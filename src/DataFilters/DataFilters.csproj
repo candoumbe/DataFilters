@@ -3,6 +3,13 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+    <Authors>Cyrillle NDOUMBE</Authors>
+    <Product />
+    <Description>Sets of classes to convert strings to strongly typed expressions.</Description>
+    <PackageTags>expressions, querystring</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Added description</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
