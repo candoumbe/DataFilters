@@ -169,11 +169,66 @@ namespace DataFilters
 #endif
 
         public bool Equals(Filter other)
-            => other != null &&
-            ((ReferenceEquals(other, this) ||
-            (Equals(other.Field, Field) && Equals(other.Operator, Operator) && Equals(other.Value, Value))));
+            => other != null
+            && (ReferenceEquals(other, this)
+            || (Equals(other.Field, Field) && Equals(other.Operator, Operator) && Equals(other.Value, Value)));
 
+        public IFilter Negate()
+        {
+            FilterOperator @operator;
+            switch (Operator)
+            {
+                case FilterOperator.EqualTo:
+                    @operator = FilterOperator.NotEqualTo;
+                    break;
+                case FilterOperator.NotEqualTo:
+                    @operator = FilterOperator.EqualTo;
+                    break;
+                case FilterOperator.IsNull:
+                    @operator = FilterOperator.IsNotNull;
+                    break;
+                case FilterOperator.IsNotNull:
+                    @operator = FilterOperator.IsNull;
+                    break;
+                case FilterOperator.LessThan:
+                    @operator = FilterOperator.GreaterThan;
+                    break;
+                case FilterOperator.GreaterThan:
+                    @operator = FilterOperator.LessThan;
+                    break;
+                case FilterOperator.GreaterThanOrEqual:
+                    @operator = FilterOperator.LessThanOrEqualTo;
+                    break;
+                case FilterOperator.StartsWith:
+                    @operator = FilterOperator.NotStartsWith;
+                    break;
+                case FilterOperator.NotStartsWith:
+                    @operator = FilterOperator.StartsWith;
+                    break;
+                case FilterOperator.EndsWith:
+                    @operator = FilterOperator.NotEndsWith;
+                    break;
+                case FilterOperator.NotEndsWith:
+                    @operator = FilterOperator.EndsWith;
+                    break;
+                case FilterOperator.Contains:
+                    @operator = FilterOperator.NotContains;
+                    break;
+                case FilterOperator.IsEmpty:
+                    @operator = FilterOperator.IsNotEmpty;
+                    break;
+                case FilterOperator.IsNotEmpty:
+                    @operator = FilterOperator.IsEmpty;
+                    break;
+                case FilterOperator.LessThanOrEqualTo:
+                    @operator = FilterOperator.GreaterThanOrEqual;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(@operator), "Unknown @operator");
+            }
 
+            return new Filter(Field, @operator, Value);
+        }
     }
 
 }

@@ -9,9 +9,9 @@ I wanted to have a uniform way to query a collection of resources.
 
 
 
-Let's say your api manage `vigilantes` resources :
+Let's say your api manage `vigilante` resources :
 ```c#
-/* JSon */
+/* C# object */
 [JsonObject]
 class Vigilante {
     public string Firstname { get; set; }
@@ -31,54 +31,85 @@ vigilante : {
 }
 ```
 
-
 ## Filtering
-
-### Starts with :
+### Starts with
 ```c#
-Expression<Func<Vigilante, bool>> filter = "nickname=S*".ToFilter<Client>();
+"nickname=S*".ToFilter<Client>()
 ```
-will result in 
+will result in a [IFilter](/src/DataFilters/IFilter.cs) instance equivalent to
 ```c#
 x => x.Nickname.StartsWith("S")
 ```
 
 ### Ends with
 ```c#
-Expression<Func<Vigilante, bool>> filter = "nickname=*S".ToFilter<Client>();
+"nickname=*S".ToFilter<Client>();
 ```
-will result in 
+will result in a [IFilter](/src/DataFilters/IFilter.cs) instance equivalent to
 ```c#
 x => x.Nickname.EndsWith("S")
 ```
 
-### Greater than
+### Greater than or equal
 ```c#
-Expression<Func<Vigilante, bool>> filter = "nickname=*S".ToFilter<Client>();
+Expression<Func<Vigilante, bool>> filter = "age=20-".ToFilter<Client>();
 ```
-will result in 
+will result in a [IFilter](./src/DataFilters/IFilter.cs) instance equivalent to
 ```c#
-x => x.EndsWith("S")
+x => x.Age >= 20
 ```
 
-### Less than
+### Less than or equal
 ```c#
 Expression<Func<Vigilante, bool>> filter = "age=-35".ToFilter<Client>();
 ```
-will result in 
+will result in a [IFilter](./src/DataFilters/IFilter.cs) instance equivalent to
 ```c#
-x => x.Age.EndsWith("S")
+x => x.Age <= 35
 ```
 
+### Between
+```c#
+"age=20-35".ToFilter<Client>() 
+```
+will result in a [IFilter](./src/DataFilters/IFilter.cs) instance equivalent to
+```
+x => x.Age >= 20 && x.Age <= 35
+```
 
 ### Logical operators
 #### And
+```c#
+Expression<Func<Vigilante, bool>> filter = "nickname=Bat*,*man".ToFilter<Client>();
+```
+will result in a [IFilter](./src/DataFilters/IFilter.cs) instance equivalent to
+```c#
+x => x.Nickname.StartsWith("Bat") && x.Nickname.EndsWith("man")
+```
 #### Or
-
+```c#
+Expression<Func<Vigilante, bool>> filter = "nickname=Bat*|*man".ToFilter<Client>();
+```
+will result in 
+```c#
+x => x.Nickname.StartsWith("Bat") || x.Nickname.EndsWith("man")
+```
 #### Not
 To negate a filter, simply put a `!` before the filter to negate
 ```c#
 "nickname=!B*"
-``
+```
+will result in
+```c#
+x => !x.StartsWith("B")
+```
 
 ## Ordering
+`sort=nickname` or `sort=+nickname` sort items by their `nickname` properties in ascending 
+order.
+
+You can sort by several properties at once by separating them with a `,`.
+
+For example `sort=+nickname,-age` allows to sort by `nickname` ascending, then by `age` property descending. 
+
+

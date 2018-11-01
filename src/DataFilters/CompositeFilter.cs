@@ -65,5 +65,22 @@ namespace DataFilters
 #if DEBUG
         public override string ToString() => ToJson();
 #endif
+
+        public IFilter Negate()
+        {
+            CompositeFilter filter = new CompositeFilter
+            {
+                Logic = Logic == FilterLogic.And
+                    ? FilterLogic.Or
+                    : FilterLogic.And,
+                Filters = Filters.Select(f => f.Negate())
+#if DEBUG
+                .ToArray()
+#endif
+            };
+
+            return filter;
+        }
+
     }
 }

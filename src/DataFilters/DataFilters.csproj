@@ -5,11 +5,17 @@
     <LangVersion>latest</LangVersion>
     <Authors>Cyrillle NDOUMBE</Authors>
     <Product />
-    <Description>Sets of classes to convert strings to strongly typed expressions.</Description>
+    <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <Version>1.0.1</Version>
-    <PackageReleaseNotes>Added description</PackageReleaseNotes>
+    <Version>2.0.0</Version>
+    <PackageReleaseNotes>Added NotContains operator
+Added NotEndsWith operator
+
+Added `.Negate` method which allows negate `IFilter` instance.</PackageReleaseNotes>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>github.com/candoumbe/DataFilters</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +25,7 @@
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.10" />
-    <PackageReference Include="Utilities" Version="1.0.0-CI-20181016-095833" />
+    <PackageReference Include="Utilities" Version="1.0.0-CI-20181023-092033" />
   </ItemGroup>
 
 </Project>

@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using static System.Linq.Expressions.Expression;
+using System.Text;
 using static DataFilters.FilterOperator;
+using static System.Linq.Expressions.Expression;
 using static System.StringSplitOptions;
-using System.ComponentModel;
-using System.Collections.Generic;
-using System.Linq;
-
 
 namespace DataFilters
 {
@@ -76,7 +77,6 @@ namespace DataFilters
 
                             string[] fields = df.Field.Split(new[] { '.' });
                             MemberExpression property = null;
-                            Type memberType;
                             foreach (string field in fields)
                             {
                                 property = property == null
@@ -85,16 +85,11 @@ namespace DataFilters
                             }
 
                             Expression body;
-                            memberType = (property.Member as PropertyInfo)?.PropertyType;
-                            ConstantExpression constantExpression;
-                            if (memberType == typeof(DateTime) || memberType == typeof(DateTime?) || memberType == typeof(DateTimeOffset) || memberType == typeof(DateTimeOffset?))
-                            {
-                                constantExpression = Constant(ConvertObjectToDateTime(df.Value, memberType), memberType);
-                            }
-                            else
-                            {
-                                constantExpression = Constant(df.Value, memberType);
-                            }
+                            Type memberType = (property.Member as PropertyInfo)?.PropertyType;
+                            ConstantExpression constantExpression = memberType == typeof(DateTime) || memberType == typeof(DateTime?) || memberType == typeof(DateTimeOffset) || memberType == typeof(DateTimeOffset?)
+                                ? Constant(ConvertObjectToDateTime(df.Value, memberType), memberType)
+                                : Constant(df.Value, memberType);
+
                             switch (df.Operator)
                             {
                                 case NotEqualTo:
@@ -177,24 +172,52 @@ namespace DataFilters
         /// Builds a <see cref="IFilter{T}"/> from <paramref name="queryString"/>
         /// </summary>
         /// <typeparam name="T">Type of element to filter</typeparam>
-        /// <param name="input"></param>
+        /// <param name="queryString"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
         public static IFilter ToFilter<T>(this string queryString)
         {
+            IFilter InternalToFilter(string keyPart, string input, bool preceededByStar, bool followedByStar)
+            {
+                Filter localFilter = null;
+                if (!preceededByStar)
+                {
+                    if (!followedByStar)
+                    {
+                        localFilter = new Filter(keyPart, EqualTo, input);
+                    }
+                    else
+                    {
+                        localFilter = new Filter(keyPart, StartsWith, input);
+                    }
+                }
+                else
+                {
+                    if (!followedByStar)
+                    {
+                        localFilter = new Filter(keyPart, EndsWith, input);
+                    }
+                    else
+                    {
+                        localFilter = new Filter(keyPart, Contains, input);
+                    }
+                }
+                Debug.Assert(localFilter != null);
+                return localFilter;
+            }
+
             if (queryString == null)
             {
                 throw new ArgumentNullException(nameof(queryString));
             }
 
-            IFilter filter = new Filter(field: null, @operator: default(FilterOperator), value: null);
+            IFilter filter = new Filter(field: null, @operator: default, value: null);
             Uri fakeuri = new UriBuilder
             {
                 Host = "localhost",
                 Query = queryString
             }.Uri;
-
 
             if (!string.IsNullOrEmpty(queryString))
             {
@@ -202,13 +225,14 @@ namespace DataFilters
                 if (queryStringParts.Length == 1)
                 {
                     string[] keyValueParts = queryStringParts[0].Split(new[] { "=" }, RemoveEmptyEntries)
-                        .Select(x => Uri.UnescapeDataString(x))
+                        .Select(Uri.UnescapeDataString)
                         .ToArray();
+
                     if (keyValueParts.Length == 2)
                     {
                         string keyPart = keyValueParts[0];
                         string valuePart = keyValueParts[1]
-                            .Replace("!!", "!")
+                            .Replace("!!", string.Empty)
                             .Replace("**", "*");
 
                         PropertyInfo pi = typeof(T).GetRuntimeProperties()
@@ -221,18 +245,32 @@ namespace DataFilters
                             if (valuePart.StartsWith("!"))
                             {
                                 string localValue = valuePart.Replace("!", string.Empty);
-                                object value = tc.ConvertFrom(valuePart);
-                                filter = new Filter(field: keyPart, @operator: NotEqualTo, value: localValue);
+                                filter = $"{keyPart}={localValue}".ToFilter<T>().Negate();
                             }
-                            else if (valuePart.Like("* *"))
+                            else if (valuePart.Like("*?,?*"))
                             {
-                                string[] localValues = valuePart.Split(new[] { ' ' }, RemoveEmptyEntries);
+                                IEnumerable<string> values = valuePart.Split(new[] { ',' }, RemoveEmptyEntries);
+
+                                IList<IFilter> filters = new List<IFilter>(values.Count());
+                                foreach (string value in values)
+                                {
+                                    filters.Add($"{keyPart}={value}".ToFilter<T>());
+                                }
+                                filter = new CompositeFilter
+                                {
+                                    Logic = FilterLogic.And,
+                                    Filters = filters
+                                };
+                            }
+                            else if (valuePart.Like("*?|?*"))
+                            {
+                                string[] values = valuePart.Split(new[] { '|' }, RemoveEmptyEntries);
 
                                 IList<IFilter> filters = new List<IFilter>();
 
-                                foreach (string localValue in localValues)
+                                foreach (string value in values)
                                 {
-                                    filters.Add($"{keyPart}={localValue}".ToFilter<T>());
+                                    filters.Add($"{keyPart}={value}".ToFilter<T>());
                                 }
                                 filter = new CompositeFilter
                                 {
@@ -245,15 +283,50 @@ namespace DataFilters
                                 if (valuePart.Contains("*") && !valuePart.Contains("?"))
                                 {
                                     string[] values = valuePart.Split(new[] { "*" }, RemoveEmptyEntries);
-                                    if (values.Length == 1)
+                                    switch (values.Length)
                                     {
-                                        filter = new Filter(
-                                            field: keyPart,
-                                            @operator: valuePart.StartsWith("*")
-                                                ? EndsWith
-                                                : StartsWith,
-                                            value: tc.ConvertFrom(values[0])
-                                        );
+                                        case 1:
+                                            filter = new Filter(
+                                                field: keyPart,
+                                                @operator: valuePart.StartsWith("*")
+                                                    ? EndsWith
+                                                    : StartsWith,
+                                                value: tc.ConvertFrom(values[0])
+                                            );
+                                            break;
+                                        default:
+                                            IList<IFilter> filters = new List<IFilter>(values.Length);
+
+                                            IEnumerable<int> starPositions = valuePart
+                                                .Select((c, pos) => (c, pos))
+                                                .Where(tuple => tuple.c == '*')
+                                                .Select(tuple => tuple.pos);
+                                            
+                                            int index = 0;
+                                            for (int i = 0; i < values.Length; i++)
+                                            {
+                                                if (starPositions.Any(pos => pos == 0))
+                                                {
+                                                    index++;
+                                                }
+                                                string val = values[i];
+                                                if (i == 0)
+                                                {
+                                                    filters.Add(InternalToFilter(keyPart, val, preceededByStar : index > 0, followedByStar: true));
+                                                }
+                                                else if(i < values.Length - 1)
+                                                {
+                                                    filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0 && valuePart[index] == '*', followedByStar: true));
+                                                }
+                                                else
+                                                {
+                                                    filters.Add(InternalToFilter(keyPart, val, preceededByStar : true, followedByStar : valuePart[valuePart.Length -1] == '*'));
+                                                }
+                                                index += val.Length;
+                                            }
+
+                                            filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
+                                    break;
                                     }
                                 }
                             }

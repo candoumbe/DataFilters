@@ -44,10 +44,7 @@ namespace DataFilters.UnitTests
 
         }
 
-        public DataFilterExtensionsTests(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public DataFilterExtensionsTests(ITestOutputHelper output) => _output = output;
 
 
         public static IEnumerable<object[]> EqualToTestCases
@@ -492,26 +489,36 @@ namespace DataFilters.UnitTests
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+
+
         [Fact]
-        public void ShouldReturnAlwaysTrueExpression()
+        public void ToFilterThrowsArgumentNullExceptionWhenParameterIsNull()
         {
             // Act
-            IEnumerable<SuperHero> superHeroes = new[]
-            {
-                new SuperHero { Firstname = "Clark", Lastname = "Kent",  Nickname = "Superman" },
-                new SuperHero { Firstname = "Bruce", Lastname = "Wayne",  Nickname = "Batman" },
-                new SuperHero { Firstname = "Dick", Lastname = "Grayson",  Nickname = "Nightwing" },
-            };
+#pragma warning disable IDE0039 // Utiliser une fonction locale
+            Action action = () => FilterExtensions.ToFilter<SuperHero>(null);
+#pragma warning restore IDE0039 // Utiliser une fonction locale
 
-
-
-
-
+            // Assert
+            action.Should().Throw<ArgumentNullException>().Which
+                .ParamName.Should()
+                .NotBeNullOrWhiteSpace();
         }
 
+
+        [Fact]
+        public void ToExpressionThrowsArgumentNullExceptionWhenParameterIsNull()
+        {
+            // Act
+#pragma warning disable IDE0039 // Utiliser une fonction locale
+            Action action = () => FilterExtensions.ToExpression<SuperHero>(null);
+#pragma warning restore IDE0039 // Utiliser une fonction locale
+
+            // Assert
+            action.Should().Throw<ArgumentNullException>().Which
+                .ParamName.Should()
+                .NotBeNullOrWhiteSpace();
+        }
 
         public static IEnumerable<object[]> QueryStringToFilterCases
         {
@@ -551,14 +558,14 @@ namespace DataFilters.UnitTests
                     $"Firstname={Uri.EscapeDataString("!!Bruce")}",
                     ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == NotEqualTo &&
+                        ((Filter)x).Operator == EqualTo &&
                             Equals(((Filter)x).Value, "Bruce")
                         ))
                 };
 
                 yield return new object[]
                 {
-                    $"Firstname={Uri.EscapeDataString("Bruce Dick")}",
+                    $"Firstname={Uri.EscapeDataString("Bruce|Dick")}",
                     ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == Or &&
 
@@ -634,38 +641,103 @@ namespace DataFilters.UnitTests
                     ))
                 };
 
+                yield return new object[]
+                {
+                    "Nickname=Bat*,*man",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*man",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Sup*er*man",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 3 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 3) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Sup".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "er".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*man*",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*man*",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*,*man",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=!Bru*",
+                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                        ((Filter)x).Field == "Firstname" &&
+                        ((Filter)x).Operator == NotStartsWith &&
+                            Equals(((Filter)x).Value, "Bru")
+                        ))
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=!Bat*man",
+                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == Or &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotStartsWith && "Bat".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotEndsWith && "man".Equals(((Filter)f).Value))
+                    ))
+                };
+
             }
         }
-
-        [Fact]
-        public void ToFilterThrowsArgumentNullExceptionWhenParameterIsNull()
-        {
-            // Act
-#pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => FilterExtensions.ToFilter<SuperHero>(null);
-#pragma warning restore IDE0039 // Utiliser une fonction locale
-
-            // Assert
-            action.Should().Throw<ArgumentNullException>().Which
-                .ParamName.Should()
-                .NotBeNullOrWhiteSpace();
-        }
-
-
-        [Fact]
-        public void ToExpressionThrowsArgumentNullExceptionWhenParameterIsNull()
-        {
-            // Act
-#pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => FilterExtensions.ToExpression<SuperHero>(null);
-#pragma warning restore IDE0039 // Utiliser une fonction locale
-
-            // Assert
-            action.Should().Throw<ArgumentNullException>().Which
-                .ParamName.Should()
-                .NotBeNullOrWhiteSpace();
-        }
-
 
         /// <summary>
         /// Tests for the <see cref="DataFilterExtensions.ToFilter{T}(string)"/>
@@ -683,7 +755,7 @@ namespace DataFilters.UnitTests
             // Act
             IFilter filter = queryString.ToFilter<SuperHero>();
             _output.WriteLine($"Filter : {filter}");
-            
+
             // Assert
             filter.Should()
                 .Match(resultExpression);
