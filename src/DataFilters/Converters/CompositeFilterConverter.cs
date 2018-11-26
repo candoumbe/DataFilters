@@ -12,87 +12,58 @@ namespace DataFilters.Converters
     /// </summary>
     public class CompositeFilterConverter : JsonConverter
     {
-
-        private static IImmutableDictionary<string, FilterLogic> Logics = new Dictionary<string, FilterLogic>
+        private static readonly IImmutableDictionary<string, FilterLogic> _logics = new Dictionary<string, FilterLogic>
         {
-            [FilterLogic.And.ToString().ToLower()] = FilterLogic.And,
-            [FilterLogic.Or.ToString().ToLower()] = FilterLogic.Or
-        }.ToImmutableDictionary();
-
-
-        private static IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
-        {
-            ["contains"] = FilterOperator.Contains,
-            ["endswith"] = FilterOperator.EndsWith,
-            ["eq"] = FilterOperator.EqualTo,
-            ["gt"] = FilterOperator.GreaterThan,
-            ["gte"] = FilterOperator.GreaterThanOrEqual,
-            ["isempty"] = FilterOperator.IsEmpty,
-            ["isnotempty"] = FilterOperator.IsNotEmpty,
-            ["isnotnull"] = FilterOperator.IsNotNull,
-            ["isnull"] = FilterOperator.IsNull,
-            ["lt"] = FilterOperator.LessThan,
-            ["lte"] = FilterOperator.LessThanOrEqualTo,
-            ["neq"] = FilterOperator.NotEqualTo,
-            ["startswith"] = FilterOperator.StartsWith,
-
+            [nameof(FilterLogic.And).ToLower()] = FilterLogic.And,
+            [nameof(FilterLogic.Or).ToLower()] = FilterLogic.Or
         }.ToImmutableDictionary();
 
         public override bool CanConvert(Type objectType) => objectType == typeof(CompositeFilter);
-
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             CompositeFilter kcf = null;
 
             JToken token = JToken.ReadFrom(reader);
-            if (objectType == typeof(CompositeFilter))
+            if (objectType == typeof(CompositeFilter) && token.Type == JTokenType.Object)
             {
-                if (token.Type == JTokenType.Object)
+                IEnumerable<JProperty> properties = ((JObject)token).Properties();
+
+                JProperty logicProperty = properties
+                    .SingleOrDefault(prop => prop.Name == CompositeFilter.LogicJsonPropertyName);
+
+                if (logicProperty != null)
                 {
-                    IEnumerable<JProperty> properties = ((JObject)token).Properties();
-
-                    JProperty logicProperty = properties
-                        .SingleOrDefault(prop => prop.Name == CompositeFilter.LogicJsonPropertyName);
-
-                    if (logicProperty != null)
+                    JProperty filtersProperty = properties.SingleOrDefault(prop => prop.Name == CompositeFilter.FiltersJsonPropertyName);
+                    if (filtersProperty?.Type == JTokenType.Array)
                     {
-                        JProperty filtersProperty = properties.SingleOrDefault(prop => prop.Name == CompositeFilter.FiltersJsonPropertyName);
-                        if (filtersProperty != null
-                            && filtersProperty.Type == JTokenType.Array)
+                        JArray filtersArray = (JArray)token[CompositeFilter.FiltersJsonPropertyName];
+                        int nbFilters = filtersArray.Count();
+                        if (nbFilters > 2)
                         {
-                            JArray filtersArray = (JArray)token[CompositeFilter.FiltersJsonPropertyName];
-                            int nbFilters = filtersArray.Count();
-                            if (nbFilters > 2)
+                            IList<IFilter> filters = new List<IFilter>(nbFilters);
+                            foreach (JToken item in filtersArray)
                             {
-                                IList<IFilter> filters = new List<IFilter>(nbFilters);
-                                foreach (JToken item in filtersArray)
+                                IFilter kf = (IFilter)item.ToObject<Filter>() ?? item.ToObject<CompositeFilter>();
+
+                                if (kf != null)
                                 {
-                                    IFilter kf = (IFilter)item.ToObject<Filter>() ?? item.ToObject<CompositeFilter>();
-
-                                    if (kf != null)
-                                    {
-                                        filters.Add(kf);
-                                    }
-                                }
-
-
-                                if (filters.Count() >= 2)
-                                {
-                                    kcf = new CompositeFilter
-                                    {
-                                        Logic = Logics[token[CompositeFilter.LogicJsonPropertyName].Value<string>()],
-                                        Filters = filters
-                                    };
+                                    filters.Add(kf);
                                 }
                             }
 
+                            if (filters.Count >= 2)
+                            {
+                                kcf = new CompositeFilter
+                                {
+                                    Logic = _logics[token[CompositeFilter.LogicJsonPropertyName].Value<string>()],
+                                    Filters = filters
+                                };
+                            }
                         }
                     }
                 }
             }
-
-
 
             return kcf?.As(objectType);
         }
@@ -117,6 +88,5 @@ namespace DataFilters.Converters
 
             writer.WriteEndObject();
         }
-
     }
 }

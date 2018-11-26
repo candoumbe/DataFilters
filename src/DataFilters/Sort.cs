@@ -11,7 +11,6 @@ namespace DataFilters
     {
         public LambdaExpression Expression { get; set; }
 
-
         public SortDirection Direction { get; set; }
     }
 }

@@ -55,7 +55,7 @@ namespace DataFilters.UnitTests
                 {
                     Enumerable.Empty<SuperHero>(),
                     new Filter(field : nameof(SuperHero.Firstname), @operator : EqualTo, value : "Bruce"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname == "Bruce"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname == "Bruce")
                 };
 
 
@@ -63,14 +63,14 @@ namespace DataFilters.UnitTests
                 {
                     new[] {new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" }},
                     new Filter(field : nameof(SuperHero.Firstname), @operator : EqualTo, value : null),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname == null))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname == null)
                 };
 
                 yield return new object[]
                 {
                     new[] {new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }},
                     new Filter(field : nameof(SuperHero.Firstname), @operator : EqualTo, value : "Bruce"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname == "Bruce"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname == "Bruce")
                 };
 
 
@@ -78,7 +78,7 @@ namespace DataFilters.UnitTests
                 {
                     new[] {new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190 }},
                     new Filter(field : nameof(SuperHero.Height), @operator : EqualTo, value : 190),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Height == 190 ))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Height == 190 )
                 };
 
 
@@ -96,7 +96,7 @@ namespace DataFilters.UnitTests
                             new Filter(field : nameof(SuperHero.Nickname), @operator : EqualTo, value : "Superman")
                         }
                     },
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Nickname == "Batman" || item.Nickname == "Superman"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname == "Batman" || item.Nickname == "Superman")
                 };
 
 
@@ -122,7 +122,7 @@ namespace DataFilters.UnitTests
                             }
                         }
                     },
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (item.Nickname == "Batman" || item.Nickname == "Superman")))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (item.Nickname == "Batman" || item.Nickname == "Superman"))
                 };
 
 
@@ -148,7 +148,7 @@ namespace DataFilters.UnitTests
                             }
                         }
                     },
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (1.January(2007) < item.LastBattleDate) && item.LastBattleDate < 31.December(2012)))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (1.January(2007) < item.LastBattleDate) && item.LastBattleDate < 31.December(2012))
                 };
 
             }
@@ -167,7 +167,7 @@ namespace DataFilters.UnitTests
                 {
                     Enumerable.Empty<SuperHero>(),
                     new Filter(field : nameof(SuperHero.Firstname), @operator : IsNull),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname == null))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname == null)
                 };
 
                 yield return new object[]
@@ -178,7 +178,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field : nameof(SuperHero.Firstname), @operator : IsNull),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Firstname == null)),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname == null),
                 };
             }
         }
@@ -195,7 +195,7 @@ namespace DataFilters.UnitTests
                 {
                     Enumerable.Empty<SuperHero>(),
                     new Filter(field : nameof(SuperHero.Lastname), @operator : IsEmpty),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname == string.Empty))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname == string.Empty)
                 };
 
 
@@ -207,7 +207,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field : nameof(SuperHero.Lastname), @operator : IsEmpty),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname == string.Empty)),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname == string.Empty),
 
                 };
 
@@ -225,7 +225,7 @@ namespace DataFilters.UnitTests
                            Henchman = new Henchman { Nickname = "Krypto" } }
                     },
                     new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : IsEmpty),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname == string.Empty))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname == string.Empty)
                 };
 
 
@@ -245,7 +245,7 @@ namespace DataFilters.UnitTests
                         }
                     },
                     new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : NotEqualTo, value: "Dick"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick")
                 };
 
             }
@@ -266,7 +266,7 @@ namespace DataFilters.UnitTests
                 {
                     Enumerable.Empty<SuperHero>(),
                     new Filter(field : nameof(SuperHero.Lastname), @operator : IsNotEmpty),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname != string.Empty))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname != string.Empty)
                 };
 
 
@@ -278,7 +278,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field : nameof(SuperHero.Lastname), @operator : IsNotEmpty),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname != string.Empty)),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname != string.Empty),
 
                 };
 
@@ -296,7 +296,7 @@ namespace DataFilters.UnitTests
                            Henchman = new Henchman { Nickname = "Krypto" } }
                     },
                     new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : IsNotEmpty),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname != string.Empty))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname != string.Empty)
                 };
 
             }
@@ -320,7 +320,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field : nameof(SuperHero.Nickname), @operator : StartsWith, value: "B"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Nickname.StartsWith("B")))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.StartsWith("B"))
                 };
             }
 
@@ -345,7 +345,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field: nameof(SuperHero.Nickname), @operator: EndsWith, value:"n"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Nickname.EndsWith("n")))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.EndsWith("n"))
                 };
             }
 
@@ -369,7 +369,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field:nameof(SuperHero.Nickname), @operator: Contains, value: "an"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Nickname.Contains("n")))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.Contains("n"))
                 };
             }
 
@@ -393,7 +393,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field : nameof(SuperHero.Height), @operator : LessThan, value: 150),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Height < 150)),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Height < 150),
                 };
 
 
@@ -413,7 +413,7 @@ namespace DataFilters.UnitTests
                 {
                     Enumerable.Empty<SuperHero>(),
                     new Filter(field : nameof(SuperHero.Lastname), @operator : NotEqualTo, value : "Kent"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname != "Kent"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname != "Kent")
                 };
                 yield return new object[]
                 {
@@ -421,7 +421,7 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }
                     },
                     new Filter(field : nameof(SuperHero.Lastname), @operator : NotEqualTo, value : "Kent"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname != "Kent"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname != "Kent")
                 };
 
                 yield return new object[]
@@ -431,7 +431,7 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }
                     },
                     new Filter(field : nameof(SuperHero.Lastname), @operator : NotEqualTo, value : "Kent"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Lastname != "Kent"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Lastname != "Kent")
                 };
 
 
@@ -451,7 +451,7 @@ namespace DataFilters.UnitTests
                         }
                     },
                     new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : NotEqualTo, value : "Dick"),
-                    ((Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick")
                 };
 
             }
@@ -528,45 +528,45 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                {
                     string.Empty,
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field ==  null &&
-                        ((Filter)x).Value == null))
+                        ((Filter)x).Value == null)
                };
 
                 yield return new object[]
                 {
                     "Firstname=Bruce",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
                         ((Filter)x).Operator == EqualTo &&
                          Equals(((Filter)x).Value, "Bruce")
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=!Bruce",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
                         ((Filter)x).Operator == NotEqualTo &&
                             Equals(((Filter)x).Value, "Bruce")
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
-                    $"Firstname={Uri.EscapeDataString("!!Bruce")}",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    $"Firstname=!!Bruce",
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
                         ((Filter)x).Operator == EqualTo &&
                             Equals(((Filter)x).Value, "Bruce")
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
-                    $"Firstname={Uri.EscapeDataString("Bruce|Dick")}",
-                    ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                    $"Firstname=Bruce|Dick",
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == Or &&
 
                         ((CompositeFilter)x).Filters != null &&
@@ -583,43 +583,43 @@ namespace DataFilters.UnitTests
                             ((Filter)f).Field == "Firstname" &&
                             ((Filter)f).Operator == EqualTo &&
                             Equals(((Filter)f).Value, "Dick"))
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=Bru*",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
                         ((Filter)x).Operator == StartsWith &&
                             Equals(((Filter)x).Value, "Bru")
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=*Bru",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
                         ((Filter)x).Operator == EndsWith &&
                             Equals(((Filter)x).Value, "Bru")
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Height=100-",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Height" &&
                         ((Filter)x).Operator == GreaterThanOrEqual &&
                             Equals(((Filter)x).Value, 100)
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Height=100-200",
-                    ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                             ((CompositeFilter)x).Filters.Once( filter => filter is Filter &&
@@ -628,112 +628,170 @@ namespace DataFilters.UnitTests
                             ((CompositeFilter)x).Filters.Once( filter => filter is Filter &&
                                 ((Filter)filter).Field == "Height" && ((Filter)filter).Operator == LessThanOrEqualTo && Equals(((Filter)filter).Value, 200))
 
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Height=-200",
-                     ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                     (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Height" &&
                         ((Filter)x).Operator == LessThanOrEqualTo &&
                             Equals(((Filter)x).Value, 200)
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*man",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Sup*er*man",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 3 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 3) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Sup".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "er".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*man*",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*man*",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == And &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=!Bru*",
-                    ((Expression<Func<IFilter, bool>>)(x => x is Filter &&
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
                         ((Filter)x).Field == "Firstname" &&
                         ((Filter)x).Operator == NotStartsWith &&
                             Equals(((Filter)x).Value, "Bru")
-                        ))
+                        )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=!Bat*man",
-                        ((Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
                         ((CompositeFilter)x).Logic == Or &&
                         ((CompositeFilter)x).Filters.Count() == 2 &&
                         ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotStartsWith && "Bat".Equals(((Filter)f).Value)) &&
                         ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotEndsWith && "man".Equals(((Filter)f).Value))
-                    ))
+                    )
+                };
+
+
+                yield return new object[]
+                {
+                    "Firstname=Bruce&Lastname=Wayne",
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "Bruce".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Lastname" && ((Filter)f).Operator == EqualTo && "Wayne".Equals(((Filter)f).Value)) 
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=Bru*&Lastname=Wayne",
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == And &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == StartsWith && "Bru".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Lastname" && ((Filter)f).Operator == EqualTo && "Wayne".Equals(((Filter)f).Value))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=Br[uU]ce",
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == Or &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "Bruce".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "BrUce".Equals(((Filter)f).Value))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=*Br[uU]",
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == Or &&
+                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "Bru".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "BrU".Equals(((Filter)f).Value))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=*[Bb]r[uU]",
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
+                        ((CompositeFilter)x).Logic == Or &&
+                        ((CompositeFilter)x).Filters.Count() == 4 &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "Bru".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "BrU".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "bru".Equals(((Filter)f).Value)) &&
+                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "brU".Equals(((Filter)f).Value))
+                    )
                 };
 
             }
@@ -759,8 +817,6 @@ namespace DataFilters.UnitTests
             // Assert
             filter.Should()
                 .Match(resultExpression);
-
-
         }
 
 

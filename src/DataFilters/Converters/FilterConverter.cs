@@ -13,7 +13,6 @@ namespace DataFilters.Converters
     /// </summary>
     public class FilterConverter : JsonConverter
     {
-
         private readonly static IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
         {
             ["contains"] = FilterOperator.Contains,
@@ -36,7 +35,6 @@ namespace DataFilters.Converters
 
         public override bool CanConvert(Type objectType) => objectType == typeof(Filter);
 
-
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Filter filter = null;
@@ -51,7 +49,6 @@ namespace DataFilters.Converters
                     if (properties.Any(prop => prop.Name == Filter.FieldJsonPropertyName)
                          && properties.Any(prop => prop.Name == Filter.OperatorJsonPropertyName))
                     {
-
                         string field = token[Filter.FieldJsonPropertyName].Value<string>();
                         FilterOperator @operator = _operators[token[Filter.OperatorJsonPropertyName].Value<string>()];
                         object value = null;
@@ -60,7 +57,6 @@ namespace DataFilters.Converters
                             value = token[Filter.ValueJsonPropertyName]?.Value<string>();
                         }
                         filter = new Filter(field, @operator, value);
-
                     }
                 }
             }
@@ -94,5 +90,4 @@ namespace DataFilters.Converters
             writer.WriteEnd();
         }
     }
-
 }

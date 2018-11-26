@@ -9,7 +9,6 @@ using static Newtonsoft.Json.Required;
 
 namespace DataFilters
 {
-
     /// <summary>
     /// An instance of this class holds a kendo filter
     /// </summary>
@@ -32,22 +31,15 @@ namespace DataFilters
         /// </summary>
         public const string ValueJsonPropertyName = "value";
 
-
         /// <summary>
-        /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be set value to a non null value
+        /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
         /// </summary>
-        private static readonly IEnumerable<FilterOperator> _unaryOperators = new[]{
+        public static IEnumerable<FilterOperator> UnaryOperators { get; } = new[]{
             FilterOperator.IsEmpty,
             FilterOperator.IsNotEmpty,
             FilterOperator.IsNotNull,
             FilterOperator.IsNull
         };
-
-        /// <summary>
-        /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
-        /// </summary>
-        public static IEnumerable<FilterOperator> UnaryOperators => _unaryOperators;
-
 
         /// <summary>
         /// Builds a new <see cref="Filter"/> instance.
@@ -126,12 +118,10 @@ namespace DataFilters
                         Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
                     };
                     break;
-
             }
             schema.AllowAdditionalProperties = false;
 
             return schema;
-
         }
 #endif
 
@@ -230,5 +220,4 @@ namespace DataFilters
             return new Filter(Field, @operator, Value);
         }
     }
-
 }

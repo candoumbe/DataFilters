@@ -19,6 +19,5 @@ namespace DataFilters.Converters
         {
             CamelCaseText = true;
         }
-
     }
 }

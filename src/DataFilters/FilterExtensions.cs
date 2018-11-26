@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Primitives;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -68,7 +69,7 @@ namespace DataFilters
                     {
                         if (df.Field == null)
                         {
-                            filterExpression = x => true;
+                            filterExpression = _ => true;
                         }
                         else
                         {
@@ -162,11 +163,12 @@ namespace DataFilters
                         filterExpression = expression;
                         break;
                     }
-
             }
 
             return filterExpression;
         }
+
+        public static IFilter ToFilter<T>(this string queryString) => new StringSegment(queryString).ToFilter<T>();
 
         /// <summary>
         /// Builds a <see cref="IFilter{T}"/> from <paramref name="queryString"/>
@@ -176,38 +178,39 @@ namespace DataFilters
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
-        public static IFilter ToFilter<T>(this string queryString)
+        public static IFilter ToFilter<T>(this StringSegment queryString)
         {
-            IFilter InternalToFilter(string keyPart, string input, bool preceededByStar, bool followedByStar)
+            StringSegment localQueryString = queryString;
+            IFilter InternalToFilter(StringSegment keyPart, StringSegment input, bool preceededByStar, bool followedByStar)
             {
                 Filter localFilter = null;
                 if (!preceededByStar)
                 {
                     if (!followedByStar)
                     {
-                        localFilter = new Filter(keyPart, EqualTo, input);
+                        localFilter = new Filter(keyPart.ToString(), EqualTo, input.Value);
                     }
                     else
                     {
-                        localFilter = new Filter(keyPart, StartsWith, input);
+                        localFilter = new Filter(keyPart.ToString(), StartsWith, input.Value);
                     }
                 }
                 else
                 {
                     if (!followedByStar)
                     {
-                        localFilter = new Filter(keyPart, EndsWith, input);
+                        localFilter = new Filter(keyPart.Value, EndsWith, input.Value);
                     }
                     else
                     {
-                        localFilter = new Filter(keyPart, Contains, input);
+                        localFilter = new Filter(keyPart.Value, Contains, input.Value);
                     }
                 }
                 Debug.Assert(localFilter != null);
                 return localFilter;
             }
 
-            if (queryString == null)
+            if (queryString == default)
             {
                 throw new ArgumentNullException(nameof(queryString));
             }
@@ -216,22 +219,22 @@ namespace DataFilters
             Uri fakeuri = new UriBuilder
             {
                 Host = "localhost",
-                Query = queryString
+                Query = queryString.ToString()
             }.Uri;
 
-            if (!string.IsNullOrEmpty(queryString))
+            if (queryString != StringSegment.Empty)
             {
-                string[] queryStringParts = queryString.Split(new[] { "&" }, RemoveEmptyEntries);
-                if (queryStringParts.Length == 1)
+                IEnumerable<StringSegment> queryStringParts = localQueryString.Split(new[] { '&'})
+                    .Where(segment => segment != StringSegment.Empty);
+                if (queryStringParts.Once())
                 {
-                    string[] keyValueParts = queryStringParts[0].Split(new[] { "=" }, RemoveEmptyEntries)
-                        .Select(Uri.UnescapeDataString)
-                        .ToArray();
+                    StringTokenizer keyValueParts = queryStringParts.Single().Split(new[] { '=' });
 
-                    if (keyValueParts.Length == 2)
+                    if (keyValueParts.Exactly(_ => true, 2))
                     {
-                        string keyPart = keyValueParts[0];
-                        string valuePart = keyValueParts[1]
+                        StringSegment keyPart = keyValueParts.First();
+                        StringSegment valuePart = keyValueParts.Last()
+                            .Value
                             .Replace("!!", string.Empty)
                             .Replace("**", "*");
 
@@ -242,19 +245,20 @@ namespace DataFilters
                         {
                             TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
 
-                            if (valuePart.StartsWith("!"))
+                            if (valuePart.StartsWith("!", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                string localValue = valuePart.Replace("!", string.Empty);
-                                filter = $"{keyPart}={localValue}".ToFilter<T>().Negate();
+                                StringSegment localValue = valuePart.Subsegment(1);
+                                filter = $"{keyPart}={localValue.ToString()}".ToFilter<T>().Negate();
                             }
                             else if (valuePart.Like("*?,?*"))
                             {
-                                IEnumerable<string> values = valuePart.Split(new[] { ',' }, RemoveEmptyEntries);
+                                IEnumerable<StringSegment> segments = valuePart.Split(new[] { ',' })
+                                    .Where(segment => segment != StringSegment.Empty);
 
-                                IList<IFilter> filters = new List<IFilter>(values.Count());
-                                foreach (string value in values)
+                                IList<IFilter> filters = new List<IFilter>(segments.Count());
+                                foreach (StringSegment segment in segments)
                                 {
-                                    filters.Add($"{keyPart}={value}".ToFilter<T>());
+                                    filters.Add($"{keyPart}={segment.Value}".ToFilter<T>());
                                 }
                                 filter = new CompositeFilter
                                 {
@@ -264,13 +268,13 @@ namespace DataFilters
                             }
                             else if (valuePart.Like("*?|?*"))
                             {
-                                string[] values = valuePart.Split(new[] { '|' }, RemoveEmptyEntries);
+                                StringTokenizer segments = valuePart.Split(new[] { '|' });
 
                                 IList<IFilter> filters = new List<IFilter>();
 
-                                foreach (string value in values)
+                                foreach (StringSegment value in segments)
                                 {
-                                    filters.Add($"{keyPart}={value}".ToFilter<T>());
+                                    filters.Add($"{keyPart}={value.Value}".ToFilter<T>());
                                 }
                                 filter = new CompositeFilter
                                 {
@@ -278,92 +282,151 @@ namespace DataFilters
                                     Filters = filters
                                 };
                             }
-                            else if (valuePart.Contains("*") || valuePart.Contains("?"))
+                            else if (valuePart.Like(@"*\[*\]*"))
                             {
-                                if (valuePart.Contains("*") && !valuePart.Contains("?"))
+                                IEnumerable<StringSegment> values = FlattenValues(valuePart);
+                                while (values.Any(val => val.Like(@"*\[*\]*")))
                                 {
-                                    string[] values = valuePart.Split(new[] { "*" }, RemoveEmptyEntries);
-                                    switch (values.Length)
-                                    {
-                                        case 1:
-                                            filter = new Filter(
-                                                field: keyPart,
-                                                @operator: valuePart.StartsWith("*")
-                                                    ? EndsWith
-                                                    : StartsWith,
-                                                value: tc.ConvertFrom(values[0])
-                                            );
-                                            break;
-                                        default:
-                                            IList<IFilter> filters = new List<IFilter>(values.Length);
+                                    values = values
+                                        .Where(val => !val.Like(@"*\[*\]*"))
+                                        .Concat(
+                                            values
+                                                .Where(val => val.Like(@"*\[*\]*"))
+                                                .Select(FlattenValues)
+                                                .SelectMany(x => x)
+                                        );
+                                }
 
-                                            IEnumerable<int> starPositions = valuePart
-                                                .Select((c, pos) => (c, pos))
-                                                .Where(tuple => tuple.c == '*')
-                                                .Select(tuple => tuple.pos);
-                                            
-                                            int index = 0;
-                                            for (int i = 0; i < values.Length; i++)
-                                            {
-                                                if (starPositions.Any(pos => pos == 0))
-                                                {
-                                                    index++;
-                                                }
-                                                string val = values[i];
-                                                if (i == 0)
-                                                {
-                                                    filters.Add(InternalToFilter(keyPart, val, preceededByStar : index > 0, followedByStar: true));
-                                                }
-                                                else if(i < values.Length - 1)
-                                                {
-                                                    filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0 && valuePart[index] == '*', followedByStar: true));
-                                                }
-                                                else
-                                                {
-                                                    filters.Add(InternalToFilter(keyPart, val, preceededByStar : true, followedByStar : valuePart[valuePart.Length -1] == '*'));
-                                                }
-                                                index += val.Length;
-                                            }
-
-                                            filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
-                                    break;
-                                    }
-                                }
-                            }
-                            else if (valuePart.Like("*-*"))
-                            {
-                                string[] values = valuePart.Split(new[] { '-' }, RemoveEmptyEntries);
-                                if (values.Length == 2)
-                                {
-                                    filter = new CompositeFilter
-                                    {
-                                        Logic = FilterLogic.And,
-                                        Filters = new[]
-                                        {
-                                            new Filter(field : keyPart, @operator : FilterOperator.GreaterThanOrEqual, value : tc.ConvertFrom(values[0])),
-                                            new Filter(field : keyPart, @operator : LessThanOrEqualTo, value : tc.ConvertFrom(values[1])),
-                                        }
-                                    };
-                                }
-                                else
-                                {
-                                    FilterOperator op = valuePart.Like("*?-")
-                                        ? FilterOperator.GreaterThanOrEqual
-                                        : LessThanOrEqualTo;
-                                    filter = new Filter(field: keyPart, @operator: op, value: tc.ConvertFrom(values[0]));
-                                }
+                                filter = $"{keyPart}={string.Join("|", values.Select(x => x.Value))}".ToFilter<T>();
                             }
                             else
                             {
-                                object value = tc.ConvertFrom(valuePart);
-                                filter = new Filter(field: keyPart, @operator: EqualTo, value: value);
+                                ReadOnlySpan<char> span = valuePart.AsSpan();
+                                if (span.Contains("*".AsSpan(), StringComparison.OrdinalIgnoreCase) || span.Contains("?".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (span.Contains("*".AsSpan(), StringComparison.OrdinalIgnoreCase) && !span.Contains("?".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        IEnumerable<StringSegment> segments = valuePart.Split(new[] { '*' })
+                                            .Where(segment => segment != StringSegment.Empty);
+                                        switch (segments.Count())
+                                        {
+                                            case 1:
+                                                filter = new Filter(
+                                                    field: keyPart.ToString(),
+                                                    @operator: valuePart.StartsWith("*", StringComparison.OrdinalIgnoreCase)
+                                                        ? EndsWith
+                                                        : StartsWith,
+                                                    value: tc.ConvertFrom(segments.Single().ToString())
+                                                );
+                                                break;
+                                            default:
+                                                IList<IFilter> filters = new List<IFilter>(segments.Count());
+
+                                                IList<int> starPositions = new List<int>();
+                                                for (int i = 0; i < valuePart.Length; i++)
+                                                {
+                                                    if (valuePart[i] == '*')
+                                                    {
+                                                        starPositions.Add(i);
+                                                    }
+                                                }
+
+                                                int index = 0;
+                                                for (int i = 0; i < segments.Count(); i++)
+                                                {
+                                                    if (starPositions.Any(pos => pos == 0))
+                                                    {
+                                                        index++;
+                                                    }
+                                                    StringSegment val = segments.ElementAt(i);
+                                                    if (i == 0)
+                                                    {
+                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0, followedByStar: true));
+                                                    }
+                                                    else if (i < segments.Count() - 1)
+                                                    {
+                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0 && valuePart[index] == '*', followedByStar: true));
+                                                    }
+                                                    else
+                                                    {
+                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: true, followedByStar: valuePart[valuePart.Length - 1] == '*'));
+                                                    }
+                                                    index += val.Length;
+                                                }
+
+                                                filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
+                                                break;
+                                        }
+                                    }
+                                }
+                                else if (valuePart.Like("*-*"))
+                                {
+                                    IEnumerable<StringSegment> segments = valuePart.Split(new[] { '-' })
+                                        .Where(segment => segment != StringSegment.Empty);
+                                    if (segments.Count() == 2)
+                                    {
+                                        filter = new CompositeFilter
+                                        {
+                                            Logic = FilterLogic.And,
+                                            Filters = new[]
+                                            {
+                                            new Filter(field : keyPart.ToString(), @operator : FilterOperator.GreaterThanOrEqual, value : tc.ConvertFrom(segments.First().ToString())),
+                                            new Filter(field : keyPart.ToString(), @operator : LessThanOrEqualTo, value : tc.ConvertFrom(segments.ElementAt(1).ToString())),
+                                        }
+                                        };
+                                    }
+                                    else
+                                    {
+                                        FilterOperator op = valuePart.Like("*?-")
+                                            ? FilterOperator.GreaterThanOrEqual
+                                            : LessThanOrEqualTo;
+                                        filter = new Filter(field: keyPart.ToString(), @operator: op, value: tc.ConvertFrom(segments.Single().ToString()));
+                                    }
+                                }
+                                else
+                                {
+                                    object value = tc.ConvertFrom(valuePart.ToString());
+                                    filter = new Filter(field: keyPart.ToString(), @operator: EqualTo, value: value);
+                                }
                             }
                         }
                     }
                 }
+                else
+                {
+                    IList<IFilter> filters = new List<IFilter>(queryStringParts.Count());
+
+                    foreach (StringSegment queryStringPart in queryStringParts)
+                    {
+                        filters.Add(queryStringPart.ToFilter<T>());
+                    }
+
+                    filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
+                }
             }
 
             return filter;
+        }
+
+        private static IEnumerable<StringSegment> FlattenValues(StringSegment valuePart)
+        {
+            int variableStart = valuePart.IndexOf('[');
+            int variableEnd = valuePart.IndexOf(']', variableStart + 1);
+
+            char[] variables = valuePart.Substring(variableStart + 1, variableEnd - variableStart - 1)
+                .ToCharArray();
+            StringSegment startString = valuePart.Substring(0, variableStart);
+            StringSegment endString = variableEnd < valuePart.Length
+                ? valuePart.Subsegment(variableEnd + 1)
+                : StringSegment.Empty;
+
+            IList<StringSegment> values = new List<StringSegment>(variables.Length);
+            for (int i = 0; i < variables.Length; i++)
+            {
+                values.Add($"{startString}{variables[i]}{endString}");
+            }
+
+            return values;
         }
     }
 }

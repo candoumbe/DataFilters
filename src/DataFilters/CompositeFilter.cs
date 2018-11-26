@@ -81,6 +81,5 @@ namespace DataFilters
 
             return filter;
         }
-
     }
 }
