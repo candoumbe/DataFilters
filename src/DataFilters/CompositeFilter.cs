@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
-#if !NETSTANDARD1_0
 using Newtonsoft.Json.Schema;
-#endif
 using System.Collections.Generic;
 using System.Linq;
 using static Newtonsoft.Json.Required;
