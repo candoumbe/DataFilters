@@ -12,7 +12,7 @@ using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 using static Newtonsoft.Json.JsonConvert;
 
-namespace DataFilters.Tests
+namespace DataFilters.UnitTests
 {
     public class FilterTests
     {
@@ -382,7 +382,8 @@ namespace DataFilters.Tests
             bool result = first.Equals(second);
 
             // Assert
-            result.Should().Be(expectedResult);
+            result.Should()
+                .Be(expectedResult);
         }
 
 

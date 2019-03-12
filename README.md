@@ -4,8 +4,8 @@
 DataFilters is a small library that allow to convert a string to its strongly typed equivalent.
 
 ## Introduction
-The idea came to me when working on a set of rest apis and trying to build `/search` endpoints.
-I wanted to have a uniform way to query a collection of resources.
+The idea came to me when working on a set of REST apis and trying to build `/search` endpoints.
+I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
 
 
 
