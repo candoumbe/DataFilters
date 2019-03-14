@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Datafilters;
+using FluentAssertions;
 using FluentAssertions.Extensions;
 using Newtonsoft.Json;
 using System;
@@ -14,7 +15,7 @@ namespace DataFilters.UnitTests
 {
     [Feature("Filters")]
     [UnitTest]
-    public class DataFilterExtensionsTests
+    public class FilterToExpressionTests
     {
         private readonly ITestOutputHelper _output;
 
@@ -44,7 +45,7 @@ namespace DataFilters.UnitTests
 
         }
 
-        public DataFilterExtensionsTests(ITestOutputHelper output) => _output = output;
+        public FilterToExpressionTests(ITestOutputHelper output) => _output = output;
 
 
         public static IEnumerable<object[]> EqualToTestCases
@@ -511,7 +512,7 @@ namespace DataFilters.UnitTests
         {
             // Act
 #pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => FilterExtensions.ToExpression<SuperHero>(null);
+            Action action = () => FilterToExpressions.ToExpression<SuperHero>(null);
 #pragma warning restore IDE0039 // Utiliser une fonction locale
 
             // Assert
