@@ -5,7 +5,6 @@ using static DataFilters.FilterOperator;
 using System.Reflection;
 using System.Linq.Expressions;
 
-
 namespace Datafilters
 {
     public static class FilterToExpressions
@@ -86,7 +85,6 @@ namespace Datafilters
                             switch (df.Operator)
                             {
                                 case NotEqualTo:
-                                    // 
                                     body = NotEqual(property, constantExpression);
                                     break;
                                 case IsNull:
@@ -107,11 +105,20 @@ namespace Datafilters
                                 case StartsWith:
                                     body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression);
                                     break;
+                                case NotStartsWith:
+                                    body = Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression));
+                                    break;
                                 case EndsWith:
                                     body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression);
                                     break;
+                                case NotEndsWith:
+                                    body = Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression));
+                                    break;
                                 case Contains:
                                     body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression);
+                                    break;
+                                case NotContains:
+                                    body = Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression));
                                     break;
                                 case IsEmpty:
                                     body = Equal(property, Constant(string.Empty));
@@ -119,9 +126,11 @@ namespace Datafilters
                                 case IsNotEmpty:
                                     body = NotEqual(property, Constant(string.Empty));
                                     break;
-                                default:
+                                case EqualTo:
                                     body = Equal(property, constantExpression);
                                     break;
+                                default:
+                                    throw new ArgumentOutOfRangeException(nameof(filter), df.Operator, "Unsupported operator");
                             }
 
                             filterExpression = Lambda<Func<T, bool>>(body, pe);
@@ -159,6 +168,5 @@ namespace Datafilters
 
             return filterExpression;
         }
-
     }
 }

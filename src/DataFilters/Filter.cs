@@ -163,6 +163,10 @@ namespace DataFilters
             && (ReferenceEquals(other, this)
             || (Equals(other.Field, Field) && Equals(other.Operator, Operator) && Equals(other.Value, Value)));
 
+        public override bool Equals(object obj) => Equals(obj as Filter);
+
+        public override int GetHashCode() => (Field, Operator, Value).GetHashCode();
+
         public IFilter Negate()
         {
             FilterOperator @operator;
@@ -219,5 +223,7 @@ namespace DataFilters
 
             return new Filter(Field, @operator, Value);
         }
+
+        public bool Equals(IFilter other) => Equals(other as Filter);
     }
 }

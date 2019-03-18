@@ -8,12 +8,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Categories;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace DataFilters.UnitTests
 {
+    [UnitTest]
     public class FilterTests
     {
 
@@ -35,6 +37,16 @@ namespace DataFilters.UnitTests
             ["startswith"] = StartsWith
         }.ToImmutableDictionary();
 
+
+        public class Person
+        {
+            public string Firstname { get; set; }
+
+            public string Lastname { get; set; }
+
+            public DateTime BirthDate { get; set; }
+
+        }
 
 
         /// <summary>
@@ -402,5 +414,43 @@ namespace DataFilters.UnitTests
             // Assert
             isValid.Should().Be(expectedValidity);
         }
+
+
+        public static IEnumerable<object[]> ToFilterCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "",
+                    new Filter(field: null, @operator: EqualTo)
+                };
+
+                yield return new object[]
+                {
+                    $"{nameof(Person.Firstname)}=!*wayne",
+                    new Filter(field: nameof(Person.Firstname), @operator: NotEndsWith, value: "wayne")
+                };
+            }
+        }
+
+
+        [Theory]
+        [MemberData(nameof(ToFilterCases))]
+        public void ToFilter(string filter, IFilter expected)
+        {
+            _output.WriteLine($"{nameof(filter)} : '{filter}'");
+
+            // Act
+            IFilter actual = filter.ToFilter<Person>();
+
+            // Assert
+            actual.Should()
+                .NotBeSameAs(expected).And
+                .Be(expected)
+                ;
+
+        }
+
     }
 }

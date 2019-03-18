@@ -16,6 +16,7 @@ The functionality of building Expressions out of IFilter instance is now provide
     <FileVersion>$(Version)</FileVersion>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>github.com/candoumbe/DataFilters</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

@@ -79,5 +79,7 @@ namespace DataFilters
 
             return filter;
         }
+
+        public bool Equals(IFilter other) => Equals(other as CompositeFilter);
     }
 }

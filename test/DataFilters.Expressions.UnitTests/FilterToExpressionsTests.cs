@@ -333,6 +333,30 @@ namespace DataFilters.UnitTests
         public void BuildStartsWith(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
             => Build(superheroes, filter, expression);
 
+        public static IEnumerable<object[]> NotStartsWithCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+
+                    },
+                    new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: "B"),
+                    (Expression<Func<SuperHero, bool>>)(item => !item.Nickname.StartsWith("B"))
+                };
+            }
+
+        }
+
+        [Theory]
+        [MemberData(nameof(NotStartsWithCases))]
+        public void BuildNotStartsWith(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
+            => Build(superheroes, filter, expression);
+
         public static IEnumerable<object[]> EndsWithCases
         {
             get
@@ -356,6 +380,29 @@ namespace DataFilters.UnitTests
         [MemberData(nameof(EndsWithCases))]
         public void BuildEndsWith(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
             => Build(superheroes, filter, expression);
+        public static IEnumerable<object[]> NotEndsWithCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+
+                    },
+                    new Filter(field: nameof(SuperHero.Nickname), @operator: NotEndsWith, value:"n"),
+                    (Expression<Func<SuperHero, bool>>)(item => !item.Nickname.EndsWith("n"))
+                };
+            }
+
+        }
+
+        [Theory]
+        [MemberData(nameof(NotEndsWithCases))]
+        public void BuildNotEndsWith(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
+            => Build(superheroes, filter, expression);
 
         public static IEnumerable<object[]> ContainsCases
         {
@@ -370,7 +417,7 @@ namespace DataFilters.UnitTests
 
                     },
                     new Filter(field:nameof(SuperHero.Nickname), @operator: Contains, value: "an"),
-                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.Contains("n"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.Contains("an"))
                 };
             }
 
@@ -379,6 +426,30 @@ namespace DataFilters.UnitTests
         [Theory]
         [MemberData(nameof(ContainsCases))]
         public void BuildContains(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
+            => Build(superheroes, filter, expression);
+
+         public static IEnumerable<object[]> NotContainsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+
+                    },
+                    new Filter(field:nameof(SuperHero.Nickname), @operator: NotContains, value: "an"),
+                    (Expression<Func<SuperHero, bool>>)(item => !item.Nickname.Contains("an"))
+                };
+            }
+
+        }
+
+        [Theory]
+        [MemberData(nameof(NotContainsCases))]
+        public void BuildNotContains(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
             => Build(superheroes, filter, expression);
 
 

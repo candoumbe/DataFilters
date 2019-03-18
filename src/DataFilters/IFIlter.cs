@@ -1,9 +1,11 @@
-﻿namespace DataFilters
+﻿using System;
+
+namespace DataFilters
 {
     /// <summary>
     /// Defines the basic shape of a filter
     /// </summary>
-    public interface IFilter
+    public interface IFilter : IEquatable<IFilter>
     {
         /// <summary>
         /// Gets the JSON representation of the filter
