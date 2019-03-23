@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DataFilters.Converters
@@ -12,26 +13,27 @@ namespace DataFilters.Converters
     /// </summary>
     public class FilterConverter : JsonConverter
     {
-
-        private static IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
+        private readonly static IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
         {
             ["contains"] = FilterOperator.Contains,
+            ["ncontains"] = FilterOperator.NotContains,
             ["endswith"] = FilterOperator.EndsWith,
+            ["nendswith"] = FilterOperator.NotEndsWith,
             ["eq"] = FilterOperator.EqualTo,
+            ["neq"] = FilterOperator.NotEqualTo,
             ["gt"] = FilterOperator.GreaterThan,
             ["gte"] = FilterOperator.GreaterThanOrEqual,
             ["isempty"] = FilterOperator.IsEmpty,
             ["isnotempty"] = FilterOperator.IsNotEmpty,
-            ["isnotnull"] = FilterOperator.IsNotNull,
             ["isnull"] = FilterOperator.IsNull,
+            ["isnotnull"] = FilterOperator.IsNotNull,
             ["lt"] = FilterOperator.LessThan,
             ["lte"] = FilterOperator.LessThanOrEqualTo,
-            ["neq"] = FilterOperator.NotEqualTo,
-            ["startswith"] = FilterOperator.StartsWith
+            ["startswith"] = FilterOperator.StartsWith,
+            ["nstartswith"] = FilterOperator.NotStartsWith
         }.ToImmutableDictionary();
 
         public override bool CanConvert(Type objectType) => objectType == typeof(Filter);
-
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
@@ -47,7 +49,6 @@ namespace DataFilters.Converters
                     if (properties.Any(prop => prop.Name == Filter.FieldJsonPropertyName)
                          && properties.Any(prop => prop.Name == Filter.OperatorJsonPropertyName))
                     {
-
                         string field = token[Filter.FieldJsonPropertyName].Value<string>();
                         FilterOperator @operator = _operators[token[Filter.OperatorJsonPropertyName].Value<string>()];
                         object value = null;
@@ -56,7 +57,6 @@ namespace DataFilters.Converters
                             value = token[Filter.ValueJsonPropertyName]?.Value<string>();
                         }
                         filter = new Filter(field, @operator, value);
-
                     }
                 }
             }
@@ -77,6 +77,7 @@ namespace DataFilters.Converters
             // operator
             writer.WritePropertyName(Filter.OperatorJsonPropertyName);
             KeyValuePair<string, FilterOperator> kv = _operators.Single(item => item.Value == kf.Operator);
+
             writer.WriteValue(kv.Key);
 
             // value (only if the operator is not an unary operator)
@@ -89,5 +90,4 @@ namespace DataFilters.Converters
             writer.WriteEnd();
         }
     }
-
 }

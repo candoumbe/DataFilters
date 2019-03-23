@@ -3,15 +3,10 @@
     /// <summary>
     /// Operators that can be used when building <see cref="Filter"/> instances.
     /// </summary>
-    public enum FilterOperator
+    public enum FilterOperator : short
     {
-        /// <summary>
-        /// 
-        /// </summary>
         EqualTo,
-        /// <summary>
 
-        /// </summary>
         NotEqualTo,
 
         IsNull,
@@ -24,10 +19,15 @@
 
         GreaterThanOrEqual,
 
-        /// <summary
+        /// <summary>
         /// Applies only to string
         /// </summary>
         StartsWith,
+
+        /// <summary>
+        /// Applies only to string
+        /// </summary>
+        NotStartsWith,
 
         /// <summary>
         /// 
@@ -35,7 +35,15 @@
         /// </summary>
         EndsWith,
 
+        /// <summary>
+        /// 
+        /// <remarks>Applies only to string</remarks>
+        /// </summary>
+        NotEndsWith,
+
         Contains,
+
+        NotContains,
 
         IsEmpty,
 

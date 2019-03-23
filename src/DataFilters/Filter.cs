@@ -9,7 +9,6 @@ using static Newtonsoft.Json.Required;
 
 namespace DataFilters
 {
-
     /// <summary>
     /// An instance of this class holds a kendo filter
     /// </summary>
@@ -32,22 +31,15 @@ namespace DataFilters
         /// </summary>
         public const string ValueJsonPropertyName = "value";
 
-
         /// <summary>
-        /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be set value to a non null value
+        /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
         /// </summary>
-        private static readonly IEnumerable<FilterOperator> _unaryOperators = new[]{
+        public static IEnumerable<FilterOperator> UnaryOperators { get; } = new[]{
             FilterOperator.IsEmpty,
             FilterOperator.IsNotEmpty,
             FilterOperator.IsNotNull,
             FilterOperator.IsNull
         };
-
-        /// <summary>
-        /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
-        /// </summary>
-        public static IEnumerable<FilterOperator> UnaryOperators => _unaryOperators;
-
 
         /// <summary>
         /// Builds a new <see cref="Filter"/> instance.
@@ -126,12 +118,10 @@ namespace DataFilters
                         Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
                     };
                     break;
-
             }
             schema.AllowAdditionalProperties = false;
 
             return schema;
-
         }
 #endif
 
@@ -169,11 +159,71 @@ namespace DataFilters
 #endif
 
         public bool Equals(Filter other)
-            => other != null &&
-            ((ReferenceEquals(other, this) ||
-            (Equals(other.Field, Field) && Equals(other.Operator, Operator) && Equals(other.Value, Value))));
+            => other != null
+            && (ReferenceEquals(other, this)
+            || (Equals(other.Field, Field) && Equals(other.Operator, Operator) && Equals(other.Value, Value)));
 
+        public override bool Equals(object obj) => Equals(obj as Filter);
 
+        public override int GetHashCode() => (Field, Operator, Value).GetHashCode();
+
+        public IFilter Negate()
+        {
+            FilterOperator @operator;
+            switch (Operator)
+            {
+                case FilterOperator.EqualTo:
+                    @operator = FilterOperator.NotEqualTo;
+                    break;
+                case FilterOperator.NotEqualTo:
+                    @operator = FilterOperator.EqualTo;
+                    break;
+                case FilterOperator.IsNull:
+                    @operator = FilterOperator.IsNotNull;
+                    break;
+                case FilterOperator.IsNotNull:
+                    @operator = FilterOperator.IsNull;
+                    break;
+                case FilterOperator.LessThan:
+                    @operator = FilterOperator.GreaterThan;
+                    break;
+                case FilterOperator.GreaterThan:
+                    @operator = FilterOperator.LessThan;
+                    break;
+                case FilterOperator.GreaterThanOrEqual:
+                    @operator = FilterOperator.LessThanOrEqualTo;
+                    break;
+                case FilterOperator.StartsWith:
+                    @operator = FilterOperator.NotStartsWith;
+                    break;
+                case FilterOperator.NotStartsWith:
+                    @operator = FilterOperator.StartsWith;
+                    break;
+                case FilterOperator.EndsWith:
+                    @operator = FilterOperator.NotEndsWith;
+                    break;
+                case FilterOperator.NotEndsWith:
+                    @operator = FilterOperator.EndsWith;
+                    break;
+                case FilterOperator.Contains:
+                    @operator = FilterOperator.NotContains;
+                    break;
+                case FilterOperator.IsEmpty:
+                    @operator = FilterOperator.IsNotEmpty;
+                    break;
+                case FilterOperator.IsNotEmpty:
+                    @operator = FilterOperator.IsEmpty;
+                    break;
+                case FilterOperator.LessThanOrEqualTo:
+                    @operator = FilterOperator.GreaterThanOrEqual;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(@operator), "Unknown @operator");
+            }
+
+            return new Filter(Field, @operator, Value);
+        }
+
+        public bool Equals(IFilter other) => Equals(other as Filter);
     }
-
 }

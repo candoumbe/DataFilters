@@ -15,6 +15,7 @@ namespace DataFilters
         /// Logical AND operator will be applied to all
         /// </summary>
         And,
+
         /// <summary>
         /// Logicial OR operatior will be applied 
         /// </summary>

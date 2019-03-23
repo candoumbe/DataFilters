@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
-#if !NETSTANDARD1_0
 using Newtonsoft.Json.Schema;
-#endif
 using System.Collections.Generic;
 using System.Linq;
 using static Newtonsoft.Json.Required;
@@ -65,5 +63,23 @@ namespace DataFilters
 #if DEBUG
         public override string ToString() => ToJson();
 #endif
+
+        public IFilter Negate()
+        {
+            CompositeFilter filter = new CompositeFilter
+            {
+                Logic = Logic == FilterLogic.And
+                    ? FilterLogic.Or
+                    : FilterLogic.And,
+                Filters = Filters.Select(f => f.Negate())
+#if DEBUG
+                .ToArray()
+#endif
+            };
+
+            return filter;
+        }
+
+        public bool Equals(IFilter other) => Equals(other as CompositeFilter);
     }
 }

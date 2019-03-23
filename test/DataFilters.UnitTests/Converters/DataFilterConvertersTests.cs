@@ -33,15 +33,9 @@ namespace DataFilters.UnitTests.Converters
             ["isempty"] = IsEmpty
         }.ToImmutableDictionary();
 
-        public DataFilterConverterTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
+        public DataFilterConverterTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
-        public void Dispose()
-        {
-            _outputHelper = null;
-        }
+        public void Dispose() => _outputHelper = null;
 
 
 
@@ -202,12 +196,5 @@ namespace DataFilters.UnitTests.Converters
             result.Should()
                 .Match(expectation);
         }
-
-
-
-
-
-        
-
     }
 }
