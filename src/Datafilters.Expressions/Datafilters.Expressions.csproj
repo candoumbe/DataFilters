@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
     <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
     <PackageProjectUrl>https://candoumbe.visualstudio.com/DataFilters</PackageProjectUrl>
     <RepositoryUrl>https://candoumbe.visualstudio.com/DataFilters</RepositoryUrl>
@@ -10,9 +11,14 @@
     <PackageReleaseNotes>Added support for converting 'Filter' instances with 'NotEndsWith' operator
 Added support for converting 'Filter' instances with 'NotStartsWith' operator
 Added support for converting 'Filter' instances with 'NotEndsWith' operator
-Added support for converting 'Filter' instances with 'NotContains' operator</PackageReleaseNotes>
+Added support for converting 'Filter' instances with 'NotContains' operator
+
+Added conversion of ISort&lt;T&gt; to OrderClause&lt;T&gt;</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataFilters\DataFilters.csproj" />
   </ItemGroup>

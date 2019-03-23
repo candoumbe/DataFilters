@@ -8,10 +8,8 @@
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <Version>2.0.0</Version>
-    <PackageReleaseNotes>Moved the core functionality of building filters from querystring to DataFilters.Core
-The functionality of building Expressions out of IFilter instance is now provided by a separated DataFilters.Expressions package
-</PackageReleaseNotes>
+    <Version>3.0.0</Version>
+    <PackageReleaseNotes>Added conversions of "sort" expressions</PackageReleaseNotes>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <PackageProjectUrl></PackageProjectUrl>
@@ -23,24 +21,24 @@ The functionality of building Expressions out of IFilter instance is now provide
     <DefineConstants>STRING_SEGMENT</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+    <PackageReference Include="FluentValidation" Version="8.1.3" />
     <PackageReference Include="Roslynator.Analyzers" Version="1.9.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Utilities" Version="1.1.0" />
+    <PackageReference Include="Utilities" Version="2019.3.23.1" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)'=='netstandard2.0'">
       <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.1.1" />
-        <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
         <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.10" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.3'">
         <PackageReference Include="Microsoft.Extensions.Primitives" Version="1.1.1" />
-        <PackageReference Include="System.Collections.Immutable" Version="1.2.0" />
         <PackageReference Include="Newtonsoft.Json.Schema" Version="2.0.13" />
       </ItemGroup>
     </Otherwise>

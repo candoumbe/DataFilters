@@ -24,7 +24,6 @@ namespace DataFilters
         private const string _sTAR_STRING = "*";
         private const char _sTAR_CHAR = '*';
 
-        
 #if STRING_SEGMENT
         /// <summary>
         /// Builds a <see cref="IFilter{T}"/> from <paramref name="queryString"/>

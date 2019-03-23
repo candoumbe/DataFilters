@@ -105,11 +105,18 @@ x => !x.StartsWith("B")
 ```
 
 ## Ordering
+This library also supports a custom syntax to sort elements.
+
 `sort=nickname` or `sort=+nickname` sort items by their `nickname` properties in ascending 
 order.
 
 You can sort by several properties at once by separating them with a `,`.
 
 For example `sort=+nickname,-age` allows to sort by `nickname` ascending, then by `age` property descending. 
+
+# How to install
+
+1. run `install DataFilters` : you can already start to build [IFilter](./src/DataFilters/IFilter.cs) instances
+2. You can then add `Datafilters.Expressions` package to build `Expression<Func<T, bool>>`
 
 
