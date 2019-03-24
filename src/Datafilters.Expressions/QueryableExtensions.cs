@@ -16,34 +16,38 @@ namespace System.Linq
         /// <typeparam name="T"></typeparam>
         /// <param name="entries"></param>
         /// <param name="orderBy">List of <see cref="OrderClause{T}"/></param>
-        /// <returns></returns>
-        public static IQueryable<T> OrderBy<T>(this IQueryable<T> entries, in IEnumerable<OrderClause<T>> orderBy)
+        /// <returns><see cref="IOrderedQueryable{T}"/></returns>
+        /// <exception cref="ArgumentNullException">if either <paramref name="entries"/> or <paramref name="orderBy"/> is <c>null</c></exception>
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> entries, in IEnumerable<OrderClause<T>> orderBy)
         {
-            OrderClause<T> previousClause = null;
-            IOrderedQueryable<T> ordered = null;
-            foreach (OrderClause<T> orderClause in orderBy)
+            if (orderBy == null)
+            {
+                throw new ArgumentNullException(nameof(orderBy));
+            }
+
+            if (!orderBy.Any())
+            {
+                throw new EmptyOrderByException();
+            }
+            OrderClause<T> first = orderBy.First();
+            IOrderedQueryable<T> ordered = first.Direction == SortDirection.Ascending 
+                ? Queryable.OrderBy(entries, (dynamic)first.Expression)
+                : Queryable.OrderByDescending(entries, (dynamic)first.Expression);
+
+            foreach (OrderClause<T> orderClause in orderBy.Skip(1))
             {
                 switch (orderClause.Direction)
                 {
                     case SortDirection.Ascending:
-                        ordered = previousClause != null
-                            ? Queryable.ThenBy(ordered, (dynamic)orderClause.Expression)
-                            : Queryable.OrderBy(entries, (dynamic)orderClause.Expression);
+                        ordered = Queryable.ThenBy(ordered, (dynamic)orderClause.Expression);
                         break;
                     case SortDirection.Descending:
-                        ordered = previousClause != null
-                                ? Queryable.ThenByDescending(ordered, (dynamic)orderClause.Expression)
-                                : Queryable.OrderByDescending(entries, (dynamic)orderClause.Expression);
+                        ordered = Queryable.ThenByDescending(ordered, (dynamic)orderClause.Expression);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-
-                previousClause = orderClause;
-            }
-
-            Debug.Assert(ordered != null);
-            
+            }            
             return ordered;
         }
     }

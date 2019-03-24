@@ -5,35 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
+using Xunit.Categories;
 using static DataFilters.SortDirection;
 
 
 namespace DataFilters.Expressions.UnitTests
 {
+    [UnitTest]
+    [Feature("Expressions")]
     public class SortToOrderClauseTests
     {
-        public class Hero : IEquatable<Hero>
-        {
-            public string Name { get; set; }
-
-            public int Age { get; set; }
-
-            public override bool Equals(object obj) => Equals(obj as Hero);
-            public bool Equals(Hero other) => other != null && Name == other.Name && Age == other.Age;
-            public override int GetHashCode() => HashCode.Combine(Name, Age);
-
-            public static bool operator ==(Hero hero1, Hero hero2)
-            {
-                return EqualityComparer<Hero>.Default.Equals(hero1, hero2);
-            }
-
-            public static bool operator !=(Hero hero1, Hero hero2)
-            {
-                return !(hero1 == hero2);
-            }
-        }
-
-
+        
         public static IEnumerable<object[]> SortToOrderClauseCases
         {
             get
@@ -51,6 +33,35 @@ namespace DataFilters.Expressions.UnitTests
                         && heroes.Last().Name == "Flash"
                     )
                 };
+
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new Hero { Name = "Batman"},
+                        new Hero { Name = "Flash"}
+                    },
+                    new Sort<Hero>("name"),
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
+                        && heroes.First().Name == "Batman"
+                        && heroes.Last().Name == "Flash"
+                    )
+                };
+
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new Hero { Name = "Batman"},
+                        new Hero { Name = "Flash"}
+                    },
+                    new Sort<Hero>(" name"),
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
+                        && heroes.First().Name == "Batman"
+                        && heroes.Last().Name == "Flash"
+                    )
+                };
+
 
                 yield return new object[]
                 {
