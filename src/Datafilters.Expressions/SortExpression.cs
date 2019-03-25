@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using static DataFilters.SortDirection;
 
-namespace Datafilters.Expressions
+namespace DataFilters.Expressions
 {
 
     /// <summary>

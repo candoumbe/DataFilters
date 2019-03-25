@@ -1,4 +1,4 @@
-﻿using Datafilters;
+﻿using DataFilters;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Newtonsoft.Json;
