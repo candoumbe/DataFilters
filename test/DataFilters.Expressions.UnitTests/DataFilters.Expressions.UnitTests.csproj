@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Datafilters.Expressions\Datafilters.Expressions.csproj" />
+    <ProjectReference Include="..\..\src\Datafilters.Expressions\DataFilters.Expressions.csproj" />
   </ItemGroup>
 
 </Project>

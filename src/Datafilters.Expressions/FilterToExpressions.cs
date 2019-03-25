@@ -5,7 +5,7 @@ using static DataFilters.FilterOperator;
 using System.Reflection;
 using System.Linq.Expressions;
 
-namespace Datafilters
+namespace DataFilters
 {
     public static class FilterToExpressions
     {
