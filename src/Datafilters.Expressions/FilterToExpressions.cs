@@ -102,6 +102,9 @@ namespace DataFilters
                                 case FilterOperator.GreaterThanOrEqual:
                                     body = GreaterThanOrEqual(property, constantExpression);
                                     break;
+                                case LessThanOrEqualTo:
+                                    body = LessThanOrEqual(property, constantExpression);
+                                    break;
                                 case StartsWith:
                                     body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression);
                                     break;

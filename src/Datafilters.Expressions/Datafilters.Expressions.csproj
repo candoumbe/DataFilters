@@ -3,15 +3,12 @@
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
-    <Version>2.0.0</Version>
+    <Version>3.0.0</Version>
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
     <PackageProjectUrl>https://candoumbe.visualstudio.com/DataFilters</PackageProjectUrl>
     <RepositoryUrl>https://candoumbe.visualstudio.com/DataFilters</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>`OrderBy` extension method's return type is now `IOrderedQueryable&lt;T&gt;`
-`OrderBy` throws  : 
-- ArgumentNullException when called with a null parameter
-- EmptyOrderByException when called with an empty collection of OrderClause&lt;T&gt;</PackageReleaseNotes>
+    <PackageReleaseNotes>Changed namespace casing</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
