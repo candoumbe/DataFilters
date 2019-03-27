@@ -87,7 +87,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     new[] {
-                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }
                     },
                     new CompositeFilter {
@@ -151,9 +151,7 @@ namespace DataFilters.UnitTests
                     },
                     (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (1.January(2007) < item.LastBattleDate) && item.LastBattleDate < 31.December(2012))
                 };
-
             }
-
         }
         [Theory]
         [MemberData(nameof(EqualToTestCases))]
@@ -534,6 +532,28 @@ namespace DataFilters.UnitTests
         public void BuildNotEqual(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
             => Build(superheroes, filter, expression);
 
+        public static IEnumerable<object[]> LessThanOrEqualToCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }
+
+                    },
+                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : LessThanOrEqualTo, value : 1.January(2007)),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && item.LastBattleDate <= 1.January(2007))
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(LessThanOrEqualToCases))]
+        public void BuildLessThanOrEqual(IEnumerable<SuperHero> superHeroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
+            => Build(superHeroes, filter, expression);
 
         /// <summary>
         /// Tests various filters
