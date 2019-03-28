@@ -8,6 +8,7 @@ namespace DataFilters.Expressions
     /// Exception thrown when calling <see cref="QueryableExtensions.OrderBy{T}(IQueryable{T}, in IEnumerable{OrderClause{T}})"/> with
     /// an empty orderBy
     /// </summary>
+    [Obsolete("Will be removed in a future release")]
     public class EmptyOrderByException : ArgumentException
     {
     }
