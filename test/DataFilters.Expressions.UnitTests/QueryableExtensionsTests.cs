@@ -16,10 +16,7 @@ namespace DataFilters.Expressions.UnitTests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        public QueryableExtensionsTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
+        public QueryableExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
         public static IEnumerable<object[]> ThrowsArgumentNullExceptionCases
         {
@@ -68,6 +65,17 @@ namespace DataFilters.Expressions.UnitTests
             // Asser
             action.Should()
                 .ThrowExactly<EmptyOrderByException>();
+        }
+
+        [Fact]
+        public void Should_Throws_ArgumentNullException_WhenOrderBy_Null()
+        {
+            // Act
+            Action action = () => QueryableExtensions.OrderBy(Enumerable.Empty<Hero>().AsQueryable(), (ISort<Hero>) null);
+
+            // Assert
+            action.Should()
+                .ThrowExactly<ArgumentNullException>();
         }
     }
 }

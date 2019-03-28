@@ -3,12 +3,14 @@
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
-    <Version>3.0.0</Version>
+    <Version>4.0.0</Version>
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
     <PackageProjectUrl>https://candoumbe.visualstudio.com/DataFilters</PackageProjectUrl>
     <RepositoryUrl>https://candoumbe.visualstudio.com/DataFilters</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Changed namespace casing</PackageReleaseNotes>
+    <PackageReleaseNotes>Marked QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, IEnumerable&lt;OrderClause&lt;T&gt;&gt; orderBy) obsolete
+
+Added QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy)</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
