@@ -19,10 +19,10 @@ namespace DataFilters
     /// </summary>
     public static class FilterExtensions
     {
-        private const char _aMPERSAND_STAR = '&';
+        private const char _ampersandChar = '&';
 
-        private const string _sTAR_STRING = "*";
-        private const char _sTAR_CHAR = '*';
+        private const string _starString = "*";
+        private const char _starChar = '*';
 
 #if STRING_SEGMENT
         /// <summary>
@@ -102,7 +102,7 @@ namespace DataFilters
             if (!isEmptyQueryString)
             {
 #if STRING_SEGMENT
-                IEnumerable<StringSegment> queryStringParts = localQueryString.Split(new[] { _aMPERSAND_STAR })
+                IEnumerable<StringSegment> queryStringParts = localQueryString.Split(new[] { _ampersandChar })
                     .Where(segment => segment != StringSegment.Empty);
 #else
                 IEnumerable<string> queryStringParts = localQueryString.Split(new[] { _aMPERSAND_STAR }, RemoveEmptyEntries);
@@ -123,12 +123,12 @@ namespace DataFilters
                         StringSegment valuePart = keyValueParts.Last()
                             .Value
                             .Replace("!!", string.Empty)
-                            .Replace("**", _sTAR_STRING);
+                            .Replace("**", _starString);
 #else
                         string keyPart = keyValueParts.First();
                         string valuePart = keyValueParts.Last()
                             .Replace("!!", string.Empty)
-                            .Replace("**", _sTAR_STRING);
+                            .Replace("**", _starString);
 #endif
 
                         PropertyInfo pi = typeof(T).GetRuntimeProperties()
@@ -230,9 +230,9 @@ namespace DataFilters
 #else
                                 if(valuePart.Contains("*") || valuePart.Contains("?"))
                                 {
-                                    if(valuePart.Contains(_sTAR_CHAR) && !valuePart.Contains("?"))
+                                    if(valuePart.Contains(_starChar) && !valuePart.Contains("?"))
                                     {
-                                        IEnumerable<string> segments = valuePart.Split(new[] { _sTAR_CHAR }, RemoveEmptyEntries);
+                                        IEnumerable<string> segments = valuePart.Split(new[] { _starChar }, RemoveEmptyEntries);
 #endif
                                         switch (segments.Count())
                                         {
@@ -246,7 +246,7 @@ namespace DataFilters
                                                     value: tc.ConvertFrom(segments.Single().Value)
 #else
                                                     field: keyPart,
-                                                    @operator: valuePart.StartsWith(_sTAR_STRING, StringComparison.OrdinalIgnoreCase)
+                                                    @operator: valuePart.StartsWith(_starString, StringComparison.OrdinalIgnoreCase)
                                                         ? EndsWith
                                                         : StartsWith,
                                                     value: tc.ConvertFrom(segments.Single())
@@ -259,7 +259,7 @@ namespace DataFilters
                                                 IList<int> starPositions = new List<int>();
                                                 for (int i = 0; i < valuePart.Length; i++)
                                                 {
-                                                    if (valuePart[i] == _sTAR_CHAR)
+                                                    if (valuePart[i] == _starChar)
                                                     {
                                                         starPositions.Add(i);
                                                     }
@@ -283,11 +283,11 @@ namespace DataFilters
                                                     }
                                                     else if (i < segments.Count() - 1)
                                                     {
-                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0 && valuePart[index] == _sTAR_CHAR, followedByStar: true));
+                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0 && valuePart[index] == _starChar, followedByStar: true));
                                                     }
                                                     else
                                                     {
-                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: true, followedByStar: valuePart[valuePart.Length - 1] == _sTAR_CHAR));
+                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: true, followedByStar: valuePart[valuePart.Length - 1] == _starChar));
                                                     }
                                                     index += val.Length;
                                                 }
