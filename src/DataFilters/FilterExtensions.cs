@@ -105,7 +105,7 @@ namespace DataFilters
                 IEnumerable<StringSegment> queryStringParts = localQueryString.Split(new[] { _ampersandChar })
                     .Where(segment => segment != StringSegment.Empty);
 #else
-                IEnumerable<string> queryStringParts = localQueryString.Split(new[] { _aMPERSAND_STAR }, RemoveEmptyEntries);
+                IEnumerable<string> queryStringParts = localQueryString.Split(new[] { _ampersandChar }, RemoveEmptyEntries);
 #endif
                 if (queryStringParts.Once())
                 {
