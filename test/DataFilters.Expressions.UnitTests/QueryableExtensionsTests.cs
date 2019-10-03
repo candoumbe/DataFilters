@@ -45,9 +45,9 @@ namespace DataFilters.Expressions.UnitTests
         {
             _outputHelper.WriteLine($"{nameof(heroes)} is null : {heroes == null}");
             _outputHelper.WriteLine($"{nameof(orderBy)} is null : {orderBy == null}");
-            
+
             // Act
-            Action action = () => QueryableExtensions.OrderBy(heroes, orderBy);
+            Action action = () => heroes.OrderBy(orderBy);
 
             // Assert
             action.Should()
@@ -55,12 +55,11 @@ namespace DataFilters.Expressions.UnitTests
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
         }
 
-
         [Fact]
         public void Should_Throws_EmptyOrderByException_WhenOrderBy_IsEmpty()
         {
             // Act
-            Action action = () => QueryableExtensions.OrderBy(Enumerable.Empty<Hero>().AsQueryable(), Enumerable.Empty<OrderClause<Hero>>());
+            Action action = () => Enumerable.Empty<Hero>().AsQueryable().OrderBy(Enumerable.Empty<OrderClause<Hero>>());
 
             // Asser
             action.Should()
@@ -71,7 +70,7 @@ namespace DataFilters.Expressions.UnitTests
         public void Should_Throws_ArgumentNullException_WhenOrderBy_Null()
         {
             // Act
-            Action action = () => QueryableExtensions.OrderBy(Enumerable.Empty<Hero>().AsQueryable(), (ISort<Hero>) null);
+            Action action = () => Enumerable.Empty<Hero>().AsQueryable().OrderBy((ISort<Hero>)null);
 
             // Assert
             action.Should()

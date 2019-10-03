@@ -18,5 +18,9 @@ namespace DataFilters
         /// </summary>
         /// <returns>The exact opposite of the current instance.</returns>
         IFilter Negate();
+
+#if NETSTANDARD2_1
+        public virtual void ToString() => ToJson();
+#endif
     }
 }

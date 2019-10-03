@@ -1,18 +1,14 @@
-﻿using DataFilters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Linq.Expressions;
 using static DataFilters.SortDirection;
 
 namespace DataFilters.Expressions
 {
-
     /// <summary>
     /// An instance of this class holds an <see cref="LambdaExpression"/> which defines a property and its related <see cref="SortDirection"/> to use to order collections
     /// </summary>
     /// <typeparam name="T">Type of the object which the <see cref="OrderClause{T}"/> c</typeparam>
-    public class OrderClause<T>
+    public sealed class OrderClause<T>
     {
         private OrderClause(LambdaExpression keySelector, SortDirection direction)
         {
@@ -39,10 +35,11 @@ namespace DataFilters.Expressions
         public static OrderClause<T> Create(LambdaExpression keySelector,
             SortDirection direction = Ascending) => new OrderClause<T>(keySelector, direction);
 
-        public LambdaExpression Expression { get; private set; }
+        public LambdaExpression Expression { get; }
+
         /// <summary>
         /// Order direction (either <see cref="Ascending"/> or <see cref="Descending"/>
         /// </summary>
-        public SortDirection Direction { get; private set; }
+        public SortDirection Direction { get; }
     }
 }

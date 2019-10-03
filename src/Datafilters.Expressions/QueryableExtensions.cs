@@ -1,7 +1,7 @@
-﻿using DataFilters.Expressions;
-using DataFilters;
+﻿using DataFilters;
+using DataFilters.Expressions;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 
 namespace System.Linq
 {
@@ -31,24 +31,20 @@ namespace System.Linq
                 throw new EmptyOrderByException();
             }
             OrderClause<T> first = orderBy.First();
-            IOrderedQueryable<T> ordered = first.Direction == SortDirection.Ascending 
+            IOrderedQueryable<T> ordered = first.Direction == SortDirection.Ascending
                 ? Queryable.OrderBy(entries, (dynamic)first.Expression)
                 : Queryable.OrderByDescending(entries, (dynamic)first.Expression);
 
             foreach (OrderClause<T> orderClause in orderBy.Skip(1))
             {
-                switch (orderClause.Direction)
+                ordered = orderClause.Direction switch
                 {
-                    case SortDirection.Ascending:
-                        ordered = Queryable.ThenBy(ordered, (dynamic)orderClause.Expression);
-                        break;
-                    case SortDirection.Descending:
-                        ordered = Queryable.ThenByDescending(ordered, (dynamic)orderClause.Expression);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }            
+                    SortDirection.Ascending => Queryable.ThenBy(ordered, (dynamic)orderClause.Expression),
+                    SortDirection.Descending => Queryable.ThenByDescending(ordered, (dynamic)orderClause.Expression),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
+            }
+
             return ordered;
         }
 
@@ -75,17 +71,12 @@ namespace System.Linq
 
             foreach (OrderClause<T> orderClause in orders.Skip(1))
             {
-                switch (orderClause.Direction)
+                ordered = orderClause.Direction switch
                 {
-                    case SortDirection.Ascending:
-                        ordered = Queryable.ThenBy(ordered, (dynamic)orderClause.Expression);
-                        break;
-                    case SortDirection.Descending:
-                        ordered = Queryable.ThenByDescending(ordered, (dynamic)orderClause.Expression);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    SortDirection.Ascending => Queryable.ThenBy(ordered, (dynamic)orderClause.Expression),
+                    SortDirection.Descending => Queryable.ThenByDescending(ordered, (dynamic)orderClause.Expression),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
             }
             return ordered;
         }

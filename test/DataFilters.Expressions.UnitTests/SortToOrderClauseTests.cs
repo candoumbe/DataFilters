@@ -8,14 +8,12 @@ using Xunit;
 using Xunit.Categories;
 using static DataFilters.SortDirection;
 
-
 namespace DataFilters.Expressions.UnitTests
 {
     [UnitTest]
     [Feature("Expressions")]
     public class SortToOrderClauseTests
     {
-        
         public static IEnumerable<object[]> SortToOrderClauseCases
         {
             get
@@ -62,7 +60,6 @@ namespace DataFilters.Expressions.UnitTests
                     )
                 };
 
-
                 yield return new object[]
                 {
                     new[]
@@ -72,7 +69,7 @@ namespace DataFilters.Expressions.UnitTests
                     },
                     new Sort<Hero>(nameof(Hero.Name), Descending),
 
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == (2)
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
                         && heroes.First().Name == "Flash"
                         && heroes.Last().Name == "Batman"
                     )
@@ -123,10 +120,8 @@ namespace DataFilters.Expressions.UnitTests
         public void SortToOrderTests(IEnumerable<Hero> heroes, ISort<Hero> order, Expression<Func<IEnumerable<Hero>, bool>> expectation)
         {
             // Act
-            IEnumerable<OrderClause<Hero>> sorts = order.ToOrderClause();
-
             IEnumerable<Hero> actual = heroes.AsQueryable()
-                .OrderBy(sorts)
+                .OrderBy(order)
                 .ToList();
 
             // Assert

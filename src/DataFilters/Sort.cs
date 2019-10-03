@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD2_0
+﻿#if STRING_SEGMENT
 using Microsoft.Extensions.Primitives;
 # endif
 using System;
@@ -12,7 +12,7 @@ namespace DataFilters
     /// <typeparam name="T">Type onto which the sort applies</typeparam>
     public class Sort<T> : ISort<T>
     {
-#if NETSTANDARD1_3
+#if !STRING_SEGMENT
         public string Expression { get; }
 #else
         public StringSegment Expression { get; }
@@ -20,7 +20,7 @@ namespace DataFilters
 
         public SortDirection Direction { get; }
 
-#if NETSTANDARD2_0
+#if STRING_SEGMENT
         /// <summary>
         /// Builds a new 
         /// </summary>
@@ -53,8 +53,8 @@ namespace DataFilters
 
         public override int GetHashCode() => (Expression, Direction).GetHashCode();
 
-#if NETSTANDARD1_3
-        public override string ToString() => this.Stringify(); 
+#if !STRING_SEGMENT
+        public override string ToString() => this.Stringify();
 #else
         public override string ToString() => new { Expression = Expression.Value, Direction = Direction.ToString() }.Stringify();
 #endif

@@ -1,5 +1,6 @@
 ﻿using Queries.Core.Parts.Sorting;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace DataFilters
@@ -9,29 +10,35 @@ namespace DataFilters
         /// <summary>
         /// Converts <paramref name="sort"/> to <see cref="IOrder"/>.
         /// </summary>
+        /// <typeparam name="T">Type of element the sort will be apply to.</typeparam>
         /// <param name="sort"></param>
         /// <returns></returns>
-        public static IOrder ToOrder<T>(this ISort<T> sort)
+        public static IEnumerable<IOrder> ToOrder<T>(this ISort<T> sort)
         {
-            IOrder order = null;
-
-            if (sort.GetType().IsAssignableToGenericType(typeof(Sort<>)))
+            static OrderExpression CreateOrderExpressionFromSort(in Sort<T> instance)
             {
-                PropertyInfo piExpression = sort.GetType().GetProperty(nameof(Sort<object>.Expression));
-                object expression = piExpression.GetValue(sort).ToString();
-
-                PropertyInfo piDirection = sort.GetType().GetProperty(nameof(Sort<object>.Direction));
-                SortDirection direction = (SortDirection) piDirection.GetValue(sort);
-
-                order = new OrderExpression(expression.ToString().Field(), direction: direction == SortDirection.Ascending
+                return new OrderExpression(instance.ToString().Field(), direction: instance.Direction == SortDirection.Ascending
                     ? OrderDirection.Ascending : OrderDirection.Descending);
             }
-            else
+
+            switch (sort)
             {
+                case Sort<T> expression:
+                    yield return CreateOrderExpressionFromSort(expression);
+                    break;
+                case MultiSort<T> multisort:
+                    {
+                        foreach (Sort<T> item in multisort.Sorts)
+                        {
+                            yield return CreateOrderExpressionFromSort(item);
+                        }
 
+                        break;
+                    }
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(sort), "Unknown sort type");
             }
-
-            return order;
         }
     }
 }

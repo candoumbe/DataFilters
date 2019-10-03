@@ -1,4 +1,7 @@
 ﻿using Newtonsoft.Json.Converters;
+#if !NETSTANDARD1_3
+using Newtonsoft.Json.Serialization;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +18,10 @@ namespace DataFilters.Converters
         /// <summary>
         /// Builds a new <see cref="CamelCaseEnumTypeConverter"/> instance
         /// </summary>
+#if NETSTANDARD1_3
         public CamelCaseEnumTypeConverter() => CamelCaseText = true;
+#else
+        public CamelCaseEnumTypeConverter() => NamingStrategy = new CamelCaseNamingStrategy();
+#endif
     }
 }

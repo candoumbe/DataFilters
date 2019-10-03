@@ -16,89 +16,90 @@ namespace DataFilters
         public static IWhereClause ToWhere(this IFilter filter)
         {
             IWhereClause clause = null;
-            
-            if (filter is Filter f)
+
+            switch (filter)
             {
-                ClauseOperator clauseOperator;
-                object value = f.Value;
+                case Filter f:
+                    {
+                        ClauseOperator clauseOperator;
+                        object value = f.Value;
 
-                switch (f.Operator)
-                {
-                    case FilterOperator.EqualTo:
-                        clauseOperator = ClauseOperator.EqualTo;
-                        break;
-                    case FilterOperator.NotEqualTo:
-                        clauseOperator = ClauseOperator.NotEqualTo;
-                        break;
-                    case FilterOperator.IsNull:
-                        clauseOperator = ClauseOperator.IsNull;
-                        break;
-                    case FilterOperator.IsNotNull:
-                        clauseOperator = ClauseOperator.IsNotNull;
-                        break;
-                    case FilterOperator.LessThan:
-                        clauseOperator = ClauseOperator.LessThan;
-                        break;
-                    case FilterOperator.GreaterThan:
-                        clauseOperator = ClauseOperator.GreaterThan;
-                        break;
-                    case FilterOperator.GreaterThanOrEqual:
-                        clauseOperator = ClauseOperator.GreaterThanOrEqualTo;
-                        break;
-                    case FilterOperator.StartsWith:
-                    case FilterOperator.EndsWith:
-                    case FilterOperator.Contains:
-                        clauseOperator = ClauseOperator.Like;
-                        if (f.Operator == FilterOperator.StartsWith)
+                        switch (f.Operator)
                         {
-                            value = $"{value}%";
-                                
+                            case FilterOperator.EqualTo:
+                                clauseOperator = ClauseOperator.EqualTo;
+                                break;
+                            case FilterOperator.NotEqualTo:
+                                clauseOperator = ClauseOperator.NotEqualTo;
+                                break;
+                            case FilterOperator.IsNull:
+                                clauseOperator = ClauseOperator.IsNull;
+                                break;
+                            case FilterOperator.IsNotNull:
+                                clauseOperator = ClauseOperator.IsNotNull;
+                                break;
+                            case FilterOperator.LessThan:
+                                clauseOperator = ClauseOperator.LessThan;
+                                break;
+                            case FilterOperator.GreaterThan:
+                                clauseOperator = ClauseOperator.GreaterThan;
+                                break;
+                            case FilterOperator.GreaterThanOrEqual:
+                                clauseOperator = ClauseOperator.GreaterThanOrEqualTo;
+                                break;
+                            case FilterOperator.StartsWith:
+                            case FilterOperator.EndsWith:
+                            case FilterOperator.Contains:
+                                clauseOperator = ClauseOperator.Like;
+                                if (f.Operator == FilterOperator.StartsWith)
+                                {
+                                    value = $"{value}%";
+                                }
+                                else if (f.Operator == FilterOperator.EndsWith)
+                                {
+                                    value = $"%{value}";
+                                }
+                                else
+                                {
+                                    value = $"%{value}%";
+                                }
+                                break;
+                            case FilterOperator.NotStartsWith:
+                            case FilterOperator.NotEndsWith:
+                            case FilterOperator.NotContains:
+                                clauseOperator = ClauseOperator.NotLike;
+                                if (f.Operator == FilterOperator.NotStartsWith)
+                                {
+                                    value = $"{value}%";
+                                }
+                                else if (f.Operator == FilterOperator.NotEndsWith)
+                                {
+                                    value = $"%{value}";
+                                }
+                                else
+                                {
+                                    value = $"%{value}%";
+                                }
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException($"Unsupported '{f.Operator}' operator");
                         }
-                        else if(f.Operator == FilterOperator.EndsWith)
-                        {
 
-                            value = $"%{value}";
-                        }
-                        else
-                        {
-                            value = $"%{value}%";
-                        }
+                        clause = new WhereClause(f.Field.Field(), clauseOperator, new Literal(value));
                         break;
-                    case FilterOperator.NotStartsWith:
-                    case FilterOperator.NotEndsWith:
-                    case FilterOperator.NotContains:
-                        clauseOperator = ClauseOperator.NotLike;
-                        if (f.Operator == FilterOperator.NotStartsWith)
-                        {
-                            value = $"{value}%";
+                    }
 
-                        }
-                        else if (f.Operator == FilterOperator.NotEndsWith)
+                case CompositeFilter cf:
+                    {
+                        clause = new CompositeWhereClause
                         {
-
-                            value = $"%{value}";
-                        }
-                        else
-                        {
-                            value = $"%{value}%";
-                        }
+                            Logic = cf.Logic == FilterLogic.And
+                                ? ClauseLogic.And
+                                : ClauseLogic.Or,
+                            Clauses = cf.Filters.Select(item => item.ToWhere())
+                        };
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Unsupported '{f.Operator}' operator");
-                        
-                }
-
-                clause = new WhereClause(f.Field.Field(), clauseOperator, new Literal(value));
-            }
-            else if(filter is CompositeFilter cf)
-            {
-                clause = new CompositeWhereClause
-                {
-                    Logic = cf.Logic == FilterLogic.And
-                        ? ClauseLogic.And
-                        : ClauseLogic.Or,
-                    Clauses = cf.Filters.Select(item => item.ToWhere())
-                };
+                    }
             }
 
             return clause;

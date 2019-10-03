@@ -16,7 +16,7 @@ namespace System
         /// <returns></returns>
         public static ISort<T> ToSort<T>(this string sortString)
         {
-            if (string.IsNullOrWhiteSpace(sortString))
+            if (string.IsNullOrWhiteSpace(sortString) || sortString?.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(sortString), "cannot be be null or whitespace only");
             }
@@ -30,7 +30,7 @@ namespace System
             }
 
             ISort<T> sort = null;
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             Span<string> sorts = sortString.Split(new []{ Separator }, StringSplitOptions.RemoveEmptyEntries)
                 .AsSpan();
 
@@ -65,6 +65,7 @@ namespace System
                     sort = new Sort<T>(sortString);
                 }
             }
+
             return sort;
         }
     }

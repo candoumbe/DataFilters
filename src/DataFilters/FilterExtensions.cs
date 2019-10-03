@@ -49,12 +49,12 @@ namespace DataFilters
         public static IFilter ToFilter<T>(this StringSegment queryString)
         {
             StringSegment localQueryString = queryString;
-            IFilter InternalToFilter(StringSegment keyPart, StringSegment input, bool preceededByStar, bool followedByStar)
+            static IFilter InternalToFilter(StringSegment keyPart, StringSegment input, bool preceededByStar, bool followedByStar)
 #else
         public static IFilter ToFilter<T>(this string queryString)
         {
             string localQueryString = queryString;
-            IFilter InternalToFilter(string keyPart, string input, bool preceededByStar, bool followedByStar)
+            static IFilter InternalToFilter(string keyPart, string input, bool preceededByStar, bool followedByStar)
 #endif
             {
                 Filter localFilter = null;
@@ -92,11 +92,10 @@ namespace DataFilters
 
             IFilter filter = new Filter(field: null, @operator: default, value: null);
 
-            bool isEmptyQueryString =
 #if STRING_SEGMENT
-            queryString == StringSegment.Empty;
+            bool isEmptyQueryString = queryString == StringSegment.Empty;
 #else
-            string.IsNullOrWhiteSpace(queryString);
+            bool isEmptyQueryString = string.IsNullOrWhiteSpace(queryString);
 #endif
 
             if (!isEmptyQueryString)
@@ -191,7 +190,7 @@ namespace DataFilters
                                     Filters = filters
                                 };
                             }
-                            else if (valuePart.Like(@"*\[*\]*"))
+                            else if (valuePart.Like(@"*\[*\]*")) // the value looks like a regex expression 
                             {
 #if STRING_SEGMENT
                                 IEnumerable<StringSegment> values = FlattenValues(valuePart);
@@ -313,10 +312,10 @@ namespace DataFilters
                                             Filters = new[]
                                             {
 #if STRING_SEGMENT
-                                                new Filter(field : keyPart.Value, @operator : FilterOperator.GreaterThanOrEqual, value : tc.ConvertFrom(segments.First().Value)),
+                                                new Filter(field : keyPart.Value, @operator : GreaterThanOrEqual, value : tc.ConvertFrom(segments.First().Value)),
                                                 new Filter(field : keyPart.Value, @operator : LessThanOrEqualTo, value : tc.ConvertFrom(segments.Last().Value))
 #else
-                                                new Filter(field : keyPart, @operator : FilterOperator.GreaterThanOrEqual, value : tc.ConvertFrom(segments.First())),
+                                                new Filter(field : keyPart, @operator : GreaterThanOrEqual, value : tc.ConvertFrom(segments.First())),
                                                 new Filter(field : keyPart, @operator : LessThanOrEqualTo, value : tc.ConvertFrom(segments.Last()))
 #endif
                                             }
@@ -385,21 +384,17 @@ namespace DataFilters
                 ? valuePart.Subsegment(variableEnd + 1)
                 : StringSegment.Empty;
 
-            IList<StringSegment> values = new List<StringSegment>(variables.Length);
 #else
             string startString = valuePart.Substring(0, variableStart);
             string endString = variableEnd < valuePart.Length
                 ? valuePart.Substring(variableEnd + 1)
                 : string.Empty;
 
-            IList<string> values = new List<string>(variables.Length);
 #endif
             for (int i = 0; i < variables.Length; i++)
             {
-                values.Add($"{startString}{variables[i]}{endString}");
+                yield return $"{startString}{variables[i]}{endString}";
             }
-
-            return values;
         }
     }
 }

@@ -16,14 +16,13 @@ namespace DataFilters
     {
         public const string Pattern = @"^\s*(-|\+)?(([A-Za-z])\w*)+(\s*,\s*((-|\+)?(([A-Za-z])\w*)+)\s*)*$";
         private readonly Regex _sortRegex = new Regex(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
-        private const string _separator = ",";
+        private const char _separator = ',';
 
         public SortValidator() => RuleFor(x => x)
                 .Matches(Pattern)
                 .WithMessage(search =>
                 {
-                    string[] incorrectExpresions = search.Split(new[] { _separator }, RemoveEmptyEntries)
-                        .Select(x => x.Trim())
+                    string[] incorrectExpresions = search.Split(new[] { _separator })
                         .Where(x => !_sortRegex.IsMatch(x))
                         .Select(x => $@"""{x}""")
                         .ToArray();

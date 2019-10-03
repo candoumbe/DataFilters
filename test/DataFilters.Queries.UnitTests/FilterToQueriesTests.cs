@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Queries.Core.Extensions;
 using Queries.Core.Parts.Clauses;
 using System;
 using System.Collections.Generic;

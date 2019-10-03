@@ -1,9 +1,8 @@
-﻿using DataFilters;
-using System;
-using static System.Linq.Expressions.Expression;
-using static DataFilters.FilterOperator;
-using System.Reflection;
+﻿using System;
 using System.Linq.Expressions;
+using System.Reflection;
+using static DataFilters.FilterOperator;
+using static System.Linq.Expressions.Expression;
 
 namespace DataFilters
 {
@@ -18,7 +17,7 @@ namespace DataFilters
         /// <exception cref="ArgumentNullException">if <paramref name="filter"/> is <c>null</c>.</exception>
         public static Expression<Func<T, bool>> ToExpression<T>(this IFilter filter)
         {
-            object ConvertObjectToDateTime(object source, Type targetType)
+            static object ConvertObjectToDateTime(object source, Type targetType)
             {
                 object dateTime = null;
 
@@ -76,66 +75,31 @@ namespace DataFilters
                                     : Property(property, field);
                             }
 
-                            Expression body;
                             Type memberType = (property.Member as PropertyInfo)?.PropertyType;
                             ConstantExpression constantExpression = memberType == typeof(DateTime) || memberType == typeof(DateTime?) || memberType == typeof(DateTimeOffset) || memberType == typeof(DateTimeOffset?)
                                 ? Constant(ConvertObjectToDateTime(df.Value, memberType), memberType)
                                 : Constant(df.Value, memberType);
 
-                            switch (df.Operator)
+                            Expression body = df.Operator switch
                             {
-                                case NotEqualTo:
-                                    body = NotEqual(property, constantExpression);
-                                    break;
-                                case IsNull:
-                                    body = Equal(property, Constant(null));
-                                    break;
-                                case IsNotNull:
-                                    body = NotEqual(property, Constant(null));
-                                    break;
-                                case FilterOperator.LessThan:
-                                    body = LessThan(property, constantExpression);
-                                    break;
-                                case FilterOperator.GreaterThan:
-                                    body = GreaterThan(property, constantExpression);
-                                    break;
-                                case FilterOperator.GreaterThanOrEqual:
-                                    body = GreaterThanOrEqual(property, constantExpression);
-                                    break;
-                                case LessThanOrEqualTo:
-                                    body = LessThanOrEqual(property, constantExpression);
-                                    break;
-                                case StartsWith:
-                                    body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression);
-                                    break;
-                                case NotStartsWith:
-                                    body = Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression));
-                                    break;
-                                case EndsWith:
-                                    body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression);
-                                    break;
-                                case NotEndsWith:
-                                    body = Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression));
-                                    break;
-                                case Contains:
-                                    body = Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression);
-                                    break;
-                                case NotContains:
-                                    body = Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression));
-                                    break;
-                                case IsEmpty:
-                                    body = Equal(property, Constant(string.Empty));
-                                    break;
-                                case IsNotEmpty:
-                                    body = NotEqual(property, Constant(string.Empty));
-                                    break;
-                                case EqualTo:
-                                    body = Equal(property, constantExpression);
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException(nameof(filter), df.Operator, "Unsupported operator");
-                            }
-
+                                NotEqualTo => NotEqual(property, constantExpression),
+                                IsNull => Equal(property, Constant(null)),
+                                IsNotNull => NotEqual(property, Constant(null)),
+                                FilterOperator.LessThan => LessThan(property, constantExpression),
+                                FilterOperator.GreaterThan => GreaterThan(property, constantExpression),
+                                FilterOperator.GreaterThanOrEqual => GreaterThanOrEqual(property, constantExpression),
+                                LessThanOrEqualTo => LessThanOrEqual(property, constantExpression),
+                                StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression),
+                                NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
+                                EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression),
+                                NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression)),
+                                Contains => Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression),
+                                NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression)),
+                                IsEmpty => Equal(property, Constant(string.Empty)),
+                                IsNotEmpty => NotEqual(property, Constant(string.Empty)),
+                                EqualTo => Equal(property, constantExpression),
+                                _ => throw new ArgumentOutOfRangeException(nameof(filter), df.Operator, "Unsupported operator"),
+                            };
                             filterExpression = Lambda<Func<T, bool>>(body, pe);
                         }
 

@@ -23,33 +23,34 @@ namespace DataFilters.UnitTests
 
         public StringExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
-        [Fact]
-        public void Throws_ArgumentNullException_When_Parameter_IsNull()
+        [Theory]
+        [InlineData(null, "sort expression cannot be null")]
+        [InlineData("  ", "sort expression cannot be whitespace only")]
+        public void Throws_ArgumentNullException_When_Parameter_IsNull(string source, string reason)
         {
-            // Arrange
-            string source = null;
-
             // Act
             Action action = () => source.ToSort<SuperHero>();
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentOutOfRangeException>()
+                .ThrowExactly<ArgumentOutOfRangeException>(reason)
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName), $"{nameof(ArgumentOutOfRangeException.ParamName)} must not be null")
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null") ;
         }
 
         [Theory]
-        [InlineData("prop1 prop2")]
-        [InlineData("prop1,prop2,")]
-        public void Throws_InvalidSortExpression_When_Expression_IsNotValid(string invalidExpression)
+        [InlineData("prop1 prop2", "sort expression contains two properties that are not separated by a comma")]
+        [InlineData("prop1,prop2,", "sort expression cannot ends with a comma")]
+        [InlineData(",prop1,prop2", "sort expression cannot starts with a comma")]
+        [InlineData("--prop", "sort expression can start with only one hyphen")]
+        public void Throws_InvalidSortExpression_When_Expression_IsNotValid(string invalidExpression, string reason)
         {
             // Act
             Action action = () => invalidExpression.ToSort<SuperHero>();
 
             // Assert
             action.Should()
-                .ThrowExactly<InvalidSortExpression>($"'{invalidExpression}' is not a valid sort expresion")
+                .ThrowExactly<InvalidSortExpression>(reason)
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null");
         }
 
