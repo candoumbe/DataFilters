@@ -53,11 +53,11 @@ namespace DataFilters.Queries.UnitTests
         [MemberData(nameof(SortToSortCases))]
         public void FilterToSort(ISort<Person> sort, Expression<Func<IEnumerable<IOrder>, bool>> expected)
         {
-            _outputHelper.WriteLine($"Sort : {sort.Stringify()}");
+            _outputHelper.WriteLine($"Sort : {sort.Jsonify()}");
 
             // Act
             IEnumerable<IOrder> actual = sort.ToOrder();
-            _outputHelper.WriteLine($"actual result : {actual.Stringify()}");
+            _outputHelper.WriteLine($"actual result : {actual.Jsonify()}");
 
             // Assert
             actual.Should()

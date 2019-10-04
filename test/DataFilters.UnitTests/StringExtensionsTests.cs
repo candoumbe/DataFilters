@@ -114,7 +114,6 @@ namespace DataFilters.UnitTests
                 .Be(expected);
         }
 
-
         public static IEnumerable<object[]> EqualsCases
         {
             get

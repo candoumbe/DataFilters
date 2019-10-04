@@ -25,10 +25,7 @@ namespace DataFilters.Expressions.UnitTests
                 yield return new object[]
                 {
                     null,
-                    new[]
-                    {
-                        OrderClause<Hero>.Create(x => x.Name)
-                    }
+                    new Sort<Hero>(nameof(Hero.Name))
                 };
 
                 yield return new object[]
@@ -41,7 +38,7 @@ namespace DataFilters.Expressions.UnitTests
 
         [Theory]
         [MemberData(nameof(ThrowsArgumentNullExceptionCases))]
-        public void Should_Throws_ArgumentNullException_When_Parameter_IsNull(IQueryable<Hero> heroes, IEnumerable<OrderClause<Hero>> orderBy)
+        public void Should_Throws_ArgumentNullException_When_Parameter_IsNull(IQueryable<Hero> heroes, ISort<Hero> orderBy)
         {
             _outputHelper.WriteLine($"{nameof(heroes)} is null : {heroes == null}");
             _outputHelper.WriteLine($"{nameof(orderBy)} is null : {orderBy == null}");
@@ -53,17 +50,6 @@ namespace DataFilters.Expressions.UnitTests
             action.Should()
                 .ThrowExactly<ArgumentNullException>()
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
-        }
-
-        [Fact]
-        public void Should_Throws_EmptyOrderByException_WhenOrderBy_IsEmpty()
-        {
-            // Act
-            Action action = () => Enumerable.Empty<Hero>().AsQueryable().OrderBy(Enumerable.Empty<OrderClause<Hero>>());
-
-            // Asser
-            action.Should()
-                .ThrowExactly<EmptyOrderByException>();
         }
 
         [Fact]

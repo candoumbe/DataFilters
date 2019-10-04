@@ -53,8 +53,7 @@ namespace DataFilters.Queries.UnitTests
                         Logic = FilterLogic.Or,
                         Filters = new []{
                             new Filter(field: "Name",@operator: FilterOperator.EndsWith, value: "man"),
-                            new Filter(field: "Name",@operator: FilterOperator.StartsWith, value: "Bat"),
-
+                            new Filter(field: "Name",@operator: FilterOperator.StartsWith, value: "Bat")
                         }
                     },
                     new CompositeWhereClause
@@ -62,7 +61,7 @@ namespace DataFilters.Queries.UnitTests
                         Logic = ClauseLogic.Or,
                         Clauses = new []{
                             new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "%man"),
-                            new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "Bat%"),
+                            new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "Bat%")
                         }
                     }
                 };
@@ -73,17 +72,16 @@ namespace DataFilters.Queries.UnitTests
         [MemberData(nameof(FilterToWhereCases))]
         public void FilterToWhere(IFilter filter, IWhereClause expected)
         {
-            _outputHelper.WriteLine($"Filter : {filter.Stringify()}");
-            _outputHelper.WriteLine($"Expected : {expected.Stringify()}");
+            _outputHelper.WriteLine($"Filter : {filter.Jsonify()}");
+            _outputHelper.WriteLine($"Expected : {expected.Jsonify()}");
 
             // Act
             IWhereClause actualWhere= filter.ToWhere();
-            _outputHelper.WriteLine($"actualQuery : {actualWhere.Stringify()}");
+            _outputHelper.WriteLine($"actualQuery : {actualWhere.Jsonify()}");
 
             // Assert
             actualWhere.Should()
                 .Be(expected);
-
         }
     }
 }

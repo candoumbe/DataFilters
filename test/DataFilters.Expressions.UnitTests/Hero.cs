@@ -11,7 +11,11 @@ namespace DataFilters.Expressions.UnitTests
 
         public override bool Equals(object obj) => Equals(obj as Hero);
         public bool Equals(Hero other) => other != null && Name == other.Name && Age == other.Age;
+#if NETCOREAPP1_0 || NETCOREAPP2_0
+        public override int GetHashCode() => (Name, Age).GetHashCode();
+#else
         public override int GetHashCode() => HashCode.Combine(Name, Age);
+#endif
 
         public static bool operator ==(Hero hero1, Hero hero2)
         {

@@ -100,7 +100,6 @@ namespace DataFilters
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String }
                         },
                         Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
-
                     };
                     break;
                 default:
