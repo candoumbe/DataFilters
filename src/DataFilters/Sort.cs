@@ -12,30 +12,10 @@ namespace DataFilters
     /// <typeparam name="T">Type onto which the sort applies</typeparam>
     public class Sort<T> : ISort<T>
     {
-#if !STRING_SEGMENT
         public string Expression { get; }
-#else
-        public StringSegment Expression { get; }
-#endif
 
         public SortDirection Direction { get; }
 
-#if STRING_SEGMENT
-        /// <summary>
-        /// Builds a new 
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <param name="direction"></param>
-        public Sort(StringSegment expression, SortDirection direction = Ascending)
-        {
-            if (expression.Trim().Length == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(expression), "cannot be empty or whitespace only");
-            }
-            Expression = expression;
-            Direction = direction;
-        }
-#endif
         public Sort(string expression, SortDirection direction = Ascending)
         {
             if (string.IsNullOrWhiteSpace(expression))
@@ -46,17 +26,17 @@ namespace DataFilters
             Direction = direction;
         }
 
-        public bool Equals(ISort<T> other) => other is Sort<T> sort
-            && (Expression, Direction) == (sort.Expression, sort.Direction);
+        public bool Equals(ISort<T> other)
+            => other is Sort<T> sort && (Expression, Direction) == (sort.Expression, sort.Direction);
 
         public override bool Equals(object obj) => Equals(obj as Sort<T>);
 
+#if !NETSTANDARD2_1
         public override int GetHashCode() => (Expression, Direction).GetHashCode();
-
-#if !STRING_SEGMENT
-        public override string ToString() => this.Stringify();
 #else
-        public override string ToString() => new { Expression = Expression.Value, Direction = Direction.ToString() }.Stringify();
+        public override int GetHashCode() => HashCode.Combine(Expression, Direction);
 #endif
+
+        public override string ToString() => this.Jsonify();
     }
 }

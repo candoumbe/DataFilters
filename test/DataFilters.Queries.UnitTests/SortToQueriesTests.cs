@@ -41,9 +41,9 @@ namespace DataFilters.Queries.UnitTests
                     yield return new object[]
                     {
                         multiSort,
-                        (Expression<Func<IEnumerable<IOrder>, bool>>) (sorts => sorts.Exactly(_ => true, 2)
-                            && sorts.First().Equals(new OrderExpression(nameof(Person.Firstname).Field(), Ascending))
-                            && sorts.Last().Equals(new OrderExpression(nameof(Person.Lastname).Field(), Ascending)))
+                        (Expression<Func<IEnumerable<IOrder>, bool>>) (sorts => sorts.Exactly(2)
+                            && sorts.First().Equals(new OrderExpression(nameof(Person.Firstname), Ascending))
+                            && sorts.Last().Equals(new OrderExpression(nameof(Person.Lastname), Ascending)))
                     };
                 }
             }

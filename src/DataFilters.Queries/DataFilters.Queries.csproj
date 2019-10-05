@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Queries.Core" Version="2019.*" />
+    <PackageReference Include="Queries.Core" Version="2019.10.5.3" />
   </ItemGroup>
 
   <ItemGroup>

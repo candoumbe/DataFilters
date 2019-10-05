@@ -17,7 +17,7 @@ namespace DataFilters
         {
             static OrderExpression CreateOrderExpressionFromSort(in Sort<T> instance)
             {
-                return new OrderExpression(instance.ToString().Field(), direction: instance.Direction == SortDirection.Ascending
+                return new OrderExpression(instance.Expression.Field(), direction: instance.Direction == SortDirection.Ascending
                     ? OrderDirection.Ascending : OrderDirection.Descending);
             }
 
