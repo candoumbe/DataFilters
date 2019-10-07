@@ -23,7 +23,7 @@ namespace DataFilters
                     {
                         ClauseOperator clauseOperator;
                         object value = f.Value;
-
+                        
                         switch (f.Operator)
                         {
                             case FilterOperator.EqualTo:
@@ -85,7 +85,19 @@ namespace DataFilters
                                 throw new ArgumentOutOfRangeException($"Unsupported '{f.Operator}' operator");
                         }
 
-                        clause = new WhereClause(f.Field.Field(), clauseOperator, new Literal(value));
+                        clause = new WhereClause(f.Field.Field(), clauseOperator, value switch
+                        {
+                            int i=> i.Literal(),
+                            long l => l.Literal(),
+                            float floatValue => floatValue.Literal(),
+                            bool b => b.Literal(),
+                            DateTime date => date.Literal(),
+                            string s => s.Literal(),
+                            null => null,
+                            _ => throw new ArgumentOutOfRangeException(nameof(value), $"Unexpected value : {value}")
+
+                        }
+                        );
                         break;
                     }
 
