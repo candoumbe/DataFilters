@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using DataFilters.Converters;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Newtonsoft.Json.Required;
 using static Newtonsoft.Json.DefaultValueHandling;
-using static Newtonsoft.Json.JsonConvert;
-using DataFilters.Converters;
+using static Newtonsoft.Json.Required;
 
 namespace DataFilters
 {
@@ -14,7 +14,7 @@ namespace DataFilters
     /// </summary>
     [JsonObject]
     [JsonConverter(typeof(CompositeFilterConverter))]
-    public class CompositeFilter : IFilter
+    public class CompositeFilter : IFilter, IEquatable<CompositeFilter>
     {
         /// <summary>
         /// Name of the json property that holds filter's filters collection.
@@ -53,16 +53,9 @@ namespace DataFilters
         [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
         public FilterLogic Logic { get; set; } = FilterLogic.And;
 
-        public virtual string ToJson()
-#if DEBUG
-        => SerializeObject(this, Formatting.Indented);
-#else
-            => SerializeObject(this);
-#endif
+        public virtual string ToJson() => this.Jsonify();
 
-#if DEBUG
-        public override string ToString() => ToJson();
-#endif
+        public override string ToString() => this.Jsonify();
 
         public IFilter Negate()
         {
@@ -80,6 +73,25 @@ namespace DataFilters
             return filter;
         }
 
+#if NETSTANDARD1_3 || NETSTANDARD2_0
+        public override int GetHashCode() => (Logic, Filters).GetHashCode();
+#else
+        public override int GetHashCode()
+        {
+            HashCode hash = new HashCode();
+            hash.Add(Logic);
+            foreach (IFilter filter in Filters)
+            {
+                hash.Add(filter);
+            }
+            return hash.ToHashCode();
+        }
+#endif
+
         public bool Equals(IFilter other) => Equals(other as CompositeFilter);
+
+        public override bool Equals(object obj) => Equals(obj as CompositeFilter);
+
+        public bool Equals(CompositeFilter other) => Logic == other?.Logic && Filters.SequenceEqual(other?.Filters);
     }
 }

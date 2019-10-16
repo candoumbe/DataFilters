@@ -16,9 +16,12 @@ using static Newtonsoft.Json.JsonConvert;
 namespace DataFilters.UnitTests
 {
     [UnitTest]
-    public class FilterTests
+    public class CompositeFilterTests
     {
+        public CompositeFilterTests(ITestOutputHelper output) => _output = output;
+
         private readonly ITestOutputHelper _output;
+
         private static readonly IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
         {
             ["contains"] = Contains,
@@ -45,27 +48,7 @@ namespace DataFilters.UnitTests
             public DateTime BirthDate { get; set; }
         }
 
-        /// <summary>
-        /// Deserialization of various json representation into <see cref="Filter"/>
-        /// </summary>
-        public static IEnumerable<object[]> FilterDeserializeCases
-        {
-            get
-            {
-                foreach (KeyValuePair<string, FilterOperator> item in _operators)
-                {
-                    yield return new object[]
-                    {
-                        $"{{ field = 'Firstname', operator = '{item.Key}',  Value = 'Batman'}}",
-                        (Expression<Func<IFilter, bool>>)(result => result is Filter
-                            && "Firstname".Equals(((Filter) result).Field)
-                            && item.Value.Equals(((Filter) result).Operator)
-                            && "Batman".Equals(((Filter) result).Value)
-                        )
-                    };
-                }
-            }
-        }
+
 
         public static IEnumerable<object[]> CompositeFilterToJsonCases
         {
@@ -122,79 +105,69 @@ namespace DataFilters.UnitTests
             }
         }
 
-        public static IEnumerable<object[]> FilterSchemaTestCases
+        public static IEnumerable<object[]> CompositeFilterSchemaTestCases
         {
             get
             {
                 yield return new object[]
                 {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} :'batman' }}",
-                    EqualTo,
+                    "{" +
+                        $"{CompositeFilter.LogicJsonPropertyName} : 'or'," +
+                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'batman' }}," +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
+                        "]" +
+                    "}",
                     true
                 };
 
                 yield return new object[]
                 {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : null }}",
-                    EqualTo,
-                    false
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq' }}",
-                    EqualTo,
-                    false
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'contains', {Filter.ValueJsonPropertyName} : 'br' }}",
-                    Contains,
+                    "{" +
+                        $"{CompositeFilter.LogicJsonPropertyName} : 'and'," +
+                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'batman' }}," +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
+                        "]" +
+                    "}",
                     true
                 };
 
                 yield return new object[]
                 {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'contains', {Filter.ValueJsonPropertyName} : 6 }}",
-                    Contains,
-                    false
+                    "{" +
+                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'batman' }}," +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
+                        "]" +
+                    "}",
+                    true
                 };
 
                 yield return new object[]
                 {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'isnull', {Filter.ValueJsonPropertyName} : 6 }}",
-                    IsNull,
+                    "{" +
+                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                            $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
+                        "]" +
+                    "}",
                     false
-                };
-            }
-        }
-
-        public FilterTests(ITestOutputHelper output) => _output = output;
-
-        /// <summary>
-        /// Serialization of instance of <see cref="Filter"/> test cases
-        /// </summary>
-        public static IEnumerable<object[]> FilterToJsonCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new Filter (field : "Firstname", @operator  : EqualTo,  value : "Batman"),
-                    (Expression<Func<string, bool>>)(json =>
-                        "Firstname".Equals((string) JObject.Parse(json)[Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string) JObject.Parse(json)[Filter.OperatorJsonPropertyName])
-                        && "Batman".Equals((string) JObject.Parse(json)[Filter.ValueJsonPropertyName])
-                    )
                 };
             }
         }
 
         [Theory]
-        [MemberData(nameof(FilterToJsonCases))]
-        public void FilterToJson(Filter filter, Expression<Func<string, bool>> jsonMatcher)
-            => ToJson(filter, jsonMatcher);
+        [MemberData(nameof(CompositeFilterToJsonCases))]
+        public void CompositeFilterToJson(CompositeFilter filter, Expression<Func<string, bool>> jsonMatcher)
+        {
+            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
+
+            // Act
+            string json = filter.ToJson();
+
+            // Assert
+            json.Should().Match(jsonMatcher);
+        }
 
         public static IEnumerable<object[]> CollectionOfFiltersCases
         {
@@ -239,81 +212,92 @@ namespace DataFilters.UnitTests
             json.Should().Match(jsonExpectation);
         }
 
-        private void ToJson(IFilter filter, Expression<Func<string, bool>> jsonMatcher)
-        {
-            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
-
-            // Act
-            string json = filter.ToJson();
-
-            // Assert
-            json.Should().Match(jsonMatcher);
-        }
-
-        [Theory]
-        [MemberData(nameof(FilterSchemaTestCases))]
-        public void FilterSchema(string json, FilterOperator @operator, bool expectedValidity)
-        {
-            _output.WriteLine($"{nameof(json)} : {json}");
-            _output.WriteLine($"{nameof(FilterOperator)} : {@operator}");
-
-            // Arrange
-            JSchema schema = Filter.Schema(@operator);
-
-            // Act
-            bool isValid = JObject.Parse(json).IsValid(schema);
-
-            // Arrange
-            isValid.Should().Be(expectedValidity);
-        }
-
-        public static IEnumerable<object[]> FilterEquatableCases
+        public static IEnumerable<object[]> CompositeFilterEquatableCases
         {
             get
             {
                 yield return new object[]
                 {
-                    new Filter("property", EqualTo, "value"),
-                    new Filter("property", EqualTo, "value"),
-                    true
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]{
+                            new Filter("property", EqualTo, "value"),
+                            new Filter("property", EqualTo, "value"),
+                        }
+                    },
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]{
+                            new Filter("property", EqualTo, "value"),
+                            new Filter("property", EqualTo, "value"),
+                        }
+                    },
+                    true,
+                    $"Two instances of {nameof(CompositeFilter)} contains same ${nameof(CompositeFilter.Filters)} in same order"
                 };
 
                 yield return new object[]
                 {
-                    new Filter("property", EqualTo, null),
-                    new Filter("property", IsNull),
-                    true
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]{
+                            new Filter("property", EqualTo, "value"),
+                            new Filter("property", EqualTo, "value"),
+                        }
+                    },
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]{
+                            new Filter("property", NotEqualTo, "value"),
+                            new Filter("property", EqualTo, "value"),
+                        }
+                    },
+                    false,
+                    "the second instance contains one filter that has a different operator"
                 };
-
+                
                 yield return new object[]
                 {
-                    new Filter("property", EqualTo, "value"),
-                    new Filter("property", NotEqualTo, "value"),
-                    false
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]{
+                            new Filter("property", EqualTo, "value"),
+                            new Filter("property", EqualTo, "value"),
+                        }
+                    },
+                    null,
+                    false,
+                    "comparing to null"
                 };
 
-                yield return new object[]
                 {
-                    new Filter("Property", EqualTo, "value"),
-                    new Filter("property", EqualTo, "value"),
-                    false
-                };
-
-                {
-                    Filter first = new Filter("Property", EqualTo, "value");
+                    CompositeFilter filter = new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]{
+                            new Filter("property", EqualTo, "value"),
+                            new Filter("property", EqualTo, "value"),
+                        }
+                    };
                     yield return new object[]
                     {
-                        first,
-                        first,
-                        true
+                        filter,
+                        filter,
+                        true,
+                        "comparing a too itself must always returns true"
                     };
                 }
             }
         }
 
         [Theory]
-        [MemberData(nameof(FilterEquatableCases))]
-        public void FilterImplementsEquatableProperly(Filter first, Filter second, bool expectedResult)
+        [MemberData(nameof(CompositeFilterEquatableCases))]
+        public void CompositeFilterImplementsEquatableProperly(CompositeFilter first, object second, bool expectedResult, string reason)
         {
             _output.WriteLine($"first : {first}");
             _output.WriteLine($"second : {second}");
@@ -324,6 +308,22 @@ namespace DataFilters.UnitTests
             // Assert
             result.Should()
                 .Be(expectedResult);
+        }
+
+        [Theory]
+        [MemberData(nameof(CompositeFilterSchemaTestCases))]
+        public void CompositeFilterSchema(string json, bool expectedValidity)
+        {
+            _output.WriteLine($"{nameof(json)} : {json}");
+
+            // Arrange
+            JSchema schema = CompositeFilter.Schema;
+
+            // Act
+            bool isValid = JObject.Parse(json).IsValid(schema);
+
+            // Assert
+            isValid.Should().Be(expectedValidity);
         }
     }
 }

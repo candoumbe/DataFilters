@@ -37,8 +37,6 @@ namespace DataFilters.UnitTests.Converters
 
         public void Dispose() => _outputHelper = null;
 
-
-
         /// <summary>
         /// Deserialize tests cases
         /// </summary>
@@ -51,69 +49,67 @@ namespace DataFilters.UnitTests.Converters
                     yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName} :'Firstname', {Filter.OperatorJsonPropertyName} :'{item.Key}', {Filter.ValueJsonPropertyName} : 'Bruce'}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && item.Value == ((Filter)result).Operator
                             && ((Filter)result).Value is string
-                            && "Bruce".Equals((string)((Filter)result).Value)))
+                            && "Bruce".Equals((string)((Filter)result).Value))
                     };
                 }
 
                 yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName} :'Firstname', {Filter.OperatorJsonPropertyName} :'isnull'}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && Operators["isnull"] == ((Filter)result).Operator
-                            && ((Filter)result).Value == null))
+                            && ((Filter)result).Value == null)
                     };
-
 
                 yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName} :'Firstname', {Filter.OperatorJsonPropertyName} :'isnull', {Filter.ValueJsonPropertyName} : 6}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && Operators["isnull"] == ((Filter)result).Operator
-                            && ((Filter)result).Value == null))
+                            && ((Filter)result).Value == null)
                     };
 
                 yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName}:'Firstname', {Filter.OperatorJsonPropertyName} :'isnull', value : null}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && Operators["isnull"] == ((Filter)result).Operator
-                            && ((Filter)result).Value == null))
+                            && ((Filter)result).Value == null)
                     };
 
                 yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName}:'Firstname', {Filter.OperatorJsonPropertyName} :'isnull', value : null}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && Operators["isnull"] == ((Filter)result).Operator
-                            && ((Filter)result).Value == null))
+                            && ((Filter)result).Value == null)
                     };
 
                 yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName} :'Firstname', {Filter.OperatorJsonPropertyName} :'isnotnull', value : null}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && Operators["isnotnull"] == ((Filter)result).Operator
-                            && ((Filter)result).Value == null))
+                            && ((Filter)result).Value == null)
                     };
 
                 yield return new object[]{
                         $"{{{Filter.FieldJsonPropertyName} :'Firstname', {Filter.OperatorJsonPropertyName} :'isnotnull'}}",
                         typeof(Filter),
-                        ((Expression<Func<object, bool>>) ((result) => result is Filter
+                        (Expression<Func<object, bool>>) ((result) => result is Filter
                             && "Firstname" == ((Filter)result).Field
                             && Operators["isnotnull"] == ((Filter)result).Operator
-                            && ((Filter)result).Value == null))
+                            && ((Filter)result).Value == null)
                     };
-
 
 
             }
@@ -126,18 +122,16 @@ namespace DataFilters.UnitTests.Converters
         {
             get
             {
-
                 foreach (KeyValuePair<string, FilterOperator> item in Operators.Where(kv => !Filter.UnaryOperators.Any(op => op == kv.Value)))
                 {
                     yield return new object[]{
                         new Filter(field : "Firstname", @operator : item.Value, value : "Bruce"),
-                        ((Expression<Func<string, bool>>) ((json) => json != null
+                        (Expression<Func<string, bool>>) ((json) => json != null
                             && JToken.Parse(json).Type == JTokenType.Object
                             && JObject.Parse(json).Properties().Count() == 3
                             && "Firstname".Equals(JObject.Parse(json)[Filter.FieldJsonPropertyName].Value<string>())
                             && item.Key.Equals(JObject.Parse(json)[Filter.OperatorJsonPropertyName].Value<string>())
-                            && "Bruce".Equals(JObject.Parse(json)[Filter.ValueJsonPropertyName].Value<string>())))
-
+                            && "Bruce".Equals(JObject.Parse(json)[Filter.ValueJsonPropertyName].Value<string>()))
 
                     };
                 }
@@ -146,18 +140,15 @@ namespace DataFilters.UnitTests.Converters
                 {
                     yield return new object[]{
                         new Filter(field : "Firstname", @operator : item.Value),
-                        ((Expression<Func<string, bool>>) ((json) => json != null
+                        (Expression<Func<string, bool>>) ((json) => json != null
                             && JToken.Parse(json).Type == JTokenType.Object
                             && JObject.Parse(json).Properties().Count() == 2
                             && "Firstname".Equals(JObject.Parse(json)[Filter.FieldJsonPropertyName].Value<string>())
-                            && item.Key.Equals(JObject.Parse(json)[Filter.OperatorJsonPropertyName].Value<string>())))
-
+                            && item.Key.Equals(JObject.Parse(json)[Filter.OperatorJsonPropertyName].Value<string>()))
                     };
                 }
-
             }
         }
-
 
         /// <summary>
         /// Tests the deserialization of the <paramref name="json"/> to an instance of the specified <paramref name="targetType"/> <br/>
@@ -177,7 +168,6 @@ namespace DataFilters.UnitTests.Converters
             result.Should()
                 .Match(expectation);
         }
-
 
         /// <summary>
         /// Tests the serialization of the <paramref name="obj"/> to its string representation

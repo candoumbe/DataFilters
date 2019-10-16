@@ -607,105 +607,105 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                {
                     string.Empty,
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field ==  null &&
-                        ((Filter)x).Value == null)
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field ==  null
+                        && ((Filter)x).Value == null)
                };
 
                 yield return new object[]
                 {
                     "Firstname=Bruce",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == EqualTo &&
-                         Equals(((Filter)x).Value, "Bruce")
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Firstname"
+                        && ((Filter)x).Operator == EqualTo
+                         && Equals(((Filter)x).Value, "Bruce")
                         )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=!Bruce",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == NotEqualTo &&
-                            Equals(((Filter)x).Value, "Bruce")
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Firstname"
+                        && ((Filter)x).Operator == NotEqualTo
+                            && Equals(((Filter)x).Value, "Bruce")
                         )
                 };
 
                 yield return new object[]
                 {
                     $"Firstname=!!Bruce",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == EqualTo &&
-                            Equals(((Filter)x).Value, "Bruce")
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Firstname"
+                        && ((Filter)x).Operator == EqualTo
+                            && Equals(((Filter)x).Value, "Bruce")
                         )
                 };
 
                 yield return new object[]
                 {
                     $"Firstname=Bruce|Dick",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == Or &&
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == Or
 
-                        ((CompositeFilter)x).Filters != null &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
+                        && ((CompositeFilter)x).Filters != null
+                        && ((CompositeFilter)x).Filters.Count() == 2
 
-                        ((CompositeFilter)x).Filters.Once(f =>
-                            f is Filter &&
-                            ((Filter)f).Field == "Firstname" &&
-                            ((Filter)f).Operator == EqualTo &&
-                            Equals(((Filter)f).Value, "Bruce")) &&
+                        && ((CompositeFilter)x).Filters.Once(f =>
+                            f is Filter
+                            && ((Filter)f).Field == "Firstname"
+                            && ((Filter)f).Operator == EqualTo
+                            && Equals(((Filter)f).Value, "Bruce"))
 
-                        ((CompositeFilter)x).Filters.Once(f =>
-                            f is Filter &&
-                            ((Filter)f).Field == "Firstname" &&
-                            ((Filter)f).Operator == EqualTo &&
-                            Equals(((Filter)f).Value, "Dick"))
+                        && ((CompositeFilter)x).Filters.Once(f =>
+                            f is Filter
+                            && ((Filter)f).Field == "Firstname"
+                            && ((Filter)f).Operator == EqualTo
+                            && Equals(((Filter)f).Value, "Dick"))
                         )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=Bru*",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == StartsWith &&
-                            Equals(((Filter)x).Value, "Bru")
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Firstname"
+                        && ((Filter)x).Operator == StartsWith
+                            && Equals(((Filter)x).Value, "Bru")
                         )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=*Bru",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == EndsWith &&
-                            Equals(((Filter)x).Value, "Bru")
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Firstname"
+                        && ((Filter)x).Operator == EndsWith
+                            && Equals(((Filter)x).Value, "Bru")
                         )
                 };
 
                 yield return new object[]
                 {
                     "Height=100-",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Height" &&
-                        ((Filter)x).Operator == GreaterThanOrEqual &&
-                            Equals(((Filter)x).Value, 100)
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Height"
+                        && ((Filter)x).Operator == GreaterThanOrEqual
+                            && Equals(((Filter)x).Value, 100)
                         )
                 };
 
                 yield return new object[]
                 {
                     "Height=100-200",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                            ((CompositeFilter)x).Filters.Once( filter => filter is Filter &&
-                                ((Filter)filter).Field == "Height" && ((Filter)filter).Operator == GreaterThanOrEqual && Equals(((Filter)filter).Value, 100))
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                            && ((CompositeFilter)x).Filters.Once( filter => filter is Filter
+                                && ((Filter)filter).Field == "Height" && ((Filter)filter).Operator == GreaterThanOrEqual && Equals(((Filter)filter).Value, 100))
                             &&
-                            ((CompositeFilter)x).Filters.Once( filter => filter is Filter &&
-                                ((Filter)filter).Field == "Height" && ((Filter)filter).Operator == LessThanOrEqualTo && Equals(((Filter)filter).Value, 200))
+                            ((CompositeFilter)x).Filters.Once( filter => filter is Filter
+                                && ((Filter)filter).Field == "Height" && ((Filter)filter).Operator == LessThanOrEqualTo && Equals(((Filter)filter).Value, 200))
 
                         )
                 };
@@ -713,105 +713,105 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Height=-200",
-                     (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Height" &&
-                        ((Filter)x).Operator == LessThanOrEqualTo &&
-                            Equals(((Filter)x).Value, 200)
+                     (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Height"
+                        && ((Filter)x).Operator == LessThanOrEqualTo
+                            && Equals(((Filter)x).Value, 200)
                     )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*man",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Sup*er*man",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 3 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 3) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Sup".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "er".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 3
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 3)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Sup".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "er".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*man*",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*man*",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == Contains && "man".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == StartsWith && "Bat".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == EndsWith && "man".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=!Bru*",
-                    (Expression<Func<IFilter, bool>>)(x => x is Filter &&
-                        ((Filter)x).Field == "Firstname" &&
-                        ((Filter)x).Operator == NotStartsWith &&
-                            Equals(((Filter)x).Value, "Bru")
+                    (Expression<Func<IFilter, bool>>)(x => x is Filter
+                        && ((Filter)x).Field == "Firstname"
+                        && ((Filter)x).Operator == NotStartsWith
+                            && Equals(((Filter)x).Value, "Bru")
                         )
                 };
 
                 yield return new object[]
                 {
                     "Nickname=!Bat*man",
-                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == Or &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotStartsWith && "Bat".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotEndsWith && "man".Equals(((Filter)f).Value))
+                        (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == Or
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Exactly(f => f is Filter && ((Filter)f).Field == "Nickname", 2)
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotStartsWith && "Bat".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => ((Filter)f).Operator == NotEndsWith && "man".Equals(((Filter)f).Value))
                     )
                 };
 
@@ -819,57 +819,57 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=Bruce&Lastname=Wayne",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "Bruce".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Lastname" && ((Filter)f).Operator == EqualTo && "Wayne".Equals(((Filter)f).Value))
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "Bruce".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Lastname" && ((Filter)f).Operator == EqualTo && "Wayne".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=Bru*&Lastname=Wayne",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == And &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == StartsWith && "Bru".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Lastname" && ((Filter)f).Operator == EqualTo && "Wayne".Equals(((Filter)f).Value))
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == And
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == StartsWith && "Bru".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Lastname" && ((Filter)f).Operator == EqualTo && "Wayne".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=Br[uU]ce",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == Or &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "Bruce".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "BrUce".Equals(((Filter)f).Value))
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == Or
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "Bruce".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EqualTo && "BrUce".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=*Br[uU]",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == Or &&
-                        ((CompositeFilter)x).Filters.Count() == 2 &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "Bru".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "BrU".Equals(((Filter)f).Value))
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == Or
+                        && ((CompositeFilter)x).Filters.Count() == 2
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "Bru".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "BrU".Equals(((Filter)f).Value))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=*[Bb]r[uU]",
-                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter &&
-                        ((CompositeFilter)x).Logic == Or &&
-                        ((CompositeFilter)x).Filters.Count() == 4 &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "Bru".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "BrU".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "bru".Equals(((Filter)f).Value)) &&
-                        ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "brU".Equals(((Filter)f).Value))
+                    (Expression<Func<IFilter, bool>>)(x => x is CompositeFilter
+                        && ((CompositeFilter)x).Logic == Or
+                        && ((CompositeFilter)x).Filters.Count() == 4
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "Bru".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "BrU".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "bru".Equals(((Filter)f).Value))
+                        && ((CompositeFilter)x).Filters.Once(f => f is Filter && ((Filter)f).Field == "Firstname" && ((Filter)f).Operator == EndsWith && "brU".Equals(((Filter)f).Value))
                     )
                 };
             }

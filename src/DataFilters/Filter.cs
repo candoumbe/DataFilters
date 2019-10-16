@@ -17,6 +17,11 @@ namespace DataFilters
     public class Filter : IFilter, IEquatable<Filter>
     {
         /// <summary>
+        /// Filter that always returns <c>true</c>
+        /// </summary>
+        public static Filter True => new Filter(default, default);
+
+        /// <summary>
         /// Name of the json property that holds the field name
         /// </summary>
         public const string FieldJsonPropertyName = "field";
@@ -146,16 +151,9 @@ namespace DataFilters
             NullValueHandling = NullValueHandling.Ignore)]
         public object Value { get; }
 
-        public virtual string ToJson()
-#if DEBUG
-        => SerializeObject(this, Formatting.Indented);
-#else
-            => SerializeObject(this);
-#endif
+        public string ToJson() => this.Jsonify();
 
-#if DEBUG
-        public override string ToString() => ToJson();
-#endif
+        public override string ToString() => this.Jsonify();
 
         public bool Equals(Filter other)
             => other != null
