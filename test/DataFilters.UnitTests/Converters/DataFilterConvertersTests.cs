@@ -111,7 +111,6 @@ namespace DataFilters.UnitTests.Converters
                             && ((Filter)result).Value == null)
                     };
 
-
             }
         }
 
@@ -132,7 +131,6 @@ namespace DataFilters.UnitTests.Converters
                             && "Firstname".Equals(JObject.Parse(json)[Filter.FieldJsonPropertyName].Value<string>())
                             && item.Key.Equals(JObject.Parse(json)[Filter.OperatorJsonPropertyName].Value<string>())
                             && "Bruce".Equals(JObject.Parse(json)[Filter.ValueJsonPropertyName].Value<string>()))
-
                     };
                 }
 

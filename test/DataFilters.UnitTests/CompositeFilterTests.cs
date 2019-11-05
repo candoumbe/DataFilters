@@ -48,8 +48,6 @@ namespace DataFilters.UnitTests
             public DateTime BirthDate { get; set; }
         }
 
-
-
         public static IEnumerable<object[]> CompositeFilterToJsonCases
         {
             get
@@ -259,7 +257,7 @@ namespace DataFilters.UnitTests
                     false,
                     "the second instance contains one filter that has a different operator"
                 };
-                
+
                 yield return new object[]
                 {
                     new CompositeFilter
@@ -307,7 +305,7 @@ namespace DataFilters.UnitTests
 
             // Assert
             result.Should()
-                .Be(expectedResult);
+                .Be(expectedResult, reason);
         }
 
         [Theory]

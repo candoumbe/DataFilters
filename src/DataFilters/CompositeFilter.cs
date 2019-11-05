@@ -92,6 +92,10 @@ namespace DataFilters
 
         public override bool Equals(object obj) => Equals(obj as CompositeFilter);
 
-        public bool Equals(CompositeFilter other) => Logic == other?.Logic && Filters.SequenceEqual(other?.Filters);
+        public bool Equals(CompositeFilter other)
+            => Logic == other?.Logic
+            && Filters.Count() == other?.Filters?.Count()
+            && Filters.All(filter => other?.Filters?.Contains(filter) ?? false)
+            && (other?.Filters.All(filter => Filters.Contains(filter)) ?? false);
     }
 }

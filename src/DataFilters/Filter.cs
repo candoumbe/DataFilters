@@ -162,7 +162,11 @@ namespace DataFilters
 
         public override bool Equals(object obj) => Equals(obj as Filter);
 
+#if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Field, Operator, Value).GetHashCode();
+#else
+        public override int GetHashCode() => HashCode.Combine(Field, Operator, Value);
+#endif
 
         public IFilter Negate()
         {

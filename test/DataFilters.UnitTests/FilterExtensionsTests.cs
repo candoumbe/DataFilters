@@ -22,7 +22,9 @@ namespace DataFilters.UnitTests
 
             public DateTime BirthDate { get; set; }
 
-            public int Age { get; set; }
+            public string Nickname { get; set; }
+
+            public int Height { get; set; }
         }
 
         public static IEnumerable<object[]> ToFilterCases
@@ -76,7 +78,7 @@ namespace DataFilters.UnitTests
 
                 yield return new object[]
                 {
-                    $"{nameof(Person.Firstname)}=V*|G*,*l|*s",
+                    $"{nameof(Person.Firstname)}=(V*|G*),(*l|*s)",
                     new CompositeFilter
                     {
                         Logic = And,
@@ -103,6 +105,259 @@ namespace DataFilters.UnitTests
                         }
                     }
                 };
+
+                yield return new object[]
+               {
+                    string.Empty,
+                    Filter.True
+               };
+
+                yield return new object[]
+                {
+                    "Firstname=Bruce",
+                    new Filter("Firstname", EqualTo, "Bruce")
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=!Bruce",
+                    new Filter("Firstname", NotEqualTo, "Bruce")
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=!!Bruce",
+                    new Filter("Firstname", EqualTo, "Bruce")
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=Bruce|Dick",
+                    new CompositeFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Firstname", EqualTo, "Bruce"),
+                            new Filter("Firstname", EqualTo, "Dick")
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=Bru*",
+                    new Filter("Firstname", StartsWith, "Bru")
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=*Bru",
+                    new Filter("Firstname", EndsWith, "Bru")
+                };
+
+                yield return new object[]
+                {
+                    "Height=100-",
+                    new Filter("Height", GreaterThanOrEqual, 100)
+                };
+
+                yield return new object[]
+                {
+                    "Height=100-200",
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Height", GreaterThanOrEqual, 100),
+                            new Filter("Height", LessThanOrEqualTo, 200)
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Height=-200",
+                     new Filter("Height", LessThanOrEqualTo, 200)
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*,*man",
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Nickname", StartsWith, "Bat"),
+                            new Filter("Nickname", EndsWith, "man"),
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*man",
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Nickname", StartsWith, "Bat"),
+                            new Filter("Nickname", EndsWith, "man"),
+                        }
+                    }
+                };
+
+                //yield return new object[]
+                //{
+                //    "Nickname=Sup*er*man",
+                //    new CompositeFilter
+                //    {
+                //        Logic = And,
+                //        Filters = new IFilter[]
+                //        {
+                //            new Filter("Nickname", StartsWith, "Sup"),
+                //            new Filter("Nickname", Contains, "er"),
+                //            new Filter("Nickname", EndsWith, "man"),
+                //        }
+                //    }
+                //};
+
+                yield return new object[]
+                {
+                    "Nickname=Bat*,*man*",
+                     new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Nickname", StartsWith, "Bat"),
+                            new Filter("Nickname", Contains, "man"),
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=!Bru*",
+                    new Filter("Firstname", NotStartsWith, "Bru")
+                };
+
+                yield return new object[]
+                {
+                    "Nickname=!(Bat*man)",
+                    new CompositeFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Nickname", NotStartsWith, "Bat"),
+                            new Filter("Nickname", NotEndsWith, "man"),
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=Bru*&Lastname=Wayne",
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Firstname", StartsWith, "Bru"),
+                            new Filter("Lastname", EqualTo, "Wayne"),
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=Br[uU]ce",
+                    new CompositeFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Firstname", EqualTo, "Bruce"),
+                            new Filter("Firstname", EqualTo, "BrUce"),
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=*Br[uU]",
+                    new CompositeFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Firstname", EndsWith, "Bru"),
+                            new Filter("Firstname", EndsWith, "BrU"),
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=!(Bruce|Wayne)",
+                    new CompositeFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Firstname", NotEqualTo, "Bruce"),
+                            new Filter("Firstname", NotEqualTo, "Wayne")
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=(Bruce|Wayne)",
+                    new CompositeFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Firstname", EqualTo, "Bruce"),
+                            new Filter("Firstname", EqualTo, "Wayne")
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Firstname=(Bat*|Sup*)|(*man|*er)",
+                    new CompositeFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new CompositeFilter
+                            {
+                                Logic = Or,
+                                Filters = new IFilter[]
+                                {
+                                    new Filter("Firstname", StartsWith, "Bat"),
+                                    new Filter("Firstname", StartsWith, "Sup"),
+                                }
+                            },
+                            new CompositeFilter
+                            {
+                                Logic = Or,
+                                Filters = new IFilter[]
+                                {
+                                    new Filter("Firstname", EndsWith, "man"),
+                                    new Filter("Firstname", EndsWith, "er"),
+                                }
+                            },
+                        }
+                    }
+                };
             }
         }
 
@@ -118,8 +373,7 @@ namespace DataFilters.UnitTests
             // Assert
             actual.Should()
                 .NotBeSameAs(expected).And
-                .Be(expected)
-                ;
+                .Be(expected);
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿using DataFilters.Grammar.Parsing;
+using DataFilters.Grammar.Syntax;
+using Microsoft.Extensions.Primitives;
+using Superpower;
+using Superpower.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using static DataFilters.FilterOperator;
 
@@ -19,11 +21,6 @@ namespace DataFilters
     /// </summary>
     public static class FilterExtensions
     {
-        private const char _ampersandChar = '&';
-
-        private const string _starString = "*";
-        private const char _starChar = '*';
-
 #if STRING_SEGMENT
         /// <summary>
         /// Builds a <see cref="IFilter{T}"/> from <paramref name="queryString"/>
@@ -48,316 +45,150 @@ namespace DataFilters
 #if STRING_SEGMENT
         public static IFilter ToFilter<T>(this StringSegment queryString)
         {
-            StringSegment localQueryString = queryString;
-            static IFilter InternalToFilter(StringSegment keyPart, StringSegment input, bool preceededByStar, bool followedByStar)
+            string localQueryString = queryString.Value;
 #else
         public static IFilter ToFilter<T>(this string queryString)
         {
             string localQueryString = queryString;
-            static IFilter InternalToFilter(string keyPart, string input, bool preceededByStar, bool followedByStar)
 #endif
+            static IFilter ConvertExpressionToFilter(FilterExpression expression, string propertyName, TypeConverter tc)
             {
-                Filter localFilter = null;
-                if (!preceededByStar)
+                IFilter filter = Filter.True;
+                switch (expression)
                 {
-                    localFilter = !followedByStar
-#if STRING_SEGMENT
-                        ? new Filter(keyPart.Value, EqualTo, input.Value)
-                        : new Filter(keyPart.Value, StartsWith, input.Value);
-#else
-                        ? new Filter(keyPart, EqualTo, input)
-                        : new Filter(keyPart, StartsWith, input);
-#endif
+                    case ConstantExpression constant:
+                        filter = new Filter(propertyName, EqualTo, tc.ConvertFrom(constant.Value));
+                        break;
+                    case StartsWithExpression startsWith:
+                        filter = new Filter(propertyName, StartsWith, startsWith.Value);
+                        break;
+                    case EndsWithExpression endsWith:
+                        filter = new Filter(propertyName, EndsWith, endsWith.Value);
+                        break;
+                    case ContainsExpression endsWith:
+                        filter = new Filter(propertyName, Contains, endsWith.Value);
+                        break;
+                    case NotExpression not:
+                        filter = ConvertExpressionToFilter(not.Expression, propertyName, tc).Negate();
+                        break;
+                    case OrExpression orExpression:
+                        filter = new CompositeFilter
+                        {
+                            Logic = FilterLogic.Or,
+                            Filters = new IFilter[]
+                            {
+                                ConvertExpressionToFilter(orExpression.Left, propertyName, tc),
+                                ConvertExpressionToFilter(orExpression.Right, propertyName, tc)
+                            }
+                        };
+                        break;
+                    case AndExpression andExpression:
+                        filter = new CompositeFilter
+                        {
+                            Logic = FilterLogic.And,
+                            Filters = new IFilter[]
+                            {
+                                ConvertExpressionToFilter(andExpression.Left, propertyName, tc),
+                                ConvertExpressionToFilter(andExpression.Right, propertyName, tc)
+                            }
+                        };
+                        break;
+                    case RegularExpression regex:
+                        filter = new CompositeFilter
+                        {
+                            Logic = FilterLogic.Or,
+                            //Filters = regex.Value.Select(c => ConvertExpressionToFilter(new ConstantExpression($"{regex.Before?.Value ?? string.Empty}{c}{regex.After?.Value ?? string.Empty}"), propertyName, tc))
+                        };
+                        break;
+                    case GroupExpression group:
+                        filter = ConvertExpressionToFilter(group.Expression, propertyName, tc);
+                        break;
+                    case OneOfExpression oneOf:
+                        FilterExpression[] possibleValues = oneOf.Values.ToArray();
+                        if (oneOf.Values.Exactly(1))
+                        {
+                            filter = ConvertExpressionToFilter(possibleValues[0], propertyName, tc);
+                        }
+                        else
+                        {
+                            IList<IFilter> filters = new List<IFilter>(possibleValues.Length);
+
+                            foreach (FilterExpression item in possibleValues)
+                            {
+                                filters.Add(ConvertExpressionToFilter(item, propertyName, tc));
+                            }
+                            filter = new CompositeFilter { Logic = FilterLogic.Or, Filters = filters };
+                        }
+                        break;
+                    case RangeExpression range:
+                        if (range.Min != default && range.Max != default)
+                        {
+                            filter = new CompositeFilter
+                            {
+                                Logic = FilterLogic.And,
+                                Filters = new IFilter[]
+                                {
+                                new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(range.Min.Value)),
+                                new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(range.Max.Value))
+                                }
+                            };
+                        }
+                        else if (range.Min != default)
+                        {
+                            filter = new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(range.Min.Value));
+                        }
+                        else
+                        {
+                            filter = new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(range.Max.Value));
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException($"Unsupported '{expression.GetType()}'s expression type.");
                 }
-                else
-                {
-#if STRING_SEGMENT
-                    localFilter = !followedByStar
-                                    ? new Filter(keyPart.Value, EndsWith, input.Value)
-                                    : new Filter(keyPart.Value, Contains, input.Value);
-#else
-                    localFilter = !followedByStar
-                                    ? new Filter(keyPart, EndsWith, input)
-                                    : new Filter(keyPart, Contains, input);
-#endif
-                }
-                Debug.Assert(localFilter != null);
-                return localFilter;
+
+                return filter;
             }
 
-            if (queryString == default)
+            if (localQueryString == default)
             {
                 throw new ArgumentNullException(nameof(queryString));
             }
 
-            IFilter filter = new Filter(field: null, @operator: default, value: null);
-
-#if STRING_SEGMENT
-            bool isEmptyQueryString = queryString == StringSegment.Empty;
-#else
-            bool isEmptyQueryString = string.IsNullOrWhiteSpace(queryString);
-#endif
+            IFilter filter = Filter.True;
+            bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
 
             if (!isEmptyQueryString)
             {
-#if STRING_SEGMENT
-                IEnumerable<StringSegment> queryStringParts = localQueryString.Split(new[] { _ampersandChar })
-                    .Where(segment => segment != StringSegment.Empty);
-#else
-                IEnumerable<string> queryStringParts = localQueryString.Split(new[] { _ampersandChar }, RemoveEmptyEntries);
-#endif
-                if (queryStringParts.Once())
+                FilterTokenizer tokenizer = new FilterTokenizer();
+                TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
+
+                (PropertyNameExpression Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
+
+                if (expressions.Once())
                 {
-#if STRING_SEGMENT
-                    IEnumerable<StringSegment> keyValueParts = queryStringParts.Single().Split(new[] { '=' })
-                        .Where(segment => segment != StringSegment.Empty);
-#else
-                    IEnumerable<string> keyValueParts = queryStringParts.Single().Split(new[] { '=' }, RemoveEmptyEntries);
-#endif
+                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                         .SingleOrDefault(x => x.CanRead && x.Name == expressions.Single().Property.Name);
 
-                    if (keyValueParts.Exactly(_ => true, 2))
+                    if (pi != null)
                     {
-#if STRING_SEGMENT
-                        StringSegment keyPart = keyValueParts.First();
-                        StringSegment valuePart = keyValueParts.Last()
-                            .Value
-                            .Replace("!!", string.Empty)
-                            .Replace("**", _starString);
-#else
-                        string keyPart = keyValueParts.First();
-                        string valuePart = keyValueParts.Last()
-                            .Replace("!!", string.Empty)
-                            .Replace("**", _starString);
-#endif
-
-                        PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                            .SingleOrDefault(x => x.CanRead && x.Name == keyPart);
-
-                        if (pi != null)
-                        {
-                            TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-
-#if STRING_SEGMENT
-                            bool valuePartIsNegation = valuePart.StartsWith("!", StringComparison.InvariantCultureIgnoreCase);
-#else
-
-                            bool valuePartIsNegation = valuePart.StartsWith("!");
-#endif
-                            if (valuePartIsNegation)
-                            {
-#if STRING_SEGMENT
-                                StringSegment localValue = valuePart.Subsegment(1);
-                                filter = $"{keyPart}={localValue.Value}".ToFilter<T>().Negate();
-#else
-                                string localValue = valuePart.Substring(1);
-                                filter = $"{keyPart}={localValue}".ToFilter<T>().Negate();
-#endif
-                            }
-                            else if (valuePart.Like("*?,?*"))
-                            {
-#if STRING_SEGMENT
-                                IEnumerable<StringSegment> segments = valuePart.Split(new[] { ',' })
-                                                            .Where(segment => segment != StringSegment.Empty);
-                                IEnumerable<IFilter> filters = segments
-                                    .Select(segment => $"{keyPart}={segment.Value}".ToFilter<T>());
-#else
-                                IEnumerable<string> segments = valuePart.Split(new[] { ',' }, RemoveEmptyEntries);
-                                IEnumerable<IFilter> filters = segments
-                                    .Select(segment => $"{keyPart}={segment}".ToFilter<T>());
-#endif
-
-                                filter = new CompositeFilter
-                                {
-                                    Logic = FilterLogic.And,
-                                    Filters = filters
-                                };
-                            }
-                            else if (valuePart.Like("*?|?*"))
-                            {
-#if STRING_SEGMENT
-                                IEnumerable<StringSegment> segments = valuePart.Split(new[] { '|' })
-                                                            .Where(segment => segment != StringSegment.Empty);
-                                IEnumerable<IFilter> filters = segments
-                                    .Select(segment => $"{keyPart}={segment.Value}".ToFilter<T>());
-#else
-                                IEnumerable<string> segments = valuePart.Split(new[] { '|' }, RemoveEmptyEntries);
-                                IEnumerable<IFilter> filters = segments
-                                    .Select(segment => $"{keyPart}={segment}".ToFilter<T>());
-#endif
-                                filter = new CompositeFilter
-                                {
-                                    Logic = FilterLogic.Or,
-                                    Filters = filters
-                                };
-                            }
-                            else if (valuePart.Like(@"*\[*\]*")) // the value looks like a regex expression 
-                            {
-#if STRING_SEGMENT
-                                IEnumerable<StringSegment> values = FlattenValues(valuePart);
-#else
-                                IEnumerable<string> values = FlattenValues(valuePart);
-#endif
-                                while (values.Any(val => val.Like(@"*\[*\]*")))
-                                {
-                                    values = values
-                                        .Where(val => !val.Like(@"*\[*\]*"))
-                                        .Concat(
-                                            values
-                                                .Where(val => val.Like(@"*\[*\]*"))
-                                                .Select(FlattenValues)
-                                                .SelectMany(x => x)
-                                        );
-                                }
-
-#if STRING_SEGMENT
-                                filter = $"{keyPart}={string.Join("|", values.Select(x => x.Value))}".ToFilter<T>();
-#else
-                                filter = $"{keyPart}={string.Join("|", values)}".ToFilter<T>();
-#endif
-                            }
-                            else
-                            {
-#if STRING_SEGMENT
-                                ReadOnlySpan<char> span = valuePart.AsSpan();
-                                if (span.Contains("*".AsSpan(), StringComparison.OrdinalIgnoreCase)
-                                    || span.Contains("?".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (span.Contains("*".AsSpan(), StringComparison.OrdinalIgnoreCase) && !span.Contains("?".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        IEnumerable<StringSegment> segments = valuePart.Split(new[] { '*' })
-                                                                            .Where(segment => segment != StringSegment.Empty);
-#else
-                                if(valuePart.Contains("*") || valuePart.Contains("?"))
-                                {
-                                    if(valuePart.Contains(_starChar) && !valuePart.Contains("?"))
-                                    {
-                                        IEnumerable<string> segments = valuePart.Split(new[] { _starChar }, RemoveEmptyEntries);
-#endif
-                                        switch (segments.Count())
-                                        {
-                                            case 1:
-                                                filter = new Filter(
-#if STRING_SEGMENT
-                                                    field: keyPart.Value,
-                                                    @operator: valuePart.StartsWith("*", StringComparison.OrdinalIgnoreCase)
-                                                        ? EndsWith
-                                                        : StartsWith,
-                                                    value: tc.ConvertFrom(segments.Single().Value)
-#else
-                                                    field: keyPart,
-                                                    @operator: valuePart.StartsWith(_starString, StringComparison.OrdinalIgnoreCase)
-                                                        ? EndsWith
-                                                        : StartsWith,
-                                                    value: tc.ConvertFrom(segments.Single())
-#endif
-                                                );
-                                                break;
-                                            default:
-                                                IList<IFilter> filters = new List<IFilter>(segments.Count());
-
-                                                IList<int> starPositions = new List<int>();
-                                                for (int i = 0; i < valuePart.Length; i++)
-                                                {
-                                                    if (valuePart[i] == _starChar)
-                                                    {
-                                                        starPositions.Add(i);
-                                                    }
-                                                }
-
-                                                int index = 0;
-                                                for (int i = 0; i < segments.Count(); i++)
-                                                {
-                                                    if (starPositions.Any(pos => pos == 0))
-                                                    {
-                                                        index++;
-                                                    }
-#if STRING_SEGMENT
-                                                    StringSegment val = segments.ElementAt(i);
-#else
-                                                    string val = segments.ElementAt(i);
-#endif
-                                                    if (i == 0)
-                                                    {
-                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0, followedByStar: true));
-                                                    }
-                                                    else if (i < segments.Count() - 1)
-                                                    {
-                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: index > 0 && valuePart[index] == _starChar, followedByStar: true));
-                                                    }
-                                                    else
-                                                    {
-                                                        filters.Add(InternalToFilter(keyPart, val, preceededByStar: true, followedByStar: valuePart[valuePart.Length - 1] == _starChar));
-                                                    }
-                                                    index += val.Length;
-                                                }
-
-                                                filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
-                                                break;
-                                        }
-                                    }
-                                }
-                                else if (valuePart.Like("*-*"))
-                                {
-#if STRING_SEGMENT
-                                    IEnumerable<StringSegment> segments = valuePart.Split(new[] { '-' })
-                                                                    .Where(segment => segment != StringSegment.Empty);
-#else
-                                    IEnumerable<string> segments = valuePart.Split(new[] { '-' }, RemoveEmptyEntries);
-#endif
-                                    if (segments.Count() == 2)
-                                    {
-                                        filter = new CompositeFilter
-                                        {
-                                            Logic = FilterLogic.And,
-                                            Filters = new[]
-                                            {
-#if STRING_SEGMENT
-                                                new Filter(field : keyPart.Value, @operator : GreaterThanOrEqual, value : tc.ConvertFrom(segments.First().Value)),
-                                                new Filter(field : keyPart.Value, @operator : LessThanOrEqualTo, value : tc.ConvertFrom(segments.Last().Value))
-#else
-                                                new Filter(field : keyPart, @operator : GreaterThanOrEqual, value : tc.ConvertFrom(segments.First())),
-                                                new Filter(field : keyPart, @operator : LessThanOrEqualTo, value : tc.ConvertFrom(segments.Last()))
-#endif
-                                            }
-                                        };
-                                    }
-                                    else
-                                    {
-                                        FilterOperator op = valuePart.Like("*?-")
-                                            ? FilterOperator.GreaterThanOrEqual
-                                            : LessThanOrEqualTo;
-#if STRING_SEGMENT
-                                        filter = new Filter(field: keyPart.Value, @operator: op, value: tc.ConvertFrom(segments.Single().Value));
-#else
-                                        filter = new Filter(field: keyPart, @operator: op, value: tc.ConvertFrom(segments.Single()));
-#endif
-                                    }
-                                }
-                                else
-                                {
-#if STRING_SEGMENT
-                                    object value = tc.ConvertFrom(valuePart.ToString());
-                                    filter = new Filter(field: keyPart.ToString(), @operator: EqualTo, value: value);
-#else
-                                    object value = tc.ConvertFrom(valuePart);
-                                    filter = new Filter(field: keyPart, @operator: EqualTo, value: value);
-#endif
-                                }
-                            }
-                        }
+                        TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
+                        filter = ConvertExpressionToFilter(expressions.Single().Expression, pi.Name, tc);
                     }
                 }
                 else
                 {
-                    IList<IFilter> filters = new List<IFilter>(queryStringParts.Count());
+                    IList<IFilter> filters = new List<IFilter>();
 
-#if STRING_SEGMENT
-                    foreach (StringSegment queryStringPart in queryStringParts)
-#else
-                    foreach(string queryStringPart in queryStringParts)
-#endif
+                    foreach ((PropertyNameExpression property, FilterExpression Expression) in expressions)
                     {
-                        filters.Add(queryStringPart.ToFilter<T>());
+                        PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                             .SingleOrDefault(x => x.CanRead && x.Name == property.Name);
+
+                        if (pi != null)
+                        {
+                            TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
+                            filters.Add(ConvertExpressionToFilter(Expression, property.Name, tc));
+                        }
                     }
 
                     filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
@@ -365,36 +196,6 @@ namespace DataFilters
             }
 
             return filter;
-        }
-
-#if STRING_SEGMENT
-        private static IEnumerable<StringSegment> FlattenValues(StringSegment valuePart)
-#else
-        private static IEnumerable<string> FlattenValues(string valuePart)
-#endif
-        {
-            int variableStart = valuePart.IndexOf('[');
-            int variableEnd = valuePart.IndexOf(']', variableStart + 1);
-
-            char[] variables = valuePart.Substring(variableStart + 1, variableEnd - variableStart - 1)
-                .ToCharArray();
-#if STRING_SEGMENT
-            StringSegment startString = valuePart.Substring(0, variableStart);
-            StringSegment endString = variableEnd < valuePart.Length
-                ? valuePart.Subsegment(variableEnd + 1)
-                : StringSegment.Empty;
-
-#else
-            string startString = valuePart.Substring(0, variableStart);
-            string endString = variableEnd < valuePart.Length
-                ? valuePart.Substring(variableEnd + 1)
-                : string.Empty;
-
-#endif
-            for (int i = 0; i < variables.Length; i++)
-            {
-                yield return $"{startString}{variables[i]}{endString}";
-            }
         }
     }
 }
