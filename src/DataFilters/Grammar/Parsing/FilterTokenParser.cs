@@ -1,5 +1,6 @@
 ﻿using DataFilters.Grammar.Syntax;
 using Superpower;
+using Superpower.Model;
 using Superpower.Parsers;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,6 @@ namespace DataFilters.Grammar.Parsing
                                                                        from right in Expression
                                                                        select new OrExpression(left, right);
 
-
         /// <summary>
         /// Parser for logical AND expression
         /// </summary>
@@ -81,17 +81,34 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parses Range expressions
         /// </summary>
-        public static TokenListParser<FilterToken, RangeExpression> Range => from min in Token.EqualTo(FilterToken.Numeric)
-                                                                                .Apply(Numerics.Decimal)
-                                                                                .Select(n => new ConstantExpression(n.ToStringValue()))
-                                                                                 .OptionalOrDefault()
-                                                                             from _ in Token.EqualTo(FilterToken.Hyphen)
-                                                                             from max in Token.EqualTo(FilterToken.Numeric)
-                                                                                .Apply(Numerics.Decimal)
-                                                                                .Select(n => new ConstantExpression(n.ToStringValue()))
-                                                                                .OptionalOrDefault()
+        public static TokenListParser<FilterToken, RangeExpression> Range => from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+
+                                                                             from min in DateAndTime.Try().Cast<FilterToken, ConstantExpression, FilterExpression>()
+                                                                                .Or(Date.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                                                .Or(Time.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                                                .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+
+                                                                             from _ in Token.EqualToValueIgnoreCase(FilterToken.Literal, "to").Named("Range separator")
+                                                                                .Between(Whitespace, Whitespace)
+
+                                                                             from max in DateAndTime.Try().Cast<FilterToken, ConstantExpression, FilterExpression>()
+                                                                                .Or(Date.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                                                .Or(Time.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                                                .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                                                .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                .Or(Constant.Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                                                                             from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+
                                                                              where min != default || max != default
-                                                                             select new RangeExpression(min, max);
+                                                                             select new RangeExpression(
+                                                                                 min is ConstantExpression constantMin ? constantMin : null,
+                                                                                 max is ConstantExpression constantMax ? constantMax : null
+                                                                            );
+
+        private static TokenListParser<FilterToken, Token<FilterToken>[]> Whitespace => Token.EqualTo(FilterToken.Whitespace)
+            .AtLeastOnce();
 
         /// <summary>
         /// Group expression
@@ -166,19 +183,19 @@ namespace DataFilters.Grammar.Parsing
                                 expressions.AddRange(item.regex.Value.Select(chr => new ConstantExpression($"{chr}{constant.Value}"))
                                     .ToArray());
                             }
-                                break;
+                            break;
                         case EndsWithExpression endsWith: // Syntax like [Mm]*an
                             {
-                                expressions.AddRange(item.regex.Value.Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()),new EndsWithExpression(endsWith.Value)))
+                                expressions.AddRange(item.regex.Value.Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), new EndsWithExpression(endsWith.Value)))
                                     .ToArray());
                             }
-                                break;
-                        case StartsWithExpression startsWith : // Syntax like [Mm]an*
+                            break;
+                        case StartsWithExpression startsWith: // Syntax like [Mm]an*
                             {
                                 expressions.AddRange(item.regex.Value.Select(chr => new StartsWithExpression($"{chr}{startsWith.Value}"))
                                     .ToArray());
                             }
-                                break;
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException($"Unsupported {nameof(item.after)} expression type when before expression is null");
                     }
@@ -209,6 +226,41 @@ namespace DataFilters.Grammar.Parsing
                 return new OneOfExpression(expressions.ToArray());
             });
 
+        private static TokenListParser<FilterToken, ConstantExpression> DateAndTime => from date in Date
+                                                                                       from separator in Token.EqualToValue(FilterToken.None, "T")
+                                                                                            .Or(Token.EqualTo(FilterToken.Whitespace))
+                                                                                       from time in Time
+                                                                                       select new ConstantExpression($"{date.Value}{separator.ToStringValue()}{time.Value}");
+
+
+
+        private static TokenListParser<FilterToken, ConstantExpression> Date => from year in Token.EqualTo(FilterToken.Numeric)
+                                                                                from _ in Token.EqualTo(FilterToken.Dash)
+                                                                                from month in Token.EqualTo(FilterToken.Numeric)
+                                                                                from __ in Token.EqualTo(FilterToken.Dash)
+                                                                                from day in Token.EqualTo(FilterToken.Numeric)
+                                                                                select new ConstantExpression($"{year.ToStringValue()}-{month.ToStringValue()}-{day.ToStringValue()}");
+
+
+        private static TokenListParser<FilterToken, Token<FilterToken>> Colon => Token.EqualTo(FilterToken.Colon);
+        private static TokenListParser<FilterToken, Token<FilterToken>> Dash => Token.EqualTo(FilterToken.Dash);
+
+        private static TextParser<char> TimeSeparator => Character.In('T', ' ');
+
+
+        private static TokenListParser<FilterToken, ConstantExpression> Time => from hour in Token.EqualTo(FilterToken.Numeric)
+                                                                                from _ in Colon
+                                                                                from minutes in Token.EqualTo(FilterToken.Numeric)
+                                                                                from __ in Dash
+                                                                                from second in Colon
+                                                                                  .IgnoreThen(Token.EqualTo(FilterToken.Numeric))
+                                                                                select new ConstantExpression($"{hour}:{minutes}");
+
+        private static TokenListParser<FilterToken, ConstantExpression> DateTime => from date in Date
+                                                                                    from separator in Token.EqualTo(FilterToken.Dash)
+                                                                                    from time in Time
+                                                                                    select new ConstantExpression($"{date.Value}{separator.ToStringValue()}{time.Value}");
+
         /// <summary>
         /// Parser for full criteria
         /// </summary>
@@ -223,10 +275,17 @@ namespace DataFilters.Grammar.Parsing
             .Or(Parse.Ref(() => Constant.Cast<FilterToken, ConstantExpression, FilterExpression>()))
             ;
 
+        
+
         public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)> Criterion => from property in Token.EqualTo(FilterToken.Literal)
                                                                                                             from _ in Token.EqualTo(FilterToken.Equal)
                                                                                                             from expression in AnyExpression
                                                                                                             select (new PropertyNameExpression(property.ToStringValue()), expression);
+
+        public static TokenListParser<FilterToken, ConstantExpression> Number => from n in Token.EqualTo(FilterToken.Numeric)
+                                                                                .Apply(Numerics.Decimal)
+                                                                                select new ConstantExpression(n.ToStringValue());
+
 
         public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)[]> Criteria => from criteria in Criterion
                                                                                                             .ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))

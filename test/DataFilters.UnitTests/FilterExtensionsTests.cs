@@ -158,13 +158,13 @@ namespace DataFilters.UnitTests
 
                 yield return new object[]
                 {
-                    "Height=100-",
+                    "Height=[100 TO *]",
                     new Filter("Height", GreaterThanOrEqual, 100)
                 };
 
                 yield return new object[]
                 {
-                    "Height=100-200",
+                    "Height=[100 TO 200]",
                     new CompositeFilter
                     {
                         Logic = And,
@@ -178,7 +178,7 @@ namespace DataFilters.UnitTests
 
                 yield return new object[]
                 {
-                    "Height=-200",
+                    "Height=[* TO 200]",
                      new Filter("Height", LessThanOrEqualTo, 200)
                 };
 

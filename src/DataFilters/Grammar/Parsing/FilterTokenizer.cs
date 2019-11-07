@@ -1,5 +1,6 @@
 ﻿using Superpower;
 using Superpower.Model;
+using Superpower.Parsers;
 using System.Collections.Generic;
 using static DataFilters.Grammar.Parsing.FilterToken;
 
@@ -13,7 +14,7 @@ namespace DataFilters.Grammar.Parsing
 
         protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
         {
-            Result<char> next = SkipWhiteSpace(span);
+            Result<char> next = span.ConsumeChar();
 
             if (!next.HasValue)
             {
@@ -79,7 +80,7 @@ namespace DataFilters.Grammar.Parsing
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '-':
-                        yield return Result.Value(Hyphen, next.Location, next.Remainder);
+                        yield return Result.Value(Dash, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '(':
@@ -88,6 +89,14 @@ namespace DataFilters.Grammar.Parsing
                         break;
                     case ')':
                         yield return Result.Value(CloseParenthese, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case ' ':
+                        yield return Result.Value(Whitespace, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case ':':
+                        yield return Result.Value(Colon, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     default:

@@ -144,8 +144,38 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(3)
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("10"))
-                        && results.Once(result => result.Kind == FilterToken.Hyphen && result.Span.EqualsValue("-"))
+                        && results.Once(result => result.Kind == FilterToken.Dash && result.Span.EqualsValue("-"))
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("20"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    " ",
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
+                        results.Exactly(1)
+                        && results.Once(result => result.Kind == FilterToken.Whitespace && result.Span.EqualsValue(" "))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    ":",
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
+                        results.Exactly(1)
+                        && results.Once(result => result.Kind == FilterToken.Colon && result.Span.EqualsValue(":"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "2019-10-22",
+                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
+                        results.Exactly(5)
+                        && results.Exactly(result => result.Kind == FilterToken.Dash && result.Span.EqualsValue("-"), 2)
+                        && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("2019"))
+                        && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("10"))
+                        && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("22"))
                     )
                 };
             }

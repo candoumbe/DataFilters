@@ -235,7 +235,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
                 yield return new object[]
                 {
-                    "!10-",
+                    "![10 TO *]",
                     new NotExpression(new RangeExpression(min : new ConstantExpression("10")))
                 };
 
@@ -332,20 +332,26 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             {
                 yield return new object[]
                 {
-                    "10-20",
+                    "[10 TO 20]",
                     new RangeExpression(min : new ConstantExpression("10"), max: new ConstantExpression("20"))
                 };
 
                 yield return new object[]
                 {
-                    "-20",
+                    "[* TO 20]",
                     new RangeExpression(max: new ConstantExpression("20"))
                 };
 
                 yield return new object[]
                 {
-                    "10-",
+                    "[10 TO *]",
                     new RangeExpression(min: new ConstantExpression("10"))
+                };
+
+                yield return new object[]
+                {
+                    "[2010-06-25 TO 2010-06-29]",
+                    new RangeExpression(min: new ConstantExpression("2010-06-25"), max: new ConstantExpression("2010-06-29"))
                 };
             }
         }

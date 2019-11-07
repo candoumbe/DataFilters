@@ -63,7 +63,7 @@ namespace DataFilters.Grammar.Parsing
         /// Hyphen
         /// </summary>
         [Token(Example = "-")]
-        Hyphen,
+        Dash,
 
         /// <summary>
         /// Equal sign
@@ -81,5 +81,14 @@ namespace DataFilters.Grammar.Parsing
         /// </summary>
         [Token(Example = "!")]
         Not,
+
+        /// <summary>
+        /// The whitespace
+        /// </summary>
+        [Token(Example = " ")]
+        Whitespace,
+
+        [Token(Example = ":")]
+        Colon
     }
 }
