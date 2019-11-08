@@ -1,4 +1,4 @@
-# Datafilters
+# Datafilters [![Build status](https://candoumbe.visualstudio.com/DataFilters/_apis/build/status/Filters-CI%20(master))](https://candoumbe.visualstudio.com/DataFilters/_build/latest?definitionId=16)
 
 
 DataFilters is a small library that allow to convert a string to its strongly typed equivalent.
