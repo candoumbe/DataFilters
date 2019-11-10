@@ -69,10 +69,10 @@ steps:
   inputs:
     command: push
     publishVstsFeed: '$(azureArtifactFeed)'
-    enabled: true
-  
+  enabled: false
+
 - task: nkdagility.gittasks.gitsync-task.gitsync@1
   displayName: 'Git Publish to https://$(github.apiKey)@github.com/candoumbe/$(projectName).git'
   inputs:
-    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/$(projectNam).git'
+    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/$(projectName).git'
   condition: succeededOrFailed()
