@@ -1,0 +1,60 @@
+pool:
+  name: Hosted VS2017
+#Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk 3.0.100'
+  inputs:
+    version: 3.0.100
+
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk 2.2.401'
+  inputs:
+    version: 2.2.401
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: restore
+    projects: '$(Parameters.projects)'
+    feedsToUse: config
+    nugetConfigPath: Nuget.config
+    verbosityRestore: Normal
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    projects: '$(Parameters.projects)'
+    arguments: '--no-restore'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--no-build'
+
+- task: nobitagamer.gitmirror.gitmirror-task.gitmirror@0
+  displayName: 'Git mirror to https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
+  inputs:
+    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
+  enabled: false
+  timeoutInMinutes: 5
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack'
+  inputs:
+    command: pack
+    nobuild: true
+    versioningScheme: byBuildNumber
+  condition: succeededOrFailed()
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet push'
+  inputs:
+    command: push
+    publishVstsFeed: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
+  enabled: false
