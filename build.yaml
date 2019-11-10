@@ -55,7 +55,7 @@ steps:
   inputs:
     command: push
     publishVstsFeed: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
-  enabled: false
+  enabled: true
 
 - task: nkdagility.gittasks.gitsync-task.gitsync@1
   displayName: 'Git Publish to https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
