@@ -3,6 +3,7 @@ pool:
 #Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 #Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 #Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
 
 steps:
 - task: UseDotNet@2
@@ -58,3 +59,9 @@ steps:
     command: push
     publishVstsFeed: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
   enabled: false
+
+- task: nkdagility.gittasks.gitsync-task.gitsync@1
+  displayName: 'Git Publish to https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
+  inputs:
+    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
+  condition: succeededOrFailed()
