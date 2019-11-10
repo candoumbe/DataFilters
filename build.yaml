@@ -3,6 +3,20 @@ variables :
     Parameters.projects: '**/*.csproj'
     Parameters.projects.tests: '**/*Tests/*.csproj'
     version: '1.0.0'
+    projectName: 'DataFilters'
+    azureArtifactFeed: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
+
+pr:
+  - master
+
+trigger:
+  batch: true
+  branches:
+   include:
+      - master
+      - features/*
+      - fixes/*
+
 
 pool:
   name: Hosted VS2017
@@ -54,11 +68,11 @@ steps:
   displayName: 'dotnet push'
   inputs:
     command: push
-    publishVstsFeed: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
-  enabled: true
-
+    publishVstsFeed: '$(azureArtifactFeed)'
+    enabled: true
+  
 - task: nkdagility.gittasks.gitsync-task.gitsync@1
-  displayName: 'Git Publish to https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
+  displayName: 'Git Publish to https://$(github.apiKey)@github.com/candoumbe/$(projectName).git'
   inputs:
-    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
+    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/$(projectNam).git'
   condition: succeededOrFailed()
