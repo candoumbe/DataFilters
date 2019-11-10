@@ -1,9 +1,13 @@
+variables :
+    configuration: 'Release'
+    Parameters.projects: '**/*.csproj'
+    Parameters.projects.tests: '**/*Tests/*.csproj'
+    version: '1.0.0'
+
 pool:
   name: Hosted VS2017
-#Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references an undefined variable named â€˜Parameters.projectsâ€™. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references a secret variable named â€˜github.apiKeyâ€™. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
 
 steps:
 - task: UseDotNet@2
@@ -29,28 +33,21 @@ steps:
   displayName: 'dotnet build'
   inputs:
     projects: '$(Parameters.projects)'
-    arguments: '--no-restore'
+    arguments: '--no-restore -c $(configuration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
   inputs:
     command: test
-    projects: '**/*Tests/*.csproj'
-    arguments: '--no-build'
-
-- task: nobitagamer.gitmirror.gitmirror-task.gitmirror@0
-  displayName: 'Git mirror to https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
-  inputs:
-    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/DataFilters.git'
-  enabled: false
-  timeoutInMinutes: 5
+    projects: '$(Parameters.projects.tests)'
+    arguments: '--no-build -c $(configuration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack'
   inputs:
     command: pack
     nobuild: true
-    versioningScheme: byBuildNumber
+    versioningScheme: byPrereleaseNumber
   condition: succeededOrFailed()
 
 - task: DotNetCoreCLI@2
