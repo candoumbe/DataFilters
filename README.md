@@ -2,7 +2,8 @@
 
 
 DataFilters is a small library that allow to convert a string to a generic `IFilter`object.
-Highly inspired by the elastic syntax, it offers a powerful way to query data
+Highly inspired by the elastic syntax, it offers a powerful way to build and query data 
+with a syntax that's not bound to a peculiar datasource.
 
 1. [Introduction](#intro)
 2. [Filtering](#filtering)
@@ -13,7 +14,8 @@ Highly inspired by the elastic syntax, it offers a powerful way to query data
    v. [Less than or equal](#lte-expression)
    vi. [Between](#btw-expression)
 3. [Sorting](#sorting)
-4. [How to install](#how-to-install)
+4. [How to use](#how-to-use)
+5. [How to install](#how-to-install)
 
 
 ## <a href='#' id='intro'>Introduction</a>
@@ -21,26 +23,14 @@ The idea came to me when working on a set of REST apis and trying to build `/sea
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
 
 
-
 Let's say your api manage `vigilante` resources :
 ```csharp
-/* C# object */
 class Vigilante
 {
     public string Firstname { get; set; }
     public string Lastname { get; set; }
     public string Nickname {get; set; }
     public int Age { get; set; }
-}
-```
-
-```JSon
-/* Json representation */
-{
-    firstname : string,
-    lastname : string,
-    nickname : string,
-    age : number
 }
 ```
 
@@ -68,7 +58,7 @@ The currently supported syntax mimic the query string syntax : a key-value pair 
 - `field` is the name of a property of the resource to filter
 - `value` is an expression which syntax is highly inspired by the [Lucene syntax](http://www.lucenetutorial.com/lucene-query-syntax.html)
 
-Several expressions are supported to filter elements
+Several expressions are supported and here's how you can start using them in your search queries.
 
 **<a href='#' id='starts-with-expression'>Starts with</a>**
 
@@ -101,21 +91,7 @@ Search for `vigilante` resources that contains `bat` in the `nickname` property.
 "nickname=*bat*"
 ```
 
-##### Regular expressions
-The library offers a limited support for regular expressions
 
-
-#### Ranges
-
-Search for `vigilante`s that are 18 years old at least
-```csharp
-"age=[18 TO *]"
-```
-
-which will be turned into the following [IFilter][class-ifilter] instance.
-```csharp
-IFilter filter = new Filter("age", GreaterThanOrEqualTo, 18),
-```
 
 **<a href='#' id='gte-expression'>Greater than or equal</a>**
 
@@ -126,7 +102,7 @@ Search for `vigilante` resources where the value of `age` property is greater th
 ```
 will result in a [IFilter][class-ifilter] instance equivalent to
 ```csharp
-x => x.Age >= 20
+IFilter filter = new Filter("age", GreaterThanOrEqualTo, 18);
 ```
 
 **<a href='#' id='lte-expression'>Less than or equal</a>**
@@ -197,7 +173,7 @@ Ifilter filter = new CompositeFilter
 To invert a filter, simply put a `!` before the expression to negate
 
 Search for `vigilante` resources where the value of `nickname` property does not starts with `"B"`
-```URL
+```csharp
 "nickname=!B*"
 ```
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
@@ -208,7 +184,17 @@ IFilter filter = new Filter("nickname", DoesNotStartWith, "B");
 Expressions can be arbitrarily complex.
 
 
-`"Nickname=(Bat*|Sup*)|(*man|*er)"`
+```csharp
+"nickname=(Bat*|Sup*)|(*man|*er)"
+```
+
+Explanation :
+
+The criteria under construction will be applied to the value of `nickname` property and can be read as follow :
+
+Searchs for `vigilante` resources that starts with  `Bat` or `Sup` and ends with `man` or 
+`er`.
+
 
 will be parsed into a 
 ```csharp
@@ -239,6 +225,10 @@ IFilter filter = new CompositeFilter
 }
 
 ```
+
+The `(` and `)` allows to group two expressions together so that this group can be used as a more complex 
+expression unit.
+
 ## <a href='#' id='sorting'>Sorting</a>
 This library also supports a custom syntax to sort elements.
 
@@ -249,13 +239,100 @@ You can sort by several properties at once by separating them with a `,`.
 
 For example `sort=+nickname,-age` allows to sort by `nickname` ascending, then by `age` property descending. 
 
+# <a href='#' id='how-to-install'>How to use</a>
+
+So you have your API and want provide a great search experience ?
+
+## On the client
+The client will have the responsability of building search criteria.
+Go to [filtering](#filtering) and [sorting](#sorting) sections to see example on how to get started.
+
+## On the backend
+One way to start could be by having a dedicated resource which properties match the resource's properties search will 
+be performed onto.
+
+Continuing with our `vigilante` API, we could have 
+```csharp
+// Wraps the search criteria for Vigilante resources.
+public class SearchVigilanteQuery
+{
+    public string Firstname {get; set;}
+
+    public string Lastname {get; set;}
+
+    public string Nickname {get; set;}
+
+    public int? Age {get; set;} 
+}
+```
+
+and the following endpoint 
+
+```csharp
+using DataFilters;
+
+public class VigilantesController 
+{
+    // code omitted for brievity
+
+    [HttpGet("search")]
+    public ActionResult Search([FromQuery] SearchVigilanteQuery query)
+    {
+        IList<IFilter> filters = new List<IFilter>();
+
+        if(!string.IsNullOrWhitespace(query.Firstname))
+        {
+            filters.Add($"{nameof(Vigilante.Firstname)}={query.Firstname}".ToFilter<Vigilante>());
+        }
+
+        if(!string.IsNullOrWhitespace(query.Lastname))
+        {
+            filters.Add($"{nameof(Vigilante.Lastname)}={query.Lastname}".ToFilter<Vigilante>());
+        }
+
+        if(!string.IsNullOrWhitespace(query.Nickname))
+        {
+            filters.Add($"{nameof(Vigilante.Nickname)}={query.Nickname}".ToFilter<Vigilante>());
+        }
+
+        if(query.Age.HasValue)
+        {
+            filters.Add($"{nameof(Vigilante.Age)}={query.Age.Value}".ToFilter<Vigilante>());
+        }
+
+
+        IFilter  filter = filters.Count() == 1
+            ? filters.Single()
+            : new CompositeFilter{ Logic = And, Filters = filters };
+
+        // filter now contains how search criteria and is ready to be used :-) 
+
+    }
+}
+
+```
+
+Some explanation on the controller's code above (assuming ):
+
+1. The endpoint is bound to incoming HTTP GET requests  on `/vigilante/search`
+2. The framework will parse incoming querystring and feeds the `query` parameter accordingly.
+3. From this point we test each criterion to see if it's acceptable to turn it into a [IFilter][class-ifilter] instance.
+For that purpose, a handy `.ToFilter<T>()` string extension is available. It turns a query-string key-value pair into a 
+full [IFilter][class-ifilter].
+4. we can then either :
+   - use the filter directly is there was only one filter
+   - or combine them using [composite filter][class-complex-filter] if there were more than one criteria
+
+
+You may have notice that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` is not. 
+This is to distinguuish if the `Age` criterion was provided or not when calling the `vigilantes/search` endpoint
+
 # <a href='#' id='how-to-install'>How to install</a>
 
-1. run `install DataFilters` : you can already start to build [IFilter][class-ifilter] instances
+1. run `dotnet install DataFilters` : you can already start to build [IFilter][class-ifilter] instances
 2. You can then add `Datafilters.Expressions` package to build `Expression<Func<T, bool>>`
 
 
 [class-ifilter]: /src/DataFilters/IFilter.cs
 [class-filter]: /src/DataFilters/Filter.cs
 [class-complex-filter]: /src/DataFilters/CompositeFilter.cs
-[dir-lnk-filtering]: #filtering
