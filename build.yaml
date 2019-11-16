@@ -1,11 +1,17 @@
 variables :
-    configuration: 'Release'
-    Parameters.projects: '**/*.csproj'
-    Parameters.projects.tests: '**/*Tests/*.csproj'
-    version: '1.0.0'
-    projectName: 'DataFilters'
-    azureArtifactFeed: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
-
+  - name: 'configuration'
+    value: 'Release'
+  - name: 'Parameters.projects'
+    value: '**/*.csproj'
+  - name: 'Parameters.projects.tests'
+    value: '**/*Tests/*.csproj'
+  - name: 'version'
+    value: '1.0.0'
+  - name : 'projectName'
+    value: 'DataFilters'
+  - name: 'azureArtifactFeed'
+    value: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
+  
 pr:
   - master
 
@@ -16,7 +22,6 @@ trigger:
       - master
       - features/*
       - fixes/*
-
 
 pool:
   name: Hosted VS2017
