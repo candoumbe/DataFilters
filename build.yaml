@@ -12,10 +12,15 @@ pr:
 trigger:
   batch: true
   branches:
-   include:
-      - master
-      - features/*
-      - fixes/*
+    include:
+        - master
+        - features/*
+        - fixes/*
+  paths:
+    exclude:
+        - README.md
+        - docs/
+
 
 
 pool:
@@ -24,6 +29,10 @@ pool:
 #Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
 
 steps:
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk 3.x'
+  inputs:
+    version: 3.x
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 3.0.100'
   inputs:
