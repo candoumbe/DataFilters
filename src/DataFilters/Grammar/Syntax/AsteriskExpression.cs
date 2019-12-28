@@ -5,7 +5,7 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// Expression that defines equality
     /// </summary>
-    public class AsteriskExpression : FilterExpression, IEquatable<AsteriskExpression>
+    public class AsteriskExpression : FilterExpression, IEquatable<AsteriskExpression>, IBoundaryExpression
     {
         public bool Equals(AsteriskExpression other) => !(other is null);
 

@@ -73,7 +73,7 @@ namespace DataFilters.UnitTests
             {
                 yield return new object[]
                 {
-                    new CompositeFilter  {
+                    new MultiFilter  {
                         Logic = Or,
                         Filters = new [] {
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Batman"),
@@ -83,22 +83,22 @@ namespace DataFilters.UnitTests
                     (Expression<Func<string, bool>>)(json =>
                         JObject.Parse(json).Properties().Count() == 2
 
-                        && "or".Equals((string) JObject.Parse(json)[CompositeFilter.LogicJsonPropertyName])
+                        && "or".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
 
-                        && "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
-                        && "Batman".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
+                        && "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
+                        && "Batman".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
                                &&
-                        "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
-                        && "Robin".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
+                        "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
+                        && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
                     )
                 };
 
                 yield return new object[]
                 {
-                    new CompositeFilter  {
+                    new MultiFilter  {
                         Filters = new [] {
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Batman"),
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Robin")
@@ -107,15 +107,15 @@ namespace DataFilters.UnitTests
                     (Expression<Func<string, bool>>)(json =>
                         JObject.Parse(json).Properties().Count() == 2
 
-                        && "and".Equals((string) JObject.Parse(json)[CompositeFilter.LogicJsonPropertyName])
+                        && "and".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
 
-                        && "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
-                        && "Batman".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
+                        && "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
+                        && "Batman".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
                                &&
-                        "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
-                        && "Robin".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
+                        "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
+                        && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
                     )
                 };

@@ -5,7 +5,7 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-    public class ConstantExpression : FilterExpression, IEquatable<ConstantExpression>
+    public class ConstantExpression : FilterExpression, IEquatable<ConstantExpression>, IBoundaryExpression
     {
         public string Value { get; }
 

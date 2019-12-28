@@ -16,9 +16,9 @@ using static Newtonsoft.Json.JsonConvert;
 namespace DataFilters.UnitTests
 {
     [UnitTest]
-    public class CompositeFilterTests
+    public class MultiFilterTests
     {
-        public CompositeFilterTests(ITestOutputHelper output) => _output = output;
+        public MultiFilterTests(ITestOutputHelper output) => _output = output;
 
         private readonly ITestOutputHelper _output;
 
@@ -48,13 +48,13 @@ namespace DataFilters.UnitTests
             public DateTime BirthDate { get; set; }
         }
 
-        public static IEnumerable<object[]> CompositeFilterToJsonCases
+        public static IEnumerable<object[]> MultiFilterToJsonCases
         {
             get
             {
                 yield return new object[]
                 {
-                    new CompositeFilter  {
+                    new MultiFilter  {
                         Logic = Or,
                         Filters = new [] {
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Batman"),
@@ -64,22 +64,22 @@ namespace DataFilters.UnitTests
                     (Expression<Func<string, bool>>)(json =>
                         JObject.Parse(json).Properties().Count() == 2
 
-                        && "or".Equals((string) JObject.Parse(json)[CompositeFilter.LogicJsonPropertyName])
+                        && "or".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
 
-                        && "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
-                        && "Batman".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
+                        && "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
+                        && "Batman".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
                                &&
-                        "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
-                        && "Robin".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
+                        "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
+                        && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
                     )
                 };
 
                 yield return new object[]
                 {
-                    new CompositeFilter  {
+                    new MultiFilter  {
                         Filters = new [] {
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Batman"),
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Robin")
@@ -88,15 +88,15 @@ namespace DataFilters.UnitTests
                     (Expression<Func<string, bool>>)(json =>
                         JObject.Parse(json).Properties().Count() == 2
 
-                        && "and".Equals((string) JObject.Parse(json)[CompositeFilter.LogicJsonPropertyName])
+                        && "and".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
 
-                        && "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
-                        && "Batman".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
+                        && "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
+                        && "Batman".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
                                &&
-                        "Nickname".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
-                        && "Robin".Equals((string)JObject.Parse(json)[CompositeFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
+                        "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
+                        && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
+                        && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
                     )
                 };
@@ -110,8 +110,8 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "{" +
-                        $"{CompositeFilter.LogicJsonPropertyName} : 'or'," +
-                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                        $"{MultiFilter.LogicJsonPropertyName} : 'or'," +
+                        $"{MultiFilter.FiltersJsonPropertyName}: [" +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'batman' }}," +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
                         "]" +
@@ -122,8 +122,8 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "{" +
-                        $"{CompositeFilter.LogicJsonPropertyName} : 'and'," +
-                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                        $"{MultiFilter.LogicJsonPropertyName} : 'and'," +
+                        $"{MultiFilter.FiltersJsonPropertyName}: [" +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'batman' }}," +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
                         "]" +
@@ -134,7 +134,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "{" +
-                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                        $"{MultiFilter.FiltersJsonPropertyName}: [" +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'batman' }}," +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
                         "]" +
@@ -145,7 +145,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "{" +
-                        $"{CompositeFilter.FiltersJsonPropertyName}: [" +
+                        $"{MultiFilter.FiltersJsonPropertyName}: [" +
                             $"{{ {Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : 'robin' }}" +
                         "]" +
                     "}",
@@ -155,8 +155,8 @@ namespace DataFilters.UnitTests
         }
 
         [Theory]
-        [MemberData(nameof(CompositeFilterToJsonCases))]
-        public void CompositeFilterToJson(CompositeFilter filter, Expression<Func<string, bool>> jsonMatcher)
+        [MemberData(nameof(MultiFilterToJsonCases))]
+        public void CompositeFilterToJson(MultiFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
             _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
@@ -216,7 +216,7 @@ namespace DataFilters.UnitTests
             {
                 yield return new object[]
                 {
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]{
@@ -224,7 +224,7 @@ namespace DataFilters.UnitTests
                             new Filter("property", EqualTo, "value"),
                         }
                     },
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]{
@@ -233,12 +233,12 @@ namespace DataFilters.UnitTests
                         }
                     },
                     true,
-                    $"Two instances of {nameof(CompositeFilter)} contains same ${nameof(CompositeFilter.Filters)} in same order"
+                    $"Two instances of {nameof(MultiFilter)} contains same ${nameof(MultiFilter.Filters)} in same order"
                 };
 
                 yield return new object[]
                 {
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]{
@@ -246,7 +246,7 @@ namespace DataFilters.UnitTests
                             new Filter("property", EqualTo, "value"),
                         }
                     },
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]{
@@ -260,7 +260,7 @@ namespace DataFilters.UnitTests
 
                 yield return new object[]
                 {
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]{
@@ -274,7 +274,7 @@ namespace DataFilters.UnitTests
                 };
 
                 {
-                    CompositeFilter filter = new CompositeFilter
+                    MultiFilter filter = new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]{
@@ -295,7 +295,7 @@ namespace DataFilters.UnitTests
 
         [Theory]
         [MemberData(nameof(CompositeFilterEquatableCases))]
-        public void CompositeFilterImplementsEquatableProperly(CompositeFilter first, object second, bool expectedResult, string reason)
+        public void CompositeFilterImplementsEquatableProperly(MultiFilter first, object second, bool expectedResult, string reason)
         {
             _output.WriteLine($"first : {first}");
             _output.WriteLine($"second : {second}");
@@ -315,7 +315,7 @@ namespace DataFilters.UnitTests
             _output.WriteLine($"{nameof(json)} : {json}");
 
             // Arrange
-            JSchema schema = CompositeFilter.Schema;
+            JSchema schema = MultiFilter.Schema;
 
             // Act
             bool isValid = JObject.Parse(json).IsValid(schema);

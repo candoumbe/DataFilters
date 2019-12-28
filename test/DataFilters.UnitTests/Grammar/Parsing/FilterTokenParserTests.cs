@@ -42,6 +42,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             .HaveProperty<TokenListParser<FilterToken, AsteriskExpression>>("Asterisk").And
             .HaveProperty<TokenListParser<FilterToken, GroupExpression>>("Group").And
             .HaveProperty<TokenListParser<FilterToken, AndExpression>>("And").And
+            .HaveProperty<TokenListParser<FilterToken, RangeExpression>>("Range").And
             .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
         [Fact]
@@ -351,7 +352,24 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "[2010-06-25 TO 2010-06-29]",
-                    new RangeExpression(min: new ConstantExpression("2010-06-25"), max: new ConstantExpression("2010-06-29"))
+                    new RangeExpression(
+                        min: new DateExpression(year: 2010, month: 06, day:25),
+                        max: new DateExpression(year: 2010, month: 06, day:29)
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "[2010-06-25 TO *]",
+                    new RangeExpression(
+                        min: new DateExpression(year: 2010, month: 06, day:25)
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "[13:30:00 TO *]",
+                    new RangeExpression(min: new TimeExpression(hours: 13, minutes: 30))
                 };
             }
         }
@@ -530,6 +548,70 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             // Assert
             actual.Should()
                 .Match(expectation);
+        }
+
+        public static IEnumerable<object[]> DateAndTimeCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "2019-01-12T14:33:00",
+                    new DateTimeExpression(
+                        new DateExpression(year : 2019, month: 01, day: 12),
+                        new TimeExpression(hours: 14, minutes:33)
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "2019-01-12 14:33:00",
+                    new DateTimeExpression(
+                        new DateExpression(year : 2019, month: 01, day: 12),
+                        new TimeExpression(hours: 14, minutes:33)
+                    )
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DateAndTimeCases))]
+        public void CanParseDateAndTime(string input, DateTimeExpression expected )
+        {
+            // Arrange
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            // Act
+            DateTimeExpression actual = FilterTokenParser.DateAndTime.Parse(tokens);
+
+            // Assert
+            AssertThatCanParse(actual, expected);
+        }
+
+        public static IEnumerable<object[]> DateCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "2019-01-12",
+                    new DateExpression(year : 2019, month: 01, day: 12)
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DateCases))]
+        public void CanParseDateCases(string input, DateExpression expected)
+        {
+            // Arrange
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            // Act
+            DateExpression actual = FilterTokenParser.Date.Parse(tokens);
+
+            // Assert
+            AssertThatCanParse(actual, expected);
         }
 
         private static void AssertThatCanParse(FilterExpression expression, FilterExpression expected)

@@ -48,7 +48,7 @@ namespace DataFilters.Queries.UnitTests
                 };
                 yield return new object[]
                 {
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = FilterLogic.Or,
                         Filters = new []{

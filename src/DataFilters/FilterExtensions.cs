@@ -72,7 +72,7 @@ namespace DataFilters
                         filter = ConvertExpressionToFilter(not.Expression, propertyName, tc).Negate();
                         break;
                     case OrExpression orExpression:
-                        filter = new CompositeFilter
+                        filter = new MultiFilter
                         {
                             Logic = FilterLogic.Or,
                             Filters = new IFilter[]
@@ -83,7 +83,7 @@ namespace DataFilters
                         };
                         break;
                     case AndExpression andExpression:
-                        filter = new CompositeFilter
+                        filter = new MultiFilter
                         {
                             Logic = FilterLogic.And,
                             Filters = new IFilter[]
@@ -94,7 +94,7 @@ namespace DataFilters
                         };
                         break;
                     case RegularExpression regex:
-                        filter = new CompositeFilter
+                        filter = new MultiFilter
                         {
                             Logic = FilterLogic.Or,
                             //Filters = regex.Value.Select(c => ConvertExpressionToFilter(new ConstantExpression($"{regex.Before?.Value ?? string.Empty}{c}{regex.After?.Value ?? string.Empty}"), propertyName, tc))
@@ -117,29 +117,44 @@ namespace DataFilters
                             {
                                 filters.Add(ConvertExpressionToFilter(item, propertyName, tc));
                             }
-                            filter = new CompositeFilter { Logic = FilterLogic.Or, Filters = filters };
+                            filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
                         }
                         break;
                     case RangeExpression range:
-                        if (range.Min != default && range.Max != default)
+
+                        static ConstantExpression ConvertBounderyExpressionToConstantExpression(IBoundaryExpression input)
+                            => input switch
+                            {
+                                ConstantExpression ce => ce,
+                                DateTimeExpression { Time: null } dateTime => new ConstantExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}"),
+                                DateTimeExpression { Date: null } dateTime => new ConstantExpression($"{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"),
+                                DateTimeExpression dateTime => new ConstantExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"),
+                                AsteriskExpression asterisk => null, // because this is equivalent to an unbounded range
+                                null => null,
+                                _ => throw new ArgumentOutOfRangeException($"Unsupported boundery type {input.GetType()}")
+                            };
+
+                        ConstantExpression min = ConvertBounderyExpressionToConstantExpression(range.Min);
+                        ConstantExpression max = ConvertBounderyExpressionToConstantExpression(range.Max);
+                        if (min != default && max != default)
                         {
-                            filter = new CompositeFilter
+                            filter = new MultiFilter
                             {
                                 Logic = FilterLogic.And,
                                 Filters = new IFilter[]
                                 {
-                                new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(range.Min.Value)),
-                                new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(range.Max.Value))
+                                    new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(min.Value)),
+                                    new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(max.Value))
                                 }
                             };
                         }
-                        else if (range.Min != default)
+                        else if (min != default)
                         {
-                            filter = new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(range.Min.Value));
+                            filter = new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(min.Value));
                         }
                         else
                         {
-                            filter = new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(range.Max.Value));
+                            filter = new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(max.Value));
                         }
                         break;
                     default:
@@ -191,7 +206,7 @@ namespace DataFilters
                         }
                     }
 
-                    filter = new CompositeFilter { Logic = FilterLogic.And, Filters = filters };
+                    filter = new MultiFilter { Logic = FilterLogic.And, Filters = filters };
                 }
             }
 

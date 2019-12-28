@@ -34,7 +34,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     $"{nameof(Person.Firstname)}=Hal&{nameof(Person.Lastname)}=Jordan",
-                    new CompositeFilter{
+                    new MultiFilter{
                         Logic = And,
                         Filters = new IFilter[]
                         {
@@ -65,7 +65,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     $"{nameof(Person.Firstname)}=Vandal|Gengis",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
@@ -79,12 +79,12 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     $"{nameof(Person.Firstname)}=(V*|G*),(*l|*s)",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
                         {
-                            new CompositeFilter
+                            new MultiFilter
                             {
                                 Logic = Or,
                                 Filters = new IFilter[]
@@ -93,7 +93,7 @@ namespace DataFilters.UnitTests
                                     new Filter(field: nameof(Person.Firstname), @operator: StartsWith, value: "G")
                                 }
                             },
-                            new CompositeFilter
+                            new MultiFilter
                             {
                                 Logic = Or,
                                 Filters = new IFilter[]
@@ -133,7 +133,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=Bruce|Dick",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
@@ -165,7 +165,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Height=[100 TO 200]",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
@@ -185,7 +185,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
@@ -199,7 +199,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Nickname=Bat*man",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
@@ -213,7 +213,7 @@ namespace DataFilters.UnitTests
                 //yield return new object[]
                 //{
                 //    "Nickname=Sup*er*man",
-                //    new CompositeFilter
+                //    new MultiFilter
                 //    {
                 //        Logic = And,
                 //        Filters = new IFilter[]
@@ -228,7 +228,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man*",
-                     new CompositeFilter
+                     new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
@@ -248,7 +248,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Nickname=!(Bat*man)",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
@@ -262,7 +262,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=Bru*&Lastname=Wayne",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
@@ -276,7 +276,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=Br[uU]ce",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
@@ -290,7 +290,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=*Br[uU]",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
@@ -304,7 +304,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=!(Bruce|Wayne)",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
@@ -318,7 +318,7 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=(Bruce|Wayne)",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
@@ -332,12 +332,12 @@ namespace DataFilters.UnitTests
                 yield return new object[]
                 {
                     "Firstname=(Bat*|Sup*)|(*man|*er)",
-                    new CompositeFilter
+                    new MultiFilter
                     {
                         Logic = Or,
                         Filters = new IFilter[]
                         {
-                            new CompositeFilter
+                            new MultiFilter
                             {
                                 Logic = Or,
                                 Filters = new IFilter[]
@@ -346,7 +346,7 @@ namespace DataFilters.UnitTests
                                     new Filter("Firstname", StartsWith, "Sup"),
                                 }
                             },
-                            new CompositeFilter
+                            new MultiFilter
                             {
                                 Logic = Or,
                                 Filters = new IFilter[]
