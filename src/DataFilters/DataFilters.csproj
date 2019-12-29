@@ -7,7 +7,7 @@
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <Version>4.0.0</Version>
+    <Version>5.0.0</Version>
     <PackageReleaseNotes>Added conversions of "sort" expressions</PackageReleaseNotes>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
@@ -21,7 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-    <PackageReference Include="Utilities" Version="2019.*" />
+    <PackageReference Include="Utilities" Version="1.0.0-*" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>
   <Choose>
