@@ -5,12 +5,16 @@ variables :
     value: '**/*.csproj'
   - name: 'Parameters.projects.tests'
     value: '**/*Tests/*.csproj'
-  - name: 'version'
-    value: '1.0.0'
+  - name: 'majorVersion'
+    value: '1'
+  - name: 'minorVersion'
+    value: '0'
+  - name: 'patchVersion'
+    value: '0'
   - name : 'projectName'
     value: 'DataFilters'
   - name: 'azureArtifactFeed'
-    value: '/ed6dab8b-faff-49b5-adcd-2a2e5a4186e5'
+    value: 'Filters'
   
 pr:
   - master
@@ -74,6 +78,9 @@ steps:
   inputs:
     command: push
     publishVstsFeed: '$(azureArtifactFeed)'
+    majorVersion: '$(majorVersion)'
+    minorVersion: '$(minorVersion)'
+    patchVersion: '$(patchVersion)'
   enabled: false
 
 - task: nkdagility.gittasks.gitsync-task.gitsync@1
