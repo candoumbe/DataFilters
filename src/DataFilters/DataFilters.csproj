@@ -24,6 +24,9 @@
     <PackageReference Include="Utilities" Version="1.0.0-*" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Grammar\Filtering\" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)'=='netstandard1.3'">
       <ItemGroup>

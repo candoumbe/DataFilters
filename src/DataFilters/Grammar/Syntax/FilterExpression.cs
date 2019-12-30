@@ -7,6 +7,5 @@ namespace DataFilters.Grammar.Syntax
     /// </summary>
     public abstract class FilterExpression
     {
-        public override string ToString() => $"{GetType().Name} : {this.Jsonify()}";
     }
 }

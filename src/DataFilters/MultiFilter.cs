@@ -10,11 +10,11 @@ using static Newtonsoft.Json.Required;
 namespace DataFilters
 {
     /// <summary>
-    /// An instance of this class holds combination of <see cref="IDataFilter"/>
+    /// An instance of this class holds combination of <see cref="IFilter"/>
     /// </summary>
     [JsonObject]
-    [JsonConverter(typeof(CompositeFilterConverter))]
-    public class CompositeFilter : IFilter, IEquatable<CompositeFilter>
+    [JsonConverter(typeof(MultiFilterConverter))]
+    public class MultiFilter : IFilter, IEquatable<MultiFilter>
     {
         /// <summary>
         /// Name of the json property that holds filter's filters collection.
@@ -51,7 +51,7 @@ namespace DataFilters
         /// </summary>
         [JsonProperty(PropertyName = LogicJsonPropertyName, DefaultValueHandling = IgnoreAndPopulate)]
         [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
-        public FilterLogic Logic { get; set; } = FilterLogic.And;
+        public FilterLogic Logic { get; set; }
 
         public virtual string ToJson() => this.Jsonify();
 
@@ -59,11 +59,14 @@ namespace DataFilters
 
         public IFilter Negate()
         {
-            CompositeFilter filter = new CompositeFilter
+            MultiFilter filter = new MultiFilter
             {
-                Logic = Logic == FilterLogic.And
-                    ? FilterLogic.Or
-                    : FilterLogic.And,
+                Logic = Logic switch
+                {
+                    FilterLogic.And => FilterLogic.Or,
+                    FilterLogic.Or => FilterLogic.And,
+                    _ => throw new ArgumentOutOfRangeException($"Unsupported {Logic}")
+                },
                 Filters = Filters.Select(f => f.Negate())
 #if DEBUG
                 .ToArray()
@@ -88,11 +91,11 @@ namespace DataFilters
         }
 #endif
 
-        public bool Equals(IFilter other) => Equals(other as CompositeFilter);
+        public bool Equals(IFilter other) => Equals(other as MultiFilter);
 
-        public override bool Equals(object obj) => Equals(obj as CompositeFilter);
+        public override bool Equals(object obj) => Equals(obj as MultiFilter);
 
-        public bool Equals(CompositeFilter other)
+        public bool Equals(MultiFilter other)
             => Logic == other?.Logic
             && Filters.Count() == other?.Filters?.Count()
             && Filters.All(filter => other?.Filters?.Contains(filter) ?? false)

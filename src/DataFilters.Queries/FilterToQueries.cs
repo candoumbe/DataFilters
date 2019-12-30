@@ -23,7 +23,7 @@ namespace DataFilters
                     {
                         ClauseOperator clauseOperator;
                         object value = f.Value;
-                        
+
                         switch (f.Operator)
                         {
                             case FilterOperator.EqualTo:
@@ -101,7 +101,7 @@ namespace DataFilters
                         break;
                     }
 
-                case CompositeFilter cf:
+                case MultiFilter cf:
                     {
                         clause = new CompositeWhereClause
                         {

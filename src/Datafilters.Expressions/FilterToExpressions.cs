@@ -106,7 +106,7 @@ namespace DataFilters
                         break;
                     }
 
-                case CompositeFilter dcf:
+                case MultiFilter dcf:
                     {
                         Expression<Func<T, bool>> expression = null;
                         // local function that can combine two expressions using either AND or OR operators

@@ -85,7 +85,7 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }
                     },
-                    new CompositeFilter {
+                    new MultiFilter {
                         Logic = Or,
                         Filters = new [] {
                             new Filter(field : nameof(SuperHero.Nickname), @operator : EqualTo, value : "Batman"),
@@ -102,11 +102,11 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
                         new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
                     },
-                    new CompositeFilter {
+                    new MultiFilter {
                         Logic = And,
                         Filters = new IFilter [] {
                             new Filter(field : nameof(SuperHero.Firstname), @operator : Contains, value : "a"),
-                            new CompositeFilter
+                            new MultiFilter
                             {
                                 Logic = Or,
                                 Filters = new [] {
@@ -126,11 +126,11 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
                         new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }
                     },
-                    new CompositeFilter {
+                    new MultiFilter {
                         Logic = And,
                         Filters = new IFilter [] {
                             new Filter(field : nameof(SuperHero.Firstname), @operator : Contains, value : "a"),
-                            new CompositeFilter
+                            new MultiFilter
                             {
                                 Logic = And,
                                 Filters = new [] {

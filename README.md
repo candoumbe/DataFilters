@@ -6,16 +6,17 @@ Highly inspired by the elastic syntax, it offers a powerful way to build and que
 with a syntax that's not bound to a peculiar datasource.
 
 1. [Introduction](#intro)
-2. [Filtering](#filtering)
+2. [Parsing](#parsing)
+3. [Filtering](#filtering)
    i. [Starts with](#starts-with-expression)
    ii. [Ends with](#ends-with-expression)
    iii. [Contains](#contains-expression)     
    iv. [Greater than or equal](#gte-expression)
    v. [Less than or equal](#lte-expression)
-   vi. [Between](#btw-expression)
-3. [Sorting](#sorting)
-4. [How to use](#how-to-use)
+   vi. [Between](#btw-expression) 
+4. [Sorting](#sorting)
 5. [How to install](#how-to-install)
+6. [How to use](#how-to-use)
 
 
 ## <a href='#' id='intro'>Introduction</a>
@@ -41,22 +42,22 @@ and the base url of your api is `https://my-beautiful/api`.
 Wouldn't it be nice to be able to search any resource like so
 `https://my-beautiful/api/vigilantes/search?nickname=Bat*|Super*` ?
 
-This is exactly what this project is about : giving you an uniform syntax to query resources without having to thing about the underlying datasource.
+This is exactly what this project is about : giving you an uniform syntax to query resources 
+without having to thing about the underlying datasource.
 
 
-## <a href='#' id='filtering'>Filtering</a>
+## <a href='#' id='parsing'>Parsing</a>
 
-The main classes to deal with are :
-
-- [IFilter][class-ifilter] is the interface that describes the shape of filters. There are two kind of filter
-- [Filter][class-filter] is an implementation of a filter on a single property
-- [CompositeFilter][class-complex-filter] : combines several [Filter][class-ifilter]s using a logical operator that can be `AND` or `OR`. 
-
-
-The library supports a custom syntax that can be used to specified one or more criteria resources must fullfill. 
+This is the first step on filtering data. Thanks to [SuperPower](https://github.com/datalust/superpower/), 
+the library supports a custom syntax that can be used to specified one or more criteria resources must fullfill. 
 The currently supported syntax mimic the query string syntax : a key-value pair separated by _ampersand_ (`&` character) where :
 - `field` is the name of a property of the resource to filter
 - `value` is an expression which syntax is highly inspired by the [Lucene syntax](http://www.lucenetutorial.com/lucene-query-syntax.html)
+
+To parse an expression, simply call the string extension `ToFilter<T>` extension method
+ (see unit tests for more details on the syntax)
+
+## <a href='#' id='filtering'>Filtering</a>
 
 Several expressions are supported and here's how you can start using them in your search queries.
 
@@ -125,7 +126,7 @@ Search for vigilante resources where `age` property is between `20` and `35`
 ```
 will result in a [IFilter][class-ifilter] instance equivalent to
 ```csharp
-IFilter filter = new CompositeFilter
+IFilter filter = new MultiFilter
 {
     Logic = Or,
     Filters = new IFilter[]
@@ -138,7 +139,7 @@ IFilter filter = new CompositeFilter
 
 #### Logical operators
 
-Logicial operators helps combine several instances of [IFilter][class-ifilter]
+Logicial operators can be used combine several instances of [IFilter][class-ifilter] together.
 
 **<a href='#' id='and-expression'>And</a>**
 
@@ -159,7 +160,7 @@ ends with `"man"`
 ```
 will result in 
 ```csharp
-Ifilter filter = new CompositeFilter 
+IFilter filter = new MultiFilter 
 {
     Logic = Or,
     Filters = new IFilter[]
@@ -198,12 +199,12 @@ Searchs for `vigilante` resources that starts with  `Bat` or `Sup` and ends with
 
 will be parsed into a 
 ```csharp
-IFilter filter = new CompositeFilter
+IFilter filter = new MultiFilter
 {
     Logic = Or,
     Filters = new IFilter[]
     {
-        new CompositeFilter
+        new MultiFilter
         {
             Logic = Or,
             Filters = new IFilter[]
@@ -212,7 +213,7 @@ IFilter filter = new CompositeFilter
                 new Filter("Firstname", StartsWith, "Sup"),
             }
         },
-        new CompositeFilter
+        new MultiFilter
         {
             Logic = Or,
             Filters = new IFilter[]
@@ -303,7 +304,7 @@ public class VigilantesController
 
         IFilter  filter = filters.Count() == 1
             ? filters.Single()
-            : new CompositeFilter{ Logic = And, Filters = filters };
+            : new MultiFilter{ Logic = And, Filters = filters };
 
         // filter now contains how search criteria and is ready to be used :-) 
 
@@ -321,7 +322,7 @@ For that purpose, a handy `.ToFilter<T>()` string extension is available. It tur
 full [IFilter][class-ifilter].
 4. we can then either :
    - use the filter directly is there was only one filter
-   - or combine them using [composite filter][class-complex-filter] if there were more than one criteria
+   - or combine them using [composite filter][class-multi-filter] if there were more than one criteria
 
 
 You may have notice that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` is not. 
@@ -335,4 +336,4 @@ This is to distinguuish if the `Age` criterion was provided or not when calling 
 
 [class-ifilter]: /src/DataFilters/IFilter.cs
 [class-filter]: /src/DataFilters/Filter.cs
-[class-complex-filter]: /src/DataFilters/CompositeFilter.cs
+[class-multi-filter]: /src/DataFilters/MultiFilter.cs

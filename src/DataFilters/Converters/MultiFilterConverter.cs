@@ -8,9 +8,9 @@ using System.Linq;
 namespace DataFilters.Converters
 {
     /// <summary>
-    /// <see cref="JsonConverter"/> implementation that allow to convert json string from/to <see cref="CompositeFilter"/>
+    /// <see cref="JsonConverter"/> implementation that allow to convert json string from/to <see cref="MultiFilter"/>
     /// </summary>
-    public class CompositeFilterConverter : JsonConverter
+    public class MultiFilterConverter : JsonConverter
     {
         private static readonly IImmutableDictionary<string, FilterLogic> _logics = new Dictionary<string, FilterLogic>
         {
@@ -18,33 +18,33 @@ namespace DataFilters.Converters
             [nameof(FilterLogic.Or).ToLower()] = FilterLogic.Or
         }.ToImmutableDictionary();
 
-        public override bool CanConvert(Type objectType) => objectType == typeof(CompositeFilter);
+        public override bool CanConvert(Type objectType) => objectType == typeof(MultiFilter);
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            CompositeFilter kcf = null;
+            MultiFilter kcf = null;
 
             JToken token = JToken.ReadFrom(reader);
-            if (objectType == typeof(CompositeFilter) && token.Type == JTokenType.Object)
+            if (objectType == typeof(MultiFilter) && token.Type == JTokenType.Object)
             {
                 IEnumerable<JProperty> properties = ((JObject)token).Properties();
 
                 JProperty logicProperty = properties
-                    .SingleOrDefault(prop => prop.Name == CompositeFilter.LogicJsonPropertyName);
+                    .SingleOrDefault(prop => prop.Name == MultiFilter.LogicJsonPropertyName);
 
                 if (logicProperty != null)
                 {
-                    JProperty filtersProperty = properties.SingleOrDefault(prop => prop.Name == CompositeFilter.FiltersJsonPropertyName);
+                    JProperty filtersProperty = properties.SingleOrDefault(prop => prop.Name == MultiFilter.FiltersJsonPropertyName);
                     if (filtersProperty?.Type == JTokenType.Array)
                     {
-                        JArray filtersArray = (JArray)token[CompositeFilter.FiltersJsonPropertyName];
+                        JArray filtersArray = (JArray)token[MultiFilter.FiltersJsonPropertyName];
                         int nbFilters = filtersArray.Count();
                         if (nbFilters > 2)
                         {
                             IList<IFilter> filters = new List<IFilter>(nbFilters);
                             foreach (JToken item in filtersArray)
                             {
-                                IFilter kf = (IFilter)item.ToObject<Filter>() ?? item.ToObject<CompositeFilter>();
+                                IFilter kf = (IFilter)item.ToObject<Filter>() ?? item.ToObject<MultiFilter>();
 
                                 if (kf != null)
                                 {
@@ -54,9 +54,9 @@ namespace DataFilters.Converters
 
                             if (filters.Count >= 2)
                             {
-                                kcf = new CompositeFilter
+                                kcf = new MultiFilter
                                 {
-                                    Logic = _logics[token[CompositeFilter.LogicJsonPropertyName].Value<string>()],
+                                    Logic = _logics[token[MultiFilter.LogicJsonPropertyName].Value<string>()],
                                     Filters = filters
                                 };
                             }
@@ -70,15 +70,15 @@ namespace DataFilters.Converters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            CompositeFilter kcf = (CompositeFilter)value;
+            MultiFilter kcf = (MultiFilter)value;
 
             writer.WriteStartObject();
 
             // TODO Maybe can we rely on the serializer to handle the logic serialization ?
-            writer.WritePropertyName(CompositeFilter.LogicJsonPropertyName);
+            writer.WritePropertyName(MultiFilter.LogicJsonPropertyName);
             writer.WriteValue(kcf.Logic.ToString().ToLower());
 
-            writer.WritePropertyName(CompositeFilter.FiltersJsonPropertyName);
+            writer.WritePropertyName(MultiFilter.FiltersJsonPropertyName);
             writer.WriteStartArray();
             foreach (IFilter filter in kcf.Filters)
             {
