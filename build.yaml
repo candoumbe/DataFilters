@@ -22,10 +22,16 @@ pr:
 trigger:
   batch: true
   branches:
-   include:
-      - master
-      - features/*
-      - fixes/*
+    include:
+        - master
+        - features/*
+        - fixes/*
+  paths:
+    exclude:
+        - README.md
+        - docs/
+
+
 
 pool:
   name: Hosted VS2017
@@ -75,6 +81,9 @@ steps:
     command: pack
     nobuild: true
     versioningScheme: byPrereleaseNumber
+    majorVersion: '$(majorVersion)'
+    minorVersion: '$(minorVersion)'
+    patchVersion: '$(patchVersion)'
   condition: succeededOrFailed()
 
 - task: DotNetCoreCLI@2
