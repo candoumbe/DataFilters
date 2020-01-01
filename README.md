@@ -5,18 +5,22 @@ DataFilters is a small library that allow to convert a string to a generic `IFil
 Highly inspired by the elastic syntax, it offers a powerful way to build and query data 
 with a syntax that's not bound to a peculiar datasource.
 
-1. [Introduction](#intro)
-2. [Parsing](#parsing)
-3. [Filtering](#filtering)
-   i. [Starts with](#starts-with-expression)
-   ii. [Ends with](#ends-with-expression)
-   iii. [Contains](#contains-expression)     
-   iv. [Greater than or equal](#gte-expression)
-   v. [Less than or equal](#lte-expression)
-   vi. [Between](#btw-expression) 
-4. [Sorting](#sorting)
-5. [How to install](#how-to-install)
-6. [How to use](#how-to-use)
+<ol type='number'>
+    <li><a href='#intro'>Introduction</a></li>
+    <li><a href='#parsing'>Parsing</a></li>
+    <li><a href='#filtering'>Filtering</a></li>
+    <ol>
+        <li><a href='#starts-with-expression'>Starts with</a></li>
+        <li><a href='#ends-with-expression'>Ends with</a></li>
+        <li><a href='#contains-expression'>Contains</a></li>
+        <li><a href='#gte-expression'>Greater than or equal</a></li>
+        <li><a href='#lte-expression'>Less than or equal</a></li>
+        <li><a href='#btw-expression'>Bertween</a></li>
+    </ol>
+    <li><a href='#sorting'>Sorting</a></li>
+    <li><a href='#how-to-install'>How to install</a></li>
+    <li><a href='#how-to-use'>How to use</a></li>
+</ol>
 
 
 ## <a href='#' id='intro'>Introduction</a>

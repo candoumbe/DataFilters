@@ -4,7 +4,6 @@ using Newtonsoft.Json.Schema;
 using System;
 using System.Collections.Generic;
 using static Newtonsoft.Json.DefaultValueHandling;
-using static Newtonsoft.Json.JsonConvert;
 using static Newtonsoft.Json.Required;
 
 namespace DataFilters

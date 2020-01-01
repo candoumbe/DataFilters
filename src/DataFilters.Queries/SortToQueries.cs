@@ -1,7 +1,6 @@
 ﻿using Queries.Core.Parts.Sorting;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace DataFilters
 {

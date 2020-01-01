@@ -1,6 +1,4 @@
-﻿using Queries.Core.Extensions;
-using Queries.Core.Parts.Clauses;
-using Queries.Core.Parts.Columns;
+﻿using Queries.Core.Parts.Clauses;
 using System;
 using System.Linq;
 

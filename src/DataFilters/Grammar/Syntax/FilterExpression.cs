@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
     /// Base class for filter expression
