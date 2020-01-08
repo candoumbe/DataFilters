@@ -24,7 +24,7 @@ namespace DataFilters.Grammar.Syntax
 
             if (value.Length == 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)} cannot be empty");
             }
 
             Value = value;

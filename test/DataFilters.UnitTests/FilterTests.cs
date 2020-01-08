@@ -19,6 +19,7 @@ namespace DataFilters.UnitTests
     public class FilterTests
     {
         private readonly ITestOutputHelper _output;
+
         private static readonly IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
         {
             ["contains"] = Contains,
@@ -30,7 +31,7 @@ namespace DataFilters.UnitTests
             ["isnotempty"] = IsNotEmpty,
             ["isnotnull"] = IsNotNull,
             ["isnull"] = IsNull,
-            ["lt"] = LessThan,
+            ["lt"] = FilterOperator.LessThan,
             ["lte"] = LessThanOrEqualTo,
             ["neq"] = NotEqualTo,
             ["startswith"] = StartsWith

@@ -22,23 +22,6 @@ namespace DataFilters.UnitTests
 
         private readonly ITestOutputHelper _output;
 
-        private static readonly IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
-        {
-            ["contains"] = Contains,
-            ["endswith"] = EndsWith,
-            ["eq"] = EqualTo,
-            ["gt"] = GreaterThan,
-            ["gte"] = GreaterThanOrEqual,
-            ["isempty"] = IsEmpty,
-            ["isnotempty"] = IsNotEmpty,
-            ["isnotnull"] = IsNotNull,
-            ["isnull"] = IsNull,
-            ["lt"] = LessThan,
-            ["lte"] = LessThanOrEqualTo,
-            ["neq"] = NotEqualTo,
-            ["startswith"] = StartsWith
-        }.ToImmutableDictionary();
-
         public class Person
         {
             public string Firstname { get; set; }

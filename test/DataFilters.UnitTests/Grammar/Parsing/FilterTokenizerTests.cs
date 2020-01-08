@@ -34,9 +34,9 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Firstname=Bruce",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(3)
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Firstname"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Firstname"))
                         && results.Once(result => result.Kind == FilterToken.Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Bruce"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
@@ -46,9 +46,9 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(4)
                         && results.Once(result => result.Kind == FilterToken.Underscore && result.Span.EqualsValue("_"))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Firstname"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Firstname"))
                         && results.Once(result => result.Kind == FilterToken.Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Bruce"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
@@ -57,9 +57,9 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Firstname=Bru*",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(4)
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Firstname"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Firstname"))
                         && results.Once(result => result.Kind == FilterToken.Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Bru"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Bru"))
                         && results.Once(result => result.Kind == FilterToken.Asterisk && result.Span.EqualsValue("*"))
                     )
                 };
@@ -69,10 +69,10 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "prop1=Bruce",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(4)
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("prop"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("prop"))
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("1"))
                         && results.Once(result => result.Kind == FilterToken.Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Bruce"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
@@ -81,7 +81,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "val1|val2",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(5)
-                        && results.Exactly(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("val"), 2)
+                        && results.Exactly(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("val"), 2)
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("1"))
                         && results.Once(result => result.Kind == FilterToken.Or && result.Span.EqualsValue("|"))
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("2"))
@@ -93,7 +93,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "val1,val2",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(5)
-                        && results.Exactly(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("val"), 2)
+                        && results.Exactly(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("val"), 2)
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("1"))
                         && results.Once(result => result.Kind == FilterToken.And && result.Span.EqualsValue(","))
                         && results.Once(result => result.Kind == FilterToken.Numeric && result.Span.EqualsValue("2"))
@@ -106,7 +106,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(2)
                         && results.Once(result => result.Kind == FilterToken.Not && result.Span.EqualsValue("!"))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Bruce"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
@@ -116,7 +116,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(2)
                         && results.Once(result => result.Kind == FilterToken.Not && result.Span.EqualsValue("!"))
-                        && results.Once(result => result.Kind == FilterToken.Literal && result.Span.EqualsValue("Bruce"))
+                        && results.Once(result => result.Kind == FilterToken.Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 

@@ -24,7 +24,7 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Literal
         /// </summary>
-        Literal,
+        Alpha,
 
         /// <summary>
         /// Numeric value of some sort
@@ -89,6 +89,12 @@ namespace DataFilters.Grammar.Parsing
         Whitespace,
 
         [Token(Example = ":")]
-        Colon
+        Colon,
+
+        /// <summary>
+        /// The dot character
+        /// </summary>
+        [Token(Example = ".")]
+        Dot
     }
 }

@@ -32,7 +32,7 @@ namespace DataFilters.Grammar.Parsing
                                 next = next.Remainder.ConsumeChar();
                             }
 
-                            yield return Result.Value(Literal, identifierStart, next.Location);
+                            yield return Result.Value(Alpha, identifierStart, next.Location);
                         }
                         break;
                     case char c when char.IsDigit(c):
@@ -96,6 +96,10 @@ namespace DataFilters.Grammar.Parsing
                         break;
                     case ':':
                         yield return Result.Value(Colon, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case '.':
+                        yield return Result.Value(Dot, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     default:

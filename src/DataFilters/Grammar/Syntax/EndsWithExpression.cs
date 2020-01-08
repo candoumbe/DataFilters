@@ -32,6 +32,6 @@ namespace DataFilters.Grammar.Syntax
 
         public override int GetHashCode() => Value.GetHashCode();
 
-        public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> {Value}";
+        public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> '{Value}'";
     }
 }

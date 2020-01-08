@@ -34,7 +34,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         [Fact]
         public void IsParser() => typeof(FilterTokenParser).Should()
             .BeStatic().And
-            .HaveProperty<TokenListParser<FilterToken, ConstantExpression>>("Constant").And
+            .HaveProperty<TokenListParser<FilterToken, ConstantExpression>>("AlphaNumeric").And
             .HaveProperty<TokenListParser<FilterToken, StartsWithExpression>>("StartsWith").And
             .HaveProperty<TokenListParser<FilterToken, EndsWithExpression>>("EndsWith").And
             .HaveProperty<TokenListParser<FilterToken, OneOfExpression>>("OneOf").And
@@ -45,19 +45,31 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             .HaveProperty<TokenListParser<FilterToken, RangeExpression>>("Range").And
             .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
-        [Fact]
-        public void CanParseConstant()
+        public static IEnumerable<object[]> AlphaNumericCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "Bruce",
+                    new ConstantExpression("Bruce")
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(AlphaNumericCases))]
+        public void CanParseAlphaNumeric(string input, ConstantExpression expected)
         {
             // Arrange
-            const string input = "Bruce";
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
 
             // Act
-            FilterExpression expression = FilterTokenParser.Constant.Parse(tokens);
+            FilterExpression expression = FilterTokenParser.AlphaNumeric.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, new ConstantExpression("Bruce"));
+            AssertThatCanParse(expression, expected);
         }
 
         [Fact]
@@ -83,6 +95,42 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "*ce",
                     new EndsWithExpression("ce")
+                };
+
+                yield return new object[]
+                {
+                    "*.ce",
+                    new EndsWithExpression(".ce")
+                };
+
+                yield return new object[]
+                {
+                    "*..ce",
+                    new EndsWithExpression("..ce")
+                };
+
+                yield return new object[]
+                {
+                    "*..ce..",
+                    new EndsWithExpression("..ce..")
+                };
+
+                yield return new object[]
+                {
+                    "*c.e",
+                    new EndsWithExpression("c.e")
+                };
+
+                yield return new object[]
+                {
+                    "*c.e.",
+                    new EndsWithExpression("c.e.")
+                };
+
+                yield return new object[]
+                {
+                    "*.c.e",
+                    new EndsWithExpression(".c.e")
                 };
             }
         }

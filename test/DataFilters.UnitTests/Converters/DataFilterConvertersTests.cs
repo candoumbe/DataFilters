@@ -20,7 +20,7 @@ namespace DataFilters.UnitTests.Converters
         {
             ["eq"] = EqualTo,
             ["neq"] = NotEqualTo,
-            ["lt"] = LessThan,
+            ["lt"] = FilterOperator.LessThan,
             ["gt"] = GreaterThan,
             ["lte"] = LessThanOrEqualTo,
             ["gte"] = GreaterThanOrEqual,
@@ -108,7 +108,6 @@ namespace DataFilters.UnitTests.Converters
                             && Operators["isnotnull"] == ((Filter)result).Operator
                             && ((Filter)result).Value == null)
                     };
-
             }
         }
 

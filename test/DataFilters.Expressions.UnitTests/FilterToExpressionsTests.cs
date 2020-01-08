@@ -41,7 +41,6 @@ namespace DataFilters.UnitTests
 
         public class Henchman : SuperHero
         {
-
         }
 
         public FilterToExpressionTests(ITestOutputHelper output) => _output = output;
@@ -134,7 +133,7 @@ namespace DataFilters.UnitTests
                                 Logic = And,
                                 Filters = new [] {
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
-                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : LessThan, value : 31.December(2012))
+                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
                                 }
                             }
                         }
@@ -428,7 +427,7 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
                         new SuperHero { Firstname = null, Lastname = "", Height = 178, Nickname = "Sinestro" }
                     },
-                    new Filter(field : nameof(SuperHero.Height), @operator : LessThan, value: 150),
+                    new Filter(field : nameof(SuperHero.Height), @operator : FilterOperator.LessThan, value: 150),
                     (Expression<Func<SuperHero, bool>>)(item => item.Height < 150),
                 };
             }
@@ -579,7 +578,7 @@ namespace DataFilters.UnitTests
         [InlineData(IsNotEmpty, "")]
         [InlineData(IsNull, "")]
         [InlineData(IsNotNull, "")]
-        [InlineData(LessThan, " ")]
+        [InlineData(FilterOperator.LessThan, " ")]
         [InlineData(LessThanOrEqualTo, " ")]
         [InlineData(NotEqualTo, " ")]
         [InlineData(StartsWith, " ")]
