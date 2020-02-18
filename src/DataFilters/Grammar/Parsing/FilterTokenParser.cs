@@ -14,7 +14,7 @@ namespace DataFilters.Grammar.Parsing
     public static class FilterTokenParser
     {
         /// <summary>
-        /// Parser for <see cref="FilterToken.Constant"/>
+        /// Parser for <see cref="FilterToken.Alpha"/>
         /// </summary>
         public static TokenListParser<FilterToken, ConstantExpression> AlphaNumeric => from numberBefore in Token.EqualTo(FilterToken.Numeric).Optional()
                                                                                        from value in Token.EqualTo(FilterToken.Alpha)
@@ -49,7 +49,7 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parser for "contains" expression
         /// </summary>
-        public static TokenListParser<FilterToken, ContainsExpression> Contains => from value in AlphaNumeric.Between(Asterisk, Asterisk)
+        public static TokenListParser<FilterToken, ContainsExpression> Contains => from value in AlphaNumeric.Or(Punctuation).Between(Asterisk, Asterisk)
                                                                                    select new ContainsExpression(value.Value);
 
         public static TokenListParser<FilterToken, OrExpression> Or => from left in Expression
@@ -111,14 +111,14 @@ namespace DataFilters.Grammar.Parsing
                        select new RangeExpression(
                            min switch
                            {
-                               AsteriskExpression asterisk => null,
+                               AsteriskExpression _ => null,
                                ConstantExpression constant => constant,
                                DateTimeExpression dateTime => dateTime,
                                _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
                            },
                            max switch
                            {
-                               AsteriskExpression asterisk => null,
+                               AsteriskExpression _ => null,
                                ConstantExpression constant => constant,
                                DateTimeExpression dateTime => dateTime,
                                _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")

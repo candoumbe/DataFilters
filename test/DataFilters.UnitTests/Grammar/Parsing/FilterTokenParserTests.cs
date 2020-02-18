@@ -150,18 +150,36 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             AssertThatCanParse(expression, expected);
         }
 
-        [Fact]
-        public void CanParseContains()
+        public static IEnumerable<object[]> ContainsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "*bat*",
+                    new ContainsExpression("bat")
+                };
+
+                yield return new object[]
+                {
+                    "*.*",
+                    new ContainsExpression(".")
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ContainsCases))]
+        public void CanParseContains(string input, ContainsExpression expectedContains)
         {
             // Arrange
-            const string input = "*bat*";
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
             ContainsExpression expression = FilterTokenParser.Contains.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, new ContainsExpression("bat"));
+            AssertThatCanParse(expression, expectedContains);
         }
 
         public static IEnumerable<object[]> OrExpressionCases

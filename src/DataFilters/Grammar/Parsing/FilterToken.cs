@@ -22,7 +22,7 @@ namespace DataFilters.Grammar.Parsing
         CloseParenthese,
 
         /// <summary>
-        /// Literal
+        /// alphabetical
         /// </summary>
         Alpha,
 
