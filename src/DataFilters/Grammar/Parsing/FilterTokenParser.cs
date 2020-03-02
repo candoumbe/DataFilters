@@ -312,15 +312,24 @@ namespace DataFilters.Grammar.Parsing
                                                                                                             .ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
                                                                                                              select criteria;
 
-        private static TokenListParser<FilterToken, ConstantExpression> Punctuation => from c in Token.EqualTo(FilterToken.Dot)
-                                                                                       select new ConstantExpression(c.ToStringValue());
-
+        private static TokenListParser<FilterToken, ConstantExpression> Punctuation =>
+        (
+            from c in Token.EqualTo(FilterToken.Dot)
+            select new ConstantExpression(c.ToStringValue())
+        ).Or(
+                from c in Token.EqualTo(FilterToken.Colon)
+                select new ConstantExpression(c.ToStringValue())
+        ).Or(
+            from c in Token.EqualTo(FilterToken.Dash)
+            select new ConstantExpression(c.ToStringValue())
+        ).Or(
+            from c in Token.EqualTo(FilterToken.Underscore)
+            select new ConstantExpression(c.ToStringValue())
+        );
 
         private static TokenListParser<FilterToken, ConstantExpression> WordBoundary => from c in (Token.EqualTo(FilterToken.Dot)
                                                                                    .Or(Token.EqualTo(FilterToken.Whitespace))
                                                                                        .AtLeastOnce())
                                                                                         select new ConstantExpression(string.Concat(c));
-
-
     }
 }

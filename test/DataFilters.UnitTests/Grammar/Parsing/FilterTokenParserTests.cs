@@ -97,41 +97,58 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new EndsWithExpression("ce")
                 };
 
-                yield return new object[]
-                {
-                    "*.ce",
-                    new EndsWithExpression(".ce")
-                };
+                string[] punctuations = {".", "-", ":", "_"};
 
-                yield return new object[]
+                foreach (string punctuation in punctuations)
                 {
-                    "*..ce",
-                    new EndsWithExpression("..ce")
-                };
+                    yield return new object[]
+                    {
+                        $"*{punctuation}ce",
+                        new EndsWithExpression($"{punctuation}ce")
+                    };
 
-                yield return new object[]
-                {
-                    "*..ce..",
-                    new EndsWithExpression("..ce..")
-                };
+                    yield return new object[]
+                    {
+                        $"*ce{punctuation}",
+                        new EndsWithExpression($"ce{punctuation}")
+                    };
 
-                yield return new object[]
-                {
-                    "*c.e",
-                    new EndsWithExpression("c.e")
-                };
+                    yield return new object[]
+                    {
+                        $"*c{punctuation}e",
+                        new EndsWithExpression($"c{punctuation}e")
+                    };
 
-                yield return new object[]
-                {
-                    "*c.e.",
-                    new EndsWithExpression("c.e.")
-                };
+                    yield return new object[]
+                    {
+                        $"*{punctuation}",
+                        new EndsWithExpression(punctuation)
+                    };
 
-                yield return new object[]
-                {
-                    "*.c.e",
-                    new EndsWithExpression(".c.e")
-                };
+                    yield return new object[]
+                    {
+                        $"*{punctuation}{punctuation}ce",
+                        new EndsWithExpression($"{punctuation}{punctuation}ce")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"*{punctuation}{punctuation}ce{punctuation}{punctuation}",
+                        new EndsWithExpression($"{punctuation}{punctuation}ce{punctuation}{punctuation}")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"*c{punctuation}e{punctuation}",
+                        new EndsWithExpression($"c{punctuation}e{punctuation}")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"*{punctuation}c{punctuation}e",
+                        new EndsWithExpression($"{punctuation}c{punctuation}e")
+                    };
+                }
             }
         }
 
@@ -160,11 +177,16 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new ContainsExpression("bat")
                 };
 
-                yield return new object[]
+                string[] punctuations = { ".", "-", ":", "_" };
+
+                foreach (string punctuation in punctuations)
                 {
-                    "*.*",
-                    new ContainsExpression(".")
-                };
+                    yield return new object[]
+                    {
+                        $"*{punctuation}*",
+                        new ContainsExpression(punctuation)
+                    };
+                }
             }
         }
 
