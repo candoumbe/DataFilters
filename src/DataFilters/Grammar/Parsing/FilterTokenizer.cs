@@ -37,7 +37,6 @@ namespace DataFilters.Grammar.Parsing
             Bang
         };
 
-
         protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
         {
             Result<char> next = span.ConsumeChar();

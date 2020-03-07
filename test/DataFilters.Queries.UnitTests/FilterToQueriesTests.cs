@@ -20,31 +20,31 @@ namespace DataFilters.Queries.UnitTests
                 yield return new object[]
                 {
                     new Filter(field: "Name",@operator: FilterOperator.EqualTo, value: "Wayne"),
-                    new WhereClause(column:  "Name".Field(), @operator: ClauseOperator.EqualTo, constraint: "Wayne")
+                    new WhereClause(column: "Name".Field(), @operator: ClauseOperator.EqualTo, constraint: "Wayne")
                 };
 
                 yield return new object[]
                 {
                     new Filter(field: "Name",@operator: FilterOperator.NotEqualTo, value: "Wayne"),
-                    new WhereClause(column:  "Name".Field(), @operator: ClauseOperator.NotEqualTo, constraint: "Wayne")
+                    new WhereClause(column: "Name".Field(), @operator: ClauseOperator.NotEqualTo, constraint: "Wayne")
                 };
 
                 yield return new object[]
                 {
                     new Filter(field: "Name",@operator: FilterOperator.Contains, value: "W"),
-                    new WhereClause(column:  "Name".Field(), @operator: ClauseOperator.Like, constraint: "%W%")
+                    new WhereClause(column: "Name".Field(), @operator: ClauseOperator.Like, constraint: "%W%")
                 };
 
                 yield return new object[]
                 {
                     new Filter(field: "Name",@operator: FilterOperator.EndsWith, value: "W"),
-                    new WhereClause(column:  "Name".Field(), @operator: ClauseOperator.Like, constraint: "%W")
+                    new WhereClause(column: "Name".Field(), @operator: ClauseOperator.Like, constraint: "%W")
                 };
 
                 yield return new object[]
                 {
                     new Filter(field: "Name",@operator: FilterOperator.NotEndsWith, value: "W"),
-                    new WhereClause(column:  "Name".Field(), @operator: ClauseOperator.NotLike, constraint: "%W")
+                    new WhereClause(column: "Name".Field(), @operator: ClauseOperator.NotLike, constraint: "%W")
                 };
                 yield return new object[]
                 {

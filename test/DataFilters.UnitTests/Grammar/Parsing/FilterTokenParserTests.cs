@@ -713,7 +713,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         $@"Firstname=Vand\{c}al&Lastname=Savage",
                         (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
                             expressions => expressions.Exactly(2)
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantExpression($@"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantExpression($"Vand{c}al")))
                                && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantExpression("Savage")))
                         )
                     };
