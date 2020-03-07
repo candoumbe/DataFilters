@@ -65,6 +65,12 @@ namespace DataFilters.Queries.UnitTests
                         }
                     }
                 };
+
+                yield return new object[]
+                {
+                    new Filter(field: "Name", @operator: FilterOperator.EndsWith, "*"),
+                    new WhereClause(column: "Name".Field(), @operator: ClauseOperator.Like, "%*"),
+                };
             }
         }
 

@@ -6,6 +6,7 @@ using Superpower;
 using Superpower.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 using Xunit.Abstractions;
@@ -54,6 +55,18 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Bruce",
                     new ConstantExpression("Bruce")
                 };
+
+                yield return new object[]
+                {
+                    @"Vandal\*",
+                    new ConstantExpression("Vandal*")
+                };
+
+                yield return new object[]
+                {
+                    @"Van\*dal",
+                    new ConstantExpression("Van*dal")
+                };
             }
         }
 
@@ -72,19 +85,90 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             AssertThatCanParse(expression, expected);
         }
 
-        [Fact]
-        public void CanParseStartsWith()
+        public static IEnumerable<object[]> StartsWithCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "ce*",
+                    new StartsWithExpression("ce")
+                };
+
+                string[] punctuations = { ".", "-", ":", "_" };
+
+                foreach (string punctuation in punctuations)
+                {
+                    yield return new object[]
+                    {
+                        $"{punctuation}ce*",
+                        new StartsWithExpression($"{punctuation}ce")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"ce{punctuation}*",
+                        new StartsWithExpression($"ce{punctuation}")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"c{punctuation}e*",
+                        new StartsWithExpression($"c{punctuation}e")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"{punctuation}*",
+                        new StartsWithExpression(punctuation)
+                    };
+
+                    yield return new object[]
+                    {
+                        $"{punctuation}{punctuation}ce*",
+                        new StartsWithExpression($"{punctuation}{punctuation}ce")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"{punctuation}{punctuation}ce{punctuation}{punctuation}*",
+                        new StartsWithExpression($"{punctuation}{punctuation}ce{punctuation}{punctuation}")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"c{punctuation}e{punctuation}*",
+                        new StartsWithExpression($"c{punctuation}e{punctuation}")
+                    };
+
+                    yield return new object[]
+                    {
+                        $"{punctuation}c{punctuation}e*",
+                        new StartsWithExpression($"{punctuation}c{punctuation}e")
+                    };
+
+                    yield return new object[]
+                    {
+                        $@"\*{punctuation}c{punctuation}e*",
+                        new StartsWithExpression($"*{punctuation}c{punctuation}e")
+                    };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(StartsWithCases))]
+        public void CanParseStartsWith(string input, StartsWithExpression expected)
         {
             // Arrange
-            const string input = "Bru*";
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
-            _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
+            _outputHelper.WriteLine($"Tokens : ${tokens.Select(token => new { token.Kind, token.Position.Line, token.Position.Column }).Jsonify()}");
 
             // Act
             StartsWithExpression expression = FilterTokenParser.StartsWith.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, new StartsWithExpression("Bru"));
+            AssertThatCanParse(expression, expected);
         }
 
         public static IEnumerable<object[]> EndsWithCases
@@ -97,7 +181,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new EndsWithExpression("ce")
                 };
 
-                string[] punctuations = {".", "-", ":", "_"};
+                string[] punctuations = { ".", "-", ":", "_" };
 
                 foreach (string punctuation in punctuations)
                 {
@@ -175,6 +259,12 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "*bat*",
                     new ContainsExpression("bat")
+                };
+
+                yield return new object[]
+                {
+                    @"*bat\*man*",
+                    new ContainsExpression("bat*man")
                 };
 
                 string[] punctuations = { ".", "-", ":", "_" };
@@ -615,6 +705,19 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                             && expr.expression.Equals(new OneOfExpression(new ConstantExpression("Vandal"), new ConstantExpression("vandal"))))
                     )
                 };
+
+                foreach (char c in FilterTokenizer.SpecialCharacters)
+                {
+                    yield return new object[]
+                    {
+                        $@"Firstname=Vand\{c}al&Lastname=Savage",
+                        (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
+                            expressions => expressions.Exactly(2)
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantExpression($@"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantExpression("Savage")))
+                        )
+                    };
+                }
             }
         }
 
@@ -622,7 +725,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         /// Tests if <see cref="FilterTokenParser.Criteria"/> can parse a criteria
         /// </summary>
         /// <param name="input"></param>
-        /// <param name="expected"></param>
+        /// <param name="expectation"></param>
         [Theory]
         [MemberData(nameof(CriteriaCases))]
         public void CanParseCriteria(string input, Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>> expectation)
@@ -664,7 +767,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
         [Theory]
         [MemberData(nameof(DateAndTimeCases))]
-        public void CanParseDateAndTime(string input, DateTimeExpression expected )
+        public void CanParseDateAndTime(string input, DateTimeExpression expected)
         {
             // Arrange
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);

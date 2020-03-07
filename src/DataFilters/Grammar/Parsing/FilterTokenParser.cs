@@ -5,6 +5,8 @@ using Superpower.Parsers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Text;
 
 namespace DataFilters.Grammar.Parsing
 {
@@ -16,34 +18,67 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parser for <see cref="FilterToken.Alpha"/>
         /// </summary>
-        public static TokenListParser<FilterToken, ConstantExpression> AlphaNumeric => from numberBefore in Token.EqualTo(FilterToken.Numeric).Optional()
-                                                                                       from value in Token.EqualTo(FilterToken.Alpha)
-                                                                                       from numberAfter in Token.EqualTo(FilterToken.Numeric).Optional()
-                                                                                       select new ConstantExpression($"{numberBefore}{value.ToStringValue()}{numberAfter}");
+        public static TokenListParser<FilterToken, ConstantExpression> AlphaNumeric => from data in (
+                                                                                        from numberBefore in Token.EqualTo(FilterToken.Numeric).Optional()
+                                                                                        from value in Token.EqualTo(FilterToken.Alpha)
+                                                                                            .Or(Token.EqualTo(FilterToken.Escaped)).Optional()
+                                                                                        from numberAfter in Token.EqualTo(FilterToken.Numeric).Optional()
+                                                                                        where numberBefore != null || value != null || numberAfter != null
+                                                                                        select new { numberBefore, value, numberAfter }
+                                                                                        ).AtLeastOnce()
+                                                                                       select new ConstantExpression(
+                                                                                           string.Concat(
+                                                                                               data.Select(d => string.Concat(
+                                                                                                   d.numberBefore?.ToStringValue() ?? string.Empty,
+                                                                                                   d.value?.ToStringValue() ?? string.Empty,
+                                                                                                   d.numberAfter?.ToStringValue() ?? string.Empty)))
+                                                                                        );
 
         /// <summary>
         /// Parser for '*' character
         /// </summary>
-        private static TokenListParser<FilterToken, AsteriskExpression> Asterisk => Token.EqualTo(FilterToken.Asterisk).Value(new AsteriskExpression());
+        private static TokenListParser<FilterToken, AsteriskExpression> Asterisk => from __ in Token.EqualTo(FilterToken.Asterisk)
+                                                                                    select new AsteriskExpression();
 
         /// <summary>
         /// Parser for "starts with" expressions
         /// </summary>
-        public static TokenListParser<FilterToken, StartsWithExpression> StartsWith => from alphaNumeric in AlphaNumeric
-                                                                                       from _ in Asterisk
-                                                                                       select new StartsWithExpression(alphaNumeric.Value);
+        public static TokenListParser<FilterToken, StartsWithExpression> StartsWith =>
+            from data in (
+                from puncBefore in Punctuation.Many()
+                from alpha in AlphaNumeric.Many()
+                from puncAfter in Punctuation.Many()
+                where puncBefore.Length > 0 || alpha.Length > 0 || puncAfter.Length > 0
+                select new
+                {
+                    value = string.Concat(
+                        string.Concat(puncBefore.Select(x => x.Value)),
+                        string.Concat(alpha.Select(item => item.Value)),
+                        string.Concat(puncAfter.Select(x => x.Value)))
+                }).AtLeastOnce()
+            from escaped in Token.EqualTo(FilterToken.Backslash).Many()
+            from _ in Asterisk
+            where escaped.Length == 0
+            select new StartsWithExpression(string.Concat(data.Select(x => x.value)));
 
         /// <summary>
         /// Parser for "starts with" expressions
         /// </summary>
         public static TokenListParser<FilterToken, EndsWithExpression> EndsWith =>
             from _ in Asterisk
-            from data in (from puncBefore in Punctuation.Many()
-                          from alpha in AlphaNumeric.Many()
-                          from puncAfter in Punctuation.Many()
-                          where puncBefore.Length > 0 || alpha.Length > 0 || puncAfter.Length > 0
-                          select new { value = $"{string.Concat(puncBefore.Select(x => x.Value))}{string.Concat(alpha.Select(item => item.Value))}{string.Concat(puncAfter.Select(x => x.Value))}" }
-             ).AtLeastOnce()
+            from data in (
+                from puncBefore in Punctuation.Many()
+                from alpha in AlphaNumeric.Many()
+                from puncAfter in Punctuation.Many()
+                where puncBefore.Length > 0 || alpha.Length > 0 || puncAfter.Length > 0
+                select new
+                {
+                    value = string.Concat(
+                        string.Concat(puncBefore.Select(x => x.Value)),
+                        string.Concat(alpha.Select(item => item.Value)),
+                        string.Concat(puncAfter.Select(x => x.Value)))
+                }
+                ).AtLeastOnce()
             select new EndsWithExpression(string.Concat(data.Select(x => x.value)));
 
         /// <summary>
@@ -172,7 +207,7 @@ namespace DataFilters.Grammar.Parsing
                 {
                     switch (item.before)
                     {
-                        case ConstantExpression constant: // Syntaxt like ma[Nn]
+                        case ConstantExpression constant: // Syntax like ma[Nn]
                             {
                                 expressions.AddRange(item.regex.Value.Select(chr => new ConstantExpression($"{constant.Value}{chr}"))
                                     .ToArray());
@@ -228,7 +263,7 @@ namespace DataFilters.Grammar.Parsing
                             {
                                 switch (item.after)
                                 {
-                                    case ConstantExpression constantAfter: // Syntaxt like Bat[Mm]an
+                                    case ConstantExpression constantAfter: // Syntax like Bat[Mm]an
                                         expressions.AddRange(item.regex.Value.Select(chr => new ConstantExpression($"{constantBefore.Value}{chr}{constantAfter.Value}"))
                                             .ToArray());
                                         break;
@@ -326,10 +361,5 @@ namespace DataFilters.Grammar.Parsing
             from c in Token.EqualTo(FilterToken.Underscore)
             select new ConstantExpression(c.ToStringValue())
         );
-
-        private static TokenListParser<FilterToken, ConstantExpression> WordBoundary => from c in (Token.EqualTo(FilterToken.Dot)
-                                                                                   .Or(Token.EqualTo(FilterToken.Whitespace))
-                                                                                       .AtLeastOnce())
-                                                                                        select new ConstantExpression(string.Concat(c));
     }
 }

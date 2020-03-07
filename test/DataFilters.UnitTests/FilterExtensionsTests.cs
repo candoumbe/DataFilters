@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.FilterLogic;
@@ -25,6 +26,8 @@ namespace DataFilters.UnitTests
             public string Nickname { get; set; }
 
             public int Height { get; set; }
+
+            public string BattleCry { get; set; }
         }
 
         public static IEnumerable<object[]> ToFilterCases
@@ -210,21 +213,6 @@ namespace DataFilters.UnitTests
                     }
                 };
 
-                //yield return new object[]
-                //{
-                //    "Nickname=Sup*er*man",
-                //    new MultiFilter
-                //    {
-                //        Logic = And,
-                //        Filters = new IFilter[]
-                //        {
-                //            new Filter("Nickname", StartsWith, "Sup"),
-                //            new Filter("Nickname", Contains, "er"),
-                //            new Filter("Nickname", EndsWith, "man"),
-                //        }
-                //    }
-                //};
-
                 yield return new object[]
                 {
                     "Nickname=Bat*,*man*",
@@ -357,6 +345,18 @@ namespace DataFilters.UnitTests
                             },
                         }
                     }
+                };
+
+                yield return new object[]
+                {
+                    @"BattleCry=*\!",
+                    new Filter(field: "BattleCry", @operator: EndsWith, "!")
+                };
+
+                yield return new object[]
+                {
+                    @"BattleCry=\**",
+                    new Filter(field: "BattleCry", @operator: StartsWith, "*")
                 };
             }
         }

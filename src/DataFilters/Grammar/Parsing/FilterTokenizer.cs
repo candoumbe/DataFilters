@@ -1,15 +1,42 @@
 ﻿using Superpower;
 using Superpower.Model;
 using System.Collections.Generic;
+using System.Linq;
 using static DataFilters.Grammar.Parsing.FilterToken;
 
 namespace DataFilters.Grammar.Parsing
 {
     public class FilterTokenizer : Tokenizer<FilterToken>
     {
-        private const char _underscore = '_';
-        private const char _asterisk = '*';
-        private const char _equalSign = '=';
+        public const char Underscore = '_';
+        public const char Asterisk = '*';
+        public const char EqualSign = '=';
+        public const char LeftParenthesis = '(';
+        public const char RightParenthesis = ')';
+        public const char LeftSquareBracket = '[';
+        public const char RightSquareBracket = ']';
+        public const char Hyphen = '-';
+        public const char BackSlash = '\\';
+        public const char Pipe = '|';
+        public const char Comma = ',';
+        public const char Bang = '!';
+
+        /// <summary>
+        /// List of characters that have a special meaning and should be escaped
+        /// </summary>
+        public static char[] SpecialCharacters => new[]
+        {
+            Asterisk,
+            EqualSign,
+            LeftParenthesis,
+            RightParenthesis,
+            LeftSquareBracket,
+            RightSquareBracket,
+            BackSlash,
+            Pipe,
+            Bang
+        };
+
 
         protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
         {
@@ -46,47 +73,47 @@ namespace DataFilters.Grammar.Parsing
                             yield return Result.Value(Numeric, numberStart, next.Location);
                         }
                         break;
-                    case _underscore:
-                        yield return Result.Value(Underscore, next.Location, next.Remainder);
+                    case Underscore:
+                        yield return Result.Value(FilterToken.Underscore, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '|':
+                    case Pipe:
                         yield return Result.Value(Or, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case ',':
+                    case Comma:
                         yield return Result.Value(And, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case _equalSign:
+                    case EqualSign:
                         yield return Result.Value(Equal, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case _asterisk:
-                        yield return Result.Value(Asterisk, next.Location, next.Remainder);
+                    case Asterisk:
+                        yield return Result.Value(FilterToken.Asterisk, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '!':
                         yield return Result.Value(Not, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '[':
+                    case LeftSquareBracket:
                         yield return Result.Value(OpenSquaredBracket, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case ']':
+                    case RightSquareBracket:
                         yield return Result.Value(CloseSquaredBracket, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '-':
+                    case Hyphen:
                         yield return Result.Value(Dash, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '(':
+                    case LeftParenthesis:
                         yield return Result.Value(OpenParenthese, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case ')':
+                    case RightParenthesis:
                         yield return Result.Value(CloseParenthese, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
@@ -100,6 +127,15 @@ namespace DataFilters.Grammar.Parsing
                         break;
                     case '.':
                         yield return Result.Value(Dot, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case BackSlash:
+                        TextSpan backSlashStart = next.Location;
+                        next = next.Remainder.ConsumeChar();
+                        yield return next.HasValue && SpecialCharacters.Contains(next.Value)
+                            ? Result.Value(Escaped, next.Location, next.Remainder)
+                            : Result.Value(Alpha, backSlashStart, next.Remainder);
+
                         next = next.Remainder.ConsumeChar();
                         break;
                     default:

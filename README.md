@@ -5,11 +5,11 @@ DataFilters is a small library that allow to convert a string to a generic `IFil
 Highly inspired by the elastic syntax, it offers a powerful way to build and query data 
 with a syntax that's not bound to a peculiar datasource.
 
-<ol type='number'>
+<ol type='1'>
     <li><a href='#intro'>Introduction</a></li>
     <li><a href='#parsing'>Parsing</a></li>
     <li><a href='#filtering'>Filtering</a></li>
-    <ol>
+    <ol type="i">
         <li><a href='#starts-with-expression'>Starts with</a></li>
         <li><a href='#ends-with-expression'>Ends with</a></li>
         <li><a href='#contains-expression'>Contains</a></li>
@@ -17,6 +17,7 @@ with a syntax that's not bound to a peculiar datasource.
         <li><a href='#lte-expression'>Less than or equal</a></li>
         <li><a href='#btw-expression'>Bertween</a></li>
     </ol>
+    <li><a href="#special-characters">Special character handling</li>
     <li><a href='#sorting'>Sorting</a></li>
     <li><a href='#how-to-install'>How to install</a></li>
     <li><a href='#how-to-use'>How to use</a></li>
@@ -36,6 +37,7 @@ class Vigilante
     public string Lastname { get; set; }
     public string Nickname {get; set; }
     public int Age { get; set; }
+    public string Description {get; set;}
 }
 ```
 
@@ -67,7 +69,7 @@ Several expressions are supported and here's how you can start using them in you
 
 **<a href='#' id='starts-with-expression'>Starts with</a>**
 
-Search for any vigilante resource that starts with "bat" in the `nickname` property
+Search for any vigilante resource that starts with `"bat"` in the `nickname` property
 ```csharp
 "nickname=bat*"
 ```
@@ -103,7 +105,7 @@ Search for `vigilante` resources that contains `bat` in the `nickname` property.
 Search for `vigilante` resources where the value of `age` property is greater than or equal to `18`
 
 ```csharp
-"age=[* TO 18]"
+"age=[18 TO *]"
 ```
 will result in a [IFilter][class-ifilter] instance equivalent to
 ```csharp
@@ -233,6 +235,22 @@ IFilter filter = new MultiFilter
 
 The `(` and `)` allows to group two expressions together so that this group can be used as a more complex 
 expression unit.
+
+## <a href='#' id='special-character-handling'>Special character handling</a>
+Sometime, you'll be looking for a filter that match exactly a text that contains a character that has a special meaning.
+
+```csharp
+comment=@"*\!"
+```
+will be converted
+
+
+
+The backslash character (`\`) can be used to escape characters that will be otherwise interpreted as 
+a special character.
+
+ 
+
 
 ## <a href='#' id='sorting'>Sorting</a>
 This library also supports a custom syntax to sort elements.

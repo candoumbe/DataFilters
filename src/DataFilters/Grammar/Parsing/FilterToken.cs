@@ -95,6 +95,15 @@ namespace DataFilters.Grammar.Parsing
         /// The dot character
         /// </summary>
         [Token(Example = ".")]
-        Dot
+        Dot,
+
+        /// <summary>
+        /// The backslash character
+        /// </summary>
+        [Token(Example = @"\")]
+        Backslash,
+
+        [Token(Description = "Expression that allow to escape character with a special meaning", Example = @"\\")]
+        Escaped
     }
 }
