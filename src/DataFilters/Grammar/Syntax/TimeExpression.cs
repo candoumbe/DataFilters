@@ -13,22 +13,22 @@ namespace DataFilters.Grammar.Syntax
         {
             if (hours < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(hours), $"{nameof(hours)} must be zero or positive");
+                throw new ArgumentOutOfRangeException(nameof(hours), hours, $"{nameof(hours)} must be zero or positive");
             }
 
             if (minutes < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(minutes), $"{nameof(minutes)} must be zero or positive");
+                throw new ArgumentOutOfRangeException(nameof(minutes), minutes, $"{nameof(minutes)} must be zero or positive");
             }
 
             if (seconds < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(seconds), $"{nameof(seconds)} must be zero or positive");
+                throw new ArgumentOutOfRangeException(nameof(seconds), seconds, $"{nameof(seconds)} must be zero or positive");
             }
 
             if (milliseconds < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(milliseconds), $"{nameof(milliseconds)} must be zero or positive");
+                throw new ArgumentOutOfRangeException(nameof(milliseconds), milliseconds, $"{nameof(milliseconds)} must be zero or positive");
             }
 
             Hours = hours;
