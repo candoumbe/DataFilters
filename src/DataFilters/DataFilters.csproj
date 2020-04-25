@@ -6,8 +6,6 @@
     <Product />
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
-    <RepositoryType>git</RepositoryType>
-    <Version>5.0.0</Version>
     <PackageReleaseNotes>Added conversions of "sort" expressions</PackageReleaseNotes>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>

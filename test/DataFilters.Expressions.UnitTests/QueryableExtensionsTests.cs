@@ -53,7 +53,7 @@ namespace DataFilters.Expressions.UnitTests
         public void Should_Throws_ArgumentNullException_WhenOrderBy_Null()
         {
             // Act
-            Action action = () => Enumerable.Empty<Hero>().AsQueryable().OrderBy((ISort<Hero>)null);
+            Action action = () => Enumerable.Empty<Hero>().AsQueryable().OrderBy(null);
 
             // Assert
             action.Should()

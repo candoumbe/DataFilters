@@ -57,7 +57,7 @@ namespace DataFilters.UnitTests
             {
                 yield return new object[]
                 {
-                    $"{nameof(SuperHero.Name)}",
+                    nameof(SuperHero.Name),
                     new Sort<SuperHero>(expression : nameof(SuperHero.Name), direction : Ascending)
                 };
                 yield return new object[]

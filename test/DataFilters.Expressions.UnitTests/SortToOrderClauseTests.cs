@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace DataFilters.Expressions.UnitTests
                         new Hero { Name = "Flash"}
                     },
                     new Sort<Hero>(nameof(Hero.Name)),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
                     )
@@ -39,7 +40,7 @@ namespace DataFilters.Expressions.UnitTests
                         new Hero { Name = "Flash"}
                     },
                     new Sort<Hero>("name"),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
                     )
@@ -53,7 +54,7 @@ namespace DataFilters.Expressions.UnitTests
                         new Hero { Name = "Flash"}
                     },
                     new Sort<Hero>(" name"),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
                     )
@@ -68,7 +69,7 @@ namespace DataFilters.Expressions.UnitTests
                     },
                     new Sort<Hero>(nameof(Hero.Name), Descending),
 
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 2
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Flash"
                         && heroes.Last().Name == "Batman"
                     )
@@ -86,8 +87,7 @@ namespace DataFilters.Expressions.UnitTests
                         .Add(new Sort<Hero>(nameof(Hero.Age), Ascending))
                         .Add(new Sort<Hero>(nameof(Hero.Name), Descending))
                         ,
-
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 3
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
                     )
@@ -103,11 +103,24 @@ namespace DataFilters.Expressions.UnitTests
                     },
                     new MultiSort<Hero>()
                         .Add(new Sort<Hero>(nameof(Hero.Name), Descending))
-                        .Add(new Sort<Hero>(nameof(Hero.Age), Ascending))
-                        ,
-
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Count() == 3
+                        .Add(new Sort<Hero>(nameof(Hero.Age), Ascending)),
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
                         && heroes.First().Name == "Wonder Woman"
+                        && heroes.Last().Name == "Batman"
+                    )
+                };
+
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new Hero { Name = "Batman", FirstAppearance = 1.May(1939)},
+                        new Hero { Name = "Flash" , FirstAppearance = 1.May(1940)}
+                    },
+                    new Sort<Hero>(nameof(Hero.FirstAppearance), Descending),
+
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
+                        && heroes.First().Name == "Flash"
                         && heroes.Last().Name == "Batman"
                     )
                 };

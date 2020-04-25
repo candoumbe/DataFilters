@@ -3,19 +3,17 @@
   <Import Project="..\..\core.props" />
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <Version>4.0.0</Version>
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
     <PackageProjectUrl>https://candoumbe.visualstudio.com/DataFilters</PackageProjectUrl>
     <RepositoryUrl>https://candoumbe.visualstudio.com/DataFilters</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Marked QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, IEnumerable&lt;OrderClause&lt;T&gt;&gt; orderBy) obsolete
+    <PackageReleaseNotes>Removed QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, IEnumerable&lt;OrderClause&lt;T&gt;&gt; orderBy)
 
-Added QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy)</PackageReleaseNotes>
+Rewrote the QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy) and removes dependency to Microsoft.CSharp package.</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <PackageReference Include="Microsoft.Csharp" Version="4.*" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>

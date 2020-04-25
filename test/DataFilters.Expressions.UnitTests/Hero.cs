@@ -9,6 +9,8 @@ namespace DataFilters.Expressions.UnitTests
 
         public int Age { get; set; }
 
+        public DateTimeOffset FirstAppearance { get; set; }
+
         public override bool Equals(object obj) => Equals(obj as Hero);
         public bool Equals(Hero other) => other != null && Name == other.Name && Age == other.Age;
 #if NETCOREAPP1_0 || NETCOREAPP2_0
