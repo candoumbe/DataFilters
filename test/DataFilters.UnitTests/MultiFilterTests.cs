@@ -139,7 +139,7 @@ namespace DataFilters.UnitTests
 
         [Theory]
         [MemberData(nameof(MultiFilterToJsonCases))]
-        public void CompositeFilterToJson(MultiFilter filter, Expression<Func<string, bool>> jsonMatcher)
+        public void MultiFilterToJson(MultiFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
             _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
@@ -193,7 +193,7 @@ namespace DataFilters.UnitTests
             json.Should().Match(jsonExpectation);
         }
 
-        public static IEnumerable<object[]> CompositeFilterEquatableCases
+        public static IEnumerable<object[]> EqualsCases
         {
             get
             {
@@ -273,11 +273,53 @@ namespace DataFilters.UnitTests
                         "comparing a too itself must always returns true"
                     };
                 }
+
+                {
+                    yield return new object[]
+                    {
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]
+                            {
+                                new Filter("HasSuperpower", EqualTo, false),
+                                new MultiFilter
+                                {
+                                    Logic = Or,
+                                    Filters = new IFilter[]
+                                    {
+                                        new Filter("Lastname", EqualTo, "Wayne"),
+                                        new Filter("Lastname", EqualTo, "Kent")
+                                    }
+                                }
+                            }
+                        },
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]
+                            {
+                                new Filter("HasSuperpower", EqualTo, false),
+                                new MultiFilter
+                                {
+                                    Logic = Or,
+                                    Filters = new []
+                                    {
+                                        new Filter("Lastname", EqualTo, "Wayne"),
+                                        new Filter("Lastname", EqualTo, "Kent")
+                                    }
+                                }
+                            }
+                        },
+                        true,
+                        "Two distinct instances of multifilters that holds same data in same order"
+                    };
+                }
             }
         }
 
         [Theory]
-        [MemberData(nameof(CompositeFilterEquatableCases))]
+        [MemberData(nameof(EqualsCases))]
         public void CompositeFilterImplementsEquatableProperly(MultiFilter first, object second, bool expectedResult, string reason)
         {
             _output.WriteLine($"first : {first}");

@@ -36,7 +36,7 @@ namespace DataFilters
                     }
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(sort), "Unknown sort type");
+                    throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort type");
             }
         }
     }

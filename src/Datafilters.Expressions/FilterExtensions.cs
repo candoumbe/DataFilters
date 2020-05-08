@@ -6,7 +6,7 @@ using static System.Linq.Expressions.Expression;
 
 namespace DataFilters
 {
-    public static class FilterToExpressions
+    public static class FilterExtensions
     {
         /// <summary>
         /// Builds an <see cref="Expression{Func{T}}"/> tree from a <see cref="IFilter"/> instance.
@@ -98,7 +98,7 @@ namespace DataFilters
                                 IsEmpty => Equal(property, Constant(string.Empty)),
                                 IsNotEmpty => NotEqual(property, Constant(string.Empty)),
                                 EqualTo => Equal(property, constantExpression),
-                                _ => throw new ArgumentOutOfRangeException(nameof(filter), df.Operator, "Unsupported operator"),
+                                _ => throw new ArgumentOutOfRangeException(nameof(filter), df.Operator, "Unsupported operator")
                             };
                             filterExpression = Lambda<Func<T, bool>>(body, pe);
                         }

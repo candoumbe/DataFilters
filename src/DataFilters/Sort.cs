@@ -31,10 +31,13 @@ namespace DataFilters
 
         public override bool Equals(object obj) => Equals(obj as Sort<T>);
 
-#if !NETSTANDARD2_1
-        public override int GetHashCode() => (Expression, Direction).GetHashCode();
-#else
+#if ! (NETSTANDARD1_0 || NETSTANDARD1_3 || NETSTANDARD2_0)
         public override int GetHashCode() => HashCode.Combine(Expression, Direction);
+#else
+        public override int GetHashCode() => (Expression, Direction).GetHashCode();
+
+        /// <inheritdoc/>
+        public bool IsEquivalentTo(ISort<T> other) => Equals(other);
 #endif
 
         public override string ToString() => this.Jsonify();

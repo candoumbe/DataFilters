@@ -11,6 +11,6 @@ namespace DataFilters.Grammar.Syntax
 
         public override bool Equals(object obj) => Equals(obj as EqualExpression);
 
-        public override int GetHashCode() => 0;
+        public override int GetHashCode() => nameof(EqualExpression).GetHashCode();
     }
 }

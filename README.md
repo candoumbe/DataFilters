@@ -1,4 +1,4 @@
-# Datafilters [![Build status](https://candoumbe.visualstudio.com/DataFilters/_apis/build/status/Filters-CI%20(master))](https://candoumbe.visualstudio.com/DataFilters/_build/latest?definitionId=16)
+# Datafilters [![Build Status](https://dev.azure.com/candoumbe/DataFilters/_apis/build/status/DataFilters?branchName=master)](https://dev.azure.com/candoumbe/DataFilters/_build/latest?definitionId=20&branchName=master)
 
 
 DataFilters is a small library that allow to convert a string to a generic `IFilter`object.
@@ -15,7 +15,7 @@ with a syntax that's not bound to a peculiar datasource.
         <li><a href='#contains-expression'>Contains</a></li>
         <li><a href='#gte-expression'>Greater than or equal</a></li>
         <li><a href='#lte-expression'>Less than or equal</a></li>
-        <li><a href='#btw-expression'>Bertween</a></li>
+        <li><a href='#btw-expression'>Between</a></li>
     </ol>
     <li><a href="#special-characters">Special character handling</li>
     <li><a href='#sorting'>Sorting</a></li>

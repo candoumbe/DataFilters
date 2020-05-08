@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
@@ -12,6 +13,10 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     [Feature(nameof(AndExpression))]
     public class AndExpressionTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public AndExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
+
         [Fact]
         public void IsFilterExpression() => typeof(AndExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -71,12 +76,26 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(AndExpression first, object other, bool expected, string reason)
         {
+            _outputHelper.WriteLine($"First instance : {first}");
+            _outputHelper.WriteLine($"Second instance : {other}");
+
             // Act
             bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
         }
     }
 }

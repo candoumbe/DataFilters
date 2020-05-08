@@ -2,26 +2,20 @@
 
 namespace DataFilters.Grammar.Exceptions
 {
+    /// <summary>
+    /// Exception thrown when a <see cref="Syntax.RangeExpression"/> has incorrect <see cref="Syntax.RangeExpression.Min"/>
+    /// and/or
+    /// </summary>
+#pragma warning disable RCS1194 // Implement exception constructors.
     public class BoundariesTypeMismatchException : ArgumentException
+#pragma warning restore RCS1194 // Implement exception constructors.
     {
-        public BoundariesTypeMismatchException()
-        {
-
-        }
-
-        public BoundariesTypeMismatchException(string message) : base(message)
-        {
-        }
-
-        public BoundariesTypeMismatchException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
+        /// <summary>
+        /// Creates a new <see cref="BoundariesTypeMismatchException"/> instance
+        /// </summary>
+        /// <param name="message">message of the exception</param>
+        /// <param name="paramName">name of the argument which causes the exception to be thrown</param>
         public BoundariesTypeMismatchException(string message, string paramName) : base(message, paramName)
-        {
-        }
-
-        public BoundariesTypeMismatchException(string message, string paramName, Exception innerException) : base(message, paramName, innerException)
         {
         }
     }

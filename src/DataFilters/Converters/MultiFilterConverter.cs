@@ -35,31 +35,24 @@ namespace DataFilters.Converters
                 if (logicProperty != null)
                 {
                     JProperty filtersProperty = properties.SingleOrDefault(prop => prop.Name == MultiFilter.FiltersJsonPropertyName);
-                    if (filtersProperty?.Type == JTokenType.Array)
+                    if (filtersProperty is JProperty prop && filtersProperty.Value.Type == JTokenType.Array)
                     {
-                        JArray filtersArray = (JArray)token[MultiFilter.FiltersJsonPropertyName];
+                        JArray filtersArray = token[MultiFilter.FiltersJsonPropertyName].Value<JArray>();
                         int nbFilters = filtersArray.Count();
-                        if (nbFilters > 2)
+                        if (nbFilters >= 2)
                         {
                             IList<IFilter> filters = new List<IFilter>(nbFilters);
                             foreach (JToken item in filtersArray)
                             {
                                 IFilter kf = (IFilter)item.ToObject<Filter>() ?? item.ToObject<MultiFilter>();
-
-                                if (kf != null)
-                                {
-                                    filters.Add(kf);
-                                }
+                                filters.Add(kf);
                             }
 
-                            if (filters.Count >= 2)
+                            kcf = new MultiFilter
                             {
-                                kcf = new MultiFilter
-                                {
-                                    Logic = _logics[token[MultiFilter.LogicJsonPropertyName].Value<string>()],
-                                    Filters = filters
-                                };
-                            }
+                                Logic = _logics[token[MultiFilter.LogicJsonPropertyName].Value<string>()],
+                                Filters = filters
+                            };
                         }
                     }
                 }

@@ -3,11 +3,19 @@ using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
     public class NotExpressionTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public NotExpressionTests(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+        }
+
         [Fact]
         public void IsFilterExpression() => typeof(NotExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -52,12 +60,26 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(NotExpression first, object other, bool expected, string reason)
         {
+            _outputHelper.WriteLine($"First instance : {first}");
+            _outputHelper.WriteLine($"Second instance : {other}");
+
             // Act
             bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
         }
     }
 }

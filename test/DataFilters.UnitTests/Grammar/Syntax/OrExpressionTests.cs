@@ -4,11 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    [UnitTest]
     public class OrExpressionTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public OrExpressionTests(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+        }
+
         [Fact]
         public void IsFilterExpression() => typeof(OrExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -68,8 +78,67 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(OrExpression first, object other, bool expected, string reason)
         {
+            _outputHelper.WriteLine($"First instance : {first}");
+            _outputHelper.WriteLine($"Second instance : {other}");
+
             // Act
             bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
+
+            // Assert
+            actual.Should()
+                .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
+        }
+
+        public static IEnumerable<object[]> IsEquivalentToCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
+                    new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
+                    true,
+                    $"both {nameof(OrExpression)} instances are identical"
+                };
+
+                yield return new object[]
+                {
+                    new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
+                    new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop3")),
+                    false,
+                    $"the two {nameof(OrExpression)} instances contain different data."
+                };
+
+                yield return new object[]
+                {
+                    new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
+                    new OrExpression(new StartsWithExpression("prop2"), new StartsWithExpression("prop1")),
+                    true,
+                    $"both {nameof(OrExpression)} contains same data but not in the same order"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(IsEquivalentToCases))]
+        public void Implements_IsEquivalentTo_Correctly(OrExpression first, FilterExpression other, bool expected, string reason)
+        {
+            _outputHelper.WriteLine($"First instance : {first}");
+            _outputHelper.WriteLine($"Second instance : {other}");
+
+            // Act
+            bool actual = first.IsEquivalentTo(other);
 
             // Assert
             actual.Should()

@@ -3,6 +3,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 
 namespace DataFilters.Converters
@@ -39,24 +41,34 @@ namespace DataFilters.Converters
             Filter filter = null;
 
             JToken token = JToken.ReadFrom(reader);
-            if (objectType == typeof(Filter))
+            if (objectType == typeof(Filter) && token.Type == JTokenType.Object)
             {
-                if (token.Type == JTokenType.Object)
-                {
-                    IEnumerable<JProperty> properties = ((JObject)token).Properties();
+                IEnumerable<JProperty> properties = ((JObject)token).Properties();
 
-                    if (properties.Any(prop => prop.Name == Filter.FieldJsonPropertyName)
-                         && properties.Any(prop => prop.Name == Filter.OperatorJsonPropertyName))
+                if (properties.Any(prop => prop.Name == Filter.FieldJsonPropertyName)
+                     && properties.Any(prop => prop.Name == Filter.OperatorJsonPropertyName))
+                {
+                    string field = token[Filter.FieldJsonPropertyName].Value<string>();
+                    FilterOperator @operator = _operators[token[Filter.OperatorJsonPropertyName].Value<string>()];
+                    object value = null;
+                    if (!Filter.UnaryOperators.Contains(@operator))
                     {
-                        string field = token[Filter.FieldJsonPropertyName].Value<string>();
-                        FilterOperator @operator = _operators[token[Filter.OperatorJsonPropertyName].Value<string>()];
-                        object value = null;
-                        if (!Filter.UnaryOperators.Contains(@operator))
+                        JToken valueToken = token[Filter.ValueJsonPropertyName];
+                        value = valueToken?.Type switch
                         {
-                            value = token[Filter.ValueJsonPropertyName]?.Value<string>();
-                        }
-                        filter = new Filter(field, @operator, value);
+                            JTokenType.String => valueToken.Value<string>(),
+                            JTokenType.Boolean => valueToken.Value<bool>(),
+                            JTokenType.Integer => valueToken.Value<long>(),
+                            JTokenType.Float => valueToken.Value<float>(),
+                            JTokenType.Null => null,
+                            null => null,
+                            _ => throw new ArgumentOutOfRangeException(nameof(valueToken.Type),
+                                                                       valueToken.Type,
+                                                                       $"Unexpected valueTokenType when dealing with operator {@operator}")
+
+                        };
                     }
+                    filter = new Filter(field, @operator, value);
                 }
             }
 

@@ -3,11 +3,16 @@ using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
     public class ContainsExpressionTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public ContainsExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
+
         [Fact]
         public void IsFilterExpression() => typeof(ContainsExpression).Should()
                                                                           .BeAssignableTo<FilterExpression>().And
@@ -76,12 +81,26 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(ContainsExpression first, object other, bool expected, string reason)
         {
+            _outputHelper.WriteLine($"First instance : {first}");
+            _outputHelper.WriteLine($"Second instance : {other}");
+
             // Act
             bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
         }
     }
 }

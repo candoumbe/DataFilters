@@ -11,13 +11,6 @@ namespace DataFilters.UnitTests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        public class SuperHero
-        {
-            public string Name { get; set;  }
-
-            public string Age { get; set; }
-        }
-
         public StringExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
         [Theory]
@@ -73,9 +66,11 @@ namespace DataFilters.UnitTests
                 };
 
                 {
-                    MultiSort<SuperHero> multiSort = new MultiSort<SuperHero>();
-                    multiSort.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-                    multiSort.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age)));
+                    MultiSort<SuperHero> multiSort = new MultiSort<SuperHero>
+                    (
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Age))
+                    );
 
                     yield return new object[]
                     {
@@ -84,9 +79,11 @@ namespace DataFilters.UnitTests
                     };
                 }
                 {
-                    MultiSort<SuperHero> multiSort = new MultiSort<SuperHero>();
-                    multiSort.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-                    multiSort.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending));
+                    MultiSort<SuperHero> multiSort = new MultiSort<SuperHero>
+                    (
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
+                    );
 
                     yield return new object[]
                     {
@@ -109,102 +106,6 @@ namespace DataFilters.UnitTests
             // Assert
             actual.Should()
                 .Be(expected);
-        }
-
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new Sort<SuperHero>("Name"),
-                    new Sort<SuperHero>("Name"),
-                    true,
-                    $"Two distinct {nameof(Sort<SuperHero>)} instances with same properties must be equal"
-                };
-
-                {
-                    Sort<SuperHero> sort = new Sort<SuperHero>("Name");
-                    yield return new object[]
-                    {
-                        sort,
-                        sort,
-                        true,
-                        $"A {nameof(Sort<SuperHero>)} instance is equal to itself"
-                    };
-                }
-
-                yield return new object[]
-                {
-                    new Sort<SuperHero>("Name", Descending),
-                    new Sort<SuperHero>("Name"),
-                    false,
-                    $"Two distinct {nameof(Sort<SuperHero>)} instances with same {nameof(Sort<SuperHero>.Expression)} but different {nameof(Sort<SuperHero>.Direction)} must not be equal"
-                };
-
-                {
-                    MultiSort<SuperHero> first = new MultiSort<SuperHero>();
-                    first.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-                    first.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending));
-
-                    yield return new object[]
-                    {
-                        first,
-                        first,
-                        true,
-                        $"A {nameof(MultiSort<SuperHero>)} instance is equal to itself"
-                    };
-                }
-                {
-                    MultiSort<SuperHero> first = new MultiSort<SuperHero>();
-                    first.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-                    first.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending));
-
-                    MultiSort<SuperHero> second = new MultiSort<SuperHero>();
-                    second.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-                    second.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending));
-
-                    yield return new object[]
-                    {
-                        first,
-                        second,
-                        true,
-                        $"Two distinct {nameof(MultiSort<SuperHero>)} instances holding same data"
-                    };
-                }
-
-                {
-                    MultiSort<SuperHero> first = new MultiSort<SuperHero>();
-                    first.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-                    first.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending));
-
-                    MultiSort<SuperHero> second = new MultiSort<SuperHero>();
-                    second.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending));
-                    second.Add(new Sort<SuperHero>(expression: nameof(SuperHero.Name)));
-
-                    yield return new object[]
-                    {
-                        first,
-                        second,
-                        false,
-                        $"Two distinct {nameof(MultiSort<SuperHero>)} instances holding same data but not same order"
-                    };
-                }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void EqualsTests(ISort<SuperHero> first, object second, bool expected, string reason)
-        {
-            _outputHelper.WriteLine($"{nameof(first)} : '{first}'");
-
-            // Act
-            bool actual = first.Equals(second);
-
-            // Assert
-            actual.Should()
-                .Be(expected, reason);
         }
     }
 }

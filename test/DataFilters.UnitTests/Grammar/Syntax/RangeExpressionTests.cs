@@ -1,15 +1,26 @@
 ﻿using DataFilters.Grammar.Exceptions;
 using DataFilters.Grammar.Syntax;
+
 using FluentAssertions;
 using FluentAssertions.Extensions;
+
 using System;
 using System.Collections.Generic;
+
 using Xunit;
+using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
     public class RangeExpressionTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public RangeExpressionTests(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+        }
+
         [Fact]
         public void IsFilterExpression() => typeof(RangeExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -157,6 +168,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
                 yield return new object[]
                 {
+                    new RangeExpression(min: new ConstantExpression("10")),
+                    null,
+                    false,
+                    $"comparing to null"
+                };
+
+                yield return new object[]
+                {
                     new RangeExpression(max: new ConstantExpression("10")),
                     new RangeExpression(max: new ConstantExpression("10")),
                     true,
@@ -175,14 +194,28 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(EqualCases))]
-        public void TestEquals(RangeExpression first, object second, bool expected, string reason)
+        public void TestEquals(RangeExpression first, object other, bool expected, string reason)
         {
+            _outputHelper.WriteLine($"First instance : {first}");
+            _outputHelper.WriteLine($"Second instance : {other}");
+
             // Act
-            bool actual = first.Equals(second);
+            bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
         }
     }
 }

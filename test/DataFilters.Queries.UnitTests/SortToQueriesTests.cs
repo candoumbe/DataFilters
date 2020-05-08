@@ -35,9 +35,11 @@ namespace DataFilters.Queries.UnitTests
                 };
 
                 {
-                    MultiSort<Person> multiSort = new MultiSort<Person>();
-                    multiSort.Add(new Sort<Person>(nameof(Person.Firstname)));
-                    multiSort.Add(new Sort<Person>(nameof(Person.Lastname)));
+                    MultiSort<Person> multiSort = new MultiSort<Person>
+                    (
+                        new Sort<Person>(nameof(Person.Firstname)),
+                        new Sort<Person>(nameof(Person.Lastname))
+                    );
                     yield return new object[]
                     {
                         multiSort,

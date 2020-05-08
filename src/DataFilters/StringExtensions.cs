@@ -1,6 +1,13 @@
 ﻿using DataFilters;
+
 using FluentValidation.Results;
+
+using System.Linq;
+
 using static DataFilters.SortDirection;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+using System.Runtime.InteropServices;
+#endif
 
 namespace System
 {
@@ -29,26 +36,23 @@ namespace System
                 throw new InvalidSortExpression(sortString);
             }
 
-            ISort<T> sort = null;
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-            Span<string> sorts = sortString.Split(new []{ Separator }, StringSplitOptions.RemoveEmptyEntries)
-                .AsSpan();
+            ReadOnlyMemory<string> sorts = sortString.Split(new []{ Separator }, StringSplitOptions.RemoveEmptyEntries)
+                                                     .AsMemory();
 
 #else
             string[] sorts = sortString.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
 
 #endif
+            ISort<T> sort = null;
 
             if (sorts.Length > 1)
             {
-                MultiSort<T> multiSort = new MultiSort<T>();
-
-                foreach (string item in sorts)
-                {
-                    multiSort.Add(item.ToSort<T>() as Sort<T>);
-                }
-
-                sort = multiSort;
+#if NETSTANDARD2_0 || NETSTANDARD2_1
+                sort = new MultiSort<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToSort<T>() as Sort<T>).ToArray());
+#else
+                sort = new MultiSort<T>(sorts.Select(s => s.ToSort<T>() as Sort<T>).ToArray());
+#endif
             }
             else
             {

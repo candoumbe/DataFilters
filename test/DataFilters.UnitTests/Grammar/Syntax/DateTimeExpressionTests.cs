@@ -79,17 +79,64 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(DateTimeExpression first, object second, bool expected, string reason)
+        public void ImplementsEqualsCorrectly(DateTimeExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {second}");
+            _outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
-            bool actual = first.Equals(second);
+            bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
+        }
+
+        public static IEnumerable<object[]> DeconstructCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new DateTimeExpression(new DateExpression(year: 1983, month: 6, day: 23)),
+                    new DateExpression(year: 1983, month: 6, day: 23),
+                    null
+                };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new TimeExpression(hours: 12, minutes: 25, seconds: 46)),
+                    null,
+                    new TimeExpression(hours: 12, minutes: 25, seconds: 46),
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DeconstructCases))]
+        public void DeconstructTests(DateTimeExpression dateTime, DateExpression expectedDate, TimeExpression expectedTime)
+        {
+            _outputHelper.WriteLine($"DateTimeExpression is {dateTime}");
+
+            // Act
+            (DateExpression date, TimeExpression time) = dateTime;
+
+            // Assert
+            date.Should()
+                .Be(expectedDate);
+            time.Should()
+                .Be(expectedTime);
         }
     }
 }

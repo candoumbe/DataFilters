@@ -1,24 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Utilities;
 
 namespace DataFilters.Grammar.Syntax
 {
     public class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
     {
-        public IEnumerable<FilterExpression> Values { get; }
 
-        public OneOfExpression(params FilterExpression[] values) => Values = values ?? throw new ArgumentNullException(nameof(values));
+        private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new ArrayEqualityComparer<FilterExpression>();
 
-        public bool Equals(OneOfExpression other) => other != null
-            && Values.Exactly(other.Values.Count())
-            && Values.All(value => other.Values.Contains(value))
-            && other.Values.All(value => Values.Contains(value));
+        public IEnumerable<FilterExpression> Values => _values;
 
+        private readonly FilterExpression[] _values;
+
+        public OneOfExpression(params FilterExpression[] values)
+        {
+            if (values is null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+            _values = values.Where(x => x != null)
+                            .ToArray();
+        }
+
+        public bool Equals(OneOfExpression other) => other != null && equalityComparer.Equals(_values, other._values);
+
+        /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OneOfExpression);
 
-        public override int GetHashCode() => Values.GetHashCode();
+        /// <inheritdoc/>
+        public override int GetHashCode() => equalityComparer.GetHashCode(_values);
 
-        public override string ToString() => $"{GetType().Name} : Values -> {string.Join(Environment.NewLine, Values)}";
+        public static bool operator ==(OneOfExpression left, OneOfExpression right) => EqualityComparer<OneOfExpression>.Default.Equals(left, right);
+
+        public static bool operator !=(OneOfExpression left, OneOfExpression right) => !(left == right);
+
+        /// <inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+        {
+            bool equivalent = false;
+
+            if (other is OneOfExpression oneOfExpression)
+            {
+                if (equalityComparer.Equals(oneOfExpression._values, _values))
+                {
+                    equivalent = true;
+                }
+                else
+                {
+                    equivalent = !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any());
+                }
+            }
+
+            return equivalent;
+        }
     }
 }

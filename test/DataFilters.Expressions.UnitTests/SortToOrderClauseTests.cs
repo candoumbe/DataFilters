@@ -83,10 +83,11 @@ namespace DataFilters.Expressions.UnitTests
                         new Hero { Name = "Wonder Woman", Age = 30},
                         new Hero { Name = "Flash", Age = 37}
                     },
-                    new MultiSort<Hero>()
-                        .Add(new Sort<Hero>(nameof(Hero.Age), Ascending))
-                        .Add(new Sort<Hero>(nameof(Hero.Name), Descending))
-                        ,
+                    new MultiSort<Hero>
+                    (
+                        new Sort<Hero>(nameof(Hero.Age), Ascending),
+                        new Sort<Hero>(nameof(Hero.Name), Descending)
+                    ),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
@@ -101,9 +102,11 @@ namespace DataFilters.Expressions.UnitTests
                         new Hero { Name = "Wonder Woman", Age = 30},
                         new Hero { Name = "Flash", Age = 37}
                     },
-                    new MultiSort<Hero>()
-                        .Add(new Sort<Hero>(nameof(Hero.Name), Descending))
-                        .Add(new Sort<Hero>(nameof(Hero.Age), Ascending)),
+                    new MultiSort<Hero>
+                    (
+                        new Sort<Hero>(nameof(Hero.Name), Descending),
+                        new Sort<Hero>(nameof(Hero.Age), Ascending)
+                    ),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
                         && heroes.First().Name == "Wonder Woman"
                         && heroes.Last().Name == "Batman"

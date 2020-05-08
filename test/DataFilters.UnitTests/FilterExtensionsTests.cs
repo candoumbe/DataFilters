@@ -375,5 +375,21 @@ namespace DataFilters.UnitTests
                 .NotBeSameAs(expected).And
                 .Be(expected);
         }
+
+
+        [Fact]
+        public void ToFilterThrowsArgumentNullExceptionWhenParameterIsNull()
+        {
+            // Act
+#pragma warning disable IDE0039 // Utiliser une fonction locale
+            Action action = () => FilterExtensions.ToFilter<Person>(null);
+#pragma warning restore IDE0039 // Utiliser une fonction locale
+
+            // Assert
+            action.Should()
+                .Throw<ArgumentNullException>().Which
+                .ParamName.Should()
+                .NotBeNullOrWhiteSpace();
+        }
     }
 }

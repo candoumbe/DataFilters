@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Common;
 using FluentAssertions.Extensions;
 using Newtonsoft.Json;
 using System;
@@ -41,6 +42,12 @@ namespace DataFilters.UnitTests
 
         public class Henchman : SuperHero
         {
+        }
+
+        public class Appointment
+        {
+            public string Name { get; set; }
+            public DateTimeOffset? Date { get; set; }
         }
 
         public FilterToExpressionTests(ITestOutputHelper output) => _output = output;
@@ -541,25 +548,11 @@ namespace DataFilters.UnitTests
         }
 
         [Fact]
-        public void ToFilterThrowsArgumentNullExceptionWhenParameterIsNull()
-        {
-            // Act
-#pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => FilterExtensions.ToFilter<SuperHero>(null);
-#pragma warning restore IDE0039 // Utiliser une fonction locale
-
-            // Assert
-            action.Should().Throw<ArgumentNullException>().Which
-                .ParamName.Should()
-                .NotBeNullOrWhiteSpace();
-        }
-
-        [Fact]
         public void ToExpressionThrowsArgumentNullExceptionWhenParameterIsNull()
         {
             // Act
 #pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => FilterToExpressions.ToExpression<SuperHero>(null);
+            Action action = () => ((IFilter)null).ToExpression<Person>();
 #pragma warning restore IDE0039 // Utiliser une fonction locale
 
             // Assert
@@ -601,6 +594,55 @@ namespace DataFilters.UnitTests
             superHeroesFiltered.Should()
                 .HaveSameCount(superHeroes).And
                 .OnlyContain(x => superHeroes.Once(sh => x.Firstname == sh.Firstname && x.Lastname == sh.Lastname));
+        }
+
+        public static IEnumerable<object[]> DateTimeOffsetFilterCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new Appointment{ Name = "Medical appointment", Date = 23.July(2012) },
+                        new Appointment{ Name = "Medical appointment", Date = 10.September(2012) },
+                    },
+                    new Filter(field: nameof(Appointment.Date), GreaterThan, 23.July(2012)),
+                    (Expression<Func<Appointment, bool>>)(app => app.Date > 23.July(2012))
+                };
+
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new Appointment{ Name = "Medical appointment", Date = 23.July(2012) },
+                        new Appointment{ Name = "Medical appointment", Date = 10.September(2012) },
+                    },
+                    new Filter(field: nameof(Appointment.Date), GreaterThanOrEqual, 23.July(2012)),
+                    (Expression<Func<Appointment, bool>>)(app => app.Date >= 23.July(2012))
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DateTimeOffsetFilterCases))]
+        public void Filter_DateTimeOffset(IEnumerable<Appointment> appointments, IFilter filter, Expression<Func<Appointment, bool>> expression)
+        {
+            _output.WriteLine($"Filtering {JsonConvert.SerializeObject(appointments)}");
+            _output.WriteLine($"Filter under test : {filter}");
+            _output.WriteLine($"Reference expression : {expression.Body}");
+
+            // Act
+            Expression<Func<Appointment, bool>> buildResult = filter.ToExpression<Appointment>();
+            IEnumerable<Appointment> filteredResult = appointments
+                .Where(buildResult.Compile())
+                .ToList();
+            _output.WriteLine($"Current expression : {buildResult.Body}");
+
+            // Assert
+            filteredResult.Should()
+                .NotBeNull()
+                .And.BeEquivalentTo(appointments?.Where(expression.Compile()));
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Queries.Core.Parts.Clauses;
+using Queries.Core.Parts.Columns;
 using System;
 using System.Linq;
 
@@ -38,6 +39,9 @@ namespace DataFilters
                                 break;
                             case FilterOperator.LessThan:
                                 clauseOperator = ClauseOperator.LessThan;
+                                break;
+                             case FilterOperator.LessThanOrEqualTo:
+                                clauseOperator = ClauseOperator.LessThanOrEqualTo;
                                 break;
                             case FilterOperator.GreaterThan:
                                 clauseOperator = ClauseOperator.GreaterThan;
@@ -80,20 +84,21 @@ namespace DataFilters
                                 }
                                 break;
                             default:
-                                throw new ArgumentOutOfRangeException($"Unsupported '{f.Operator}' operator");
+                                throw new ArgumentOutOfRangeException(nameof(Filter.Operator), f.Operator, $"Unsupported operator");
                         }
 
                         clause = new WhereClause(f.Field.Field(), clauseOperator, value switch
                         {
-                            int i=> i.Literal(),
-                            long l => l.Literal(),
-                            float floatValue => floatValue.Literal(),
                             bool b => b.Literal(),
                             DateTime date => date.Literal(),
                             string s => s.Literal(),
                             null => null,
-                            _ => throw new ArgumentOutOfRangeException(nameof(value), $"Unexpected value : {value}")
-
+                            long l => l.Literal(),
+                            float floatValue => floatValue.Literal(),
+                            decimal decimalValue => decimalValue.Literal(),
+                            double doubleValue => doubleValue.Literal(),
+                            int intValue => intValue.Literal(),
+                            _ => throw new ArgumentOutOfRangeException(nameof(value), value, $"Unexpected value when building WhereClause")
                         }
                         );
                         break;

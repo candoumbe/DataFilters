@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Utilities;
 
 namespace DataFilters
 {
@@ -8,26 +9,42 @@ namespace DataFilters
     {
         public IEnumerable<Sort<T>> Sorts => _sorts;
 
-        private readonly IList<Sort<T>> _sorts;
+        private readonly Sort<T>[] _sorts;
 
-        public MultiSort() => _sorts = new List<Sort<T>>();
+        private static readonly ArrayEqualityComparer<Sort<T>> equalityComparer = new ArrayEqualityComparer<Sort<T>>();
 
-        public MultiSort<T> Add(Sort<T> sort)
-        {
-            _sorts.Add(sort);
-
-            return this;
-        }
+        /// <summary>
+        /// Builds a new <see cref="MultiSort{T}"/> instance
+        /// </summary>
+        public MultiSort(params Sort<T>[] sorts) => _sorts = sorts?.Where(s => s != null)
+                                                                   .ToArray();
 
         public bool Equals(ISort<T> other) => Equals(other as MultiSort<T>);
 
         public bool Equals(MultiSort<T> other) => !(other is null)
-            && Sorts.SequenceEqual(other?.Sorts);
+            && equalityComparer.Equals(_sorts, other._sorts);
 
+        /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as MultiSort<T>);
 
-        public override int GetHashCode() => Sorts.GetHashCode();
+        public bool IsEquivalentTo(ISort<T> other)
+        {
+            return other is MultiSort<T> otherMultisort && Sorts.SequenceEqual(otherMultisort.Sorts);
+        }
 
+        /// <inheritdoc/>
+        public override int GetHashCode() => equalityComparer.GetHashCode(_sorts);
+        
         public override string ToString() => $"{nameof(Sorts)}:[{string.Join(",", Sorts.Select(x => x.ToString()))}]";
+
+        public static bool operator ==(MultiSort<T> left, MultiSort<T> right)
+        {
+            return EqualityComparer<MultiSort<T>>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(MultiSort<T> left, MultiSort<T> right)
+        {
+            return !(left == right);
+        }
     }
 }

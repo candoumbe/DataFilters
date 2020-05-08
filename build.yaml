@@ -4,7 +4,7 @@ variables :
   - name: 'Parameters.projects'
     value: '**/*.csproj'
   - name: 'Parameters.projects.tests'
-    value: '**/*Tests/*.csproj'
+    value: '**/*Tests.csproj'
   - name: 'majorVersion'
     value: '1'
   - name: 'minorVersion'
@@ -15,6 +15,10 @@ variables :
     value: 'DataFilters'
   - name: 'azureArtifactFeed'
     value: 'Filters'
+  - name: 'minimumTestsCoverage'
+    value: 90
+  - name: 'coverletOutputFormat'
+    value: 'cobertura%2cjson'
   
 pr:
   - master
@@ -34,25 +38,11 @@ trigger:
 
 
 pool:
-  name: Hosted VS2017
+  vmImage: windows-latest
 #Your build pipeline references an undefined variable named ‘Parameters.projects’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 #Your build pipeline references a secret variable named ‘github.apiKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
 
 steps:
-- task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 3.x'
-  inputs:
-    version: 3.x
-- task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 3.0.100'
-  inputs:
-    version: 3.0.100
-
-- task: UseDotNet@2
-  displayName: 'Use .NET Core sdk 2.2.401'
-  inputs:
-    version: 2.2.401
-
 - task: DotNetCoreCLI@2
   displayName: 'dotnet restore'
   inputs:
@@ -69,35 +59,52 @@ steps:
     arguments: '--no-restore -c $(configuration)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet test'
+  displayName: 'Run tests and collect code coverage for DataFilters'
   inputs:
     command: test
-    projects: '$(Parameters.projects.tests)'
-    arguments: '--no-build -c $(configuration)'
+    projects: '**/*/DataFilters.*Tests.csproj'
+    arguments: >-
+      --no-build -c $(configuration)
+      /p:CoverletOutput=$(Agent.TempDirectory)\ /p:CollectCoverage=true
+      /p:ExcludeByAttribute=Obsolete
+      /p:MergeWith="$(Agent.TempDirectory)\coverage.json"
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet pack'
+  displayName: 'Run tests and collect code coverage for DataFilters.Expressions'
   inputs:
-    command: pack
-    nobuild: true
-    versioningScheme: byPrereleaseNumber
-    majorVersion: '$(majorVersion)'
-    minorVersion: '$(minorVersion)'
-    patchVersion: '$(patchVersion)'
-  condition: succeededOrFailed()
+    command: test
+    projects: '**/*/DataFilters.Expressions.*Tests.csproj'
+    arguments: >-
+      --no-build -c $(configuration)
+      /p:CoverletOutput=$(Agent.TempDirectory)\
+      /p:CollectCoverage=true
+      /p:ExcludeByAttribute=Obsolete
+      /p:MergeWith="$(Agent.TempDirectory)\coverage.json"
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet push'
+  displayName: 'Run tests and collect code coverage for DataFilters.Queries'
   inputs:
-    command: push
-    publishVstsFeed: '$(azureArtifactFeed)'
-    majorVersion: '$(majorVersion)'
-    minorVersion: '$(minorVersion)'
-    patchVersion: '$(patchVersion)'
-  enabled: false
+    command: test
+    projects: '**/*/DataFilters.Queries.*Tests.csproj'
+    arguments: >-
+      --no-build -c $(configuration)
+      /p:CoverletOutput="$(Agent.TempDirectory)\coverage.json" /p:CollectCoverage=true
+      /p:ExcludeByAttribute=Obsolete
+      /p:MergeWith="$(Agent.TempDirectory)\coverage.json"
+      /p:CoverletOutputFormat=cobertura
 
-- task: nkdagility.gittasks.gitsync-task.gitsync@1
-  displayName: 'Git Publish to https://$(github.apiKey)@github.com/candoumbe/$(projectName).git'
+- task: DotNetCoreCLI@2
   inputs:
-    GitRepoUrl: 'https://$(github.apiKey)@github.com/candoumbe/$(projectName).git'
-  condition: succeededOrFailed()
+    command: custom
+    custom: tool
+    arguments: install -g dotnet-reportgenerator-globaltool --ignore-failed-sources
+  displayName: Install ReportGenerator tool
+  
+- script: reportgenerator -reports:$(Agent.TempDirectory)\**\*.cobertura.xml -targetdir:$(Build.SourcesDirectory)\coverlet\reports -reporttypes:"Badges;Cobertura"
+  displayName: Create reports
+  
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: $(Build.SourcesDirectory)\coverlet\reports\Cobertura.xml  

@@ -101,17 +101,28 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(DateExpression first, object second, bool expected, string reason)
+        public void ImplementsEqualsCorrectly(DateExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {second}");
+            _outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
-            bool actual = first.Equals(second);
+            bool actual = first.Equals(other);
+            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
+            if (expected)
+            {
+                actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason);
+            }
+            else
+            {
+                actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason);
+            }
         }
     }
 }

@@ -33,6 +33,25 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => HashCode.Combine(Left, Right);
 #endif
 
-        public override string ToString() => $"{nameof(OrExpression)} : {{{nameof(Left)} ({Left.GetType().Name}) -> {Left}, {{{nameof(Right)} ({Right.GetType().Name}) -> {Right}}}";
+        public override string ToString() => new
+        {
+            Left = new { Type = Left.GetType().Name, Left },
+            Right = new { Type = Right.GetType().Name, Right },
+        }.Jsonify();
+
+        /// <inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+        {
+            bool equivalent = false;
+
+            if (other is OrExpression or)
+            {
+                equivalent = or.Right.Equals(Right)
+                    ? or.Left.Equals(Left)
+                    : or.Left.Equals(Right) && or.Right.Equals(Left);
+            }
+
+            return equivalent;
+        }
     }
 }

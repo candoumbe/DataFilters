@@ -54,9 +54,13 @@ namespace DataFilters
         public Filter(string field, FilterOperator @operator, object value = null)
         {
             Field = field;
-            if (@operator == FilterOperator.EqualTo && value == null)
+            if (@operator == FilterOperator.EqualTo && value is null)
             {
                 Operator = FilterOperator.IsNull;
+            }
+            else if(@operator == FilterOperator.NotEqualTo && value is null)
+            {
+                Operator = FilterOperator.IsNotNull;
             }
             else
             {
