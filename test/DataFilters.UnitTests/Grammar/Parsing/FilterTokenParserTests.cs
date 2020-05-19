@@ -414,8 +414,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
                 yield return new object[]
                 {
-                    "![10 TO *]",
-                    new NotExpression(new RangeExpression(min : new ConstantExpression("10")))
+                    "![10 TO *[",
+                    new NotExpression(new RangeExpression(min : new BoundaryExpression(new ConstantExpression("10"), included: true)))
                 };
 
                 yield return new object[]
@@ -512,42 +512,51 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "[10 TO 20]",
-                    new RangeExpression(min : new ConstantExpression("10"), max: new ConstantExpression("20"))
+                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included: true),
+                                        max: new BoundaryExpression(new ConstantExpression("20"), included : true))
                 };
 
                 yield return new object[]
                 {
-                    "[* TO 20]",
-                    new RangeExpression(max: new ConstantExpression("20"))
+                    "]* TO 20]",
+                    new RangeExpression(max: new BoundaryExpression(new ConstantExpression("20"), included: true))
                 };
 
                 yield return new object[]
                 {
-                    "[10 TO *]",
-                    new RangeExpression(min: new ConstantExpression("10"))
+                    "[10 TO *[",
+                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : true))
                 };
 
                 yield return new object[]
                 {
                     "[2010-06-25 TO 2010-06-29]",
                     new RangeExpression(
-                        min: new DateExpression(year: 2010, month: 06, day:25),
-                        max: new DateExpression(year: 2010, month: 06, day:29)
+                        min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
+                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
                     )
                 };
 
                 yield return new object[]
                 {
-                    "[2010-06-25 TO *]",
+                    "[2010-06-25 TO *[",
+                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true)
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "[13:30:00 TO *[",
+                    new RangeExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : true))
+                };
+
+                yield return new object[]
+                {
+                    "]2010-06-25 TO 2010-06-29[",
                     new RangeExpression(
-                        min: new DateExpression(year: 2010, month: 06, day:25)
+                        min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
+                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
                     )
-                };
-
-                yield return new object[]
-                {
-                    "[13:30:00 TO *]",
-                    new RangeExpression(min: new TimeExpression(hours: 13, minutes: 30))
                 };
             }
         }

@@ -13,9 +13,11 @@ with a syntax that's not bound to a peculiar datasource.
         <li><a href='#starts-with-expression'>Starts with</a></li>
         <li><a href='#ends-with-expression'>Ends with</a></li>
         <li><a href='#contains-expression'>Contains</a></li>
-        <li><a href='#gte-expression'>Greater than or equal</a></li>
-        <li><a href='#lte-expression'>Less than or equal</a></li>
-        <li><a href='#btw-expression'>Between</a></li>
+        <ul type='bullet'><a href='#range-expressions'></>
+            <li><a href='#gte-expression'>Greater than or equal</a></li>
+            <li><a href='#lte-expression'>Less than or equal</a></li>
+            <li><a href='#btw-expression'>Between</a></li>
+        </ul>
     </ol>
     <li><a href="#special-characters">Special character handling</li>
     <li><a href='#sorting'>Sorting</a></li>
@@ -100,23 +102,34 @@ Search for `vigilante` resources that contains `bat` in the `nickname` property.
 
 
 
-**<a href='#' id='gte-expression'>Greater than or equal</a>**
+**<a href='#' id='range-expressions'>Range expressions</a>**
+
+Range expressions are delimited by upper and a lower bound. The generic syntax is 
+
+`<field>=<min> TO <max>`
+
+where
+- `field` is the name of the property current range expression will be apply to
+- `min` is the lowest bound of the interval
+- `max` is the highest bound of the interval
+
+***<a href='#' id='gte-expression'>Greater than or equal</a>***
 
 Search for `vigilante` resources where the value of `age` property is greater than or equal to `18`
 
 ```csharp
-"age=[18 TO *]"
+"age=[18 TO *["
 ```
 will result in a [IFilter][class-ifilter] instance equivalent to
 ```csharp
 IFilter filter = new Filter("age", GreaterThanOrEqualTo, 18);
 ```
 
-**<a href='#' id='lte-expression'>Less than or equal</a>**
+***<a href='#' id='lte-expression'>Less than or equal</a>***
 
 Search for `vigilante` resource where the value of `age` property is lower than `30`
 ```csharp
-"age=[* TO 30]"
+"age=]* TO 30]"
 ```
 will be parsed into a [IFilter][class-filter]  equivalent to
 ```csharp
@@ -142,6 +155,14 @@ IFilter filter = new MultiFilter
     }
 }
 ```
+
+
+<strong><u>Remarks</u></strong>
+
+You can exclude the lower (resp. upper) bound by using `]` (resp. `[`).
+`age=]20 TO 35[` means `age` strictly greater than `20` and  strictly less than`35` 
+`age=[20 TO 35[` means `age` greater than or equal to `20` and  strictly less  than`35` 
+`age=]20 TO 35]` means `age` greater than `20` and  less than or equal to `35` 
 
 #### Logical operators
 

@@ -62,33 +62,10 @@ steps:
   displayName: 'Run tests and collect code coverage for DataFilters'
   inputs:
     command: test
-    projects: '**/*/DataFilters.*Tests.csproj'
+    projects: '$(Parameters.projects.tests)'
     arguments: >-
       --no-build -c $(configuration)
       /p:CoverletOutput=$(Agent.TempDirectory)\ /p:CollectCoverage=true
-      /p:ExcludeByAttribute=Obsolete
-      /p:MergeWith="$(Agent.TempDirectory)\coverage.json"
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run tests and collect code coverage for DataFilters.Expressions'
-  inputs:
-    command: test
-    projects: '**/*/DataFilters.Expressions.*Tests.csproj'
-    arguments: >-
-      --no-build -c $(configuration)
-      /p:CoverletOutput=$(Agent.TempDirectory)\
-      /p:CollectCoverage=true
-      /p:ExcludeByAttribute=Obsolete
-      /p:MergeWith="$(Agent.TempDirectory)\coverage.json"
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run tests and collect code coverage for DataFilters.Queries'
-  inputs:
-    command: test
-    projects: '**/*/DataFilters.Queries.*Tests.csproj'
-    arguments: >-
-      --no-build -c $(configuration)
-      /p:CoverletOutput="$(Agent.TempDirectory)\coverage.json" /p:CollectCoverage=true
       /p:ExcludeByAttribute=Obsolete
       /p:MergeWith="$(Agent.TempDirectory)\coverage.json"
       /p:CoverletOutputFormat=cobertura

@@ -161,7 +161,7 @@ namespace DataFilters.UnitTests
 
                 yield return new object[]
                 {
-                    "Height=[100 TO *]",
+                    "Height=[100 TO *[",
                     new Filter("Height", GreaterThanOrEqual, 100)
                 };
 
@@ -181,7 +181,21 @@ namespace DataFilters.UnitTests
 
                 yield return new object[]
                 {
-                    "Height=[* TO 200]",
+                    "Height=]100 TO 200[",
+                    new MultiFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("Height", GreaterThan, 100),
+                            new Filter("Height", FilterOperator.LessThan, 200)
+                        }
+                    }
+                };
+
+                yield return new object[]
+                {
+                    "Height=]* TO 200]",
                      new Filter("Height", LessThanOrEqualTo, 200)
                 };
 

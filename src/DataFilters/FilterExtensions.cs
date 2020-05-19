@@ -122,20 +122,24 @@ namespace DataFilters
                         break;
                     case RangeExpression range:
 
-                        static ConstantExpression ConvertBounderyExpressionToConstantExpression(IBoundaryExpression input)
-                            => input switch
+                        static (ConstantExpression constantExpression, bool included)  ConvertBounderyExpressionToConstantExpression(BoundaryExpression input)
+                            => input?.Expression switch
                             {
-                                ConstantExpression ce => ce,
-                                DateTimeExpression { Time: null } dateTime => new ConstantExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}"),
-                                DateTimeExpression { Date: null } dateTime => new ConstantExpression($"{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"),
-                                DateTimeExpression dateTime => new ConstantExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"),
-                                AsteriskExpression asterisk => null, // because this is equivalent to an unbounded range
-                                null => null,
+                                ConstantExpression ce => (ce, input.Included)  ,
+                                DateTimeExpression { Time: null } dateTime => (new ConstantExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}"), input.Included),
+                                DateTimeExpression { Date: null } dateTime => (new ConstantExpression($"{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
+                                DateTimeExpression dateTime => (new ConstantExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
+                                AsteriskExpression asterisk => default, // because this is equivalent to an unbounded range
+                                null => default,
                                 _ => throw new ArgumentOutOfRangeException($"Unsupported boundery type {input.GetType()}")
                             };
 
-                        ConstantExpression min = ConvertBounderyExpressionToConstantExpression(range.Min);
-                        ConstantExpression max = ConvertBounderyExpressionToConstantExpression(range.Max);
+                        (ConstantExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);
+                        (ConstantExpression constantExpression, bool included) max = ConvertBounderyExpressionToConstantExpression(range.Max);
+
+                        FilterOperator minOperator = min.included ? GreaterThanOrEqual : GreaterThan;
+                        FilterOperator maxOperator = max.included ? LessThanOrEqualTo : LessThan;
+
                         if (min != default && max != default)
                         {
                             filter = new MultiFilter
@@ -143,18 +147,18 @@ namespace DataFilters
                                 Logic = FilterLogic.And,
                                 Filters = new IFilter[]
                                 {
-                                    new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(min.Value)),
-                                    new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(max.Value))
+                                    new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value)),
+                                    new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value))
                                 }
                             };
                         }
                         else if (min != default)
                         {
-                            filter = new Filter(propertyName, GreaterThanOrEqual, tc.ConvertFrom(min.Value));
+                            filter = new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value));
                         }
                         else
                         {
-                            filter = new Filter(propertyName, LessThanOrEqualTo, tc.ConvertFrom(max.Value));
+                            filter = new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value));
                         }
                         break;
                     default:

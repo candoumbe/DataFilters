@@ -6,7 +6,7 @@
     <Product />
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
-    <PackageReleaseNotes>Added conversions of "sort" expressions</PackageReleaseNotes>
+    <PackageReleaseNotes>New range expression syntaax now supports including/excluding lower upper boundaries</PackageReleaseNotes>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
     <PackageProjectUrl></PackageProjectUrl>

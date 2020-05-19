@@ -126,39 +126,148 @@ namespace DataFilters.Grammar.Parsing
         {
             get
             {
-                return from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                return
+                        // Case [ min TO max ] 
+                        (from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
 
-                       from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
-                          .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
-                          .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                        from min in DateAndTime.Try()
+                                               .Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                               .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                               .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
 
-                       from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to").Named("Range separator")
-                          .Between(Whitespace, Whitespace)
+                        from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
+                                       .Named("Range separator")
+                                       .Between(Whitespace, Whitespace)
 
-                       from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
-                          .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
-                          .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                          .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
+                        from max in DateAndTime.Try()
+                                               .Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                               .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                               .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
 
-                       from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                        from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
-                       where min != default || max != default
-                       select new RangeExpression(
-                           min switch
-                           {
-                               AsteriskExpression _ => null,
-                               ConstantExpression constant => constant,
-                               DateTimeExpression dateTime => dateTime,
-                               _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
-                           },
-                           max switch
-                           {
-                               AsteriskExpression _ => null,
-                               ConstantExpression constant => constant,
-                               DateTimeExpression dateTime => dateTime,
-                               _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
-                           }
-                      );
+                        where min != default || max != default
+                        select new RangeExpression(
+                            min : new BoundaryExpression(min switch
+                            {
+                                ConstantExpression constant => constant,
+                                DateTimeExpression dateTime => dateTime,
+                                _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                            }, included: true),
+                            max : new BoundaryExpression(max switch
+                            {
+                                ConstantExpression constant => constant,
+                                DateTimeExpression dateTime => dateTime,
+                                _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                            }, included : true)
+                       )).Try()
+                      // Case ] min TO max ] : lower bound excluded from the range
+                      .Or(
+                            from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                   .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                   .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                   .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                            from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
+                                           .Named("Range separator")
+                                           .Between(Whitespace, Whitespace)
+
+                            from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                   .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                   .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                            from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+
+                            where min != default || max != default
+                            select new RangeExpression(
+                                min: new BoundaryExpression(min switch
+                                {
+                                    AsteriskExpression asterisk => asterisk,
+                                    ConstantExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                }, included: false),
+                                max: new BoundaryExpression(max switch
+                                {
+                                    ConstantExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                }, included : true)
+                           )
+                        ).Try()
+                      // Case syntax [ min TO max [ : upper bound excluded from the range
+                      .Or(
+                            from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                   .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                   .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                            from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
+                                           .Named("Range separator")
+                                           .Between(Whitespace, Whitespace)
+
+                            from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                   .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                   .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                   .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                            from end in Token.EqualTo(FilterToken.OpenSquaredBracket)
+
+                            where min != default || max != default
+                            select new RangeExpression(
+                                min :new BoundaryExpression(min switch
+                                {
+                                    ConstantExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                }, included: true),
+                                max : new BoundaryExpression(max switch
+                                {
+                                    AsteriskExpression asterisk => asterisk,
+                                    ConstantExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                }, included: false)
+                           )
+                        ).Try()
+                      // Case  ] min TO max [ : lower and upper bounds excluded from the range
+                      .Or(
+                            from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                   .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                   .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                   .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                            from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
+                                           .Named("Range separator")
+                                           .Between(Whitespace, Whitespace)
+
+                            from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                   .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                   .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                   .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
+
+                            from end in Token.EqualTo(FilterToken.OpenSquaredBracket)
+
+                            where min != default || max != default
+                            select new RangeExpression(
+                                min: new BoundaryExpression(min switch
+                                {
+                                    AsteriskExpression asterisk => asterisk,
+                                    ConstantExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                }, included: false),
+                                max: new BoundaryExpression(max switch
+                                {
+                                    AsteriskExpression asterisk => asterisk,
+                                    ConstantExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                }, included: false)
+                           )
+                        );
             }
         }
 

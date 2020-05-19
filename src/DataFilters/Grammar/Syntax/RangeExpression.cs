@@ -1,5 +1,6 @@
 ﻿using DataFilters.Grammar.Exceptions;
 using System;
+using System.Runtime.Serialization;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -11,12 +12,12 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// Lower bound of the current instance
         /// </summary>
-        public IBoundaryExpression Min { get; }
+        public BoundaryExpression Min { get; }
 
         /// <summary>
         /// Upper bound of the current instance
         /// </summary>
-        public IBoundaryExpression Max { get; }
+        public BoundaryExpression Max { get; }
 
         /// <summary>
         /// Builds a new <see cref="RangeExpression"/> instance
@@ -31,48 +32,90 @@ namespace DataFilters.Grammar.Syntax
         ///     <item>both<paramref name="min"/> is <see cref="AsteriskExpression"/> and <paramref name="max"/> <c>null</c>.</item>
         /// </list>
         /// </exception>
-        public RangeExpression(IBoundaryExpression min = null, IBoundaryExpression max = null)
+        public RangeExpression(BoundaryExpression min = null, BoundaryExpression max = null)
         {
-            switch (min)
+            if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
             {
-                case AsteriskExpression _ when max is AsteriskExpression:
-                    throw new IncorrectBoundaryException(nameof(max), $"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
-                case AsteriskExpression _ when max is null:
-                    throw new IncorrectBoundaryException(nameof(max), $"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
-                case DateExpression _ when !(max is DateExpression || max is TimeExpression || max is DateTimeExpression || max is null):
-                    throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
-                case ConstantExpression _ when !(max is AsteriskExpression || max is ConstantExpression || max is null):
-                    throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
-                case null when max is null:
-                    throw new ArgumentNullException($"{nameof(min)} or {nameof(max)} must not be null.");
-                case TimeExpression _ when !(max is TimeExpression || max is null):
-                    throw new BoundariesTypeMismatchException(nameof(max), $"{nameof(max)} must be a {nameof(TimeExpression)}");
+                throw new IncorrectBoundaryException(nameof(max), $"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
             }
-          Min = min switch{
+
+            if (min?.Expression is AsteriskExpression && max is null)
+            {
+                throw new IncorrectBoundaryException(nameof(max), $"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
+            }
+
+            if (min?.Expression is DateExpression && !(max is null || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
+            {
+                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
+            }
+
+            if (min?.Expression is ConstantExpression && !(max is null || max.Expression is ConstantExpression || max.Expression is AsteriskExpression))
+            {
+                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
+            }
+
+            if (min is null && max is null)
+            {
+                throw new ArgumentNullException($"{nameof(min)} or {nameof(max)} must not be null.");
+            }
+
+            if (min?.Expression is TimeExpression && !(max is null || max.Expression is TimeExpression))
+            {
+                throw new BoundariesTypeMismatchException(nameof(max), $"{nameof(max)} must be a {nameof(TimeExpression)}");
+            }
+
+            Min = min?.Expression switch
+            {
                 DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
                 {
-                    (null, { }) => time,
-                    ({ }, null) => date,
-                    _ => new DateTimeExpression(date, time)
+                    (null, { }) => new BoundaryExpression(time, included: min.Included),
+                    ({ }, null) => new BoundaryExpression(date, included: min.Included),
+                    _ => new BoundaryExpression(new DateTimeExpression(date, time), included: min.Included)
                 },
                 null => null,
+                AsteriskExpression _ => null,
                 _ => min
             };
-            Max = max switch
+            Max = max?.Expression switch
             {
                 DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
                 {
-                    (null, { }) => time,
-                    ({ }, null)  => date,
-                    _ => new DateTimeExpression(date, time)
+                    (null, { }) => new BoundaryExpression(time, included: max.Included),
+                    ({ }, null) => new BoundaryExpression(date, included: max.Included),
+                    _ => new BoundaryExpression(new DateTimeExpression(date, time), included: max.Included)
                 },
                 null => null,
-                TimeExpression time when min is DateTimeExpression minDateTime => new DateTimeExpression(minDateTime.Date, time),
+                AsteriskExpression _ => null,
+                TimeExpression time when min?.Expression is DateTimeExpression minDateTime => new BoundaryExpression(new DateTimeExpression(minDateTime.Date, time), included: max.Included),
                 _ => max
             };
         }
 
-        public bool Equals(RangeExpression other) => (Min, Max).Equals((other?.Min, other?.Max));
+        public bool Equals(RangeExpression other)
+        {
+            bool equals = false;
+
+            if (other != null)
+            {
+                if (Min is null)
+                {
+                    if (other.Min is null)
+                    {
+                        equals = Max is null
+                            ? other.Max is null
+                            : Max.Equals(other.Max);
+                    }
+                }
+                else if(Min.Equals(other.Min))
+                {
+                    equals = Max is null
+                        ? other.Max is null
+                        : Max.Equals(other.Max);
+                }
+            }
+
+            return equals;
+        }
 
         public override bool Equals(object obj) => Equals(obj as RangeExpression);
 
