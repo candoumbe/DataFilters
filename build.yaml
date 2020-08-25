@@ -84,4 +84,6 @@ steps:
   displayName: 'Publish code coverage'
   inputs:
     codeCoverageTool: Cobertura
-    summaryFileLocation: $(Build.SourcesDirectory)\coverlet\reports\Cobertura.xml  
+    summaryFileLocation: $(Build.SourcesDirectory)\coverlet\reports\Cobertura.xml
+
+- task: WhiteSource Bolt@20
