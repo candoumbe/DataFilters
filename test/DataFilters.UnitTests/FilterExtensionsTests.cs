@@ -390,7 +390,6 @@ namespace DataFilters.UnitTests
                 .Be(expected);
         }
 
-
         [Fact]
         public void ToFilterThrowsArgumentNullExceptionWhenParameterIsNull()
         {

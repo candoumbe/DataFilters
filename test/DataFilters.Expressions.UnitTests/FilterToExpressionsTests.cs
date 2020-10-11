@@ -38,6 +38,8 @@ namespace DataFilters.UnitTests
             public DateTimeOffset? LastBattleDate { get; set; }
 
             public Henchman Henchman { get; set; }
+
+            public IEnumerable<string> Powers { get; set; } = Enumerable.Empty<string>();
         }
 
         public class Henchman : SuperHero
@@ -147,6 +149,22 @@ namespace DataFilters.UnitTests
                     },
                     (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (1.January(2007) < item.LastBattleDate) && item.LastBattleDate < 31.December(2012))
                 };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero {
+                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        },
+                        new SuperHero
+                        {
+                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                            Powers = new [] { "super strength", "heat vision" }
+                        }
+                    },
+                    new Filter(field : nameof(SuperHero.Powers), @operator : EqualTo, value: "heat"),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Powers.Any(power => power == "heat"))
+                };
             }
         }
 
@@ -239,6 +257,22 @@ namespace DataFilters.UnitTests
                     new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : NotEqualTo, value: "Dick"),
                     (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick")
                 };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero {
+                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        },
+                        new SuperHero
+                        {
+                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                            Powers = new [] { "super strength", "heat vision" }
+                        }
+                    },
+                    new Filter(field : nameof(SuperHero.Powers), @operator : IsEmpty),
+                    (Expression<Func<SuperHero, bool>>)(item => !item.Powers.Any())
+                };
             }
         }
 
@@ -283,6 +317,22 @@ namespace DataFilters.UnitTests
                     },
                     new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : IsNotEmpty),
                     (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname != string.Empty)
+                };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero {
+                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        },
+                        new SuperHero
+                        {
+                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                            Powers = new [] { "super strength", "heat vision" }
+                        }
+                    },
+                    new Filter(field : nameof(SuperHero.Powers), @operator : IsNotEmpty),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Powers.Any())
                 };
             }
         }
