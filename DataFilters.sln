@@ -30,12 +30,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.Queries.UnitTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.Queries", "src\DataFilters.Queries\DataFilters.Queries.csproj", "{810E8E8B-9900-4C42-9391-306246CD166A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFCB995-FC9F-492A-86C8-00A40664B76E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9AFCB995-FC9F-492A-86C8-00A40664B76E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFCB995-FC9F-492A-86C8-00A40664B76E}.Release|Any CPU.ActiveCfg = Release|Any CPU
