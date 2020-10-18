@@ -4,7 +4,7 @@ using Newtonsoft.Json.Serialization;
 namespace DataFilters.Converters
 {
     /// <summary>
-    /// Converter that specifies that enum
+    /// Converter that specifies that enum members should be converted using CamelCaseNamingStrategy
     /// </summary>
     public class CamelCaseEnumTypeConverter : StringEnumConverter
     {

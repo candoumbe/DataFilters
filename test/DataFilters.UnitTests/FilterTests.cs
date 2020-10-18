@@ -11,7 +11,11 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
+#if NETCOREAPP2_1
 using static Newtonsoft.Json.JsonConvert;
+#else
+using static System.Text.Json.JsonSerializer;
+#endif
 
 namespace DataFilters.UnitTests
 {
@@ -57,7 +61,7 @@ namespace DataFilters.UnitTests
                 {
                     yield return new object[]
                     {
-                        $"{{ field = 'Firstname', operator = '{item.Key}',  Value = 'Batman'}}",
+                        @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
                         (Expression<Func<IFilter, bool>>)(result => result is Filter
                             && "Firstname".Equals(((Filter) result).Field)
                             && item.Value.Equals(((Filter) result).Operator)
@@ -197,49 +201,6 @@ namespace DataFilters.UnitTests
         public void FilterToJson(Filter filter, Expression<Func<string, bool>> jsonMatcher)
             => ToJson(filter, jsonMatcher);
 
-        public static IEnumerable<object[]> CollectionOfFiltersCases
-        {
-            get
-            {
-                yield return new object[] {
-                    new IFilter[]
-                    {
-                        new Filter (field : "Firstname", @operator : EqualTo, value : "Bruce"),
-                        new Filter (field : "Lastname", @operator : EqualTo, value : "Wayne" )
-                    },
-                    (Expression<Func<string, bool>>)(json =>
-                        JToken.Parse(json).Type == JTokenType.Array
-                        && JArray.Parse(json).Count == 2
-
-                        && JArray.Parse(json)[0].Type == JTokenType.Object
-                        && JArray.Parse(json)[0].IsValid(Filter.Schema(EqualTo))
-                        && JArray.Parse(json)[0][Filter.FieldJsonPropertyName].Value<string>() == "Firstname"
-                        && JArray.Parse(json)[0][Filter.OperatorJsonPropertyName].Value<string>() == "eq"
-                        && JArray.Parse(json)[0][Filter.ValueJsonPropertyName].Value<string>() == "Bruce"
-
-                        && JArray.Parse(json)[1].Type == JTokenType.Object
-                        && JArray.Parse(json)[1].IsValid(Filter.Schema(EqualTo))
-                        && JArray.Parse(json)[1][Filter.FieldJsonPropertyName].Value<string>() == "Lastname"
-                        && JArray.Parse(json)[1][Filter.OperatorJsonPropertyName].Value<string>() == "eq"
-                        && JArray.Parse(json)[1][Filter.ValueJsonPropertyName].Value<string>() == "Wayne"
-                    )
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(CollectionOfFiltersCases))]
-        public void CollectionOfFiltersToJson(IEnumerable<IFilter> filters, Expression<Func<string, bool>> jsonExpectation)
-        {
-            // Act
-            string json = SerializeObject(filters);
-
-            _output.WriteLine($"result of the serialization : {json}");
-
-            // Assert
-            json.Should().Match(jsonExpectation);
-        }
-
         private void ToJson(IFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
             _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
@@ -248,6 +209,7 @@ namespace DataFilters.UnitTests
             string json = filter.ToJson();
 
             // Assert
+            _output.WriteLine($"ToJson result is '{json}'");
             json.Should().Match(jsonMatcher);
         }
 
@@ -276,6 +238,13 @@ namespace DataFilters.UnitTests
                 {
                     new Filter("property", EqualTo, "value"),
                     new Filter("property", EqualTo, "value"),
+                    true
+                };
+
+                yield return new object[]
+                {
+                    new Filter("property", IsNull ),
+                    new Filter("property", IsNull, null),
                     true
                 };
 

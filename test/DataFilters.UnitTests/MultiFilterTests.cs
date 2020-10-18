@@ -1,17 +1,24 @@
 ﻿using FluentAssertions;
+
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
+
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
+
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
+#if NETCOREAPP2_1
 using static Newtonsoft.Json.JsonConvert;
+#else
+using static System.Text.Json.JsonSerializer;
+#endif
 
 namespace DataFilters.UnitTests
 {
@@ -45,7 +52,8 @@ namespace DataFilters.UnitTests
                         }
                     },
                     (Expression<Func<string, bool>>)(json =>
-                        JObject.Parse(json).Properties().Count() == 2
+                        JObject.Parse(json).IsValid(MultiFilter.Schema)
+                        && JObject.Parse(json).Properties().Exactly(2)
 
                         && "or".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
 
@@ -69,7 +77,8 @@ namespace DataFilters.UnitTests
                         }
                     },
                     (Expression<Func<string, bool>>)(json =>
-                        JObject.Parse(json).Properties().Count() == 2
+                        JObject.Parse(json).IsValid(MultiFilter.Schema)
+                        && JObject.Parse(json).Properties().Count() == 2
 
                         && "and".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
 
@@ -146,51 +155,10 @@ namespace DataFilters.UnitTests
             // Act
             string json = filter.ToJson();
 
+            _output.WriteLine($"{nameof(json)} : {json}");
+
             // Assert
             json.Should().Match(jsonMatcher);
-        }
-
-        public static IEnumerable<object[]> CollectionOfFiltersCases
-        {
-            get
-            {
-                yield return new object[] {
-                    new IFilter[]
-                    {
-                        new Filter (field : "Firstname", @operator : EqualTo, value : "Bruce"),
-                        new Filter (field : "Lastname", @operator : EqualTo, value : "Wayne" )
-                    },
-                    (Expression<Func<string, bool>>)(json =>
-                        JToken.Parse(json).Type == JTokenType.Array
-                        && JArray.Parse(json).Count == 2
-
-                        && JArray.Parse(json)[0].Type == JTokenType.Object
-                        && JArray.Parse(json)[0].IsValid(Filter.Schema(EqualTo))
-                        && JArray.Parse(json)[0][Filter.FieldJsonPropertyName].Value<string>() == "Firstname"
-                        && JArray.Parse(json)[0][Filter.OperatorJsonPropertyName].Value<string>() == "eq"
-                        && JArray.Parse(json)[0][Filter.ValueJsonPropertyName].Value<string>() == "Bruce"
-
-                        && JArray.Parse(json)[1].Type == JTokenType.Object
-                        && JArray.Parse(json)[1].IsValid(Filter.Schema(EqualTo))
-                        && JArray.Parse(json)[1][Filter.FieldJsonPropertyName].Value<string>() == "Lastname"
-                        && JArray.Parse(json)[1][Filter.OperatorJsonPropertyName].Value<string>() == "eq"
-                        && JArray.Parse(json)[1][Filter.ValueJsonPropertyName].Value<string>() == "Wayne"
-                    )
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(CollectionOfFiltersCases))]
-        public void CollectionOfFiltersToJson(IEnumerable<IFilter> filters, Expression<Func<string, bool>> jsonExpectation)
-        {
-            // Act
-            string json = SerializeObject(filters);
-
-            _output.WriteLine($"result of the serialization : {json}");
-
-            // Assert
-            json.Should().Match(jsonExpectation);
         }
 
         public static IEnumerable<object[]> EqualsCases
@@ -330,7 +298,7 @@ namespace DataFilters.UnitTests
 
             // Assert
             result.Should()
-                .Be(expectedResult, reason);
+                  .Be(expectedResult, reason);
         }
 
         [Theory]

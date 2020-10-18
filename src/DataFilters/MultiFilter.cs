@@ -7,13 +7,21 @@ using System.Linq;
 using static Newtonsoft.Json.DefaultValueHandling;
 using static Newtonsoft.Json.Required;
 
+#if !NETSTANDARD1_3
+using System.Text.Json.Serialization;
+#endif
+
 namespace DataFilters
 {
     /// <summary>
     /// An instance of this class holds combination of <see cref="IFilter"/>
     /// </summary>
     [JsonObject]
+#if NETSTANDARD1_3
     [JsonConverter(typeof(MultiFilterConverter))]
+#else
+    [System.Text.Json.Serialization.JsonConverter(typeof(MultiFilterConverter))]
+#endif
     public class MultiFilter : IFilter, IEquatable<MultiFilter>
     {
         /// <summary>
@@ -26,7 +34,6 @@ namespace DataFilters
         /// </summary>
         public const string LogicJsonPropertyName = "logic";
 
-#if !NETSTANDARD1_0
         public static JSchema Schema => new JSchema
         {
             Type = JSchemaType.Object,
@@ -38,19 +45,26 @@ namespace DataFilters
             Required = { FiltersJsonPropertyName },
             AllowAdditionalProperties = false
         };
-#endif
 
         /// <summary>
         /// Collections of filters
         /// </summary>
+#if NETSTANDARD1_3
         [JsonProperty(PropertyName = FiltersJsonPropertyName, Required = Always)]
+#else
+        [JsonPropertyName(FiltersJsonPropertyName)]
+#endif
         public IEnumerable<IFilter> Filters { get; set; } = Enumerable.Empty<IFilter>();
 
         /// <summary>
         /// Operator to apply between <see cref="Filters"/>
         /// </summary>
+#if NETSTANDARD1_3
         [JsonProperty(PropertyName = LogicJsonPropertyName, DefaultValueHandling = IgnoreAndPopulate)]
         [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
+#else
+        [JsonPropertyName(LogicJsonPropertyName)]
+#endif
         public FilterLogic Logic { get; set; }
 
         public virtual string ToJson() => this.Jsonify();
@@ -75,7 +89,7 @@ namespace DataFilters
 
             return filter;
         }
-
+        
 #if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Logic, Filters).GetHashCode();
 #else

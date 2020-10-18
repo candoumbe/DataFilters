@@ -1,18 +1,26 @@
 ﻿using DataFilters.Converters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
+
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
 using static Newtonsoft.Json.DefaultValueHandling;
 using static Newtonsoft.Json.Required;
+#if !NETSTANDARD1_3
+using System.Text.Json.Serialization;
+#endif
 
 namespace DataFilters
 {
     /// <summary>
     /// An instance of this class holds a kendo filter
     /// </summary>
+#if NETSTANDARD1_3
     [JsonObject]
     [JsonConverter(typeof(FilterConverter))]
+#else
+    [System.Text.Json.Serialization.JsonConverter(typeof(FilterConverter))]
+#endif
     public class Filter : IFilter, IEquatable<Filter>
     {
         /// <summary>
@@ -45,31 +53,6 @@ namespace DataFilters
             FilterOperator.IsNull
         };
 
-        /// <summary>
-        /// Builds a new <see cref="Filter"/> instance.
-        /// </summary>
-        /// <param name="field">name of the field</param>
-        /// <param name="operator"><see cref="Filter"/> to apply</param>
-        /// <param name="value">value of the filter</param>
-        public Filter(string field, FilterOperator @operator, object value = null)
-        {
-            Field = field;
-            if (@operator == FilterOperator.EqualTo && value is null)
-            {
-                Operator = FilterOperator.IsNull;
-            }
-            else if(@operator == FilterOperator.NotEqualTo && value is null)
-            {
-                Operator = FilterOperator.IsNotNull;
-            }
-            else
-            {
-                Operator = @operator;
-                Value = value;
-            }
-        }
-
-#if !NETSTANDARD1_0
         /// <summary>
         /// Generates the <see cref="JSchema"/> for the specified <see cref="FilterOperator"/>.
         /// </summary>
@@ -130,33 +113,76 @@ namespace DataFilters
 
             return schema;
         }
-#endif
 
         /// <summary>
         /// Name of the field to filter
         /// </summary>
+#if NETSTANDARD1_3
         [JsonProperty(FieldJsonPropertyName, Required = Always)]
+#else
+        [JsonPropertyName(FieldJsonPropertyName)]
+#endif
         public string Field { get; }
 
         /// <summary>
         /// Operator to apply to the filter
         /// </summary>
+#if NETSTANDARD1_3
         [JsonProperty(OperatorJsonPropertyName, Required = Always)]
-        //[JsonConverter(typeof(DataFilterOperatorConverter))]
+        [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
+#else
+        [JsonPropertyName(OperatorJsonPropertyName)]
+        //[System.Text.Json.Serialization.JsonConverter(typeof(FilterOperatorConverter))]
+#endif
         public FilterOperator Operator { get; }
 
         /// <summary>
         /// Value of the filter
         /// </summary>
+#if NETSTANDARD1_3
         [JsonProperty(ValueJsonPropertyName,
             Required = AllowNull,
             DefaultValueHandling = IgnoreAndPopulate,
             NullValueHandling = NullValueHandling.Ignore)]
+#else
+        [JsonPropertyName(ValueJsonPropertyName)]
+#endif
         public object Value { get; }
 
-        public string ToJson() => this.Jsonify();
+        /// <summary>
+        /// Builds a new <see cref="Filter"/> instance.
+        /// </summary>
+        /// <param name="field">name of the field</param>
+        /// <param name="operator"><see cref="Filter"/> to apply</param>
+        /// <param name="value">value of the filter</param>
+        public Filter(string field, FilterOperator @operator, object value = null)
+        {
+            Field = field;
+            switch (@operator)
+            {
+                case FilterOperator.EqualTo when value is null:
+                    Operator = FilterOperator.IsNull;
+                    break;
+                case FilterOperator.NotEqualTo when value is null:
+                    Operator = FilterOperator.IsNotNull;
+                    break;
+                default:
+                    Operator = @operator;
+                    Value = value;
+                    break;
+            }
+        }
 
-        public override string ToString() => this.Jsonify();
+#if NETSTANDARD1_3
+        public string ToJson()
+        {
+            return this.Jsonify(new JsonSerializerSettings());
+        }
+#else
+        public string ToJson() => this.Jsonify();
+#endif
+
+        public override string ToString() => ToJson();
 
         public bool Equals(Filter other)
             => other != null
@@ -197,7 +223,7 @@ namespace DataFilters
 
         public bool Equals(IFilter other) => Equals(other as Filter);
 
-        public void Deconstruct(out string field,  out FilterOperator @operator, out object value)
+        public void Deconstruct(out string field, out FilterOperator @operator, out object value)
         {
             field = Field;
             @operator = Operator;

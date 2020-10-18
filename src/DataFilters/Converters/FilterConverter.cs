@@ -1,18 +1,27 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
+
+#if NETSTANDARD1_3
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+#else
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#endif
 
 namespace DataFilters.Converters
 {
     /// <summary>
     /// <see cref="JsonConvert"/> implementation that can convert from/to <see cref="DataFilter"/>
     /// </summary>
+#if NETSTANDARD1_3 
     public class FilterConverter : JsonConverter
+#else
+    public class FilterConverter : JsonConverter<Filter>
+
+#endif
     {
         private readonly static IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
         {
@@ -34,8 +43,11 @@ namespace DataFilters.Converters
             ["nstartswith"] = FilterOperator.NotStartsWith
         }.ToImmutableDictionary();
 
+#if NETSTANDARD1_3
+        /// <inheritdoc/>
         public override bool CanConvert(Type objectType) => objectType == typeof(Filter);
 
+        /// <inheritdoc/>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Filter filter = null;
@@ -75,30 +87,106 @@ namespace DataFilters.Converters
             return filter?.As(objectType);
         }
 
+#else
+        ///<inheritdoc/>
+        public override Filter Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            object value = null;
+
+            if (reader.TokenType != JsonTokenType.StartObject)
+            {
+                throw new JsonException($"Expected '{{' but found {reader.TokenType}");
+            }
+
+            if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.FieldJsonPropertyName != reader.GetString())
+            {
+                throw new JsonException($"Missing {Filter.FieldJsonPropertyName} property.");
+            }
+
+            reader.Read();
+            string field = reader.GetString();
+
+            if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.OperatorJsonPropertyName != reader.GetString())
+            {
+                throw new JsonException($@"Missing ""{Filter.OperatorJsonPropertyName}"" property.");
+            }
+
+            reader.Read();
+            FilterOperator op = _operators[reader.GetString()];
+            if (!Filter.UnaryOperators.Contains(op))
+            {
+                if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName && Filter.ValueJsonPropertyName == reader.GetString())
+                {
+                    reader.Read();
+                    value = reader.TokenType switch
+                    {
+                        JsonTokenType.Number => reader.GetInt64(),
+                        JsonTokenType.String => reader.GetString(),
+                        JsonTokenType.False => reader.GetBoolean(),
+                        JsonTokenType.True => reader.GetBoolean(),
+                        _ => null
+                    };
+                }
+
+                if (!reader.Read() || reader.TokenType != JsonTokenType.EndObject)
+                {
+                    throw new JsonException("Filter json must end with '}'.");
+                }
+                reader.Read();
+            }
+            else
+            {
+                while (reader.Read() && reader.TokenType != JsonTokenType.EndObject) ;
+            }
+
+            return new Filter(field, op, value);
+        }
+
+#endif
+
+#if NETSTANDARD1_3
+        ///<inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            Filter kf = (Filter)value;
-
+            Filter filter = (Filter)value;
+#else
+        public override void Write(Utf8JsonWriter writer, Filter filter, JsonSerializerOptions options)
+        {
+            //options.Converters.Add(new FilterOperatorConverter());
+#endif
             writer.WriteStartObject();
 
             // Field
             writer.WritePropertyName(Filter.FieldJsonPropertyName);
-            writer.WriteValue(kf.Field);
+#if NETSTANDARD1_3
+            writer.WriteValue(filter.Field);
+#else
+            writer.WriteStringValue(filter.Field);
+#endif
 
             // operator
             writer.WritePropertyName(Filter.OperatorJsonPropertyName);
-            KeyValuePair<string, FilterOperator> kv = _operators.Single(item => item.Value == kf.Operator);
+            KeyValuePair<string, FilterOperator> kv = _operators.Single(item => item.Value == filter.Operator);
 
+#if NETSTANDARD1_3
             writer.WriteValue(kv.Key);
+#else
+            //options.Converters.Add(_stringEnumConverter);
+            writer.WriteStringValue(kv.Key);
+#endif
 
             // value (only if the operator is not an unary operator)
-            if (!Filter.UnaryOperators.Contains(kf.Operator))
+            if (!Filter.UnaryOperators.Contains(filter.Operator))
             {
                 writer.WritePropertyName(Filter.ValueJsonPropertyName);
-                writer.WriteValue(kf.Value);
+#if NETSTANDARD1_3
+                writer.WriteValue(filter.Value);
+#else
+                writer.WriteStringValue(filter.Value.ToString());
+#endif
             }
 
-            writer.WriteEnd();
+            writer.WriteEndObject();
         }
     }
 }
