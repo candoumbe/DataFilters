@@ -75,7 +75,7 @@ class Build : NukeBuild
         {
             DotNetRestore(s => s
                 .SetProjectFile(Solution)
-                .SetConfigFile("nuget.config")
+                .SetConfigFile(RootDirectory / "nuget.config")
                 .SetIgnoreFailedSources(true)
                 );
         });
