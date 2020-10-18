@@ -79,7 +79,6 @@ namespace DataFilters.Converters
 
         public override MultiFilter Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var clone = reader;
             if (reader.TokenType != JsonTokenType.StartObject)
             {
                 throw new JsonException("Multifilter json must start with '{'.");
@@ -115,6 +114,10 @@ namespace DataFilters.Converters
             }
 
             reader.Read();
+
+            // We are about to try parsing the JSON to get either a Filter or a MultiFilter.
+            // We store a copy of the original reader in case the parsing process fails.
+            Utf8JsonReader readerCopy = reader;
             while (reader.TokenType != JsonTokenType.EndArray)
             {
                 long position = reader.TokenStartIndex;
@@ -124,18 +127,24 @@ namespace DataFilters.Converters
                 }
                 catch
                 {
-                    // this allow the clone start reading where the reader crashed
-                    while(clone.TokenStartIndex < position)
+                    // The json is not a Filter so we need to go back to where the parsing was performed
+                    // and try to get a MultFilter 
+
+                    // 1. The copyReader position is moved to where the original parser were before failing
+                    while(readerCopy.TokenStartIndex < position)
                     {
-                        clone.Read();
+                        readerCopy.Read();
                     }
-                    filters.Add(Read(ref clone, typeof(MultiFilter), options));
-                    // This loop allows the reader where the clone ends reading
-                    while (reader.TokenStartIndex < clone.TokenStartIndex)
+
+                    // 2. Try to parse the Json and get a MultiFilter.
+                    filters.Add(Read(ref readerCopy, typeof(MultiFilter), options));
+                    // The parsing was a success -> we move the reader to the continue the parsing process
+
+                    while (reader.TokenStartIndex < readerCopy.TokenStartIndex)
                     {
                         reader.Read();
                     }
-                    reader.Read(); // Advances the reader onto the next token
+                    reader.Read(); // Advances the reader until the next token
                 }
             }
 

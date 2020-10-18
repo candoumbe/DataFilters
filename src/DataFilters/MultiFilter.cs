@@ -89,7 +89,6 @@ namespace DataFilters
 
             return filter;
         }
-        
 #if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Logic, Filters).GetHashCode();
 #else
