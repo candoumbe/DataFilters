@@ -89,7 +89,7 @@ class Build : NukeBuild
             //{
                 DotNetRestore(s => s
                     .SetProjectFile(Solution)
-                    .SetConfigFile(RootDirectory / "nuget.config")
+                    .SetConfigFile(RootDirectory / "Nuget.config")
                     .SetIgnoreFailedSources(true));
             //}
         });
