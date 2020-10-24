@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="8.*" />
-    <PackageReference Include="Nuget.CommandLine" Version="5.7.*"/>
     <PackageReference Include="Roslynator.Analyzers" Version="2.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

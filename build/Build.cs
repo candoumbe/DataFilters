@@ -78,24 +78,25 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
+            IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
+                                                    .Where(project => !project.Name.StartsWith("_"));
+
             DotNetRestore(s => s
-                .SetProjectFile(Solution)
                     .SetConfigFile(configFile)
                     .SetIgnoreFailedSources(true)
-                    .SetVerbosity(DotNetVerbosity.Detailed)
+                    .CombineWith(projects, (cs, proj) => cs.SetProjectFile(proj))
             );
         });
 
     Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
-        {
-
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-            );
-        });
+                .EnableNoRestore()
+            )
+        );
 
     Target Test => _ => _
         .DependsOn(Compile)
