@@ -20,7 +20,7 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.NuGet.NuGetTasks;
-
+using static Nuke.Common.Logger;
 
 [AzurePipelines(
     AzurePipelinesImage.UbuntuLatest,
@@ -79,19 +79,24 @@ class Build : NukeBuild
     Target Restore => _ => _
         .Executes(() =>
         {
-            //if (IsServerBuild)
-            //{
-            //    NuGetInstall(s => s
-            //        .SetVersion("5.7.0")
-            //        .SetSolutionDirectory(RootDirectory);
-            //}
-            //else
-            //{
+            AbsolutePath configFile = RootDirectory / "Nuget.config";
+            Info("Restoring packages");
+            Info($"Config file : '{configFile}'");
+            if (IsServerBuild)
+            {
+                NuGetRestore(s => s
+                        .SetSolutionDirectory(RootDirectory)
+                        .SetConfigFile(configFile)
+                    );
+            }
+            else
+            {
                 DotNetRestore(s => s
                     .SetProjectFile(Solution)
-                    .SetConfigFile(RootDirectory / "Nuget.config")
-                    .SetIgnoreFailedSources(true));
-            //}
+                        .SetConfigFile(configFile)
+                        .SetIgnoreFailedSources(true)
+                );
+            }
         });
 
     Target Compile => _ => _
