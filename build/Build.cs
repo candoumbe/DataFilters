@@ -33,7 +33,8 @@ using static Nuke.Common.Logger;
     TriggerBranchesInclude = new[] {
         "main",
         "feature/*",
-        "fix/*"
+        "fix/*",
+        "exp"
     },
     TriggerPathsExclude = new[]
     {
@@ -45,12 +46,6 @@ using static Nuke.Common.Logger;
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
-    /// Support plugins are available for:
-    ///   - JetBrains ReSharper        https://nuke.build/resharper
-    ///   - JetBrains Rider            https://nuke.build/rider
-    ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-    ///   - Microsoft VSCode           https://nuke.build/vscode
-
     public static int Main() => Execute<Build>(x => x.Compile);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
@@ -82,22 +77,13 @@ class Build : NukeBuild
             AbsolutePath configFile = RootDirectory / "Nuget.config";
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
-            //if (IsServerBuild)
-            //{
-            //    NuGetRestore(s => s
-            //            .SetSolutionDirectory(RootDirectory)
-            //            .SetConfigFile(configFile)
-            //        );
-            //}
-            //else
-            //{
-                DotNetRestore(s => s
-                    .SetProjectFile(Solution)
-                        .SetConfigFile(configFile)
-                        .SetIgnoreFailedSources(true)
-                        .SetVerbosity(DotNetVerbosity.Detailed)
-                );
-            //}
+
+            DotNetRestore(s => s
+                .SetProjectFile(Solution)
+                    .SetConfigFile(configFile)
+                    .SetIgnoreFailedSources(true)
+                    .SetVerbosity(DotNetVerbosity.Detailed)
+            );
         });
 
     Target Compile => _ => _
