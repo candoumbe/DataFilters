@@ -81,6 +81,8 @@ class Build : NukeBuild
         {
             if (IsServerBuild)
             {
+                DotNetToolInstall(s => s
+                    .SetPackageName("Nuget.CommandLine"));
                 NuGetRestore(s => s
                     .SetTargetPath(Solution)
                     .SetRecursive(true)
