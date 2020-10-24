@@ -82,21 +82,22 @@ class Build : NukeBuild
             AbsolutePath configFile = RootDirectory / "Nuget.config";
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
-            if (IsServerBuild)
-            {
-                NuGetRestore(s => s
-                        .SetSolutionDirectory(RootDirectory)
-                        .SetConfigFile(configFile)
-                    );
-            }
-            else
-            {
+            //if (IsServerBuild)
+            //{
+            //    NuGetRestore(s => s
+            //            .SetSolutionDirectory(RootDirectory)
+            //            .SetConfigFile(configFile)
+            //        );
+            //}
+            //else
+            //{
                 DotNetRestore(s => s
                     .SetProjectFile(Solution)
                         .SetConfigFile(configFile)
                         .SetIgnoreFailedSources(true)
+                        .SetVerbosity(DotNetVerbosity.Detailed)
                 );
-            }
+            //}
         });
 
     Target Compile => _ => _
