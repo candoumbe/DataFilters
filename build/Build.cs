@@ -79,33 +79,29 @@ class Build : NukeBuild
     Target Restore => _ => _
         .Executes(() =>
         {
-            if (IsServerBuild)
-            {
-                DotNetToolInstall(s => s
-                    .SetPackageName("Nuget.CommandLine"));
-                NuGetRestore(s => s
-                    .SetTargetPath(Solution)
-                    .SetRecursive(true)
-                    .SetConfigFile(RootDirectory / "nuget.config"));
-            }
-            else
-            {
+            //if (IsServerBuild)
+            //{
+            //    NuGetInstall(s => s
+            //        .SetVersion("5.7.0")
+            //        .SetSolutionDirectory(RootDirectory);
+            //}
+            //else
+            //{
                 DotNetRestore(s => s
                     .SetProjectFile(Solution)
                     .SetConfigFile(RootDirectory / "nuget.config")
                     .SetIgnoreFailedSources(true));
-            }
+            //}
         });
 
     Target Compile => _ => _
-        .DependsOn(Restore)
+        //.DependsOn(Restore)
         .Executes(() =>
         {
 
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
-                .SetConfiguration(Configuration)
-                .EnableNoRestore());
+                .SetConfiguration(Configuration));
         });
 
     Target Test => _ => _
