@@ -78,13 +78,10 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
-            IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
-                                                    .Where(project => !project.Name.StartsWith("_"));
-
             DotNetRestore(s => s
-                    .SetConfigFile(configFile)
-                    .SetIgnoreFailedSources(true)
-                    .CombineWith(projects, (cs, proj) => cs.SetProjectFile(proj))
+                .SetConfigFile(configFile)
+                .SetIgnoreFailedSources(true)
+                .SetProjectFile(Solution)
             );
         });
 
