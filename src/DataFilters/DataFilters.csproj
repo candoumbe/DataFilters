@@ -19,7 +19,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-    <PackageReference Include="Utilities" Version="1.0.0-*" />
+    <PackageReference Include="Utilities" Version="1.0.0-CI-20201010-143709" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>
   <ItemGroup>

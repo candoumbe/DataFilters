@@ -95,13 +95,14 @@ class Build : NukeBuild
         });
 
     Target Compile => _ => _
-        //.DependsOn(Restore)
+        .DependsOn(Restore)
         .Executes(() =>
         {
 
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
-                .SetConfiguration(Configuration));
+                .SetConfiguration(Configuration)
+            );
         });
 
     Target Test => _ => _
