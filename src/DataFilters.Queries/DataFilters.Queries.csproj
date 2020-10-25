@@ -8,9 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Queries.Core" Version="1.0.0-*" />
+    <PackageReference Include="Queries.Core" Version="1.0.0-CI-*"/>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\DataFilters\DataFilters.csproj" />
   </ItemGroup>

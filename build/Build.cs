@@ -71,8 +71,6 @@ class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
-
-
     Target Restore => _ => _
         .Executes(() =>
         {
@@ -80,7 +78,7 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
-            IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
+            IEnumerable<Project> projects = Solution.AllProjects
                                                     .Where(proj => !proj.Name.StartsWith("_"));
 
             foreach (Project item in projects)
