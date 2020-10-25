@@ -80,11 +80,16 @@ class Build : NukeBuild
             Info("Installing Azure Credentials Provider");
             if (IsWin)
             {
-                Powershell(@"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""");
+                Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+                           logInvocation : true,
+                           logOutput : true
+                    );
             }
             else
             {
-                Wget("-qO- https://aka.ms/install-artifacts-credprovider.sh | bash");
+                Wget(arguments : "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
+                     logInvocation: true,
+                     logOutput: true);
             }
             Info("Azure Credentials Provider installed successfully");
         });
