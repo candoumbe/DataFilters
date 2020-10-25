@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AzurePipelines;
@@ -15,12 +11,14 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
 
+using System.Collections.Generic;
+using System.Linq;
+
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.NuGet.NuGetTasks;
 using static Nuke.Common.Logger;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [AzurePipelines(
     AzurePipelinesImage.UbuntuLatest,
@@ -62,6 +60,9 @@ class Build : NukeBuild
 
     [Partition(10)] readonly Partition TestPartition;
 
+    [PathExecutable("pwsh")] readonly Tool Powershell;
+    [PathExecutable("wget")] readonly Tool Wget;
+
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
@@ -71,7 +72,23 @@ class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
+
+    Target SetupNuget => _ => _
+        .OnlyWhenStatic(() => IsServerBuild)
+        .Executes(() =>
+        {
+            if (IsWin)
+            {
+                Powershell(@"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""");
+            }
+            else
+            {
+                Wget("-qO- https://aka.ms/install-artifacts-credprovider.sh | bash");
+            }
+        });
+
     Target Restore => _ => _
+        .DependsOn(SetupNuget)
         .Executes(() =>
         {
             AbsolutePath configFile = RootDirectory / "Nuget.config";

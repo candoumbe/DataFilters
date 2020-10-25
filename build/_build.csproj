@@ -3,7 +3,7 @@
   <Import Project="../core.props"/>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
