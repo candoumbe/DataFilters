@@ -33,6 +33,13 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
+      - job: SetupNuget
+        displayName: 'SetupNuget'
+        dependsOn: [  ]
+        steps:
+          - task: CmdLine@2
+            inputs:
+              script: './build.cmd SetupNuget --skip'
       - job: Compile
         displayName: 'Compile'
         dependsOn: [  ]
@@ -55,6 +62,13 @@ stages:
     pool:
       vmImage: 'windows-latest'
     jobs:
+      - job: SetupNuget
+        displayName: 'SetupNuget'
+        dependsOn: [  ]
+        steps:
+          - task: CmdLine@2
+            inputs:
+              script: './build.cmd SetupNuget --skip'
       - job: Compile
         displayName: 'Compile'
         dependsOn: [  ]
