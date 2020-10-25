@@ -77,6 +77,7 @@ class Build : NukeBuild
         .OnlyWhenStatic(() => IsServerBuild)
         .Executes(() =>
         {
+            Info("Installing Azure Credentials Provider");
             if (IsWin)
             {
                 Powershell(@"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""");
@@ -85,6 +86,7 @@ class Build : NukeBuild
             {
                 Wget("-qO- https://aka.ms/install-artifacts-credprovider.sh | bash");
             }
+            Info("Azure Credentials Provider installed successfully");
         });
 
     Target Restore => _ => _
@@ -95,33 +97,21 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
-            IEnumerable<Project> projects = Solution.AllProjects
-                                                    .Where(proj => !proj.Name.StartsWith("_"));
-
-            foreach (Project item in projects)
-            {
-                Info($"Restoring {item} ...");
-
-                DotNetRestore(s => s
-                    .SetConfigFile(configFile)
-                    .SetIgnoreFailedSources(true)
-                    .SetProjectFile(item));
-            }
+            DotNetRestore(s => s
+                .SetConfigFile(configFile)
+                .SetIgnoreFailedSources(true)
+                .SetProjectFile(Solution));
         });
 
     Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
-        {
-            IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
-                                                    .Where(proj => !proj.Name.StartsWith("_"));
-
             DotNetBuild(s => s
                 .SetConfiguration(Configuration)
-                .CombineWith(projects, (setting, proj) => setting.SetProjectFile(proj)
-                                                                 .EnableNoRestore())
-            );
-        });
+                .SetProjectFile(Solution)
+                .EnableNoRestore()
+            )
+        );
 
     Target Test => _ => _
         .DependsOn(Compile)
