@@ -74,7 +74,7 @@ class Build : NukeBuild
 
 
     Target SetupNuget => _ => _
-        .OnlyWhenStatic(() => IsServerBuild)
+        .Requires(() => IsServerBuild)
         .Executes(() =>
         {
             Info("Installing Azure Credentials Provider");
@@ -105,7 +105,11 @@ class Build : NukeBuild
             DotNetRestore(s => s
                 .SetConfigFile(configFile)
                 .SetIgnoreFailedSources(true)
-                .SetProjectFile(Solution));
+                .SetProjectFile(Solution)
+                .When(IsServerBuild, s => s
+                    .AddProperty("interactive", true)
+                    )
+                );
         });
 
     Target Compile => _ => _
