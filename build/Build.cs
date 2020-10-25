@@ -83,11 +83,15 @@ class Build : NukeBuild
             IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
                                                     .Where(proj => !proj.Name.StartsWith("_"));
 
-            DotNetRestore(s => s
-                .SetConfigFile(configFile)
-                .SetIgnoreFailedSources(true)
-                .CombineWith(projects , (cs, proj) => cs.SetProjectFile(proj))
-            );
+            foreach (Project item in projects)
+            {
+                Info($"Restoring {item} ...");
+
+                DotNetRestore(s => s
+                    .SetConfigFile(configFile)
+                    .SetIgnoreFailedSources(true)
+                    .SetProjectFile(item));
+            }
         });
 
     Target Compile => _ => _
