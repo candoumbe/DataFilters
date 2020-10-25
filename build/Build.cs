@@ -71,6 +71,8 @@ class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
+
+
     Target Restore => _ => _
         .Executes(() =>
         {
@@ -78,21 +80,29 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
+            IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
+                                                    .Where(proj => !proj.Name.StartsWith("_"));
+
             DotNetRestore(s => s
                 .SetConfigFile(configFile)
                 .SetIgnoreFailedSources(true)
-                .SetProjectFile(Solution)
+                .CombineWith(projects , (cs, proj) => cs.SetProjectFile(proj))
             );
         });
 
     Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
+        {
+            IEnumerable<Project> projects = Solution.GetProjects("*.csproj")
+                                                    .Where(proj => !proj.Name.StartsWith("_"));
+
             DotNetBuild(s => s
-                .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-            )
-        );
+                .CombineWith(projects, (setting, proj) => setting.SetProjectFile(proj)
+                                                                 .EnableNoRestore())
+            );
+        });
 
     Target Test => _ => _
         .DependsOn(Compile)
