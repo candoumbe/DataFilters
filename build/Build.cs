@@ -65,6 +65,7 @@ class Build : NukeBuild
 
     Target Clean => _ => _
         .OnlyWhenStatic(() => !IsServerBuild)
+        .Before(Restore)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
@@ -74,8 +75,7 @@ class Build : NukeBuild
 
 
     Target SetupNuget => _ => _
-        .Requires(() => IsServerBuild)
-        .Before(Restore, Compile)
+        .Before(Restore)
         .Executes(() =>
         {
             Info("Installing Azure Credentials Provider");
@@ -110,13 +110,14 @@ class Build : NukeBuild
         });
 
     Target Compile => _ => _
-        .DependsOn(Clean)
+        .DependsOn(Restore)
         .Executes(() =>
             DotNetBuild(s => s
                 .SetConfiguration(Configuration)
                 .SetProjectFile(Solution)
                 .EnableLogOutput()
                 .EnableLogInvocation()
+                .EnableNoRestore()
             )
         );
 
