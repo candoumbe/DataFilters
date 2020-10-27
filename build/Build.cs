@@ -20,6 +20,7 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
+
 [AzurePipelines(
     AzurePipelinesImage.UbuntuLatest,
     AzurePipelinesImage.WindowsLatest,
@@ -60,7 +61,7 @@ class Build : NukeBuild
     [Partition(10)] readonly Partition TestPartition;
 
     [PathExecutable("pwsh")] readonly Tool Powershell;
-    [PathExecutable("wget")] readonly Tool Wget;
+    //[PathExecutable("wget")] readonly Tool Wget;
 
     Target Clean => _ => _
         .OnlyWhenStatic(() => !IsServerBuild)
@@ -72,40 +73,41 @@ class Build : NukeBuild
         });
 
 
-    //Target SetupNuget => _ => _
-    //    .Requires(() => IsServerBuild)
-    //    .Executes(() =>
-    //    {
-    //        Info("Installing Azure Credentials Provider");
-    //        if (IsWin)
-    //        {
-    //            Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
-    //                       logInvocation : true,
-    //                       logOutput : true
-    //                );
-    //        }
-    //        else
-    //        {
-    //            Wget(arguments : "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
-    //                 logInvocation: true,
-    //                 logOutput: true);
-    //        }
-    //        Info("Azure Credentials Provider installed successfully");
-    //    });
+    Target SetupNuget => _ => _
+        .Requires(() => IsServerBuild)
+        .Before(Restore, Compile)
+        .Executes(() =>
+        {
+            Info("Installing Azure Credentials Provider");
+            //if (IsWin)
+            //{
+                Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+                           logInvocation: true,
+                           logOutput: true
+                    );
+            //}
+            //else
+            //{
+            //    Wget(arguments: "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
+            //         logInvocation: true,
+            //         logOutput: true);
+            //}
+            Info("Azure Credentials Provider installed successfully");
+        });
 
-    //Target Restore => _ => _
-    //    .DependsOn(Clean)
-    //    .Executes(() =>
-    //    {
-    //        AbsolutePath configFile = RootDirectory / "Nuget.config";
-    //        Info("Restoring packages");
-    //        Info($"Config file : '{configFile}'");
+    Target Restore => _ => _
+        .DependsOn(SetupNuget)
+        .Executes(() =>
+        {
+            AbsolutePath configFile = RootDirectory / "Nuget.config";
+            Info("Restoring packages");
+            Info($"Config file : '{configFile}'");
 
-    //        DotNetRestore(s => s
-    //            .SetConfigFile(configFile)
-    //            .SetIgnoreFailedSources(true)
-    //            .SetProjectFile(Solution));
-    //    });
+            DotNetRestore(s => s
+                .SetConfigFile(configFile)
+                .SetIgnoreFailedSources(true)
+                .SetProjectFile(Solution));
+        });
 
     Target Compile => _ => _
         .DependsOn(Clean)
