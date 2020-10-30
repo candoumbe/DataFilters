@@ -85,7 +85,7 @@ class Build : NukeBuild
             //if (IsWin)
             //{
             //Powershell(arguments: @"& ""azureCredentialScript""",
-            Powershell(arguments: @"& { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+            Powershell(arguments: "-c 'iex & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }'",
                            logInvocation: true,
                            logOutput: true
                     );
