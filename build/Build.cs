@@ -16,6 +16,7 @@ using System.Linq;
 
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
+using static Nuke.Common.IO.HttpTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -76,12 +77,15 @@ class Build : NukeBuild
 
     Target SetupNuget => _ => _
         .Before(Restore)
-        .Executes(() =>
+        .Executes(async () =>
         {
             Info("Installing Azure Credentials Provider");
+            AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credentials.ps1";
+            await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript).ConfigureAwait(true);
             //if (IsWin)
             //{
-                Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+            //Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+            Powershell(arguments: azureCredentialScript,
                            logInvocation: true,
                            logOutput: true
                     );
@@ -92,6 +96,7 @@ class Build : NukeBuild
             //         logInvocation: true,
             //         logOutput: true);
             //}
+            DeleteFile(azureCredentialScript);
             Info("Azure Credentials Provider installed successfully");
         });
 
