@@ -15,7 +15,7 @@
 # ------------------------------------------------------------------------------
 
 variables:
-  - group: NugetToken
+  - group: Tokens
 
 trigger:
   branches:

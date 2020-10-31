@@ -45,7 +45,7 @@ using System.ComponentModel;
         "docs/*",
         "README.md"
     },
-    ImportVariableGroups = new[] {nameof(NugetToken)}
+    ImportVariableGroups = new[] {"Tokens"}
     )]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
