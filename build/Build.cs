@@ -13,7 +13,6 @@ using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.ReportGenerator;
 using Nuke.Common.Tools.ReSharper;
 using Nuke.Common.Utilities;
-using Nuke.Common.Utilities.Collections;
 
 using System;
 using System.Collections.Generic;
@@ -23,9 +22,11 @@ using System.Linq;
 using static Nuke.Common.IO.CompressionTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.NuGet.NuGetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using static Nuke.Common.Logger;
 using System.ComponentModel;
+using Nuke.Common.Tools.NuGet;
 
 [AzurePipelines(
     AzurePipelinesImage.UbuntuLatest,
@@ -45,7 +46,7 @@ using System.ComponentModel;
         "docs/*",
         "README.md"
     },
-    ImportVariableGroups = new[] {"Tokens"}
+    ImportVariableGroups = new[] { "Tokens" }
     )]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -85,18 +86,33 @@ class Build : NukeBuild
         .DependsOn(Clean)
         .Executes(() =>
         {
-            
             AbsolutePath configFile = RootDirectory / "Nuget.config";
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
 
-            
+            IEnumerable<Project> projects = Solution.AllProjects;
+
+            var envValue = new
+            {
+                endpointCredentials = new[]
+                {
+                    new
+                    {
+                        endpoint = "https://pkgs.dev.azure.com/candoumbe/_packaging/Filters/nuget/v3/index.json",
+                        username = "ndoumbecyrille@hotmail.com",
+                        pasword = NugetToken
+                    }
+                }
+            };
+            Environment.SetEnvironmentVariable("VS_NUGET_EXTERNAL_FEED_ENDPOINTS", envValue.Jsonify());
+
             DotNetRestore(s => s
                 .SetConfigFile(configFile)
+                .ClearSources()
+                .AddSources("https://pkgs.dev.azure.com/candoumbe/_packaging/Filters/nuget/v3/index.json")
                 .SetIgnoreFailedSources(true)
                 .SetProjectFile(Solution)
-                .When(IsServerBuild, _ => _.AddProperty("--api-key", NugetToken))
                 );
         });
 
@@ -123,7 +139,6 @@ class Build : NukeBuild
         .DependsOn(Compile)
         .Partition(() => TestPartition)
         .Produces(TestResultDirectory / "*.xml")
-        .Produces(TestResultDirectory / "*.json")
         .Produces(TestResultDirectory / "*.trx")
         .Executes(() =>
         {

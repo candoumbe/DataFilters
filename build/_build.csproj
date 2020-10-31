@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../core.props"/>
+  <Import Project="../core.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -12,7 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="Nuke.Common" Version="0.25.0" />
-    <PackageDownload Include="ReportGenerator" Version="[4.6.1]"/>
+    <PackageReference Include="Utilities" Version="1.0.0-CI-20201010-143709" />
+    <PackageDownload Include="ReportGenerator" Version="[4.6.1]" />
   </ItemGroup>
 
 </Project>
