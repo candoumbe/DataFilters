@@ -83,7 +83,7 @@ class Build : NukeBuild
             AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credentials.ps1";
             await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript).ConfigureAwait(true);
 
-            Powershell(arguments: $@"& ""{azureCredentialScript}""",
+            Powershell(arguments: azureCredentialScript,
             //Powershell(arguments: "-c 'iex & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }'",
                            logInvocation: true,
                            logOutput: true
