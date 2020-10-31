@@ -90,11 +90,13 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
+
+            
             DotNetRestore(s => s
                 .SetConfigFile(configFile)
                 .SetIgnoreFailedSources(true)
                 .SetProjectFile(Solution)
-                .When(IsServerBuild, _ => _.AddProperty("ApiKey", NugetToken))
+                .When(IsServerBuild, _ => _.AddProperty("--api-key", NugetToken))
                 );
         });
 
