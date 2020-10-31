@@ -14,6 +14,9 @@
 # </auto-generated>
 # ------------------------------------------------------------------------------
 
+variables:
+  - group: NugetToken
+
 trigger:
   branches:
     include:
@@ -56,6 +59,17 @@ stages:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Test --skip --test-partition $(System.JobPositionInPhase)'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: tests-results
+              pathtoPublish: 'output/tests-results'
+      - job: Coverage
+        displayName: 'Coverage'
+        dependsOn: [ Test ]
+        steps:
+          - task: CmdLine@2
+            inputs:
+              script: './build.cmd Coverage --skip'
   - stage: windows_latest
     displayName: 'windows-latest'
     dependsOn: [  ]
@@ -85,3 +99,14 @@ stages:
           - task: CmdLine@2
             inputs:
               script: './build.cmd Test --skip --test-partition $(System.JobPositionInPhase)'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: tests-results
+              pathtoPublish: 'output/tests-results'
+      - job: Coverage
+        displayName: 'Coverage'
+        dependsOn: [ Test ]
+        steps:
+          - task: CmdLine@2
+            inputs:
+              script: './build.cmd Coverage --skip'
