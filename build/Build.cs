@@ -77,26 +77,19 @@ class Build : NukeBuild
 
     Target SetupNuget => _ => _
         .Before(Restore)
-        .Executes(() =>
+        .Executes(async () =>
         {
             Info("Installing Azure Credentials Provider");
-            //AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credentials.ps1";
-            //await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript).ConfigureAwait(true);
-            //if (IsWin)
-            //{
-            //Powershell(arguments: @"& ""azureCredentialScript""",
-            Powershell(arguments: "-c 'iex & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }'",
+            AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credentials.ps1";
+            await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript).ConfigureAwait(true);
+
+            Powershell(arguments: $@"& ""{azureCredentialScript}""",
+            //Powershell(arguments: "-c 'iex & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }'",
                            logInvocation: true,
                            logOutput: true
                     );
-            //}
-            //else
-            //{
-            //    Wget(arguments: "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
-            //         logInvocation: true,
-            //         logOutput: true);
-            //}
-            //DeleteFile(azureCredentialScript);
+
+            DeleteFile(azureCredentialScript);
             Info("Azure Credentials Provider installed successfully");
         });
 
