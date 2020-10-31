@@ -80,12 +80,19 @@ class Build : NukeBuild
         {
             if (IsServerBuild)
             {
+                Info("Downloading Azure credential provider scripts");
+
                 AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credential-script.ps1";
-                await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript);
+                await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript).ConfigureAwait(true);
+
+                Info($"Azure credential provider script downloaded to '{azureCredentialScript}'");
+                Info($"Running '{azureCredentialScript}' script");
+
                 Powershell(arguments: azureCredentialScript,
                                logInvocation: true,
                                logOutput: true
                         );
+                Info($"Done");
             }
 
             AbsolutePath configFile = RootDirectory / "Nuget.config";
