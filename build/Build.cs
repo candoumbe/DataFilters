@@ -74,35 +74,20 @@ class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
-
-    Target SetupNuget => _ => _
-        .Before(Restore)
+    Target Restore => _ => _
+        .DependsOn(Clean)
         .Executes(async () =>
         {
-            Info("Installing Azure Credentials Provider");
-            AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credentials.ps1";
-            await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript);
-            //if (IsWin)
-            //{
-            //Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
-            Powershell(arguments: @"-c & ""{ $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
-                           logInvocation: true,
-                           logOutput: true
-                    );
-            //}
-            //else
-            //{
-            //    Wget(arguments: "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
-            //         logInvocation: true,
-            //         logOutput: true);
-            //}
-            Info("Azure Credentials Provider installed successfully");
-        });
+            if (IsServerBuild)
+            {
+                AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credential-script.ps1";
+                await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript);
+                Powershell(arguments: azureCredentialScript,
+                               logInvocation: true,
+                               logOutput: true
+                        );
+            }
 
-    Target Restore => _ => _
-        .DependsOn(SetupNuget)
-        .Executes(() =>
-        {
             AbsolutePath configFile = RootDirectory / "Nuget.config";
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
