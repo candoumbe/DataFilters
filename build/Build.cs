@@ -61,7 +61,8 @@ class Build : NukeBuild
 
     [Partition(10)] readonly Partition TestPartition;
 
-    [PathExecutable("wget")] readonly Tool Wget;
+    [PathExecutable("pwsh")] readonly Tool Powershell;
+    //[PathExecutable("wget")] readonly Tool Wget;
 
     Target Clean => _ => _
         .OnlyWhenStatic(() => !IsServerBuild)
@@ -76,13 +77,25 @@ class Build : NukeBuild
 
     Target SetupNuget => _ => _
         .Before(Restore)
-        .OnlyWhenStatic(() => IsServerBuild)
-        .Executes(() =>
+        .Executes(async () =>
         {
             Info("Installing Azure Credentials Provider");
-            Wget(arguments: "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
-                 logOutput: true,
-                 logInvocation: true);
+            AbsolutePath azureCredentialScript = TemporaryDirectory / "azure-credentials.ps1";
+            await HttpDownloadFileAsync("https://aka.ms/install-artifacts-credprovider.ps1", azureCredentialScript);
+            //if (IsWin)
+            //{
+            //Powershell(arguments: @"iex "" & { $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+            Powershell(arguments: @"-c & ""{ $(irm https://aka.ms/install-artifacts-credprovider.ps1) }""",
+                           logInvocation: true,
+                           logOutput: true
+                    );
+            //}
+            //else
+            //{
+            //    Wget(arguments: "-qO- https://aka.ms/install-artifacts-credprovider.sh | bash",
+            //         logInvocation: true,
+            //         logOutput: true);
+            //}
             Info("Azure Credentials Provider installed successfully");
         });
 
