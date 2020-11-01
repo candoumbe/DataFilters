@@ -23,6 +23,7 @@ using static Nuke.Common.IO.CompressionTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.NuGet.NuGetTasks;
+using static Nuke.Common.IO.HttpTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using static Nuke.Common.Logger;
 using System.ComponentModel;
@@ -62,6 +63,8 @@ class Build : NukeBuild
 
     [CI] readonly AzurePipelines AzurePipelines;
 
+    [PathExecutable("pwsh")] readonly Tool PowershellCore;
+
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "test";
 
@@ -82,6 +85,15 @@ class Build : NukeBuild
             EnsureCleanDirectory(ArtifactsDirectory);
         });
 
+    Target InstallFeedCredentialsProvider => _ => _
+        .Before(Restore)
+        .OnlyWhenStatic(() => IsServerBuild)
+        .Executes(async () =>
+        {
+            Info("Installing credentials provider");
+            
+        });
+
     Target Restore => _ => _
         .DependsOn(Clean)
         .Executes(() =>
@@ -90,27 +102,8 @@ class Build : NukeBuild
             Info("Restoring packages");
             Info($"Config file : '{configFile}'");
 
-
-            IEnumerable<Project> projects = Solution.AllProjects;
-
-            var envValue = new
-            {
-                endpointCredentials = new[]
-                {
-                    new
-                    {
-                        endpoint = "https://pkgs.dev.azure.com/candoumbe/_packaging/Filters/nuget/v3/index.json",
-                        username = "ndoumbecyrille@hotmail.com",
-                        pasword = NugetToken
-                    }
-                }
-            };
-            Environment.SetEnvironmentVariable("VS_NUGET_EXTERNAL_FEED_ENDPOINTS", envValue.Jsonify());
-
             DotNetRestore(s => s
-                .SetConfigFile(configFile)
-                .ClearSources()
-                .AddSources("https://pkgs.dev.azure.com/candoumbe/_packaging/Filters/nuget/v3/index.json")
+                //.SetConfigFile(configFile)
                 .SetIgnoreFailedSources(true)
                 .SetProjectFile(Solution)
                 );
