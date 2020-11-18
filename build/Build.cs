@@ -7,183 +7,178 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Coverlet;
-using Nuke.Common.Tools.DotCover;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.ReportGenerator;
-using Nuke.Common.Tools.ReSharper;
-using Nuke.Common.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using static Nuke.Common.IO.CompressionTasks;
 using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.NuGet.NuGetTasks;
-using static Nuke.Common.IO.HttpTasks;
-using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
-using System.ComponentModel;
-using Nuke.Common.Tools.NuGet;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
 [AzurePipelines(
-    AzurePipelinesImage.UbuntuLatest,
     AzurePipelinesImage.WindowsLatest,
-    InvokedTargets = new[] { nameof(Test) },
+    InvokedTargets = new[] { nameof(Pack) },
+    NonEntryTargets = new[] { nameof(Restore) },
     ExcludedTargets = new[] { nameof(Clean) },
     PullRequestsAutoCancel = true,
     PullRequestsBranchesInclude = new[] { "main" },
     TriggerBranchesInclude = new[] {
         "main",
         "feature/*",
-        "fix/*",
-        "exp"
+        "fix/*"
     },
     TriggerPathsExclude = new[]
     {
         "docs/*",
         "README.md"
-    },
-    ImportVariableGroups = new[] { "Tokens" }
-    )]
+    }
+)]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
-class Build : NukeBuild
+public class Build : NukeBuild
 {
-    public static int Main() => Execute<Build>(x => x.Compile);
+    public static int Main() => Execute<Build>(x => x.Pack);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly string Configuration = IsLocalBuild ? "Debug" : "Release";
+    public readonly string Configuration = IsLocalBuild ? "Debug" : "Release";
 
-    [Solution] readonly Solution Solution;
-    [GitRepository] readonly GitRepository GitRepository;
+    [Parameter("Indicates wheter to restore nuget in interactive mode - Default is false")]
+    public readonly bool Interactive = false;
 
-    [CI] readonly AzurePipelines AzurePipelines;
+    [Solution] public readonly Solution Solution;
+    [GitRepository] public readonly GitRepository GitRepository;
+    [GitVersion] public readonly GitVersion GitVersion;
 
-    [PathExecutable("pwsh")] readonly Tool PowershellCore;
+    [CI] public readonly AzurePipelines AzurePipelines;
 
-    AbsolutePath SourceDirectory => RootDirectory / "src";
-    AbsolutePath TestsDirectory => RootDirectory / "test";
+    [Partition(10)] public readonly Partition TestPartition;
 
-    AbsolutePath OutputDirectory = RootDirectory / "output";
-    AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
+    public AbsolutePath SourceDirectory => RootDirectory / "src";
 
-    [Partition(10)] readonly Partition TestPartition;
+    public AbsolutePath TestDirectory => RootDirectory / "test";
 
-    [Parameter("Token to access private feeds")] readonly string NugetToken;
+    public AbsolutePath OutputDirectory => RootDirectory / "output";
 
-    Target Clean => _ => _
-        .OnlyWhenStatic(() => !IsServerBuild)
+    public AbsolutePath CoverageReportDirectory => OutputDirectory / "coverage-report";
+
+    public AbsolutePath TestResultDirectory => OutputDirectory / "tests-results";
+
+    public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
+
+    public Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            EnsureCleanDirectory(ArtifactsDirectory);
+            TestDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+            EnsureCleanDirectory(OutputDirectory);
         });
 
-    Target InstallFeedCredentialsProvider => _ => _
-        .Before(Restore)
-        .OnlyWhenStatic(() => IsServerBuild)
-        .Executes(async () =>
-        {
-            Info("Installing credentials provider");
-            
-        });
-
-    Target Restore => _ => _
-        .DependsOn(Clean)
+    public Target Restore => _ => _
         .Executes(() =>
         {
-            AbsolutePath configFile = RootDirectory / "Nuget.config";
-            Info("Restoring packages");
-            Info($"Config file : '{configFile}'");
-
             DotNetRestore(s => s
-                //.SetConfigFile(configFile)
-                .SetIgnoreFailedSources(true)
                 .SetProjectFile(Solution)
+                .SetIgnoreFailedSources(true)
+                .SetDisableParallel(false)
+                .When(IsLocalBuild && Interactive, _ => _.SetProperty("NugetInteractive", IsLocalBuild && Interactive))
+            );
+        });
+
+    public Target Compile => _ => _
+        .DependsOn(Restore)
+        .Executes(() =>
+        {
+            DotNetBuild(s => s
+                .SetNoRestore(InvokedTargets.Contains(Restore))
+                .SetConfiguration(Configuration)
+                .SetProjectFile(Solution)
+                .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                .SetFileVersion(GitVersion.AssemblySemFileVer)
+                .SetInformationalVersion(GitVersion.InformationalVersion)
                 );
         });
 
-    Target Compile => _ => _
-        .DependsOn(Restore)
-        .Executes(() =>
-
-            DotNetBuild(s => s
-                .SetConfiguration(Configuration)
-                .SetProjectFile(Solution)
-                .SetProcessLogOutput(true)
-                .SetProcessLogInvocation(true)
-                .SetNoRestore(InvokedTargets.Contains(Restore))
-            )
-        );
-
-    /// <summary>
-    /// Path to the directory that contains all tests results;
-    /// </summary>
-    AbsolutePath TestResultDirectory => OutputDirectory / "tests-results";
-
-    [DisplayName("Run tests")]
-    Target Test => _ => _
+    public Target Tests => _ => _
         .DependsOn(Compile)
-        .Partition(() => TestPartition)
-        .Produces(TestResultDirectory / "*.xml")
+        .Description("Run unit tests and collect code")
         .Produces(TestResultDirectory / "*.trx")
+        .Produces(TestResultDirectory / "*.xml")
         .Executes(() =>
         {
-            IEnumerable<Project> projects = Solution.GetProjects("*Tests");
+            IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
             IEnumerable<Project> testsProjects = TestPartition.GetCurrent(projects);
+
+            testsProjects.ForEach(project => Info(project));
 
             DotNetTest(s => s
                 .SetConfiguration(Configuration)
-                .ResetVerbosity()
                 .EnableCollectCoverage()
+                .EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
                 .SetResultsDirectory(TestResultDirectory)
-                .When(IsServerBuild, _ => _
-                    .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
-                    .AddProperty("ExcludeByAttribute", "Obsolete")
-                    .EnableUseSourceLink()
-                )
+                .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+                .AddProperty("ExcludeByAttribute", "Obsolete")
                 .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
-                    .SetLogger($"trx;LogFileName={project.Name}.trx")
-                    .When(InvokedTargets.Contains(Coverage) || IsServerBuild, _ => _
-                        .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))));
+                    .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
+                        .SetFramework(framework)
+                        .SetLogger($"trx;LogFileName={project.Name}.{framework}.trx")
+                        .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))
+                    )
+            );
 
-            TestResultDirectory.GlobFiles("*.trx").ForEach(testFileResult =>
-                AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
-                                                   title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                   files: new string[] { testFileResult }));
+            TestResultDirectory.GlobFiles("*.trx")
+                               .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
+                                                                                             title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
+                                                                                             files: new string[] { testFileResult })
+            );
+
+            // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
+            ReportGenerator(_ => _
+                .SetFramework("net5.0")
+                .SetReports(TestResultDirectory / "*.xml")
+                .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
+                .SetTargetDirectory(CoverageReportDirectory)
+            );
+
+            TestResultDirectory.GlobFiles("*.xml")
+                               .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
+                                                                                    summaryFile: file,
+                                                                                    reportDirectory: CoverageReportDirectory));
         });
 
-    AbsolutePath PackageDirectory => OutputDirectory / "packages";
+    public Target Pack => _ => _
+        .DependsOn(Tests, Compile)
+        .Consumes(Compile)
+        .Produces(ArtifactsDirectory / "*.nupkg")
+        .Executes(() =>
+        {
+            DotNetPack(s => s
+                .EnableIncludeSource()
+                .EnableIncludeSymbols()
+                .SetOutputDirectory(ArtifactsDirectory)
+                .SetProject(Solution)
+                .SetConfiguration(Configuration)
+                .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                .SetFileVersion(GitVersion.AssemblySemFileVer)
+                .SetInformationalVersion(GitVersion.InformationalVersion)
+            );
+        });
 
-    AbsolutePath CoverageReportDirectory => OutputDirectory / "coverage-report";
-    AbsolutePath CoverageReportArchive => OutputDirectory / "coverage-report.zip";
+    protected override void OnTargetStart(string target)
+    {
+        Info($"Starting '{target}' task");
+    }
 
-    Target Coverage => _ => _
-       .DependsOn(Test)
-       .TriggeredBy(Test)
-       .Consumes(Test)
-       .Executes(() =>
-       {
-           ReportGenerator(_ => _
-               .SetReports(TestResultDirectory / "*.xml")
-               .SetReportTypes(ReportTypes.HtmlInline)
-               .SetTargetDirectory(CoverageReportDirectory));
-
-           IReadOnlyCollection<AbsolutePath> testResultFiles = TestResultDirectory.GlobFiles("*.xml");
-           testResultFiles.ForEach(x =>
-               AzurePipelines?.PublishCodeCoverage(AzurePipelinesCodeCoverageToolType.Cobertura,
-                                                   x,
-                                                   CoverageReportDirectory));
-
-           CompressZip(directory: CoverageReportDirectory,
-                       archiveFile: CoverageReportArchive,
-                       fileMode: FileMode.Create);
-       });
+    protected override void OnTargetExecuted(string target)
+    {
+        Info($"'{target}' task finished");
+    }
 }

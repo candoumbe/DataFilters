@@ -3,7 +3,7 @@
   <Import Project="../core.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+   <TargetFramework>net5</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
@@ -11,9 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="0.25.0" />
+    <PackageReference Include="Nuke.Common" Version="5.0.0" />
     <PackageReference Include="Utilities" Version="1.0.0-CI-20201010-143709" />
-    <PackageDownload Include="ReportGenerator" Version="[4.6.1]" />
+    <PackageReference Include="ReportGenerator" Version="4.8.*" />
+    <PackageReference Include="GitVersion.CommandLine" Version="5.5.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

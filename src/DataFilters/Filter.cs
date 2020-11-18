@@ -182,7 +182,7 @@ namespace DataFilters
         public string ToJson() => this.Jsonify();
 #endif
 
-        public override string ToString() => ToJson();
+        //public override string ToString() => ToJson();
 
         public bool Equals(Filter other)
             => other != null
