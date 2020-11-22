@@ -14,7 +14,7 @@
 Rewrote the QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy) and removes dependency to Microsoft.CSharp package.</PackageReleaseNotes>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$()'">
+  <ItemGroup>
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
