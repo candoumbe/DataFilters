@@ -9,7 +9,7 @@
 #
 #     - To trigger manual generation invoke:
 #
-#         nuke --generate-configuration AzurePipelines --host AzurePipelines
+#         nuke --generate-configuration AzurePipelines_pull-request --host AzurePipelines
 #
 # </auto-generated>
 # ------------------------------------------------------------------------------
@@ -17,7 +17,8 @@
 trigger:
   branches:
     include:
-      - main
+      - feature/*
+      - fix/*
   paths:
     exclude:
       - docs/*
@@ -48,14 +49,3 @@ stages:
             inputs:
               artifactName: tests-results
               pathtoPublish: 'output/tests-results'
-      - job: Pack
-        displayName: 'Pack'
-        dependsOn: [ Tests, Compile ]
-        steps:
-          - task: CmdLine@2
-            inputs:
-              script: './build.cmd Pack --skip'
-          - task: PublishBuildArtifacts@1
-            inputs:
-              artifactName: artifacts
-              pathtoPublish: 'output/artifacts'

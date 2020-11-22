@@ -23,16 +23,31 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
 [AzurePipelines(
+    suffix: "pull-request",
     AzurePipelinesImage.WindowsLatest,
-    InvokedTargets = new[] { nameof(Pack) },
+    InvokedTargets = new[] { nameof(Tests) },
     NonEntryTargets = new[] { nameof(Restore) },
     ExcludedTargets = new[] { nameof(Clean) },
     PullRequestsAutoCancel = true,
     PullRequestsBranchesInclude = new[] { "main" },
     TriggerBranchesInclude = new[] {
-        "main",
         "feature/*",
         "fix/*"
+    },
+    TriggerPathsExclude = new[]
+    {
+        "docs/*",
+        "README.md"
+    }
+)]
+[AzurePipelines(
+    AzurePipelinesImage.WindowsLatest,
+    InvokedTargets = new[] { nameof(Pack) },
+    NonEntryTargets = new[] { nameof(Restore) },
+    ExcludedTargets = new[] { nameof(Clean) },
+    PullRequestsAutoCancel = true,
+    TriggerBranchesInclude = new[] {
+        "main"
     },
     TriggerPathsExclude = new[]
     {
