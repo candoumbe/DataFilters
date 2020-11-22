@@ -12,10 +12,9 @@
     <PackageReleaseNotes>Removed QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, IEnumerable&lt;OrderClause&lt;T&gt;&gt; orderBy)
 
 Rewrote the QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy) and removes dependency to Microsoft.CSharp package.</PackageReleaseNotes>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   
-  <ItemGroup>
+  <ItemGroup Condition="'$()'">
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
