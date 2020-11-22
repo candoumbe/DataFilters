@@ -7,6 +7,8 @@
     <PackageProjectUrl>https://candoumbe.visualstudio.com/DataFilters</PackageProjectUrl>
     <RepositoryUrl>https://candoumbe.visualstudio.com/DataFilters</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
     <PackageReleaseNotes>Removed QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, IEnumerable&lt;OrderClause&lt;T&gt;&gt; orderBy)
 
 Rewrote the QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy) and removes dependency to Microsoft.CSharp package.</PackageReleaseNotes>
