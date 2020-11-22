@@ -2,8 +2,7 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <Product />
+    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <PackageReleaseNotes>New range expression syntaax now supports including/excluding lower upper boundaries</PackageReleaseNotes>
@@ -15,10 +14,10 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <DefineConstants>STRING_SEGMENT</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup> 
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-    <PackageReference Include="Utilities" Version="1.*" />
+    <PackageReference Include="Utilities" Version="2019.*" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>
   <ItemGroup>
