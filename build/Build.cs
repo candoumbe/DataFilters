@@ -143,6 +143,7 @@ public class Build : NukeBuild
                 .EnableCollectCoverage()
                 .EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
+                .AddProperty("maxcpucount", "1")
                 .SetResultsDirectory(TestResultDirectory)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
