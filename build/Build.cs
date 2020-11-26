@@ -173,6 +173,7 @@ public class Build : NukeBuild
         .DependsOn(Tests, Compile)
         .Consumes(Compile)
         .Produces(ArtifactsDirectory / "*.nupkg")
+        .Produces(ArtifactsDirectory / "*.snupkg")
         .Executes(() =>
         {
             DotNetPack(s => s
@@ -185,6 +186,7 @@ public class Build : NukeBuild
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
                 .SetInformationalVersion(GitVersion.InformationalVersion)
                 .SetVersion(GitVersion.NuGetVersion)
+                .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
             );
         });
 
