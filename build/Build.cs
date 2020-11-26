@@ -87,7 +87,7 @@ public class Build : NukeBuild
 
     public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
 
-    public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "history";
+    public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "coverage-history";
 
     public Target Clean => _ => _
         .Before(Restore)
@@ -130,7 +130,7 @@ public class Build : NukeBuild
         .Description("Run unit tests and collect code")
         .Produces(TestResultDirectory / "*.trx")
         .Produces(TestResultDirectory / "*.xml")
-        .Produces(CoverageReportHistoryDirectory)
+        .Produces(CoverageReportHistoryDirectory / "*.xml")
         .Executes(() =>
         {
             IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
