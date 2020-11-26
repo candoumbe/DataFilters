@@ -87,13 +87,17 @@ public class Build : NukeBuild
 
     public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
 
+    public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "history";
+
     public Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             TestDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            EnsureCleanDirectory(OutputDirectory);
+            EnsureCleanDirectory(ArtifactsDirectory);
+            EnsureCleanDirectory(CoverageReportDirectory);
+            EnsureExistingDirectory(CoverageReportHistoryDirectory);
         });
 
     public Target Restore => _ => _
@@ -126,6 +130,7 @@ public class Build : NukeBuild
         .Description("Run unit tests and collect code")
         .Produces(TestResultDirectory / "*.trx")
         .Produces(TestResultDirectory / "*.xml")
+        .Produces(CoverageReportHistoryDirectory)
         .Executes(() =>
         {
             IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
@@ -161,6 +166,7 @@ public class Build : NukeBuild
                 .SetReports(TestResultDirectory / "*.xml")
                 .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
                 .SetTargetDirectory(CoverageReportDirectory)
+                .SetHistoryDirectory(CoverageReportHistoryDirectory)
             );
 
             TestResultDirectory.GlobFiles("*.xml")

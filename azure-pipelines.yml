@@ -48,6 +48,10 @@ stages:
             inputs:
               artifactName: tests-results
               pathtoPublish: 'output/tests-results'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: coverage-history
+              pathtoPublish: 'output/coverage-history'
       - job: Pack
         displayName: 'Pack'
         dependsOn: [ Tests, Compile ]
