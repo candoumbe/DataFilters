@@ -146,6 +146,7 @@ public class Build : NukeBuild
                 .AddProperty("maxcpucount", "1")
                 .SetResultsDirectory(TestResultDirectory)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+                .SetCollectCoverage(true)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
                 .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
                     .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
@@ -164,7 +165,8 @@ public class Build : NukeBuild
             // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
             ReportGenerator(_ => _
                 .SetFramework("net5.0")
-                .SetReports(TestResultDirectory / "*.xml")
+                .SetReports(TestResultDirectory / "*.xml",
+                            TestResultDirectory / "*.trx")
                 .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
                 .SetTargetDirectory(CoverageReportDirectory)
                 .SetHistoryDirectory(CoverageReportHistoryDirectory)
