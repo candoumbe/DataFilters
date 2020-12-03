@@ -28,7 +28,7 @@ using Nuke.Common.ChangeLog;
     suffix: "pull-request",
     AzurePipelinesImage.WindowsLatest,
     InvokedTargets = new[] { nameof(Tests) },
-    NonEntryTargets = new[] { nameof(Restore) },
+    NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
     ExcludedTargets = new[] { nameof(Clean) },
     PullRequestsAutoCancel = true,
     PullRequestsBranchesInclude = new[] { "main" },
