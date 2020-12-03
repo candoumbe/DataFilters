@@ -34,17 +34,17 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
         [Fact]
         public void IsParser() => typeof(FilterTokenParser).Should()
-            .BeStatic().And
-            .HaveProperty<TokenListParser<FilterToken, ConstantExpression>>("AlphaNumeric").And
-            .HaveProperty<TokenListParser<FilterToken, StartsWithExpression>>("StartsWith").And
-            .HaveProperty<TokenListParser<FilterToken, EndsWithExpression>>("EndsWith").And
-            .HaveProperty<TokenListParser<FilterToken, OneOfExpression>>("OneOf").And
-            .HaveProperty<TokenListParser<FilterToken, ContainsExpression>>("Contains").And
-            .HaveProperty<TokenListParser<FilterToken, AsteriskExpression>>("Asterisk").And
-            .HaveProperty<TokenListParser<FilterToken, GroupExpression>>("Group").And
-            .HaveProperty<TokenListParser<FilterToken, AndExpression>>("And").And
-            .HaveProperty<TokenListParser<FilterToken, RangeExpression>>("Range").And
-            .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
+                                                           .BeStatic().And
+                                                           .HaveProperty<TokenListParser<FilterToken, ConstantExpression>>("AlphaNumeric").And
+                                                           .HaveProperty<TokenListParser<FilterToken, StartsWithExpression>>("StartsWith").And
+                                                           .HaveProperty<TokenListParser<FilterToken, EndsWithExpression>>("EndsWith").And
+                                                           .HaveProperty<TokenListParser<FilterToken, OneOfExpression>>("OneOf").And
+                                                           .HaveProperty<TokenListParser<FilterToken, ContainsExpression>>("Contains").And
+                                                           .HaveProperty<TokenListParser<FilterToken, AsteriskExpression>>("Asterisk").And
+                                                           .HaveProperty<TokenListParser<FilterToken, GroupExpression>>("Group").And
+                                                           .HaveProperty<TokenListParser<FilterToken, AndExpression>>("And").And
+                                                           .HaveProperty<TokenListParser<FilterToken, RangeExpression>>("Range").And
+                                                           .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
         public static IEnumerable<object[]> AlphaNumericCases
         {

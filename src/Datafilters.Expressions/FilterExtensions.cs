@@ -87,6 +87,46 @@ namespace DataFilters
                 return equals;
             }
 
+            static Expression ComputeContains(MemberExpression property, object value)
+            {
+                Expression contains = null;
+                ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(property.Type, value);
+
+                if (IsNotAStringAndIsEnumerable(property.Type))
+                {
+                    Type genericArgType = property.Type.GenericTypeArguments[0];
+                    ParameterExpression pe = Parameter(genericArgType);
+
+                    if (typeof(string).Equals(genericArgType))
+                    {
+                        contains = Call(typeof(Enumerable),
+                                        nameof(Enumerable.Any),
+                                        new Type[] { typeof(string) },
+                                        property,
+                                        Lambda(
+                                            Call(pe,
+                                                typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
+                                                constantExpression), new[] { pe }));
+                    }
+                    else
+                    {
+                        contains = Call(typeof(Enumerable),
+                                        nameof(Enumerable.Any),
+                                        new Type[] { property.Type.GenericTypeArguments[0] },
+                                        property,
+                                        Lambda(Equal(pe, constantExpression), new[] { pe }));
+                    }
+                }
+                else
+                {
+                    contains = Call(property,
+                                  typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
+                                  constantExpression);
+                }
+
+                return contains;
+            }
+
             static bool IsDatetimeMember(Type memberType) => memberType == typeof(DateTime)
                                                              || memberType == typeof(DateTime?)
                                                              || memberType == typeof(DateTimeOffset)
@@ -158,7 +198,7 @@ namespace DataFilters
                                 NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
                                 EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression),
                                 NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression)),
-                                Contains => Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression),
+                                Contains => ComputeContains(property, df.Value),
                                 NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression)),
                                 IsEmpty => ComputeIsEmpty(property),
                                 IsNotEmpty => ComputeIsNotEmpty(property),

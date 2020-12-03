@@ -21,6 +21,8 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+using static Nuke.Common.ChangeLog.ChangelogTasks;
+using Nuke.Common.ChangeLog;
 
 [AzurePipelines(
     suffix: "pull-request",
@@ -197,6 +199,12 @@ public class Build : NukeBuild
                 .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
             );
         });
+
+
+    private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
+
+    public Target Changelog => _ => _
+        .Executes(() => FinalizeChangelog(ChangeLogFile, GitVersion.MajorMinorPatch, GitRepository));
 
     protected override void OnTargetStart(string target)
     {

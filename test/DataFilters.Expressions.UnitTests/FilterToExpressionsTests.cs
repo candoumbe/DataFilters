@@ -442,7 +442,47 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
                     },
                     new Filter(field:nameof(SuperHero.Nickname), @operator: Contains, value: "an"),
-                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.Contains("an"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.Contains("an")),
+                };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", Powers = new[]{ "super strength", "heat vision"} },
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", Powers = new[]{ "super speed"} }
+                    },
+                    new Filter(field:nameof(SuperHero.Powers), @operator: Contains, value: "strength"),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Powers.Any( power => power.Contains("strength")))
+                };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero {
+                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        },
+                        new SuperHero
+                        {
+                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                            Powers = new [] { "super strength", "heat vision" }
+                        },
+                        new SuperHero
+                        {
+                            Firstname = "Barry", Lastname = "Allen", Nickname = "Flash",
+                            Powers = new [] { "super speed" }
+                        }
+                    },
+                    new MultiFilter
+                    {
+                        Logic = Or,
+                        Filters = new IFilter[]
+                        {
+                            new Filter(field : nameof(SuperHero.Powers), @operator : Contains, value: "heat"),
+                            new Filter(field : nameof(SuperHero.Powers), @operator : Contains, value: "speed"),
+                        }
+                    },
+                    (Expression<Func<SuperHero, bool>>)(item => item.Powers.Any(power => power.Contains("heat") || power.Contains("speed")))
                 };
             }
         }
@@ -593,8 +633,8 @@ namespace DataFilters.UnitTests
 
             // Assert
             filteredResult.Should()
-                .NotBeNull()
-                .And.BeEquivalentTo(superheroes?.Where(expression.Compile()));
+                          .NotBeNull().And
+                          .BeEquivalentTo(superheroes?.Where(expression.Compile()));
         }
 
         [Fact]
