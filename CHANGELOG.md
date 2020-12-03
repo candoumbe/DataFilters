@@ -6,5 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [0.2.1] / 2020-12-03
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
+
