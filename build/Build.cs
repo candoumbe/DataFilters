@@ -22,7 +22,7 @@ using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using static Nuke.Common.ChangeLog.ChangelogTasks;
-using Nuke.Common.ChangeLog;
+using static Nuke.Common.Tools.Git.GitTasks;
 
 [AzurePipelines(
     suffix: "pull-request",
@@ -203,8 +203,17 @@ public class Build : NukeBuild
 
     private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
+    private string MajorMinorPatchVersion => GitVersion.MajorMinorPatch;
     public Target Changelog => _ => _
-        .Executes(() => FinalizeChangelog(ChangeLogFile, GitVersion.MajorMinorPatch, GitRepository));
+        .Executes(() =>
+        {
+            FinalizeChangelog(ChangeLogFile, MajorMinorPatchVersion, GitRepository);
+            Info($"Please review CHANGELOG.md ({ChangeLogFile}) and press any key to continue...");
+            Console.ReadKey();
+
+            Git($"add {ChangeLogFile}");
+            Git($"commit -m \"Finalize {Path.GetFileName(ChangeLogFile)} for {MajorMinorPatchVersion}\"");
+        });
 
     protected override void OnTargetStart(string target)
     {
