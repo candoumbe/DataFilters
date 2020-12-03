@@ -208,11 +208,14 @@ public class Build : NukeBuild
         .Executes(() =>
         {
             FinalizeChangelog(ChangeLogFile, MajorMinorPatchVersion, GitRepository);
-            Info($"Please review CHANGELOG.md ({ChangeLogFile}) and press any key to continue...");
-            Console.ReadKey();
+            Info($"Please review CHANGELOG.md ({ChangeLogFile}) and press 'Y' to validate (any other key will cancel changes)...");
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
 
-            Git($"add {ChangeLogFile}");
-            Git($"commit -m \"Finalize {Path.GetFileName(ChangeLogFile)} for {MajorMinorPatchVersion}\"");
+            if (keyInfo.Key == ConsoleKey.Y)
+            {
+                Git($"add {ChangeLogFile}");
+                Git($"commit -m \"Finalize {Path.GetFileName(ChangeLogFile)} for {MajorMinorPatchVersion}\"");
+            }
         });
 
     protected override void OnTargetStart(string target)
