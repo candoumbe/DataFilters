@@ -9,7 +9,7 @@
 #
 #     - To trigger manual generation invoke:
 #
-#         nuke --generate-configuration AzurePipelines --host AzurePipelines
+#         nuke --generate-configuration AzurePipelines_release --host AzurePipelines
 #
 # </auto-generated>
 # ------------------------------------------------------------------------------
@@ -17,7 +17,7 @@
 trigger:
   branches:
     include:
-      - main
+      - release/*
   paths:
     exclude:
       - docs/*

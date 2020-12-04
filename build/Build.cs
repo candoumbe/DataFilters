@@ -23,7 +23,22 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
+using Nuke.Common.ChangeLog;
 
+[AzurePipelines(
+    suffix: "release",
+    AzurePipelinesImage.WindowsLatest,
+    InvokedTargets = new[] { nameof(Pack) },
+    NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
+    ExcludedTargets = new[] { nameof(Clean) },
+    PullRequestsAutoCancel = true,
+    TriggerBranchesInclude = new[] { ReleaseBranchName + "/*" },
+    TriggerPathsExclude = new[]
+    {
+        "docs/*",
+        "*.md"
+    }
+)]
 [AzurePipelines(
     suffix: "pull-request",
     AzurePipelinesImage.WindowsLatest,
@@ -31,37 +46,35 @@ using static Nuke.Common.Tools.Git.GitTasks;
     NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
     ExcludedTargets = new[] { nameof(Clean) },
     PullRequestsAutoCancel = true,
-    PullRequestsBranchesInclude = new[] { "main" },
+    PullRequestsBranchesInclude = new[] { MainBranchName },
     TriggerBranchesInclude = new[] {
-        "feature/*",
-        "fix/*"
+        FeatureBranchName + "/*",
+        HotfixBranchName + "/*"
     },
     TriggerPathsExclude = new[]
     {
         "docs/*",
-        "README.md"
+        "*.md"
     }
 )]
 [AzurePipelines(
     AzurePipelinesImage.WindowsLatest,
     InvokedTargets = new[] { nameof(Pack) },
-    NonEntryTargets = new[] { nameof(Restore) },
+    NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
     ExcludedTargets = new[] { nameof(Clean) },
     PullRequestsAutoCancel = true,
-    TriggerBranchesInclude = new[] {
-        "main"
-    },
+    TriggerBranchesInclude = new[] { MainBranchName },
     TriggerPathsExclude = new[]
     {
         "docs/*",
-        "README.md"
+        "*.md"
     }
 )]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 public class Build : NukeBuild
 {
-    public static int Main() => Execute<Build>(x => x.Pack);
+    public static int Main() => Execute<Build>(x => x.Compile);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     public readonly string Configuration = IsLocalBuild ? "Debug" : "Release";
@@ -90,6 +103,14 @@ public class Build : NukeBuild
     public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
 
     public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "coverage-history";
+
+    public const string MainBranchName = "main";
+
+    public const string FeatureBranchName = "feature";
+
+    public const string HotfixBranchName = "fix";
+
+    public const string ReleaseBranchName = "release";
 
     public Target Clean => _ => _
         .Before(Restore)
@@ -197,14 +218,16 @@ public class Build : NukeBuild
                 .SetInformationalVersion(GitVersion.InformationalVersion)
                 .SetVersion(GitVersion.NuGetVersion)
                 .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
             );
         });
-
 
     private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
     private string MajorMinorPatchVersion => GitVersion.MajorMinorPatch;
+
     public Target Changelog => _ => _
+        .OnlyWhenStatic(() => IsLocalBuild && GitRepository.IsOnReleaseBranch())
         .Executes(() =>
         {
             FinalizeChangelog(ChangeLogFile, MajorMinorPatchVersion, GitRepository);

@@ -22,7 +22,7 @@ trigger:
   paths:
     exclude:
       - docs/*
-      - README.md
+      - *.md
 
 stages:
   - stage: windows_latest
