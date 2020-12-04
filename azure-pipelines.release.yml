@@ -21,7 +21,8 @@ trigger:
   paths:
     exclude:
       - docs/*
-      - *.md
+      - README.md
+      - CHANGELOG.md
 
 stages:
   - stage: windows_latest

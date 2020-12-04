@@ -36,7 +36,8 @@ using Nuke.Common.ChangeLog;
     TriggerPathsExclude = new[]
     {
         "docs/*",
-        "*.md"
+        "README.md",
+        "CHANGELOG.md"
     }
 )]
 [AzurePipelines(
@@ -54,7 +55,8 @@ using Nuke.Common.ChangeLog;
     TriggerPathsExclude = new[]
     {
         "docs/*",
-        "*.md"
+        "README.md",
+        "CHANGELOG.md"
     }
 )]
 [AzurePipelines(
@@ -67,7 +69,8 @@ using Nuke.Common.ChangeLog;
     TriggerPathsExclude = new[]
     {
         "docs/*",
-        "*.md"
+        "README.md",
+        "CHANGELOG.md"
     }
 )]
 [CheckBuildProjectConfigurations]
