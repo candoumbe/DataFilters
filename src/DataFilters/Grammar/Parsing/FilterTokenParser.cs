@@ -5,8 +5,6 @@ using Superpower.Parsers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 
 namespace DataFilters.Grammar.Parsing
 {
@@ -84,8 +82,22 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parser for "contains" expression
         /// </summary>
-        public static TokenListParser<FilterToken, ContainsExpression> Contains => from value in AlphaNumeric.Or(Punctuation).Between(Asterisk, Asterisk)
-                                                                                   select new ContainsExpression(value.Value);
+        public static TokenListParser<FilterToken, ContainsExpression> Contains => from _ in Asterisk
+                                                                                   from data in (
+                                                                                   from puncBefore in Punctuation.Many()
+                                                                                   from alpha in AlphaNumeric.Many()
+                                                                                   from puncAfter in Punctuation.Many()
+                                                                                   where puncBefore.Length > 0 || alpha.Length > 0 || puncAfter.Length > 0
+                                                                                   select new
+                                                                                   {
+                                                                                       value = string.Concat(
+                                                                                           string.Concat(puncBefore.Select(x => x.Value)),
+                                                                                           string.Concat(alpha.Select(item => item.Value)),
+                                                                                           string.Concat(puncAfter.Select(x => x.Value)))
+                                                                                   }).AtLeastOnce()
+                                                                                   from escaped in Token.EqualTo(FilterToken.Backslash).Many()
+                                                                                   from __ in Asterisk
+                                                                                   select new ContainsExpression(string.Concat(data.Select(x => x.value)));
 
         public static TokenListParser<FilterToken, OrExpression> Or => from left in Expression
                                                                        from _ in Token.EqualTo(FilterToken.Or)
@@ -130,37 +142,37 @@ namespace DataFilters.Grammar.Parsing
                         // Case [ min TO max ] 
                         (from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
 
-                        from min in DateAndTime.Try()
-                                               .Cast<FilterToken, DateTimeExpression, FilterExpression>()
-                                               .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
-                                               .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
+                         from min in DateAndTime.Try()
+                                                .Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
 
-                        from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
-                                       .Named("Range separator")
-                                       .Between(Whitespace, Whitespace)
+                         from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
+                                        .Named("Range separator")
+                                        .Between(Whitespace, Whitespace)
 
-                        from max in DateAndTime.Try()
-                                               .Cast<FilterToken, DateTimeExpression, FilterExpression>()
-                                               .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
-                                               .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
+                         from max in DateAndTime.Try()
+                                                .Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                .Or(Number.Try().Cast<FilterToken, ConstantExpression, FilterExpression>())
+                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantExpression, FilterExpression>())
 
-                        from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                         from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
-                        where min != default || max != default
-                        select new RangeExpression(
-                            min : new BoundaryExpression(min switch
-                            {
-                                ConstantExpression constant => constant,
-                                DateTimeExpression dateTime => dateTime,
-                                _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
-                            }, included: true),
-                            max : new BoundaryExpression(max switch
-                            {
-                                ConstantExpression constant => constant,
-                                DateTimeExpression dateTime => dateTime,
-                                _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
-                            }, included : true)
-                       )).Try()
+                         where min != default || max != default
+                         select new RangeExpression(
+                             min: new BoundaryExpression(min switch
+                             {
+                                 ConstantExpression constant => constant,
+                                 DateTimeExpression dateTime => dateTime,
+                                 _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                             }, included: true),
+                             max: new BoundaryExpression(max switch
+                             {
+                                 ConstantExpression constant => constant,
+                                 DateTimeExpression dateTime => dateTime,
+                                 _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                             }, included: true)
+                        )).Try()
                       // Case ] min TO max ] : lower bound excluded from the range
                       .Or(
                             from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
@@ -193,7 +205,7 @@ namespace DataFilters.Grammar.Parsing
                                     ConstantExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
-                                }, included : true)
+                                }, included: true)
                            )
                         ).Try()
                       // Case syntax [ min TO max [ : upper bound excluded from the range
@@ -216,13 +228,13 @@ namespace DataFilters.Grammar.Parsing
 
                             where min != default || max != default
                             select new RangeExpression(
-                                min :new BoundaryExpression(min switch
+                                min: new BoundaryExpression(min switch
                                 {
                                     ConstantExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: true),
-                                max : new BoundaryExpression(max switch
+                                max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
                                     ConstantExpression constant => constant,

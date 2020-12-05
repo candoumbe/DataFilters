@@ -267,6 +267,12 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new ContainsExpression("bat*man")
                 };
 
+                yield return new object[]
+                {
+                    "*d3aa022d-ec52-47aa-be13-6823c478c60a*",
+                    new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")
+                };
+
                 string[] punctuations = { ".", "-", ":", "_" };
 
                 foreach (string punctuation in punctuations)
