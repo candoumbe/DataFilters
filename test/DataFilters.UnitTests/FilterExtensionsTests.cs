@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.FilterLogic;
@@ -395,7 +394,7 @@ namespace DataFilters.UnitTests
         {
             // Act
 #pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => FilterExtensions.ToFilter<Person>(null);
+            Action action = () => ((string)null).ToFilter<Person>();
 #pragma warning restore IDE0039 // Utiliser une fonction locale
 
             // Assert

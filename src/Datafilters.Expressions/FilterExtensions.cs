@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using DataFilters.Grammar.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,6 +12,27 @@ namespace DataFilters
 {
     public static class FilterExtensions
     {
+        /// <summary>
+        /// List of all primitives types
+        /// </summary>
+        /// <value></value>
+        private static readonly Type[] PrimitiveTypes = {
+            typeof(string),
+            typeof(Guid), typeof(Guid?),
+            typeof(int), typeof(int?),
+            typeof(long?), typeof(long?),
+            typeof(short?), typeof(short?),
+            typeof(decimal?), typeof(decimal?),
+            typeof(double?), typeof(double?),
+            typeof(ushort?), typeof(ushort?),
+            typeof(uint?), typeof(uint?),
+            typeof(ulong?), typeof(ulong?),
+            typeof(DateTime), typeof(DateTime?),
+            typeof(DateTimeOffset), typeof(DateTimeOffset?),
+            typeof(bool), typeof(bool?),
+            typeof(char), typeof(char?)
+        };
+
         /// <summary>
         /// Builds an <see cref="Expression{Func{T}}"/> tree from a <see cref="IFilter"/> instance.
         /// </summary>
@@ -60,9 +81,9 @@ namespace DataFilters
 
             static Expression ComputeIsEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
                     ? Not(Call(typeof(Enumerable),
-                           nameof(Enumerable.Any),
-                           new Type[] { property.Type.GenericTypeArguments[0] },
-                           property))
+                          nameof(Enumerable.Any),
+                          new Type[] { property.Type.GenericTypeArguments[0] },
+                          property))
                     : (Expression)Equal(property, Constant(string.Empty));
 
             static Expression ComputeEquals(MemberExpression property, object value)
@@ -153,11 +174,125 @@ namespace DataFilters
                 return ce;
             }
 
+            static Expression ComputeBodyExpression(MemberExpression property, FilterOperator @operator, object value)
+            {
+                ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(((PropertyInfo)property.Member).PropertyType, value);
+
+                return @operator switch
+                {
+                    NotEqualTo => NotEqual(property, constantExpression),
+                    IsNull => Equal(property, Constant(null)),
+                    IsNotNull => NotEqual(property, Constant(null)),
+                    FilterOperator.LessThan => LessThan(property, constantExpression),
+                    FilterOperator.GreaterThan => GreaterThan(property, constantExpression),
+                    FilterOperator.GreaterThanOrEqual => GreaterThanOrEqual(property, constantExpression),
+                    LessThanOrEqualTo => LessThanOrEqual(property, constantExpression),
+                    StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression),
+                    NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
+                    EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression),
+                    NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression)),
+                    Contains => ComputeContains(property, value),
+                    NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression)),
+                    IsEmpty => ComputeIsEmpty(property),
+                    IsNotEmpty => ComputeIsNotEmpty(property),
+                    EqualTo => ComputeEquals(property, value),
+                    _ => throw new ArgumentOutOfRangeException(nameof(@operator), @operator, "Unsupported operator")
+                };
+            }
+
+            static Expression ComputeExpression(ParameterExpression pe, IEnumerable<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
+            {
+                Expression body = null;
+                int i = 0;
+
+                if (fields.Once())
+                {
+                    if (IsNotAStringAndIsEnumerable(targetType))
+                    {
+                        Type enumerableGenericType = targetType.GenericTypeArguments[0];
+                        TypeInfo typeInfo = enumerableGenericType.GetTypeInfo();
+                        ParameterExpression localParameter = Parameter(enumerableGenericType);
+                        Expression localBody = null;
+
+                        if (typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType))
+                        {
+                            localBody = ComputeBodyExpression(property, @operator, value);
+                        }
+                        else
+                        {
+                            MemberExpression localProperty = Property(localParameter, fields.Single());
+                            localBody = ComputeBodyExpression(localProperty, @operator, value);
+                            body = Call(typeof(Enumerable),
+                                         nameof(Enumerable.Any),
+                                         new[] { enumerableGenericType },
+                                         property,
+                                         Lambda(localBody, new[] { localParameter })
+                            );
+                        }
+                    }
+                    else
+                    {
+                        body = ComputeBodyExpression(Property((Expression)property ?? pe, fields.Single()), @operator, value);
+                    }
+                }
+                else
+                {
+                    bool stopComputingExpression = false;
+                    while (!stopComputingExpression && i < fields.Count())
+                    {
+                        if (IsNotAStringAndIsEnumerable(targetType))
+                        {
+                            stopComputingExpression = true;
+                            Type enumerableGenericType = targetType.GenericTypeArguments[0];
+                            ParameterExpression localParameter = Parameter(enumerableGenericType);
+                            Expression localBody;
+
+                            fields = fields.Skip(i)
+                                           .ToArray();
+                            if (fields.Any())
+                            {
+                                localBody = ComputeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property);
+                            }
+                            else
+                            {
+                                localBody = ComputeBodyExpression(property, @operator, value);
+                            }
+
+                            body = Call(typeof(Enumerable),
+                                        nameof(Enumerable.Any),
+                                        new[] { enumerableGenericType },
+                                        property,
+                                        Lambda(localBody, new[] { localParameter })
+                                    );
+                        }
+                        else
+                        {
+                            property = Property(body ?? property ?? (Expression)pe, fields.ElementAt(i));
+                            PropertyInfo pi = (PropertyInfo)property.Member;
+                            TypeInfo propertyTypeInfo = pi.PropertyType.GetTypeInfo();
+
+                            if (propertyTypeInfo.IsPrimitive || PrimitiveTypes.Contains(pi.PropertyType))
+                            {
+                                body = ComputeBodyExpression(property, @operator, value);
+                            }
+                            else
+                            {
+                                stopComputingExpression = true;
+                                body = ComputeExpression(pe, fields.Skip(i + 1).ToArray(), pi.PropertyType, @operator, value, property);
+                            }
+                        }
+
+                        i++;
+                    }
+                }
+
+                return body;
+            }
+
             if (filter == null)
             {
                 throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
             }
-
             Expression<Func<T, bool>> filterExpression = null;
 
             switch (filter)
@@ -173,38 +308,13 @@ namespace DataFilters
                             Type type = typeof(T);
                             ParameterExpression pe = Parameter(type, "item");
 
-                            string[] fields = df.Field.Split(new[] { '.' });
-                            MemberExpression property = null;
-                            foreach (string field in fields)
-                            {
-                                property = property == null
-                                    ? Property(pe, field)
-                                    : Property(property, field);
-                            }
+                            string[] fields = df.Field.Replace(@"[""", ".")
+                                                      .Replace(@"""]", string.Empty)
+                                                      .Split(new[] { '.' })
+                                                      .ToArray();
 
-                            Type memberType = (property.Member as PropertyInfo)?.PropertyType;
-                            ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(memberType, df.Value);
+                            Expression body = ComputeExpression(pe, fields, type, df.Operator, df.Value);
 
-                            Expression body = df.Operator switch
-                            {
-                                NotEqualTo => NotEqual(property, constantExpression),
-                                IsNull => Equal(property, Constant(null)),
-                                IsNotNull => NotEqual(property, Constant(null)),
-                                FilterOperator.LessThan => LessThan(property, constantExpression),
-                                FilterOperator.GreaterThan => GreaterThan(property, constantExpression),
-                                FilterOperator.GreaterThanOrEqual => GreaterThanOrEqual(property, constantExpression),
-                                LessThanOrEqualTo => LessThanOrEqual(property, constantExpression),
-                                StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression),
-                                NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
-                                EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression),
-                                NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression)),
-                                Contains => ComputeContains(property, df.Value),
-                                NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression)),
-                                IsEmpty => ComputeIsEmpty(property),
-                                IsNotEmpty => ComputeIsNotEmpty(property),
-                                EqualTo => ComputeEquals(property, df.Value),
-                                _ => throw new ArgumentOutOfRangeException(nameof(filter), df.Operator, "Unsupported operator")
-                            };
                             filterExpression = Lambda<Func<T, bool>>(body, pe);
                         }
 

@@ -207,15 +207,11 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         $"Firstname=Bru{FilterTokenizer.BackSlash}{c}",
                         (Expression<Func<TokenList<FilterToken>, bool>>) (results =>
                             results.Exactly(4)
-                            && results.Once(result =>
-                                result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
+                            && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
                             && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                            && results.Once(
-                                result => result.Kind == Alpha && result.Span.EqualsValue("Bru"))
-                            && results.Once(result =>
-                                result.Kind == Escaped && result.Span.EqualsValue(c.ToString()))
+                            && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bru"))
+                            && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue(c.ToString()))
                         )
-
                     };
                 }
 
@@ -224,16 +220,26 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     @"\",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(1)
-                        && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue(@"\"), 1)
+                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue(@"\"))
                     )
                 };
+
                 yield return new object[]
                 {
                     @"\\t",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(2)
-                        && results.Exactly(result => result.Kind == Escaped && result.Span.EqualsValue("\\"), 1)
-                        && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("t"), 1)
+                        && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue("\\"))
+                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("t"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    @"""",
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
+                        results.Exactly(1)
+                        && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@""""))
                     )
                 };
             }

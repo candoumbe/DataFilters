@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
-using ConstantExpression = DataFilters.Grammar.Syntax.ConstantExpression;
+
 
 namespace DataFilters.UnitTests.Grammar.Parsing
 {
@@ -35,7 +35,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         [Fact]
         public void IsParser() => typeof(FilterTokenParser).Should()
                                                            .BeStatic().And
-                                                           .HaveProperty<TokenListParser<FilterToken, ConstantExpression>>("AlphaNumeric").And
+                                                           .HaveProperty<TokenListParser<FilterToken, ConstantValueExpression>>("AlphaNumeric").And
+                                                           .HaveProperty<TokenListParser<FilterToken, PropertyNameExpression>>("Property").And
                                                            .HaveProperty<TokenListParser<FilterToken, StartsWithExpression>>("StartsWith").And
                                                            .HaveProperty<TokenListParser<FilterToken, EndsWithExpression>>("EndsWith").And
                                                            .HaveProperty<TokenListParser<FilterToken, OneOfExpression>>("OneOf").And
@@ -53,26 +54,31 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Bruce",
-                    new ConstantExpression("Bruce")
+                    new ConstantValueExpression("Bruce")
                 };
 
                 yield return new object[]
                 {
                     @"Vandal\*",
-                    new ConstantExpression("Vandal*")
+                    new ConstantValueExpression("Vandal*")
                 };
 
                 yield return new object[]
                 {
                     @"Van\*dal",
-                    new ConstantExpression("Van*dal")
+                    new ConstantValueExpression("Van*dal")
+                };
+                yield return new object[]
+                {
+                    "1Bruce",
+                    new ConstantValueExpression("1Bruce")
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(AlphaNumericCases))]
-        public void CanParseAlphaNumeric(string input, ConstantExpression expected)
+        public void CanParseAlphaNumeric(string input, ConstantValueExpression expected)
         {
             // Arrange
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
@@ -301,13 +307,13 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Bruce|bat*",
-                    new OrExpression(new ConstantExpression("Bruce"), new StartsWithExpression("bat"))
+                    new OrExpression(new ConstantValueExpression("Bruce"), new StartsWithExpression("bat"))
                 };
 
                 yield return new object[]
                 {
                     "Bruce|Wayne",
-                    new OrExpression(new ConstantExpression("Bruce"), new ConstantExpression("Wayne"))
+                    new OrExpression(new ConstantValueExpression("Bruce"), new ConstantValueExpression("Wayne"))
                 };
 
                 yield return new object[]
@@ -397,13 +403,13 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "!Bruce",
-                    new NotExpression(new ConstantExpression("Bruce"))
+                    new NotExpression(new ConstantValueExpression("Bruce"))
                 };
 
                 yield return new object[]
                 {
                     "!!Bruce",
-                    new NotExpression(new NotExpression(new ConstantExpression("Bruce")))
+                    new NotExpression(new NotExpression(new ConstantValueExpression("Bruce")))
                 };
 
                 yield return new object[]
@@ -415,7 +421,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "![10 TO *[",
-                    new NotExpression(new RangeExpression(min : new BoundaryExpression(new ConstantExpression("10"), included: true)))
+                    new NotExpression(new RangeExpression(min : new BoundaryExpression(new ConstantValueExpression("10"), included: true)))
                 };
 
                 yield return new object[]
@@ -447,13 +453,13 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "[Bb]",
-                    new OneOfExpression(new ConstantExpression("B"),new ConstantExpression("b"))
+                    new OneOfExpression(new ConstantValueExpression("B"),new ConstantValueExpression("b"))
                 };
 
                 yield return new object[]
                 {
                     "[Bb]ruce",
-                    new OneOfExpression(new ConstantExpression("Bruce"), new ConstantExpression("bruce"))
+                    new OneOfExpression(new ConstantValueExpression("Bruce"), new ConstantValueExpression("bruce"))
                 };
 
                 yield return new object[]
@@ -474,7 +480,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "cat[Ww]oman",
-                    new OneOfExpression(new ConstantExpression("catWoman"), new ConstantExpression("catwoman"))
+                    new OneOfExpression(new ConstantValueExpression("catWoman"), new ConstantValueExpression("catwoman"))
                 };
 
                 yield return new object[]
@@ -486,7 +492,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Bo[Bb]",
-                    new OneOfExpression(new ConstantExpression("BoB"), new ConstantExpression("Bob"))
+                    new OneOfExpression(new ConstantValueExpression("BoB"), new ConstantValueExpression("Bob"))
                 };
             }
         }
@@ -512,20 +518,20 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "[10 TO 20]",
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included: true),
-                                        max: new BoundaryExpression(new ConstantExpression("20"), included : true))
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included: true),
+                                        max: new BoundaryExpression(new ConstantValueExpression("20"), included : true))
                 };
 
                 yield return new object[]
                 {
                     "]* TO 20]",
-                    new RangeExpression(max: new BoundaryExpression(new ConstantExpression("20"), included: true))
+                    new RangeExpression(max: new BoundaryExpression(new ConstantValueExpression("20"), included: true))
                 };
 
                 yield return new object[]
                 {
                     "[10 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : true))
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true))
                 };
 
                 yield return new object[]
@@ -622,6 +628,18 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Firstname=Bruce",
                     new PropertyNameExpression("Firstname")
                 };
+
+                yield return new object[]
+                {
+                    @"Henchmen[""Name""]=*rob*",
+                    new PropertyNameExpression(@"Henchmen[""Name""]")
+                };
+
+                yield return new object[]
+                {
+                    @"Henchmen[""Powers""][""Description""]=*strength*",
+                    new PropertyNameExpression(@"Henchmen[""Powers""][""Description""]")
+                };
             }
         }
 
@@ -648,7 +666,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=Vandal",
                     (
                         new PropertyNameExpression("Name"),
-                        (FilterExpression) new ConstantExpression("Vandal")
+                        (FilterExpression) new ConstantValueExpression("Vandal")
                     )
                 };
 
@@ -657,7 +675,37 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=Vandal|Banner",
                     (
                         new PropertyNameExpression("Name"),
-                        (FilterExpression) new OrExpression(new ConstantExpression("Vandal"), new ConstantExpression("Banner"))
+                        (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Name=Vandal|Banner",
+                    (
+                        new PropertyNameExpression("Name"),
+                        (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Size=[10 TO 20]",
+                    (
+                        new PropertyNameExpression("Size"),
+                        (FilterExpression) new RangeExpression(new BoundaryExpression(new ConstantValueExpression("10"),
+                                                                                      included: true),
+                                                               new BoundaryExpression(new ConstantValueExpression("20"),
+                                                                                      included: true))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    @"Acolytes[""Name""][""Superior""]=Vandal|Banner",
+                    (
+                        new PropertyNameExpression(@"Acolytes[""Name""][""Superior""]"),
+                        (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
                     )
                 };
             }
@@ -672,6 +720,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         [MemberData(nameof(CriterionCases))]
         public void CanParseCriterion(string input, (PropertyNameExpression prop, FilterExpression expression) expected)
         {
+            _outputHelper.WriteLine($"{nameof(input)} : '{input}'");
+
             // Arrange
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
@@ -700,8 +750,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Firstname=Vandal&Lastname=Savage",
                     (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(2)
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantExpression("Vandal")))
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantExpression("Savage")))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantValueExpression("Vandal")))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
                     )
                 };
 
@@ -711,7 +761,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(1)
                         && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname"))
-                            && expr.expression.Equals(new OneOfExpression(new ConstantExpression("Vandal"), new ConstantExpression("vandal"))))
+                            && expr.expression.Equals(new OneOfExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("vandal"))))
                     )
                 };
 
@@ -722,8 +772,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         $@"Firstname=Vand\{c}al&Lastname=Savage",
                         (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
                             expressions => expressions.Exactly(2)
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantExpression($"Vand{c}al")))
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantExpression("Savage")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
                         )
                     };
                 }

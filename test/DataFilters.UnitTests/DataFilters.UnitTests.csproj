@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DataFilters\DataFilters.csproj" />
+    <ProjectReference Include="..\DataFilters.TestObjects\DataFilters.TestObjects.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,5 @@
-﻿using FluentAssertions;
-using FluentAssertions.Common;
+﻿using DataFilters.TestObjects;
+using FluentAssertions;
 using FluentAssertions.Extensions;
 using Newtonsoft.Json;
 using System;
@@ -19,38 +19,6 @@ namespace DataFilters.UnitTests
     public class FilterToExpressionTests
     {
         private readonly ITestOutputHelper _output;
-
-        public class Person
-        {
-            public string Firstname { get; set; }
-
-            public string Lastname { get; set; }
-
-            public DateTime BirthDate { get; set; }
-        }
-
-        public class SuperHero : Person
-        {
-            public string Nickname { get; set; }
-
-            public int Height { get; set; }
-
-            public DateTimeOffset? LastBattleDate { get; set; }
-
-            public Henchman Henchman { get; set; }
-
-            public IEnumerable<string> Powers { get; set; } = Enumerable.Empty<string>();
-        }
-
-        public class Henchman : SuperHero
-        {
-        }
-
-        public class Appointment
-        {
-            public string Name { get; set; }
-            public DateTimeOffset? Date { get; set; }
-        }
 
         public FilterToExpressionTests(ITestOutputHelper output) => _output = output;
 
@@ -165,6 +133,27 @@ namespace DataFilters.UnitTests
                     new Filter(field : nameof(SuperHero.Powers), @operator : EqualTo, value: "heat"),
                     (Expression<Func<SuperHero, bool>>)(item => item.Powers.Any(power => power == "heat"))
                 };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero {
+                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                            Henchman = new Henchman
+                            {
+                                Nickname = "Robin",
+                                Weapons = new []
+                                {
+                                    new Weapon{ Name = "stick", Level = 100 }
+                                }
+                            }
+                        }
+                    },
+                    new Filter(field : @$"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Weapons)}""][""{nameof(Weapon.Name)}""]",
+                               @operator : EqualTo,
+                               value: "stick"),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Weapons.Any(weapon => weapon.Name == "stick"))
+                };
             }
         }
 
@@ -235,7 +224,7 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman",
                            Henchman = new Henchman { Nickname = "Krypto" } }
                     },
-                    new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : IsEmpty),
+                    new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Lastname)}""]", @operator : IsEmpty),
                     (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname == string.Empty)
                 };
 
@@ -254,7 +243,7 @@ namespace DataFilters.UnitTests
                             }
                         }
                     },
-                    new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : NotEqualTo, value: "Dick"),
+                    new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Firstname)}""]", @operator : NotEqualTo, value: "Dick"),
                     (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick")
                 };
 
@@ -272,6 +261,22 @@ namespace DataFilters.UnitTests
                     },
                     new Filter(field : nameof(SuperHero.Powers), @operator : IsEmpty),
                     (Expression<Func<SuperHero, bool>>)(item => !item.Powers.Any())
+                };
+
+                yield return new object[]
+                {
+                    new[] {
+                        new SuperHero {
+                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        },
+                        new SuperHero
+                        {
+                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                            Powers = new [] { "super strength", "heat vision" }
+                        }
+                    },
+                    new Filter(field : $@"{nameof(SuperHero.Acolytes)}[""{nameof(SuperHero.Weapons)}""]", @operator : IsEmpty),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Acolytes.Any(acolyte => !acolyte.Weapons.Any()))
                 };
             }
         }
@@ -298,25 +303,35 @@ namespace DataFilters.UnitTests
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
                         new SuperHero { Firstname = "", Lastname = "", Height = 178, Nickname = "Sinestro" }
                     },
-                    new Filter(field : nameof(SuperHero.Lastname), @operator : IsNotEmpty),
+                    new Filter(field: nameof(SuperHero.Lastname), @operator: IsNotEmpty),
                     (Expression<Func<SuperHero, bool>>)(item => item.Lastname != string.Empty),
                 };
 
                 yield return new object[]
                 {
                     new[] {
-                        new SuperHero {
+                        new SuperHero
+                        {
                             Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
                             Henchman = new Henchman
                             {
                                 Firstname = "Dick", Lastname = "Grayson", Nickname = "Robin"
                             }
                         },
-                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman",
-                           Henchman = new Henchman { Nickname = "Krypto" } }
+                        new SuperHero
+                        {
+                            Firstname = "Clark",
+                            Lastname = "Kent",
+                            Height = 190,
+                            Nickname = "Superman",
+                            Acolytes = new []
+                            {
+                                new SuperHero { Nickname = "Krypto" }
+                            }
+                        }
                     },
-                    new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : IsNotEmpty),
-                    (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Lastname != string.Empty)
+                    new Filter(field: $@"{nameof(SuperHero.Acolytes)}[""{nameof(Henchman.Lastname)}""]", @operator: IsNotEmpty),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Acolytes.Any(acolyte => acolyte.Lastname != string.Empty))
                 };
 
                 yield return new object[]
@@ -579,7 +594,7 @@ namespace DataFilters.UnitTests
                             }
                         }
                     },
-                    new Filter(field : $"{nameof(SuperHero.Henchman)}.{nameof(Henchman.Firstname)}", @operator : NotEqualTo, value : "Dick"),
+                    new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Firstname)}""]", @operator : NotEqualTo, value : "Dick"),
                     (Expression<Func<SuperHero, bool>>)(item => item.Henchman.Firstname != "Dick")
                 };
             }
@@ -625,11 +640,11 @@ namespace DataFilters.UnitTests
             _output.WriteLine($"Reference expression : {expression.Body}");
 
             // Act
-            Expression<Func<SuperHero, bool>> buildResult = filter.ToExpression<SuperHero>();
+            Expression<Func<SuperHero, bool>> filterExpression = filter.ToExpression<SuperHero>();
             IEnumerable<SuperHero> filteredResult = superheroes
-                .Where(buildResult.Compile())
+                .Where(filterExpression.Compile())
                 .ToList();
-            _output.WriteLine($"Current expression : {buildResult.Body}");
+            _output.WriteLine($"Current expression : {filterExpression.Body}");
 
             // Assert
             filteredResult.Should()

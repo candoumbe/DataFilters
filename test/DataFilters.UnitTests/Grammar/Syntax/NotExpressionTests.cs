@@ -40,16 +40,16 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new NotExpression(new ConstantExpression("prop1")),
-                    new NotExpression(new ConstantExpression("prop1")),
+                    new NotExpression(new ConstantValueExpression("prop1")),
+                    new NotExpression(new ConstantValueExpression("prop1")),
                     true,
                     "comparing two different instances with same expression"
                 };
 
                 yield return new object[]
                 {
-                    new NotExpression(new ConstantExpression("prop1")),
-                    new NotExpression(new ConstantExpression("prop2")),
+                    new NotExpression(new ConstantValueExpression("prop1")),
+                    new NotExpression(new ConstantValueExpression("prop2")),
                     false,
                     "comparing two different instances with different property name"
                 };

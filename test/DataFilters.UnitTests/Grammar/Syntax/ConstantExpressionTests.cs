@@ -14,9 +14,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public ConstantExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
         [Fact]
-        public void IsFilterExpression() => typeof(ConstantExpression).Should()
+        public void IsFilterExpression() => typeof(ConstantValueExpression).Should()
             .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<ConstantExpression>>().And
+            .Implement<IEquatable<ConstantValueExpression>>().And
             .HaveConstructor(new[] { typeof(string) }).And
             .HaveProperty<string>("Value");
 
@@ -24,33 +24,33 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => new ConstantExpression(null);
+            Action action = () => new ConstantValueExpression(null);
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(ConstantExpression)}'s constructor cannot be null");
+                .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(ConstantValueExpression)}'s constructor cannot be null");
         }
 
         [Fact]
         public void Ctor_Throws_ArgumentOutyException_When_Argument_Is_Empty()
         {
             // Act
-            Action action = () => new ConstantExpression(string.Empty);
+            Action action = () => new ConstantValueExpression(string.Empty);
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentOutOfRangeException>($"The parameter of  {nameof(ConstantExpression)}'s constructor cannot be empty");
+                .ThrowExactly<ArgumentOutOfRangeException>($"The parameter of  {nameof(ConstantValueExpression)}'s constructor cannot be empty");
         }
 
         [Fact]
         public void Ctor_Throws_ArgumentOutyException_When_Argument_Is_Whitespace()
         {
             // Act
-            Action action = () => new ConstantExpression(" ");
+            Action action = () => new ConstantValueExpression(" ");
 
             // Assert
             action.Should()
-                .NotThrow($"The parameter of  {nameof(ConstantExpression)}'s constructor can be whitespace");
+                .NotThrow($"The parameter of  {nameof(ConstantValueExpression)}'s constructor can be whitespace");
         }
 
         public static IEnumerable<object[]> EqualsCases
@@ -59,16 +59,16 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new ConstantExpression("prop1"),
-                    new ConstantExpression("prop1"),
+                    new ConstantValueExpression("prop1"),
+                    new ConstantValueExpression("prop1"),
                     true,
                     "comparing two different instances with same property name"
                 };
 
                 yield return new object[]
                 {
-                    new ConstantExpression("prop1"),
-                    new ConstantExpression("prop2"),
+                    new ConstantValueExpression("prop1"),
+                    new ConstantValueExpression("prop2"),
                     false,
                     "comparing two different instances with different property name"
                 };
@@ -77,7 +77,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(ConstantExpression first, object other, bool expected, string reason)
+        public void ImplementsEqualsCorrectly(ConstantValueExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
             _outputHelper.WriteLine($"Second instance : {other}");

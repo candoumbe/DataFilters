@@ -49,7 +49,7 @@ namespace DataFilters.Grammar.Syntax
                 throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
             }
 
-            if (min?.Expression is ConstantExpression && !(max is null || max.Expression is ConstantExpression || max.Expression is AsteriskExpression))
+            if (min?.Expression is ConstantValueExpression && !(max is null || max.Expression is ConstantValueExpression || max.Expression is AsteriskExpression))
             {
                 throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
             }
@@ -106,7 +106,7 @@ namespace DataFilters.Grammar.Syntax
                             : Max.Equals(other.Max);
                     }
                 }
-                else if(Min.Equals(other.Min))
+                else if (Min.Equals(other.Min))
                 {
                     equals = Max is null
                         ? other.Max is null

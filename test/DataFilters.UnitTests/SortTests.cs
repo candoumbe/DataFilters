@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using DataFilters.TestObjects;
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using Xunit;

@@ -20,6 +20,7 @@ namespace DataFilters.Grammar.Parsing
         public const char Pipe = '|';
         public const char Comma = ',';
         public const char Bang = '!';
+        public const char DoubleQuote = '"';
 
         /// <summary>
         /// List of characters that have a special meaning and should be escaped
@@ -122,6 +123,10 @@ namespace DataFilters.Grammar.Parsing
                         break;
                     case ':':
                         yield return Result.Value(Colon, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case '"':
+                        yield return Result.Value(FilterToken.DoubleQuote, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '.':

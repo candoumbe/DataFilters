@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using DataFilters.TestObjects;
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -25,7 +26,7 @@ namespace DataFilters.UnitTests
             action.Should()
                 .ThrowExactly<ArgumentOutOfRangeException>(reason)
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName), $"{nameof(ArgumentOutOfRangeException.ParamName)} must not be null")
-                .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null") ;
+                .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null");
         }
 
         [Theory]
