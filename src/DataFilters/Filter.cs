@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
 using static Newtonsoft.Json.DefaultValueHandling;
 using static Newtonsoft.Json.Required;
+using System.Text.RegularExpressions;
 #if !NETSTANDARD1_3
 using System.Text.Json.Serialization;
 #endif
@@ -27,6 +28,18 @@ namespace DataFilters
         /// Filter that always returns <c>true</c>
         /// </summary>
         public static Filter True => new Filter(default, default);
+
+        /// <summary>
+        /// Pattern that field name should respect.
+        /// </summary>
+        /// <returns></returns>
+        public const string ValidFieldNamePattern = @"^[a-zA-Z_]+(?<subProperty>([""[a-zA-Z0-9_]*""])*)$";
+
+        /// <summary>
+        /// Regular expression used to validate
+        /// </summary>
+        /// <returns></returns>
+        public static readonly Regex ValidFieldNameRegex = new Regex(ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
         /// <summary>
         /// Name of the json property that holds the field name
@@ -155,8 +168,14 @@ namespace DataFilters
         /// <param name="field">name of the field</param>
         /// <param name="operator"><see cref="Filter"/> to apply</param>
         /// <param name="value">value of the filter</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="field"/> does not conform with <see cref="ValidFieldNamePattern"/></exception>
         public Filter(string field, FilterOperator @operator, object value = null)
         {
+            if (!string.IsNullOrEmpty(field) && !ValidFieldNameRegex.IsMatch(field))
+            {
+                throw new ArgumentOutOfRangeException(nameof(field), field, $"field name is not valid ({ValidFieldNamePattern}).");
+            }
+
             Field = field;
             switch (@operator)
             {
@@ -182,7 +201,7 @@ namespace DataFilters
         public string ToJson() => this.Jsonify();
 #endif
 
-        //public override string ToString() => ToJson();
+        public override string ToString() => ToJson();
 
         public bool Equals(Filter other)
             => other != null

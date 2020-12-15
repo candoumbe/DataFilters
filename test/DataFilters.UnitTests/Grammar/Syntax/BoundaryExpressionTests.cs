@@ -20,14 +20,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new BoundaryExpression(new ConstantExpression("10"), included: true),
-                    new BoundaryExpression(new ConstantExpression("10"), included: true),
+                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
+                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
                     true,
                     $"both {nameof(BoundaryExpression)}'s {nameof(BoundaryExpression.Expression)} and {nameof(BoundaryExpression.Included)} are equals"
                 };
 
                 {
-                    BoundaryExpression instance = new BoundaryExpression(new ConstantExpression("10"), included: true);
+                    BoundaryExpression instance = new BoundaryExpression(new ConstantValueExpression("10"), included: true);
                     yield return new object[]
                     {
                         instance,
@@ -39,15 +39,15 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
                 yield return new object[]
                 {
-                    new BoundaryExpression(new ConstantExpression("10"), included: true),
-                    new BoundaryExpression(new ConstantExpression("10"), included: false),
+                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
+                    new BoundaryExpression(new ConstantValueExpression("10"), included: false),
                     false,
                     $"both {nameof(BoundaryExpression.Included)} are different"
                 };
 
                 yield return new object[]
                 {
-                    new BoundaryExpression(new ConstantExpression("10"), included: true),
+                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
                     new BoundaryExpression(new DateExpression(), included: true),
                     false,
                     $"both {nameof(BoundaryExpression.Expression)} are different"
@@ -55,7 +55,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
                 yield return new object[]
                 {
-                    new BoundaryExpression(new ConstantExpression("10"), included: true),
+                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
                     null,
                     false,
                     "the argument is null"

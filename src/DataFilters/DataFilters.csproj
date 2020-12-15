@@ -15,7 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="2019.*" />
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.1.0" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>
   <ItemGroup>

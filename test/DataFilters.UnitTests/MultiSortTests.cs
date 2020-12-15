@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.SortDirection;
+using DataFilters.TestObjects;
 
 namespace DataFilters.UnitTests
 {

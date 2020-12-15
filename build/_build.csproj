@@ -3,7 +3,7 @@
   <Import Project="../core.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-   <TargetFramework>net5</TargetFramework>
+    <TargetFramework>net5</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169</NoWarn>
     <NukeRootDirectory>..</NukeRootDirectory>
@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="5.0.0" />
-    <PackageReference Include="Utilities" Version="2019.*" />
+    <PackageReference Include="Nuke.Common" Version="5.0.2" />
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.1.0" />
     <PackageReference Include="ReportGenerator" Version="4.8.*" />
     <PackageReference Include="GitVersion.CommandLine" Version="5.5.1">
       <PrivateAssets>all</PrivateAssets>

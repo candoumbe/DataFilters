@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using FsCheck;
+using FsCheck.Xunit;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using System;
@@ -6,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -40,15 +43,6 @@ namespace DataFilters.UnitTests
             ["neq"] = NotEqualTo,
             ["startswith"] = StartsWith
         }.ToImmutableDictionary();
-
-        public class Person
-        {
-            public string Firstname { get; set; }
-
-            public string Lastname { get; set; }
-
-            public DateTime BirthDate { get; set; }
-        }
 
         /// <summary>
         /// Deserialization of various json representation into <see cref="Filter"/>
@@ -278,6 +272,16 @@ namespace DataFilters.UnitTests
                         true
                     };
                 }
+
+                {
+                    Guid guid = Guid.NewGuid();
+                    yield return new object[]
+                    {
+                        new Filter("Prop", EqualTo, guid),
+                        new Filter("Prop", EqualTo, guid),
+                        true
+                    };
+                }
             }
         }
 
@@ -294,6 +298,42 @@ namespace DataFilters.UnitTests
             // Assert
             result.Should()
                 .Be(expectedResult);
+        }
+
+        [Fact]
+        public void Ctor_should_build_valid_instance()
+        {
+            // Act
+
+            Regex validFieldNameRegex = new Regex(Filter.ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+
+            Prop.ForAll<string, FilterOperator, object>((field, @operator, value) =>
+            {
+                Lazy<Filter> filterCtor = new Lazy<Filter>(() => new Filter(field, @operator, value));
+
+                // Assertion
+                Prop.Throws<ArgumentOutOfRangeException, Filter>(filterCtor).When(field is not null && !validFieldNameRegex.IsMatch(field))
+                                                                               .Label($"'{field}' doesnt not match expected regex ")
+                    //.Trivial(field is not null && !validFieldNameRegex.IsMatch(field))
+                    .Or(() =>
+                    {
+                        Filter filter = filterCtor.Value;
+
+                        return filter.Field == field
+                            && filter.Operator == @operator
+                            && filter.Value is null;
+                    }).When(Filter.UnaryOperators.Contains(@operator)).Label("Unary operator")
+                    .Or(() =>
+                    {
+                        Filter filter = filterCtor.Value;
+
+                        return filter.Field == field
+                            && filter.Operator == @operator
+                            && value.Equals(filter.Value);
+                    }).When(!Filter.UnaryOperators.Contains(@operator)).Label("Binary operator")
+                    .VerboseCheck(_output);
+            })
+            .VerboseCheck(_output);
         }
     }
 }

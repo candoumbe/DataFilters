@@ -65,13 +65,13 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             get
             {
                 yield return new object[] {
-                    new BoundaryExpression(new DateExpression(), included: true), new BoundaryExpression(new ConstantExpression("10"), included: true),
-                    $"min holds {nameof(DateExpression)} and max holds {nameof(ConstantExpression)}"
+                    new BoundaryExpression(new DateExpression(), included: true), new BoundaryExpression(new ConstantValueExpression("10"), included: true),
+                    $"min holds {nameof(DateExpression)} and max holds {nameof(ConstantValueExpression)}"
                 };
 
                 yield return new object[] {
-                    new BoundaryExpression(new ConstantExpression("10"), included : true), new BoundaryExpression(new DateExpression(), included : true),
-                    $"min holds {nameof(ConstantExpression)} and max holds {nameof(DateExpression)}"
+                    new BoundaryExpression(new ConstantValueExpression("10"), included : true), new BoundaryExpression(new DateExpression(), included : true),
+                    $"min holds {nameof(ConstantValueExpression)} and max holds {nameof(DateExpression)}"
                 };
 
                 yield return new object[]
@@ -167,23 +167,23 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : true)),
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : true)),
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
                     true,
                     $"comparing two {nameof(RangeExpression)} instances with same min and max"
                 };
 
                 yield return new object[]
                 {
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : true)),
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : false)),
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : false)),
                     false,
                     $"comparing two {nameof(RangeExpression)} instances with same min and max but not same {nameof(BoundaryExpression.Included)}"
                 };
 
                 yield return new object[]
                 {
-                    new RangeExpression(min: new BoundaryExpression(new ConstantExpression("10"), included : true)),
+                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
                     null,
                     false,
                     "comparing to null"
@@ -191,8 +191,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
                 yield return new object[]
                 {
-                    new RangeExpression(max: new BoundaryExpression(new ConstantExpression("10"), included : true)),
-                    new RangeExpression(max: new BoundaryExpression(new ConstantExpression("10"), included : true)),
+                    new RangeExpression(max: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
+                    new RangeExpression(max: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
                     true,
                     $"comparing two {nameof(RangeExpression)} instances with same min and max"
                 };

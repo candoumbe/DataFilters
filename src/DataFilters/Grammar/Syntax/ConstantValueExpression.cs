@@ -5,17 +5,17 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-    public class ConstantExpression : FilterExpression, IEquatable<ConstantExpression>, IBoundaryExpression
+    public class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
     {
         public string Value { get; }
 
         /// <summary>
-        /// Builds a new <see cref="ConstantExpression"/> that holds the specified <paramref name="value"/>.
+        /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value"></param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
-        public ConstantExpression(string value)
+        public ConstantValueExpression(string value)
         {
             if (value is null)
             {
@@ -30,9 +30,9 @@ namespace DataFilters.Grammar.Syntax
             Value = value;
         }
 
-        public bool Equals(ConstantExpression other) => Value == other?.Value;
+        public bool Equals(ConstantValueExpression other) => Value == other?.Value;
 
-        public override bool Equals(object obj) => Equals(obj as ConstantExpression);
+        public override bool Equals(object obj) => Equals(obj as ConstantValueExpression);
 
         public override int GetHashCode() => Value.GetHashCode();
 

@@ -23,7 +23,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
-using Nuke.Common.ChangeLog;
+using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
 
 [AzurePipelines(
     suffix: "release",
@@ -32,7 +32,7 @@ using Nuke.Common.ChangeLog;
     NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
     ExcludedTargets = new[] { nameof(Clean) },
     PullRequestsAutoCancel = true,
-    TriggerBranchesInclude = new[] { ReleaseBranchName + "/*" },
+    TriggerBranchesInclude = new[] { ReleaseBranchPrefix + "/*" },
     TriggerPathsExclude = new[]
     {
         "docs/*",
@@ -49,8 +49,8 @@ using Nuke.Common.ChangeLog;
     PullRequestsAutoCancel = true,
     PullRequestsBranchesInclude = new[] { MainBranchName },
     TriggerBranchesInclude = new[] {
-        FeatureBranchName + "/*",
-        HotfixBranchName + "/*"
+        FeatureBranchPrefix + "/*",
+        HotfixBranchPrefix + "/*"
     },
     TriggerPathsExclude = new[]
     {
@@ -85,10 +85,9 @@ public class Build : NukeBuild
     [Parameter("Indicates wheter to restore nuget in interactive mode - Default is false")]
     public readonly bool Interactive = false;
 
-    [Solution] public readonly Solution Solution;
-    [GitRepository] public readonly GitRepository GitRepository;
-    [GitVersion] public readonly GitVersion GitVersion;
-
+    [Required] [Solution] public readonly Solution Solution;
+    [Required] [GitRepository] public readonly GitRepository GitRepository;
+    [Required] [GitVersion(Framework = "net5.0", NoFetch = true)] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
     [Partition(10)] public readonly Partition TestPartition;
@@ -109,11 +108,16 @@ public class Build : NukeBuild
 
     public const string MainBranchName = "main";
 
-    public const string FeatureBranchName = "feature";
+    public const string DevelopBranch = "dev";
 
-    public const string HotfixBranchName = "fix";
+    public const string FeatureBranchPrefix = "feature";
 
-    public const string ReleaseBranchName = "release";
+    public const string HotfixBranchPrefix = "fix";
+
+    public const string ReleaseBranchPrefix = "release";
+
+    [Parameter("Indicates if any changes should be stashed automatically prior to switching branch (Default : true)")]
+    public readonly bool AutoStash = true;
 
     public Target Clean => _ => _
         .Before(Restore)
@@ -227,22 +231,6 @@ public class Build : NukeBuild
 
     private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
-    private string MajorMinorPatchVersion => GitVersion.MajorMinorPatch;
-
-    public Target Changelog => _ => _
-        .OnlyWhenStatic(() => IsLocalBuild && GitRepository.IsOnReleaseBranch())
-        .Executes(() =>
-        {
-            FinalizeChangelog(ChangeLogFile, MajorMinorPatchVersion, GitRepository);
-            Info($"Please review CHANGELOG.md ({ChangeLogFile}) and press 'Y' to validate (any other key will cancel changes)...");
-            ConsoleKeyInfo keyInfo = Console.ReadKey();
-
-            if (keyInfo.Key == ConsoleKey.Y)
-            {
-                Git($"add {ChangeLogFile}");
-                Git($"commit -m \"Finalize {Path.GetFileName(ChangeLogFile)} for {MajorMinorPatchVersion}\"");
-            }
-        });
 
     protected override void OnTargetStart(string target)
     {
@@ -253,4 +241,139 @@ public class Build : NukeBuild
     {
         Info($"'{target}' task finished");
     }
+
+    #region Git flow section
+
+    public Target Changelog => _ => _
+        .OnlyWhenStatic(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
+        .Description("Finalizes the change log so that its up to date for the release. ")
+        .Executes(() =>
+        {
+            FinalizeChangelog(ChangeLogFile, GitVersion.MajorMinorPatch, GitRepository);
+            Info($"Please review CHANGELOG.md ({ChangeLogFile}) and press 'Y' to validate (any other key will cancel changes)...");
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+
+            if (keyInfo.Key == ConsoleKey.Y)
+            {
+                Git($"add {ChangeLogFile}");
+                Git($"commit -m \"Finalize {Path.GetFileName(ChangeLogFile)} for {GitVersion.MajorMinorPatch}\"");
+            }
+        });
+
+    public Target Feature => _ => _
+        .Description($"Starts a new feature development by creating the associated branch {FeatureBranchPrefix}/{{feature-name}} from {MainBranchName}")
+        .Requires(() => !GitRepository.IsOnFeatureBranch() || GitHasCleanWorkingCopy())
+        .Executes(() =>
+        {
+            Info("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
+            string featureName;
+            bool exitCreatingFeature = false;
+            do
+            {
+                featureName = (Console.ReadLine() ?? string.Empty).Trim()
+                                                                  .Trim('/');
+
+                switch (featureName)
+                {
+                    case string name when !string.IsNullOrWhiteSpace(name):
+                        {
+                            string branchName = $"{FeatureBranchPrefix}/{featureName.Slugify()}";
+                            Info($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
+                            switch (Console.ReadKey().Key)
+                            {
+                                case ConsoleKey.Y:
+                                    Info($"{Environment.NewLine}Checking out branch '{branchName}' from '{MainBranchName}'");
+                                    Checkout(branchName, start: MainBranchName);
+                                    Info($"{Environment.NewLine}'{branchName}' created successfully");
+                                    exitCreatingFeature = true;
+                                    break;
+
+                                default:
+                                    Info($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
+                                    exitCreatingFeature = true;
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        Info($"Exiting {nameof(Feature)} task.");
+                        exitCreatingFeature = true;
+                        break;
+                }
+
+            } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
+
+            Info($"{EnvironmentInfo.NewLine}Good bye !");
+        });
+
+    public Target Release => _ => _
+        .DependsOn(Changelog)
+        .Description($"Starts a new {ReleaseBranchPrefix}/{{version}} from {DevelopBranch}")
+        .Requires(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
+        .Executes(() =>
+        {
+            if (!GitRepository.IsOnReleaseBranch())
+            {
+                Checkout($"{ReleaseBranchPrefix}/{GitVersion.MajorMinorPatch}", start: DevelopBranch);
+            }
+            else
+            {
+                FinishReleaseOrHotfix();
+            }
+        });
+
+    public Target Hotfix => _ => _
+        .DependsOn(Changelog)
+        .Description($"Starts a new hotfix branch '{HotfixBranchPrefix}/*' from {MainBranchName}")
+        .Requires(() => !GitRepository.IsOnHotfixBranch() || GitHasCleanWorkingCopy())
+        .Executes(() =>
+        {
+            (GitVersion mainBranchVersion, IReadOnlyCollection<Output> _) = GitVersion(s => s
+                .SetFramework("net5.0")
+                .SetUrl(RootDirectory)
+                .SetBranch(MainBranchName)
+                .EnableNoFetch()
+                .DisableProcessLogOutput());
+
+            if (!(GitRepository.IsOnHotfixBranch() || GitRepository.Branch.Like("fix/*")))
+            {
+                Checkout($"{HotfixBranchPrefix}/{mainBranchVersion.Major}.{mainBranchVersion.Minor}.{mainBranchVersion.Patch + 1}", start: MainBranchName);
+            }
+            else
+            {
+                FinishReleaseOrHotfix();
+            }
+        });
+
+    private void Checkout(string branch, string start)
+    {
+        bool hasCleanWorkingCopy = GitHasCleanWorkingCopy();
+
+        if (!hasCleanWorkingCopy && AutoStash)
+        {
+            Git("stash");
+        }
+        Git($"checkout -b {branch} {start}");
+
+        if (!hasCleanWorkingCopy && AutoStash)
+        {
+            Git("stash apply");
+        }
+    }
+
+    private void FinishReleaseOrHotfix()
+    {
+        Warn("The hotfix (or release) could not be created because you have uncommited changes pending.");
+        // Git($"checkout {MainBranchName}");
+        // Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+        // Git($"tag {MajorMinorPatchVersion}");
+
+        // Git($"checkout {DevelopBranch}");
+        // Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+
+        // Git($"branch -D {GitRepository.Branch}");
+
+        // Git($"push origin {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+    }
+    #endregion
 }

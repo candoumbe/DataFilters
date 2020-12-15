@@ -68,6 +68,7 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Equal sign
         /// </summary>
+        [Token(Example = "=")]
         Equal,
 
         /// <summary>
@@ -104,6 +105,9 @@ namespace DataFilters.Grammar.Parsing
         Backslash,
 
         [Token(Description = "Expression that allow to escape character with a special meaning", Example = @"\\")]
-        Escaped
+        Escaped,
+
+        [Token(Example = @"""")]
+        DoubleQuote
     }
 }

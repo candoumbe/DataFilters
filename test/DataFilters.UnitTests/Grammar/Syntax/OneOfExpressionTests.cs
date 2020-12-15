@@ -41,24 +41,24 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop2"), new ConstantExpression("prop1")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop2"), new ConstantValueExpression("prop1")),
                     false,
                     "comparing two different instances with same data but the order does not matter"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop3")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
                 };
@@ -91,47 +91,46 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             }
         }
 
-
         public static IEnumerable<object[]> IsEquivalentToCases
         {
             get
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop2"), new ConstantExpression("prop1")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop2"), new ConstantValueExpression("prop1")),
                     true,
                     "comparing two different instances with same data but the order does not matter"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop3")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2"), new ConstantExpression("prop3")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2"), new ConstantValueExpression("prop3")),
                     false,
                     "the other instance contains all data of the first instance and one item that is not in the current instance"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop1"), new ConstantExpression("prop2")),
-                    new OneOfExpression(new ConstantExpression("prop1"), new ConstantExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds duplicates is equivalent a {nameof(OneOfExpression)} with no duplicate"
                 };

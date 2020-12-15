@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Queries.Core" Version="0.1.0-*"/>
+    <PackageReference Include="Queries.Core" Version="0.1.1"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataFilters\DataFilters.csproj" />
