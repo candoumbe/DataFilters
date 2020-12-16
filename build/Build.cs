@@ -158,6 +158,7 @@ public class Build : NukeBuild
     public Target Tests => _ => _
         .DependsOn(Compile)
         .Description("Run unit tests and collect code")
+        .Partition(() => TestPartition)
         .Produces(TestResultDirectory / "*.trx")
         .Produces(TestResultDirectory / "*.xml")
         .Produces(CoverageReportHistoryDirectory / "*.xml")
