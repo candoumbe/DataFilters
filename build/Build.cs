@@ -90,7 +90,7 @@ public class Build : NukeBuild
     [Required] [GitVersion(Framework = "net5.0", NoFetch = true)] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
-    [Partition(10)] public readonly Partition TestPartition;
+    [Partition(4)] public readonly Partition TestPartition;
 
     public AbsolutePath SourceDirectory => RootDirectory / "src";
 
@@ -173,7 +173,7 @@ public class Build : NukeBuild
                 .EnableCollectCoverage()
                 .EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
-                .AddProperty("maxcpucount", "1")
+                //.AddProperty("maxcpucount", "1")
                 .SetResultsDirectory(TestResultDirectory)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
