@@ -190,12 +190,13 @@ namespace System
                             => input?.Expression switch
                             {
                                 ConstantValueExpression ce => (ce, input.Included),
-                                DateTimeExpression { Time: null } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}"), input.Included),
-                                DateTimeExpression { Date: null } dateTime => (new ConstantValueExpression($"{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
-                                DateTimeExpression dateTime => (new ConstantValueExpression($"{dateTime.Date.Year}-{dateTime.Date.Month}-{dateTime.Date.Day}T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
-                                AsteriskExpression asterisk => default, // because this is equivalent to an unbounded range
-                                null => default,
-                                _ => throw new ArgumentOutOfRangeException($"Unsupported boundery type {input.GetType()}")
+                                DateTimeExpression { Time: null } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"), input.Included),
+                                DateTimeExpression { Date: null } dateTime => (new ConstantValueExpression($"{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
+                                DateTimeExpression dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}"), input.Included),
+                                DateExpression date => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
+                                TimeExpression time => (new ConstantValueExpression($"{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
+                                AsteriskExpression or null => default, // because this is equivalent to an unbounded range
+                                _ => throw new ArgumentOutOfRangeException($"Unsupported boundary type {input.GetType()}")
                             };
 
                         (ConstantValueExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);

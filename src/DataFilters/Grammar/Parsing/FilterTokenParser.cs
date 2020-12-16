@@ -122,52 +122,54 @@ namespace DataFilters.Grammar.Parsing
         {
             get
             {
-                return
-                        // Case [ min TO max ] 
-                        (from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                return  // Case [ min TO max ] 
+                        (
+                            // from prop in Property
+                            // from eq in Token.EqualTo(FilterToken.Equal)
+                            // from _ in AnyExpression.Many()
+                            from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from min in DateAndTime.Try()
+                                                    .Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                         from min in DateAndTime.Try()
-                                                .Cast<FilterToken, DateTimeExpression, FilterExpression>()
-                                                .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                            from rangeSeparator in RangeSeparator
 
-                         from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
-                                        .Named("Range separator")
-                                        .Between(Whitespace, Whitespace)
+                            from max in DateAndTime.Try()
+                                                    .Cast<FilterToken, DateTimeExpression, FilterExpression>()
+                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                         from max in DateAndTime.Try()
-                                                .Cast<FilterToken, DateTimeExpression, FilterExpression>()
-                                                .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                            from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
-                         from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-
-                         where min != default || max != default
-                         select new RangeExpression(
-                             min: new BoundaryExpression(min switch
-                             {
-                                 ConstantValueExpression constant => constant,
-                                 DateTimeExpression dateTime => dateTime,
-                                 _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
-                             }, included: true),
-                             max: new BoundaryExpression(max switch
-                             {
-                                 ConstantValueExpression constant => constant,
-                                 DateTimeExpression dateTime => dateTime,
-                                 _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
-                             }, included: true)
-                        )).Try()
+                            where min != default || max != default
+                            select new RangeExpression(
+                                min: new BoundaryExpression(min switch
+                                {
+                                    ConstantValueExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                }, included: true),
+                                max: new BoundaryExpression(max switch
+                                {
+                                    ConstantValueExpression constant => constant,
+                                    DateTimeExpression dateTime => dateTime,
+                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                }, included: true)
+                            )
+                        ).Try()
                       // Case ] min TO max ] : lower bound excluded from the range
                       .Or(
+                            // from prop in Property
+                            // from eq in Token.EqualTo(FilterToken.Equal)
+                            // from _ in AnyExpression.Many()
                             from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
-                                           .Named("Range separator")
-                                           .Between(Whitespace, Whitespace)
+                            from rangeSeparator in RangeSeparator
 
                             from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -194,14 +196,15 @@ namespace DataFilters.Grammar.Parsing
                         ).Try()
                       // Case syntax [ min TO max [ : upper bound excluded from the range
                       .Or(
+                            // from prop in Property
+                            // from eq in Token.EqualTo(FilterToken.Equal)
+                            // from _ in AnyExpression.Many()
                             from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
-                                           .Named("Range separator")
-                                           .Between(Whitespace, Whitespace)
+                            from rangeSeparatpr in RangeSeparator
 
                             from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -229,15 +232,16 @@ namespace DataFilters.Grammar.Parsing
                         ).Try()
                       // Case  ] min TO max [ : lower and upper bounds excluded from the range
                       .Or(
+                            // from prop in Property
+                            // from eq in Token.EqualTo(FilterToken.Equal)
+                            // from _ in AnyExpression.Many()
                             from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from _ in Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
-                                           .Named("Range separator")
-                                           .Between(Whitespace, Whitespace)
+                            from _ in RangeSeparator
 
                             from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -267,6 +271,10 @@ namespace DataFilters.Grammar.Parsing
             }
         }
 
+        private static TokenListParser<FilterToken, Token<FilterToken>> RangeSeparator => Token.EqualToValueIgnoreCase(FilterToken.Alpha, "to")
+                                                                                                  .Named("Range separator")
+                                                                                                  .Between(Whitespace, Whitespace);
+
         private static TokenListParser<FilterToken, Token<FilterToken>[]> Whitespace => Token.EqualTo(FilterToken.Whitespace)
             .AtLeastOnce();
 
@@ -287,16 +295,16 @@ namespace DataFilters.Grammar.Parsing
         /// Property name parser
         /// </summary>
         public static TokenListParser<FilterToken, PropertyNameExpression> Property => from prop in Token.EqualTo(FilterToken.Alpha)
-                                                                                                .Select(a => a.ToStringValue())
+                                                                                           //    .Select(a => a.ToStringValue())
                                                                                        from subProps in (
                                                                                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                            from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                            from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                                                                                            select @$"[""{subProp.Value}""]"
-                                                                                       ).Many().Try()
-                                                                                       from _ in Token.EqualTo(FilterToken.Equal)
-                                                                                       from remaining in AnyExpression
-                                                                                       select new PropertyNameExpression(string.Concat(prop, string.Concat(subProps)));
+                                                                                       ).Many()
+                                                                                           //    from _ in Token.EqualTo(FilterToken.Equal).Try()
+                                                                                           //    from remaining in AnyExpression
+                                                                                       select new PropertyNameExpression(string.Concat(prop.ToStringValue(), string.Concat(subProps)));
 
         public static TokenListParser<FilterToken, OneOfExpression> OneOf => (from before in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                                                                 .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
@@ -451,11 +459,10 @@ namespace DataFilters.Grammar.Parsing
                                                                                                             select (new PropertyNameExpression(property.Name), expression);
 
         public static TokenListParser<FilterToken, ConstantValueExpression> Number => from n in Token.EqualTo(FilterToken.Numeric)
-                                                                                .Apply(Numerics.Decimal)
+                                                                                                     .Apply(Numerics.Decimal)
                                                                                       select new ConstantValueExpression(n.ToStringValue());
 
-        public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)[]> Criteria => from criteria in Criterion
-                                                                                                            .ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
+        public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
                                                                                                              select criteria;
 
         private static TokenListParser<FilterToken, ConstantValueExpression> Punctuation =>
