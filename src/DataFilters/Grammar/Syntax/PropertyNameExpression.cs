@@ -38,5 +38,7 @@ namespace DataFilters.Grammar.Syntax
         public override bool Equals(object obj) => Equals(obj as PropertyNameExpression);
 
         public override int GetHashCode() => Name.GetHashCode();
+
+        public override string ToString() => $"{nameof(PropertyNameExpression)}[{Name}]";
     }
 }
