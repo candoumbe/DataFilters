@@ -29,7 +29,7 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="time"></param>
         /// <exception cref="ArgumentNullException">if <paramref name="time"/> is <c>null</c>.</exception>
-        public DateTimeExpression(TimeExpression time): this(null, time) { }
+        public DateTimeExpression(TimeExpression time) : this(null, time) { }
 
         /// <summary>
         /// Builds a new <see cref="DateTimeExpression"/> with both <paramref name="date"/> and <paramref name="time"/>
@@ -53,7 +53,7 @@ namespace DataFilters.Grammar.Syntax
         {
         }
 
-        public bool Equals(DateTimeExpression other) => (Date, Time).Equals( (other?.Date, other?.Time));
+        public bool Equals(DateTimeExpression other) => (Date, Time).Equals((other?.Date, other?.Time));
 
         public override bool Equals(object obj) => Equals(obj as DateTimeExpression);
 
@@ -65,6 +65,6 @@ namespace DataFilters.Grammar.Syntax
             time = Time;
         }
 
-        public override string ToString() => SerializeObject(new { Date, Time});
+        public override string ToString() => this.Jsonify();
     }
 }
