@@ -34,7 +34,7 @@ namespace DataFilters
 
         /// <inheritdoc/>
         public override int GetHashCode() => equalityComparer.GetHashCode(_sorts);
-        
+
         public override string ToString() => $"{nameof(Sorts)}:[{string.Join(",", Sorts.Select(x => x.ToString()))}]";
 
         public static bool operator ==(MultiSort<T> left, MultiSort<T> right)

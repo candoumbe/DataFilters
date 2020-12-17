@@ -43,7 +43,5 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds).GetHashCode();
 
         public override bool Equals(object obj) => Equals(obj as TimeExpression);
-
-        public override string ToString() => this.Jsonify();
     }
 }

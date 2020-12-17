@@ -12,7 +12,6 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
-
 namespace DataFilters.UnitTests.Grammar.Parsing
 {
     /// <summary>
