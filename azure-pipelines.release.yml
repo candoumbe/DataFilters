@@ -42,7 +42,7 @@ stages:
         displayName: 'Tests'
         dependsOn: [ Compile ]
         strategy:
-          parallel: 4
+          parallel: 3
         steps:
           - task: CmdLine@2
             inputs:

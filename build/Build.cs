@@ -90,7 +90,7 @@ public class Build : NukeBuild
     [Required] [GitVersion(Framework = "net5.0", NoFetch = true)] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
-    [Partition(4)] public readonly Partition TestPartition;
+    [Partition(3)] public readonly Partition TestPartition;
 
     public AbsolutePath SourceDirectory => RootDirectory / "src";
 
@@ -174,7 +174,6 @@ public class Build : NukeBuild
                 .EnableCollectCoverage()
                 .EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
-                //.AddProperty("maxcpucount", "1")
                 .SetResultsDirectory(TestResultDirectory)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
@@ -246,7 +245,8 @@ public class Build : NukeBuild
     #region Git flow section
 
     public Target Changelog => _ => _
-        .OnlyWhenStatic(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
+        .Requires(() => IsLocalBuild)
+        .Requires(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
         .Description("Finalizes the change log so that its up to date for the release. ")
         .Executes(() =>
         {
@@ -263,6 +263,7 @@ public class Build : NukeBuild
 
     public Target Feature => _ => _
         .Description($"Starts a new feature development by creating the associated branch {FeatureBranchPrefix}/{{feature-name}} from {MainBranchName}")
+        .Requires(() => IsLocalBuild)
         .Requires(() => !GitRepository.IsOnFeatureBranch() || GitHasCleanWorkingCopy())
         .Executes(() =>
         {
