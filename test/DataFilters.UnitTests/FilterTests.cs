@@ -57,9 +57,9 @@ namespace DataFilters.UnitTests
                     {
                         @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
                         (Expression<Func<IFilter, bool>>)(result => result is Filter
-                            && "Firstname".Equals(((Filter) result).Field)
-                            && item.Value.Equals(((Filter) result).Operator)
-                            && "Batman".Equals(((Filter) result).Value)
+                                                                    && "Firstname".Equals(((Filter) result).Field)
+                                                                    && item.Value.Equals(((Filter) result).Operator)
+                                                                    && "Batman".Equals(((Filter) result).Value)
                         )
                     };
                 }

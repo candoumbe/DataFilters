@@ -83,7 +83,10 @@ namespace DataFilters.UnitTests.Converters
         {
             get
             {
-                foreach ((string key, FilterOperator value) in Operators.Where(op => op.Value != IsNull && op.Value != IsNotNull && op.Value != IsEmpty && op.Value != IsNotEmpty))
+                foreach ((string key, FilterOperator value) in Operators.Where(op => op.Value != IsNull
+                                                                                     && op.Value != IsNotNull
+                                                                                     && op.Value != IsEmpty
+                                                                                     && op.Value != IsNotEmpty))
                 {
                     yield return new object[]
                     {

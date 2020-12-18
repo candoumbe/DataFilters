@@ -69,7 +69,6 @@ namespace DataFilters
 
         public virtual string ToJson() => this.Jsonify();
 
-        public override string ToString() => this.Jsonify();
 
         public IFilter Negate()
         {

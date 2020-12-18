@@ -6,7 +6,6 @@ namespace DataFilters
     {
         public InvalidSortExpression(string expression) : base($"'{expression}' must matches '{SortValidator.Pattern}' pattern")
         {
-
         }
 
         public InvalidSortExpression() : base()
