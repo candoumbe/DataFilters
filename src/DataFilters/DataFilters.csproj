@@ -7,7 +7,6 @@
     <PackageTags>expressions, querystring</PackageTags>
     <PackageReleaseNotes>New range expression syntaax now supports including/excluding lower upper boundaries</PackageReleaseNotes>
     <PackageProjectUrl></PackageProjectUrl>
-    <RepositoryUrl>github.com/candoumbe/DataFilters</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1'  or '$(TargetFramework)' == 'net5.0'">

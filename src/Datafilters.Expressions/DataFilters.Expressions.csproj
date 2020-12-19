@@ -4,12 +4,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
-    <PackageProjectUrl>https://dev.azure.com/candoumbe/DataFilters/DataFilters.Expressions.csproj</PackageProjectUrl>
-    <RepositoryUrl>https://dev.azure.com/candoumbe/DataFilters</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>Removed QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, IEnumerable&lt;OrderClause&lt;T&gt;&gt; orderBy)
-
-Rewrote the QueryableExtensions.OrderBy&lt;T&gt;(IQueryable queryable, ISort&lt;T&gt; orderBy) and removes dependency to Microsoft.CSharp package.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

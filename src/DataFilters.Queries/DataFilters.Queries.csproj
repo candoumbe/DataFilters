@@ -3,11 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <Description>Provides extension methods to convert IFilter to IWhereClause and IOrder to ISort.</Description>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Queries.Core" Version="0.1.1" PrivateAssets="all"/>
+    <PackageReference Include="Queries.Core" Version="0.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataFilters\DataFilters.csproj" />
