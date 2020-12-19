@@ -80,8 +80,22 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parser for "contains" expression
         /// </summary>
-        public static TokenListParser<FilterToken, ContainsExpression> Contains => from value in AlphaNumeric.Or(Punctuation).Between(Asterisk, Asterisk)
-                                                                                   select new ContainsExpression(value.Value);
+        public static TokenListParser<FilterToken, ContainsExpression> Contains => from _ in Asterisk
+                                                                                   from data in (
+                                                                                   from puncBefore in Punctuation.Many()
+                                                                                   from alpha in AlphaNumeric.Many()
+                                                                                   from puncAfter in Punctuation.Many()
+                                                                                   where puncBefore.Length > 0 || alpha.Length > 0 || puncAfter.Length > 0
+                                                                                   select new
+                                                                                   {
+                                                                                       value = string.Concat(
+                                                                                           string.Concat(puncBefore.Select(x => x.Value)),
+                                                                                           string.Concat(alpha.Select(item => item.Value)),
+                                                                                           string.Concat(puncAfter.Select(x => x.Value)))
+                                                                                   }).AtLeastOnce()
+                                                                                   from escaped in Token.EqualTo(FilterToken.Backslash).Many()
+                                                                                   from __ in Asterisk
+                                                                                   select new ContainsExpression(string.Concat(data.Select(x => x.value)));
 
         public static TokenListParser<FilterToken, OrExpression> Or => from left in Expression
                                                                        from _ in Token.EqualTo(FilterToken.Or)
