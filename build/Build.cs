@@ -108,11 +108,11 @@ public class Build : NukeBuild
 
     public const string MainBranchName = "main";
 
-    public const string DevelopBranch = "dev";
+    public const string DevelopBranch = "develop";
 
     public const string FeatureBranchPrefix = "feature";
 
-    public const string HotfixBranchPrefix = "fix";
+    public const string HotfixBranchPrefix = "hotfix";
 
     public const string ReleaseBranchPrefix = "release";
 
@@ -157,8 +157,7 @@ public class Build : NukeBuild
 
     public Target Tests => _ => _
         .DependsOn(Compile)
-        .Description("Run unit tests and collect code")
-        .Partition(() => TestPartition)
+        .Description("Run unit tests and collect code coverage")
         .Produces(TestResultDirectory / "*.trx")
         .Produces(TestResultDirectory / "*.xml")
         .Produces(CoverageReportHistoryDirectory / "*.xml")
@@ -177,7 +176,6 @@ public class Build : NukeBuild
                 .SetResultsDirectory(TestResultDirectory)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
-                .SetVerbosity(DotNetVerbosity.Normal)
                 .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
                     .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
                         .SetFramework(framework)
@@ -232,17 +230,6 @@ public class Build : NukeBuild
 
     private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
 
-
-    protected override void OnTargetStart(string target)
-    {
-        Info($"Starting '{target}' task");
-    }
-
-    protected override void OnTargetExecuted(string target)
-    {
-        Info($"'{target}' task finished");
-    }
-
     #region Git flow section
 
     public Target Changelog => _ => _
@@ -263,50 +250,54 @@ public class Build : NukeBuild
         });
 
     public Target Feature => _ => _
-        .Description($"Starts a new feature development by creating the associated branch {FeatureBranchPrefix}/{{feature-name}} from {MainBranchName}")
+        .Description($"Starts a new feature development by creating the associated branch {FeatureBranchPrefix}/{{feature-name}} from {DevelopBranch}")
         .Requires(() => IsLocalBuild)
         .Requires(() => !GitRepository.IsOnFeatureBranch() || GitHasCleanWorkingCopy())
         .Executes(() =>
         {
-            Info("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
-            string featureName;
-            bool exitCreatingFeature = false;
-            do
+            if (!GitRepository.IsOnFeatureBranch())
             {
-                featureName = (Console.ReadLine() ?? string.Empty).Trim()
-                                                                  .Trim('/');
-
-                switch (featureName)
+                Info("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
+                string featureName;
+                bool exitCreatingFeature = false;
+                do
                 {
-                    case string name when !string.IsNullOrWhiteSpace(name):
-                        {
-                            string branchName = $"{FeatureBranchPrefix}/{featureName.Slugify()}";
-                            Info($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
-                            switch (Console.ReadKey().Key)
+                    featureName = (Console.ReadLine() ?? string.Empty).Trim()
+                                                                    .Trim('/');
+
+                    switch (featureName)
+                    {
+                        case string name when !string.IsNullOrWhiteSpace(name):
                             {
-                                case ConsoleKey.Y:
-                                    Info($"{Environment.NewLine}Checking out branch '{branchName}' from '{MainBranchName}'");
-                                    Checkout(branchName, start: MainBranchName);
-                                    Info($"{Environment.NewLine}'{branchName}' created successfully");
-                                    exitCreatingFeature = true;
-                                    break;
+                                string branchName = $"{FeatureBranchPrefix}/{featureName.Slugify()}";
+                                Info($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
 
-                                default:
-                                    Info($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
-                                    exitCreatingFeature = true;
-                                    break;
+                                switch (Console.ReadKey().Key)
+                                {
+                                    case ConsoleKey.Y:
+                                        Info($"{Environment.NewLine}Checking out branch '{branchName}' from '{DevelopBranch}'");
+                                        Checkout(branchName, start: DevelopBranch);
+                                        Info($"{Environment.NewLine}'{branchName}' created successfully");
+                                        exitCreatingFeature = true;
+                                        break;
+
+                                    default:
+                                        Info($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
+                                        exitCreatingFeature = true;
+                                        break;
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        Info($"Exiting {nameof(Feature)} task.");
-                        exitCreatingFeature = true;
-                        break;
-                }
+                            break;
+                        default:
+                            Info($"Exiting {nameof(Feature)} task.");
+                            exitCreatingFeature = true;
+                            break;
+                    }
 
-            } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
+                } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
 
-            Info($"{EnvironmentInfo.NewLine}Good bye !");
+                Info($"{EnvironmentInfo.NewLine}Good bye !");
+            }
         });
 
     public Target Release => _ => _
@@ -338,7 +329,7 @@ public class Build : NukeBuild
                 .EnableNoFetch()
                 .DisableProcessLogOutput());
 
-            if (!(GitRepository.IsOnHotfixBranch() || GitRepository.Branch.Like("fix/*")))
+            if (!GitRepository.IsOnHotfixBranch())
             {
                 Checkout($"{HotfixBranchPrefix}/{mainBranchVersion.Major}.{mainBranchVersion.Minor}.{mainBranchVersion.Patch + 1}", start: MainBranchName);
             }
@@ -375,8 +366,7 @@ public class Build : NukeBuild
         // Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         // Git($"branch -D {GitRepository.Branch}");
-
-        // Git($"push origin {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
     }
+
     #endregion
 }

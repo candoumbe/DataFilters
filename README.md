@@ -127,8 +127,8 @@ Several expressions are supported and here's how you can start using them in you
 
 Search for any vigilante resource where `nickname` value is `manbat`
 
-| Query string    | JSON                                                       |
-| --------------- | ---------------------------------------------------------- |
+| Query string      | JSON                                                  |
+| ----------------- | ----------------------------------------------------- |
 | `nickname=manbat` | `{ "field":"nickname", "op":"eq", "value":"manbat" }` |
 
 will result in a [IFilter][class-ifilter] instance equivalent to
@@ -183,9 +183,9 @@ IFilter filter = new Filter("nickname", Contains, "bat");
 
 Search for `vigilante` resources that have no powers.
 
-| Query string     | JSON                                                     |
-| ---------------- | -------------------------------------------------------- |
-| `powers=!*` | `{ "field":"powers", "op":"isempty" }` |
+| Query string | JSON                                   |
+| ------------ | -------------------------------------- |
+| `powers=!*`  | `{ "field":"powers", "op":"isempty" }` |
 
 
 ### **_<a href='#' id='range-expressions'>Range expressions</a>_**
@@ -264,7 +264,7 @@ Example :
 `acolytes["name"]='robin'` will filter any `vigilante` resource where at least one item in `acolytes` array with its `name` property that matches the specify pattern.
 
 The generic syntax for filtering on in a hierarchical tree
-`property["subproperty"]["subproperty-n"]='robin'`
+`property["subproperty"]...["subproperty-n"]=<expression>`
 
 
 
@@ -278,8 +278,8 @@ Logicial operators can be used combine several instances of [IFilter][class-ifil
 **_<a href='#' id='and-expression'>And</a>_**
 
 The `,` to combine multiple expressions
-| Query string |JSON |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| Query string          | JSON                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `"nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 
@@ -300,8 +300,8 @@ IFilter filter = new MultiFilter
 
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
-| Query string |JSON
------|---
+| Query string          | JSON                                                                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `"nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
@@ -506,11 +506,11 @@ This is to distinguish if the `Age` criterion was provided or not when calling t
 1. run `dotnet install DataFilters` : you can already start to build [IFilter][class-ifilter] instances 😉 !
 2. install one or more `DataFilters.XXXX  extension packages to convert [IFilter][class-ifilter] instances to various target.
 
-| Package | Description
---- | --
-|[![Nuget](https://img.shields.io/nuget/v/Datafilters?label=DataFilters&style=for-the-badge)](https://www.nuget.org/packages/DataFilters) | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances. |
-| [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=DataFilters.Expressions&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.|
-|[![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Queries) | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
+| Package                                                                                                                                                                      | Description                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=DataFilters&style=for-the-badge)](https://www.nuget.org/packages/DataFilters)                                     | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
+| [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=DataFilters.Expressions&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Queries)             | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
 
 
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs

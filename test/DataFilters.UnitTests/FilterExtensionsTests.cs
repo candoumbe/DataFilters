@@ -373,33 +373,33 @@ namespace DataFilters.UnitTests
                     new Filter(field: "BattleCry", @operator: StartsWith, "*")
                 };
 
-                // yield return new object[]
-                // {
-                //     "BirthDate=]2016-10-18 TO 2016-10-25[",
-                //     new MultiFilter
-                //     {
-                //         Logic = And,
-                //         Filters = new IFilter[]
-                //         {
-                //             new Filter("BirthDate", GreaterThan, 18.October(2016)),
-                //             new Filter("BirthDate", FilterOperator.LessThan, 25.October(2016))
-                //         }
-                //     }
-                // };
+                yield return new object[]
+                {
+                    "BirthDate=]2016-10-18 TO 2016-10-25[",
+                    new MultiFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("BirthDate", GreaterThan, 18.October(2016)),
+                            new Filter("BirthDate", FilterOperator.LessThan, 25.October(2016))
+                        }
+                    }
+                };
 
-                // yield return new object[]
-                // {
-                //     "BirthDate=]2016-10-18T18:00:00 TO 2016-10-18T19:00:00[",
-                //     new MultiFilter
-                //     {
-                //         Logic = And,
-                //         Filters = new IFilter[]
-                //         {
-                //             new Filter("BirthDate", GreaterThan, 18.October(2016).Add(18.Hours())),
-                //             new Filter("BirthDate", FilterOperator.LessThan, 18.October(2016).Add(19.Hours()))
-                //         }
-                //     }
-                // };
+                yield return new object[]
+                {
+                    "BirthDate=]2016-10-18T18:00:00 TO 2016-10-18T19:00:00[",
+                    new MultiFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("BirthDate", GreaterThan, 18.October(2016).Add(18.Hours())),
+                            new Filter("BirthDate", FilterOperator.LessThan, 18.October(2016).Add(19.Hours()))
+                        }
+                    }
+                };
             }
         }
 

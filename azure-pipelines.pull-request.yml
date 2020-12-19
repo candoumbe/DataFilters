@@ -18,7 +18,7 @@ trigger:
   branches:
     include:
       - feature/*
-      - fix/*
+      - hotfix/*
   paths:
     exclude:
       - docs/*
@@ -42,12 +42,10 @@ stages:
       - job: Tests
         displayName: 'Tests'
         dependsOn: [ Compile ]
-        strategy:
-          parallel: 3
         steps:
           - task: CmdLine@2
             inputs:
-              script: './build.cmd Tests --skip --test-partition $(System.JobPositionInPhase)'
+              script: './build.cmd Tests --skip'
           - task: PublishBuildArtifacts@1
             inputs:
               artifactName: tests-results
