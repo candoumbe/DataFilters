@@ -2,7 +2,7 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <PackageReleaseNotes>New range expression syntaax now supports including/excluding lower upper boundaries</PackageReleaseNotes>
@@ -10,11 +10,26 @@
     <RepositoryUrl>github.com/candoumbe/DataFilters</RepositoryUrl>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1'  or '$(TargetFramework)' == 'net5.0'">
     <DefineConstants>STRING_SEGMENT</DefineConstants>
   </PropertyGroup>
+
+
+  <Choose>
+    <When Condition="'$(TargetFramework)' == 'net5.0'">
+      <ItemGroup>
+        <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+      </ItemGroup>
+    </When>
+
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="Candoumbe.MiscUtilities" Version="0.1.0" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>

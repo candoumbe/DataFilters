@@ -5,9 +5,45 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>
+    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests')) or $(MSBuildProjectName.EndsWith('.Test'))">true</IsTestProject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsTestProject)' == 'false'">
+    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(TF_BUILD)' == 'true' ">
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+
+ <!-- Set package references based on target framework -->
+  <Choose>
+    <When Condition="'$(TargetFramework)' == 'net5.0'">
+      <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="9.*" />
+      </ItemGroup> 
+    </When>
+    <Otherwise>
+   
+    <ItemGroup>
+      <PackageReference Include="FluentValidation" Version="8.*" />
+    </ItemGroup>
+   
+    </Otherwise>
+  </Choose>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="8.*" />
-    <PackageReference Include="Roslynator.Analyzers" Version="2.*">
+    <PackageReference Include="Roslynator.Analyzers" Version="3.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

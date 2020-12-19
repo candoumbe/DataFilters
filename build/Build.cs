@@ -355,17 +355,19 @@ public class Build : NukeBuild
         }
     }
 
+    private string MajorMinorPatchVersion => GitVersion.MajorMinorPatch;
+
     private void FinishReleaseOrHotfix()
     {
         Warn("The hotfix (or release) could not be created because you have uncommited changes pending.");
-        // Git($"checkout {MainBranchName}");
-        // Git($"merge --no-ff --no-edit {GitRepository.Branch}");
-        // Git($"tag {MajorMinorPatchVersion}");
+        Git($"checkout {MainBranchName}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+        Git($"tag {MajorMinorPatchVersion}");
 
-        // Git($"checkout {DevelopBranch}");
-        // Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+        Git($"checkout {DevelopBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
-        // Git($"branch -D {GitRepository.Branch}");
+        Git($"branch -D {GitRepository.Branch}");
     }
 
     #endregion
