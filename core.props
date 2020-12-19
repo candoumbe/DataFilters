@@ -3,6 +3,8 @@
     <LangVersion>latest</LangVersion>
     <Authors>Cyrille NDOUMBE</Authors>
     <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://dev.azure.com/candoumbe/DataFilters</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,19 +29,19 @@
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
- <!-- Set package references based on target framework -->
+  <!-- Set package references based on target framework -->
   <Choose>
     <When Condition="'$(TargetFramework)' == 'net5.0'">
       <ItemGroup>
         <PackageReference Include="FluentValidation" Version="9.*" />
-      </ItemGroup> 
+      </ItemGroup>
     </When>
     <Otherwise>
-   
-    <ItemGroup>
-      <PackageReference Include="FluentValidation" Version="8.*" />
-    </ItemGroup>
-   
+
+      <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="8.*" />
+      </ItemGroup>
+
     </Otherwise>
   </Choose>
   <ItemGroup>
