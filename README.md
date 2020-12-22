@@ -4,8 +4,8 @@ DataFilters is a small library that allow to convert a string to a generic `IFil
 Highly inspired by the elastic syntax, it offers a powerful way to build and query data
 with a syntax that's not bound to a peculiar datasource.
 
+## <a href='#' id='summary'>Summary</a>
 <ol>
-    <li><a href="#intro">Introduction</a></li>
     <li><a href="#parsing">Parsing</a></li>
     <li><a href="#filtering">Filtering</a></li>
     <ol type="a">
@@ -24,8 +24,8 @@ with a syntax that's not bound to a peculiar datasource.
     </ol>
     <li><a href="#special-character-handling">Special character handling</li>
     <li><a href="#sorting">Sorting</a></li>
-    <li><a href="#how-to-install">How to install</a></li>
     <li><a href="#how-to-use">How to use</a></li>
+    <li><a href="#how-to-install">How to install</a></li>
     <ul>
         <li><a href="#how-to-use-client">on the client</a></li>
         <li><a href="#how-to-use-backend">on the backend</a></li>
@@ -33,7 +33,6 @@ with a syntax that's not bound to a peculiar datasource.
     <li><a href="#extensions">Going a step further</a></li>
 </ol>
 
-## <a href='#' id='intro'>Introduction</a>
 
 The idea came to me when working on a set of REST apis and trying to build `/search` endpoints.
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
@@ -59,34 +58,34 @@ JSON Schema
   "title": "Vigilante",
   "type": "object",
   "properties": {
-    "Firstname": {
+    "firstname": {
       "required": true,
       "type": "string"
     },
-    "Lastname": {
+    "lastname": {
       "required": true,
       "type": "string"
     },
-    "Nickname": {
+    "nickname": {
       "required": true,
       "type": "string"
     },
-    "Age": {
+    "age": {
       "required": true,
       "type": "integer"
     },
-    "Description": {
+    "description": {
       "required": true,
       "type": "string"
     },
-    "Powers": {
+    "powers": {
       "required": true,
       "type": "array",
       "items": {
         "type": "string"
       }
     },
-    "Acolytes": {
+    "acolytes": {
       "required": true,
       "type": "array",
       "items": {
@@ -256,12 +255,16 @@ IFilter filter = new MultiFilter
 - `age=[20 TO 35[` means `age` greater than or equal to `20` and strictly less than`35`
 - `age=]20 TO 35]` means `age` greater than `20` and less than or equal to `35`
   
-💡 Dates must be specified in [ISO 8601 format](https://fr.wikipedia.org/wiki/ISO_8601#Date_et_heure)
+💡 Dates and times must be specified in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601)
+
+Examples :
+- `]1998-10-26 TO 2000-12-10[`
+- `my/beautiful/api/search?date=]1998-10-26 10:00 TO 1998-10-26 10:00[`
 
 💡 You can apply filters to any sub-property or a given collection
 
 Example : 
-`acolytes["name"]='robin'` will filter any `vigilante` resource where at least one item in `acolytes` array with its `name` property that matches the specify pattern.
+`acolytes["name"]='robin'` will filter any `vigilante` resource where at least one item in `acolytes` array with `name` equals to robin.
 
 The generic syntax for filtering on in a hierarchical tree
 `property["subproperty"]...["subproperty-n"]=<expression>`
@@ -277,7 +280,7 @@ Logicial operators can be used combine several instances of [IFilter][class-ifil
 
 **_<a href='#' id='and-expression'>And</a>_**
 
-The `,` to combine multiple expressions
+Use the coma character `,` to combine multiple expressions using logical AND operator 
 | Query string          | JSON                                                                                                                                     |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `"nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
@@ -298,6 +301,7 @@ IFilter filter = new MultiFilter
 ```
 **_<a href='#' id='or-expression'>Or</a>_**
 
+Use the pipe character `|`  to combine multiple expressions using logical AND operator 
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
 | Query string          | JSON                                                                                                                                    |
@@ -320,7 +324,7 @@ IFilter filter = new MultiFilter
 
 **_<a href='#' id='not-expression'>Not</a>_**
 
-To invert a filter, simply put a `!` before the expression to negate
+To negate a filter, simply put a `!` before the expression to negate
 
 Search for `vigilante` resources where the value of `nickname` property does not starts with `"B"`
 
@@ -419,7 +423,7 @@ So you have your API and want provide a great search experience ?
 The client will have the responsability of building search criteria.
 Go to [filtering](#filtering) and [sorting](#sorting) sections to see example on how to get started.
 
-## <a href='#' href='how-to-use-backend'>On the backend</a>
+## <a href='#' id='how-to-use-backend'>On the backend</a>
 
 One way to start could be by having a dedicated resource which properties match the resource's properties search will
 be performed onto.
@@ -506,11 +510,11 @@ This is to distinguish if the `Age` criterion was provided or not when calling t
 1. run `dotnet install DataFilters` : you can already start to build [IFilter][class-ifilter] instances 😉 !
 2. install one or more `DataFilters.XXXX  extension packages to convert [IFilter][class-ifilter] instances to various target.
 
-| Package                                                                                                                                                                      | Description                                                                                                                                                                         |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=DataFilters&style=for-the-badge)](https://www.nuget.org/packages/DataFilters)                                     | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
-| [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=DataFilters.Expressions&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
-| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Queries)             | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
+|                           | Package                                                                                                                                         | Description                                                                                                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DataFilters`             | [![Nuget](https://img.shields.io/nuget/v/Datafilters?style=for-the-badge)](https://www.nuget.org/packages/DataFilters)                          | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
+| `DataFilters.Expressions` | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
+| `DataFilters Queries`     | [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Queries)          | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
 
 
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs

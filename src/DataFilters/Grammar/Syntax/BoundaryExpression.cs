@@ -30,8 +30,8 @@ namespace DataFilters.Grammar.Syntax
         }
 
         public bool Equals(BoundaryExpression other) => other != null
-                                                        && Expression.Equals(other.Expression)
-                                                        && Included == other.Included;
+                                                        && Included == other.Included
+                                                        && Expression.Equals(other.Expression);
 
         public override bool Equals(object obj) => Equals(obj as BoundaryExpression);
 
@@ -41,21 +41,20 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode()
         {
             int hashCode = 1608575900;
-            hashCode = hashCode * -1521134295 + EqualityComparer<IBoundaryExpression>.Default.GetHashCode(Expression);
-            hashCode = hashCode * -1521134295 + Included.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<IBoundaryExpression>.Default.GetHashCode(Expression);
+            hashCode = (hashCode * -1521134295) + Included.GetHashCode();
             return hashCode;
         }
 #endif
 
-        public static bool operator ==(BoundaryExpression left, BoundaryExpression right)
+        public static bool operator ==(BoundaryExpression left, BoundaryExpression right) => left switch
         {
-            return EqualityComparer<BoundaryExpression>.Default.Equals(left, right);
-        }
+            null => right is null,
+            _ => left.Equals(right),
+        };
 
-        public static bool operator !=(BoundaryExpression left, BoundaryExpression right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(BoundaryExpression left, BoundaryExpression right) => !(left == right);
 
+        public override string ToString() => $"{{{nameof(Expression)}:{Expression?.ToString()}, {nameof(Included)} : {Included}}}";
     }
 }

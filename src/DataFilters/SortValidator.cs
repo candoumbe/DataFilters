@@ -11,7 +11,7 @@ namespace DataFilters
     public class SortValidator : AbstractValidator<string>
     {
         public const string Pattern = @"^\s*(-|\+)?(([A-Za-z])\w*)+(\s*,\s*((-|\+)?(([A-Za-z])\w*)+)\s*)*$";
-        private readonly Regex _sortRegex = new Regex(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+        private readonly Regex _sortRegex = new(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
         private const char _separator = ',';
 
         public SortValidator() => RuleFor(x => x)

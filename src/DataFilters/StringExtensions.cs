@@ -41,7 +41,7 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(sortString), "cannot be be null or whitespace only");
             }
 
-            SortValidator validator = new SortValidator();
+            SortValidator validator = new();
             ValidationResult validationResult = validator.Validate(sortString);
 
             if (!validationResult.IsValid)
@@ -192,7 +192,9 @@ namespace System
                                 ConstantValueExpression ce => (ce, input.Included),
                                 DateTimeExpression { Time: null } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"), input.Included),
                                 DateTimeExpression { Date: null } dateTime => (new ConstantValueExpression($"{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
-                                DateTimeExpression dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}"), input.Included),
+                                DateTimeExpression { Date: { }, Time: { Offset: null } } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}"), input.Included),
+                                DateTimeExpression { Date: { }, Time: { Offset: { Hours: 0, Minutes: 0 } } } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}Z"), input.Included),
+                                DateTimeExpression { Date: var date, Time: var time } => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}T{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}{time.Offset.Hours:D2}:{time.Offset.Minutes:D2}"), input.Included),
                                 DateExpression date => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
                                 TimeExpression time => (new ConstantValueExpression($"{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
@@ -243,7 +245,7 @@ namespace System
 
             if (!isEmptyQueryString)
             {
-                FilterTokenizer tokenizer = new FilterTokenizer();
+                FilterTokenizer tokenizer = new();
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
                 (PropertyNameExpression Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);

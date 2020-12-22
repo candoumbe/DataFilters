@@ -34,7 +34,7 @@ namespace DataFilters
         /// </summary>
         public const string LogicJsonPropertyName = "logic";
 
-        public static JSchema Schema => new JSchema
+        public static JSchema Schema => new()
         {
             Type = JSchemaType.Object,
             Properties =
@@ -69,10 +69,9 @@ namespace DataFilters
 
         public virtual string ToJson() => this.Jsonify();
 
-
         public IFilter Negate()
         {
-            MultiFilter filter = new MultiFilter
+            MultiFilter filter = new()
             {
                 Logic = Logic switch
                 {

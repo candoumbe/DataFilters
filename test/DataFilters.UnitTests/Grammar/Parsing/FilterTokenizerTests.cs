@@ -27,6 +27,11 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             _outputHelper = outputHelper;
         }
 
+        [Fact]
+        public void IsTokenizer() => typeof(FilterTokenizer).Should()
+                                                            .HaveDefaultConstructor().And
+                                                            .BeAssignableTo<Tokenizer<FilterToken>>();
+
         public static IEnumerable<object[]> RecognizeTokensCases
         {
             get
@@ -34,129 +39,117 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Firstname=Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(3)
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                        && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "_Firstname=Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(4)
-                        && results.Once(result => result.Kind == Underscore && result.Span.EqualsValue("_"))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                        && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
+                                                                                && results.Once(result => result.Kind == Underscore && result.Span.EqualsValue("_"))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=Bru*",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(4)
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                        && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bru"))
-                        && results.Once(result => result.Kind == Asterisk && result.Span.EqualsValue("*"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bru"))
+                                                                                && results.Once(result => result.Kind == Asterisk && result.Span.EqualsValue("*"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "prop1=Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(4)
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("prop"))
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
-                        && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("prop"))
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "val1|val2",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(5)
-                        && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("val"), 2)
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
-                        && results.Once(result => result.Kind == Or && result.Span.EqualsValue("|"))
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(5)
+                                                                                && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("val"), 2)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
+                                                                                && results.Once(result => result.Kind == Or && result.Span.EqualsValue("|"))
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "val1,val2",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(5)
-                        && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("val"), 2)
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
-                        && results.Once(result => result.Kind == And && result.Span.EqualsValue(","))
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(5)
+                                                                                && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("val"), 2)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
+                                                                                && results.Once(result => result.Kind == And && result.Span.EqualsValue(","))
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "!Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(2)
-                        && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!"))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(2)
+                                                                                && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!"))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "!Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(2)
-                        && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!"))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(2)
+                                                                                && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!"))
+                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "[",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(1)
-                        && results.Once(result => result.Kind == OpenSquaredBracket && result.Span.EqualsValue("["))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Once()
+                                                                                && results.Once(result => result.Kind == OpenSquaredBracket && result.Span.EqualsValue("["))
                     )
                 };
 
                 yield return new object[]
                 {
                     "]",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(1)
-                        && results.Once(result => result.Kind == CloseSquaredBracket && result.Span.EqualsValue("]"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Once()
+                                                                                && results.Once(result => result.Kind == CloseSquaredBracket && result.Span.EqualsValue("]"))
                     )
                 };
 
                 yield return new object[]
                 {
                     "10-20",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(3)
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("10"))
-                        && results.Once(result => result.Kind == Dash && result.Span.EqualsValue("-"))
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("20"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("10"))
+                                                                                && results.Once(result => result.Kind == Dash && result.Span.EqualsValue("-"))
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("20"))
                     )
                 };
 
                 yield return new object[]
                 {
                     " ",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(1)
-                        && results.Once(result => result.Kind == Whitespace && result.Span.EqualsValue(" "))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Once()
+                                                                                && results.Once(result => result.Kind == Whitespace && result.Span.EqualsValue(" "))
                     )
                 };
 
@@ -242,13 +235,16 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@""""))
                     )
                 };
+
+                yield return new object[]
+                {
+                    "+",
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Once()
+                                                                                && results.Once(result => result.Kind == None && result.Span.EqualsValue("+"))
+                    )
+                };
             }
         }
-
-        [Fact]
-        public void IsTokenizer() => typeof(FilterTokenizer).Should()
-            .HaveDefaultConstructor().And
-            .BeAssignableTo<Tokenizer<FilterToken>>();
 
         [Theory]
         [MemberData(nameof(RecognizeTokensCases))]

@@ -12,7 +12,7 @@ using System.Text.Json.Serialization;
 namespace DataFilters.Converters
 {
     /// <summary>
-    /// <see cref="JsonConverter"/> implementation that can handle (de)serialization of <see cref="FilterOperator"/> 
+    /// <see cref="JsonConverter"/> implementation that can handle (de)serialization of <see cref="FilterOperator"/>
     /// from/to JSon .
     /// </summary>
 #if NETSTANDARD1_3
