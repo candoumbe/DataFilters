@@ -163,53 +163,48 @@ public class Build : NukeBuild
         .Produces(CoverageReportHistoryDirectory / "*.xml")
         .Executes(() =>
         {
-            RunTests();
+            IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
+            IEnumerable<Project> testsProjects = TestPartition.GetCurrent(projects);
+
+            testsProjects.ForEach(project => Info(project));
+
+            DotNetTest(s => s
+                .SetConfiguration(Configuration)
+                .EnableCollectCoverage()
+                .EnableUseSourceLink()
+                .SetNoBuild(InvokedTargets.Contains(Compile))
+                .SetResultsDirectory(TestResultDirectory)
+                .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+                .AddProperty("ExcludeByAttribute", "Obsolete")
+                .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
+                    .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
+                        .SetFramework(framework)
+                        .SetLogger($"trx;LogFileName={project.Name}.{framework}.trx")
+                        .SetCollectCoverage(true)
+                        .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))
+                    )
+            );
+
+            TestResultDirectory.GlobFiles("*.trx")
+                            .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
+                                                                                            title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
+                                                                                            files: new string[] { testFileResult })
+            );
+
+            // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
+            ReportGenerator(_ => _
+                .SetFramework("net5.0")
+                .SetReports(TestResultDirectory / "*.xml")
+                .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
+                .SetTargetDirectory(CoverageReportDirectory)
+                .SetHistoryDirectory(CoverageReportHistoryDirectory)
+            );
+
+            TestResultDirectory.GlobFiles("*.xml")
+                            .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
+                                                                                    summaryFile: file,
+                                                                                    reportDirectory: CoverageReportDirectory));
         });
-
-    private void RunTests()
-    {
-        IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
-        IEnumerable<Project> testsProjects = TestPartition.GetCurrent(projects);
-
-        testsProjects.ForEach(project => Info(project));
-
-        DotNetTest(s => s
-            .SetConfiguration(Configuration)
-            .EnableCollectCoverage()
-            .EnableUseSourceLink()
-            .SetNoBuild(InvokedTargets.Contains(Compile))
-            .SetResultsDirectory(TestResultDirectory)
-            .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
-            .AddProperty("ExcludeByAttribute", "Obsolete")
-            .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
-                .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
-                    .SetFramework(framework)
-                    .SetLogger($"trx;LogFileName={project.Name}.{framework}.trx")
-                    .SetCollectCoverage(true)
-                    .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))
-                )
-        );
-
-        TestResultDirectory.GlobFiles("*.trx")
-                           .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
-                                                                                         title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                                                         files: new string[] { testFileResult })
-        );
-
-        // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
-        ReportGenerator(_ => _
-            .SetFramework("net5.0")
-            .SetReports(TestResultDirectory / "*.xml")
-            .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
-            .SetTargetDirectory(CoverageReportDirectory)
-            .SetHistoryDirectory(CoverageReportHistoryDirectory)
-        );
-
-        TestResultDirectory.GlobFiles("*.xml")
-                           .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
-                                                                                summaryFile: file,
-                                                                                reportDirectory: CoverageReportDirectory));
-    }
 
     public Target Pack => _ => _
         .DependsOn(Tests, Compile)
@@ -305,7 +300,6 @@ public class Build : NukeBuild
             }
             else
             {
-                RunTests();
                 FinishFeature();
             }
         });
@@ -369,7 +363,6 @@ public class Build : NukeBuild
 
     private void FinishReleaseOrHotfix()
     {
-        RunTests();
         Git($"checkout {MainBranchName}");
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
         Git($"tag {MajorMinorPatchVersion}");
@@ -384,11 +377,11 @@ public class Build : NukeBuild
 
     private void FinishFeature()
     {
-        RunTests();
-        Git($"checkout {DevelopBranch}");
-        Git("rebase");
+        Git($"rebase {DevelopBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         Git($"branch -D {GitRepository.Branch}");
+        Git($"push origin {DevelopBranch}");
     }
 
     #endregion
