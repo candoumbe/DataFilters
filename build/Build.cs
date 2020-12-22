@@ -378,6 +378,7 @@ public class Build : NukeBuild
     private void FinishFeature()
     {
         Git($"rebase {DevelopBranch}");
+        Git($"checkout {DevelopBranch}");
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         Git($"branch -D {GitRepository.Branch}");
