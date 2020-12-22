@@ -186,9 +186,9 @@ public class Build : NukeBuild
             );
 
             TestResultDirectory.GlobFiles("*.trx")
-                               .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
-                                                                                             title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                                                             files: new string[] { testFileResult })
+                            .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
+                                                                                            title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
+                                                                                            files: new string[] { testFileResult })
             );
 
             // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
@@ -201,7 +201,7 @@ public class Build : NukeBuild
             );
 
             TestResultDirectory.GlobFiles("*.xml")
-                               .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
+                            .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
                                                                                     summaryFile: file,
                                                                                     reportDirectory: CoverageReportDirectory));
         });
@@ -298,6 +298,10 @@ public class Build : NukeBuild
 
                 Info($"{EnvironmentInfo.NewLine}Good bye !");
             }
+            else
+            {
+                FinishFeature();
+            }
         });
 
     public Target Release => _ => _
@@ -359,7 +363,6 @@ public class Build : NukeBuild
 
     private void FinishReleaseOrHotfix()
     {
-        Warn("The hotfix (or release) could not be created because you have uncommited changes pending.");
         Git($"checkout {MainBranchName}");
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
         Git($"tag {MajorMinorPatchVersion}");
@@ -368,6 +371,18 @@ public class Build : NukeBuild
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         Git($"branch -D {GitRepository.Branch}");
+
+        Git($"push origin {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+    }
+
+    private void FinishFeature()
+    {
+        Git($"rebase {DevelopBranch}");
+        Git($"checkout {DevelopBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+
+        Git($"branch -D {GitRepository.Branch}");
+        Git($"push origin {DevelopBranch}");
     }
 
     #endregion

@@ -51,44 +51,44 @@ namespace DataFilters.UnitTests
             {
                 yield return new object[]
                 {
-                    nameof(SuperHero.Name),
-                    new Sort<SuperHero>(expression : nameof(SuperHero.Name), direction : Ascending)
+                    nameof(SuperHero.Nickname),
+                    new Sort<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
                 };
                 yield return new object[]
                 {
-                    $"+{nameof(SuperHero.Name)}",
-                    new Sort<SuperHero>(expression : nameof(SuperHero.Name), direction : Ascending)
+                    $"+{nameof(SuperHero.Nickname)}",
+                    new Sort<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
                 };
 
                 yield return new object[]
                 {
-                    $"-{nameof(SuperHero.Name)}",
-                    new Sort<SuperHero>(expression : nameof(SuperHero.Name), direction : Descending)
+                    $"-{nameof(SuperHero.Nickname)}",
+                    new Sort<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Descending)
                 };
 
                 {
-                    MultiSort<SuperHero> multiSort = new MultiSort<SuperHero>
+                    MultiSort<SuperHero> multiSort = new
                     (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age))
                     );
 
                     yield return new object[]
                     {
-                        $"{nameof(SuperHero.Name)},{nameof(SuperHero.Age)}",
+                        $"{nameof(SuperHero.Nickname)},{nameof(SuperHero.Age)}",
                         multiSort
                     };
                 }
                 {
-                    MultiSort<SuperHero> multiSort = new MultiSort<SuperHero>
+                    MultiSort<SuperHero> multiSort = new
                     (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
                     yield return new object[]
                     {
-                        $"+{nameof(SuperHero.Name)},-{nameof(SuperHero.Age)}",
+                        $"+{nameof(SuperHero.Nickname)},-{nameof(SuperHero.Age)}",
                         multiSort
                     };
                 }

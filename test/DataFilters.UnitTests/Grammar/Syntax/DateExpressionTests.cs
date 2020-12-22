@@ -17,7 +17,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void IsFilterExpression() => typeof(DateExpression).Should()
                                             .BeAssignableTo<FilterExpression>().And
                                             .Implement<IEquatable<DateExpression>>().And
-                                            .HaveConstructor(new[] { typeof(int), typeof(int), typeof(int)}).And
+                                            .HaveConstructor(new[] { typeof(int), typeof(int), typeof(int) }).And
                                             .HaveProperty<int>("Year").And
                                             .HaveProperty<int>("Month").And
                                             .HaveProperty<int>("Day");
@@ -54,14 +54,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     $"comparing two {nameof(DateExpression)} instance with same value for each field"
                 };
                 {
-                    DateExpression instance = new DateExpression(year: 2050, month: 10, day: 14);
+                    DateExpression instance = new(year: 2050, month: 10, day: 14);
 
                     yield return new object[]
                     {
                         instance,
                         instance,
                         true,
-                        $"comparing an instance to itself"
+                        "comparing an instance to itself"
                     };
 
                     yield return new object[]
@@ -69,7 +69,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                         instance,
                         null,
                         false,
-                        $"comparing an instance to null"
+                        "comparing an instance to null"
                     };
 
                     yield return new object[]

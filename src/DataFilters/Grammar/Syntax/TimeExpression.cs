@@ -9,7 +9,20 @@ namespace DataFilters.Grammar.Syntax
         public int Seconds { get; }
         public int Milliseconds { get; }
 
-        public TimeExpression(int hours = 0, int minutes = 0, int seconds = 0, int milliseconds = 0)
+        /// <summary>
+        /// Offset with the UTC.
+        /// </summary>
+        public TimeOffset Offset { get; }
+
+        /// <summary>
+        /// Builds a new <see cref="TimeExpression"> instance.
+        /// </summary>
+        /// <param name="hours"></param>
+        /// <param name="minutes"></param>
+        /// <param name="seconds"></param>
+        /// <param name="milliseconds"></param>
+        /// <param name="offset"></param>
+        public TimeExpression(int hours = 0, int minutes = 0, int seconds = 0, int milliseconds = 0, TimeOffset offset = null)
         {
             if (hours < 0)
             {
@@ -35,13 +48,16 @@ namespace DataFilters.Grammar.Syntax
             Minutes = minutes;
             Seconds = seconds;
             Milliseconds = milliseconds;
+            Offset = offset;
         }
 
         public bool Equals(TimeExpression other) => other != null
-            && (Hours, Minutes, Seconds, Milliseconds).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds));
+            && (Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset));
 
-        public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds).GetHashCode();
+        public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
 
         public override bool Equals(object obj) => Equals(obj as TimeExpression);
+
+        public override string ToString() => $"{{{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}}}";
     }
 }

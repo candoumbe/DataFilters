@@ -154,7 +154,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void CtorLogic(BoundaryExpression min, BoundaryExpression max, RangeExpression expected, string reason)
         {
             // Act
-            RangeExpression actual = new RangeExpression(min, max);
+            RangeExpression actual = new(min, max);
 
             // Assert
             actual.Should()
@@ -204,6 +204,18 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     true,
                     $"comparing two {nameof(RangeExpression)} instances with same {nameof(DateTimeExpression)} min and max"
                 };
+
+                {
+                    RangeExpression range = new(min: new BoundaryExpression(new ConstantValueExpression("2012-10-19T15:03:45Z"), included: false),
+                                                max: new BoundaryExpression(new ConstantValueExpression("2012-10-19T15:30:45+01:00"), included: false));
+                    yield return new object[]
+                    {
+                        range,
+                        range,
+                        true,
+                        $"Comparing two ranges "
+                    };
+                }
             }
         }
 

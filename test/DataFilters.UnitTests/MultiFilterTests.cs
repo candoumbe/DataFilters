@@ -225,7 +225,7 @@ namespace DataFilters.UnitTests
                 };
 
                 {
-                    MultiFilter filter = new MultiFilter
+                    MultiFilter filter = new()
                     {
                         Logic = And,
                         Filters = new IFilter[]{

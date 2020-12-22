@@ -332,7 +332,7 @@ namespace DataFilters.Grammar.Parsing
                                                                               select new { before, regex, after })
             .Select(item =>
             {
-                List<FilterExpression> expressions = new List<FilterExpression>();
+                List<FilterExpression> expressions = new();
                 if (item.before is null && item.after is null)
                 {
                     expressions.AddRange(item.regex.Value.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray());
@@ -417,17 +417,47 @@ namespace DataFilters.Grammar.Parsing
 
         public static TokenListParser<FilterToken, DateTimeExpression> DateAndTime => (from date in Date
                                                                                        from separator in Token.EqualToValue(FilterToken.Alpha, "T")
-                                                                                           .Or(Token.EqualTo(FilterToken.Whitespace))
+                                                                                                              .Or(Token.EqualTo(FilterToken.Whitespace))
                                                                                        from time in Time
-                                                                                       select new DateTimeExpression(date, time)).Try()
+                                                                                       from offset in Offset.OptionalOrDefault()
+                                                                                       select new DateTimeExpression(date,
+                                                                                                                     new(hours: time.Hours,
+                                                                                                                         minutes: time.Minutes,
+                                                                                                                         seconds: time.Seconds,
+                                                                                                                         offset: offset))).Try()
+                                                                                      // DATE AND TIME
                                                                                       .Or(
-                                                                                        from date in Date
-                                                                                        select new DateTimeExpression(date)
+                                                                                          from date in Date
+                                                                                          from separator in Token.EqualToValue(FilterToken.Alpha, "T")
+                                                                                                                 .Or(Token.EqualTo(FilterToken.Whitespace))
+                                                                                          from time in Time
+                                                                                          select new DateTimeExpression(date, time)).Try()
+                                                                                      // DATE
+                                                                                      .Or(from date in Date
+                                                                                          select new DateTimeExpression(date)
                                                                                         ).Try()
-                                                                                        .Or(from time in Time
-                                                                                            select new DateTimeExpression(time: time)
+                                                                                    // TIME
+                                                                                    .Or(from time in Time
+                                                                                        select new DateTimeExpression(time: time)
             );
 
+        public static TokenListParser<FilterToken, TimeOffset> Offset => (from _ in Token.EqualToValue(FilterToken.Alpha, "Z")
+                                                                          select new TimeOffset(0, 0)).Try()
+                                                                          .Or(
+                                                                                from sign in Token.EqualTo(FilterToken.Dash)
+                                                                                                  .Or(Token.EqualToValue(FilterToken.None, "+"))
+                                                                                                  .Select(n => n.ToStringValue())
+                                                                                from hour in Token.EqualTo(FilterToken.Numeric)
+                                                                                                .Select(n => int.Parse(n.ToStringValue()))
+                                                                                from _ in Colon
+                                                                                from minutes in Token.EqualTo(FilterToken.Numeric)
+                                                                                    .Select(n => int.Parse(n.ToStringValue()))
+                                                                                select new TimeOffset(hours: sign switch
+                                                                                {
+                                                                                    "-" => -hour,
+                                                                                    _ => hour
+                                                                                }, minutes)
+                                                                          );
         public static TokenListParser<FilterToken, DateExpression> Date => from year in Token.EqualTo(FilterToken.Numeric)
                                                                                 .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))

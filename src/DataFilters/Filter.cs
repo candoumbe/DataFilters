@@ -27,7 +27,7 @@ namespace DataFilters
         /// <summary>
         /// Filter that always returns <c>true</c>
         /// </summary>
-        public static Filter True => new Filter(default, default);
+        public static Filter True => new(default, default);
 
         /// <summary>
         /// Pattern that field name should respect.
@@ -39,7 +39,7 @@ namespace DataFilters
         /// Regular expression used to validate
         /// </summary>
         /// <returns></returns>
-        public static readonly Regex ValidFieldNameRegex = new Regex(ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+        public static readonly Regex ValidFieldNameRegex = new(ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
         /// <summary>
         /// Name of the json property that holds the field name

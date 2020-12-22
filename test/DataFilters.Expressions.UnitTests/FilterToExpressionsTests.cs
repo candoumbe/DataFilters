@@ -726,6 +726,17 @@ namespace DataFilters.UnitTests
                     new Filter(field: nameof(Appointment.Date), GreaterThanOrEqual, 23.July(2012)),
                     (Expression<Func<Appointment, bool>>)(app => app.Date >= 23.July(2012))
                 };
+
+                yield return new object[]
+                {
+                    new []
+                    {
+                        new Appointment { Name = "Medical appointment", Date = 12.April(2013).Add(14.Hours(1.Hours()) )},
+                        new Appointment { Name = "Medical appointment", Date = 12.April(2013).Add(14.Hours()) }
+                    },
+                    new Filter(field : nameof(Appointment.Date), EqualTo, 12.April(2013).Add(14.Hours(1.Hours()))),
+                    (Expression<Func<Appointment, bool>>)(app => app.Date == 12.April(2013).Add(14.Hours(1.Hours())))
+                };
             }
         }
 
@@ -739,15 +750,15 @@ namespace DataFilters.UnitTests
 
             // Act
             Expression<Func<Appointment, bool>> buildResult = filter.ToExpression<Appointment>();
-            IEnumerable<Appointment> filteredResult = appointments
-                .Where(buildResult.Compile())
-                .ToList();
+            IEnumerable<Appointment> filteredResult = appointments.Where(buildResult.Compile())
+                                                                  .ToArray();
             _output.WriteLine($"Current expression : {buildResult.Body}");
 
             // Assert
+            _output.WriteLine($"Filtered result : {filteredResult.Jsonify()}");
             filteredResult.Should()
-                .NotBeNull()
-                .And.BeEquivalentTo(appointments?.Where(expression.Compile()));
+                          .NotBeNull().And
+                          .BeEquivalentTo(appointments?.Where(expression.Compile()));
         }
     }
 }

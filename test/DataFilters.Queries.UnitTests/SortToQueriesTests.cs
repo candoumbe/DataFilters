@@ -35,7 +35,7 @@ namespace DataFilters.Queries.UnitTests
                 };
 
                 {
-                    MultiSort<Person> multiSort = new MultiSort<Person>
+                    MultiSort<Person> multiSort = new
                     (
                         new Sort<Person>(nameof(Person.Firstname)),
                         new Sort<Person>(nameof(Person.Lastname))

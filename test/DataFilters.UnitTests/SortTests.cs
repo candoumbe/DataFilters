@@ -46,7 +46,7 @@ namespace DataFilters.UnitTests
                 };
 
                 {
-                    Sort<SuperHero> sort = new Sort<SuperHero>("Name");
+                    Sort<SuperHero> sort = new("Name");
                     yield return new object[]
                     {
                         sort,

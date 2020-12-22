@@ -27,7 +27,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 };
 
                 {
-                    BoundaryExpression instance = new BoundaryExpression(new ConstantValueExpression("10"), included: true);
+                    BoundaryExpression instance = new(new ConstantValueExpression("10"), included: true);
                     yield return new object[]
                     {
                         instance,

@@ -22,8 +22,8 @@ namespace DataFilters.UnitTests
             get
             {
                 {
-                    MultiSort<SuperHero> first = new MultiSort<SuperHero>(
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                    MultiSort<SuperHero> first = new(
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
@@ -36,15 +36,14 @@ namespace DataFilters.UnitTests
                     };
                 }
                 {
-                    MultiSort<SuperHero> first = new MultiSort<SuperHero>
-                    (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                    MultiSort<SuperHero> first = new(
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
-                    MultiSort<SuperHero> second = new MultiSort<SuperHero>
+                    MultiSort<SuperHero> second = new
                     (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
@@ -58,16 +57,16 @@ namespace DataFilters.UnitTests
                 }
 
                 {
-                    MultiSort<SuperHero> first = new MultiSort<SuperHero>
+                    MultiSort<SuperHero> first = new
                     (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name)),
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
-                    MultiSort<SuperHero> second = new MultiSort<SuperHero>
+                    MultiSort<SuperHero> second = new
                     (
                         new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending),
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Name))
+                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname))
                     );
 
                     yield return new object[]

@@ -6,10 +6,6 @@ namespace DataFilters.TestObjects
 {
     public class SuperHero : Person
     {
-        public string Nickname { get; set; }
-
-        public int Height { get; set; }
-
         public DateTimeOffset? LastBattleDate { get; set; }
 
         public Henchman Henchman { get; set; }

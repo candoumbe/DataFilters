@@ -698,10 +698,10 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Size=[10 TO 20]",
                     (
                         new PropertyNameExpression("Size"),
-                        (FilterExpression) new RangeExpression(new BoundaryExpression(new ConstantValueExpression("10"),
-                                                                                      included: true),
-                                                               new BoundaryExpression(new ConstantValueExpression("20"),
-                                                                                      included: true))
+                        (FilterExpression) new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"),
+                                                                                           included: true),
+                                                               max: new BoundaryExpression(new ConstantValueExpression("20"),
+                                                                                           included: true))
                     )
                 };
 
@@ -711,6 +711,21 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (
                         new PropertyNameExpression(@"Acolytes[""Name""][""Superior""]"),
                         (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    @"Appointment[""Date""]=]2012-10-19T15:03:45Z TO 2012-10-19T15:30:45+01:00[",
+                    (
+                        new PropertyNameExpression(@"Appointment[""Date""]"),
+                        (FilterExpression) new RangeExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                                                                                                                  new TimeExpression(hours : 15, minutes: 03, seconds: 45, offset: new TimeOffset())),
+                                                                                           included: false),
+                                                               max: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                                                                                                                  new TimeExpression(hours : 15, minutes: 30, seconds: 45, offset: new TimeOffset(hours: 1))),
+                                                                                           included: false)
+                        )
                     )
                 };
             }
@@ -826,6 +841,15 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         new TimeExpression(hours: 14, minutes:33)
                     )
                 };
+
+                yield return new object[]
+                {
+                    "2019-01-12T14:33:00+01:25",
+                    new DateTimeExpression(
+                        new DateExpression(year : 2019, month: 01, day: 12),
+                        new TimeExpression(hours: 14, minutes:33, offset: new(hours : 1, minutes: 25))
+                    )
+                };
             }
         }
 
@@ -869,6 +893,37 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             AssertThatCanParse(actual, expected);
         }
 
+        public static IEnumerable<object[]> TimeCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "18:35:00",
+                    new TimeExpression(hours : 18, minutes: 35)
+                };
+
+                yield return new object[]
+                {
+                    "23:59:60",
+                    new TimeExpression(hours : 23, minutes: 59, seconds : 60)
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TimeCases))]
+        public void CanParseTimeExpression(string input, TimeExpression expected)
+        {
+            // Arrange
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            // Act
+            TimeExpression actual = FilterTokenParser.Time.Parse(tokens);
+
+            // Assert
+            AssertThatCanParse(actual, expected);
+        }
         private static void AssertThatCanParse(FilterExpression expression, FilterExpression expected)
             => expression.Should()
                 .NotBeSameAs(expected).And
