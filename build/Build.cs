@@ -378,6 +378,8 @@ public class Build : NukeBuild
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         Git($"branch -D {GitRepository.Branch}");
+
+        Git($"push origin {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
     }
 
     private void FinishFeature()
