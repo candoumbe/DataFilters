@@ -29,7 +29,7 @@ namespace System
         private static char Separator => ',';
 
         /// <summary>
-        /// Converts 
+        /// Converts <paramref name="sortString"/> to <see cref="ISort{T}"/>
         /// </summary>
         /// <typeparam name="T">Type of the element to which the <see cref="ISort"/> will be generated from</typeparam>
         /// <param name="sortString"></param>

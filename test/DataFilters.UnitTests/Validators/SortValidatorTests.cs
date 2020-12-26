@@ -5,13 +5,11 @@ using Xunit;
 
 namespace DataFilters.UnitTests.Validators
 {
-    public class SortValidatorTests : IDisposable
+    public class SortValidatorTests
     {
-        private SortValidator _sut;
+        private readonly SortValidator _sut;
 
         public SortValidatorTests() => _sut = new SortValidator();
-
-        public void Dispose() => _sut = null;
 
         [Theory]
         [InlineData("prop", true, "'prop' is a valid sort expression")]

@@ -38,13 +38,11 @@
         NotStartsWith,
 
         /// <summary>
-        /// 
         /// <remarks>Applies only to string</remarks>
         /// </summary>
         EndsWith,
 
         /// <summary>
-        /// 
         /// <remarks>Applies only to string</remarks>
         /// </summary>
         NotEndsWith,

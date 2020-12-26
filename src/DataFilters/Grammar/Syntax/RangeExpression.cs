@@ -122,5 +122,11 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         public override string ToString() => this.Jsonify();
+
+        public void Deconstruct(out BoundaryExpression min, out BoundaryExpression max)
+        {
+            min = Min;
+            max = Max;
+        }
     }
 }
