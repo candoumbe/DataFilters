@@ -75,6 +75,7 @@ using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
 )]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
+[DotNetVerbosityMapping]
 public class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.Compile);
@@ -171,25 +172,24 @@ public class Build : NukeBuild
             DotNetTest(s => s
                 .SetConfiguration(Configuration)
                 .EnableCollectCoverage()
-                .EnableUseSourceLink()
+                //.EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
                 .SetResultsDirectory(TestResultDirectory)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
                 .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
-                    .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
-                        .SetFramework(framework)
-                        .SetLogger($"trx;LogFileName={project.Name}.{framework}.trx")
-                        .SetCollectCoverage(true)
+                        //.CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
+                        //  .SetFramework(framework)
+                        .SetLogger($"trx;LogFileName={project.Name}.trx")
                         .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))
-                    )
             );
 
             TestResultDirectory.GlobFiles("*.trx")
-                            .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
-                                                                                            title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                                                            files: new string[] { testFileResult })
-            );
+                                    .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
+                                                                                                    title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
+                                                                                                    files: new string[] { testFileResult
+        })
+                    );
 
             // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
             ReportGenerator(_ => _
