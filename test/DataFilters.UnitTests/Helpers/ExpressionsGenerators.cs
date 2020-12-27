@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DataFilters.Grammar.Syntax;
 using FsCheck;
+using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Helpers
 {
@@ -42,6 +43,25 @@ namespace DataFilters.UnitTests.Helpers
                             .Filter(dateTime => dateTime.Date.Year >= 0 && dateTime.Date.Month >= 0 && dateTime.Date.Day >= 0)
                             .Convert(convertTo: dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day),
                                                   convertFrom: dateExpression => new DateTime(year: dateExpression.Year, month: dateExpression.Month, day: dateExpression.Day));
+        }
+
+        public static Arbitrary<ConstantValueExpression> GenerateConstantValueExpression()
+        {
+            IList<Gen<object>> generators = new List<Gen<object>>
+            {
+                Arb.Default.Bool().Generator.Select(item => (object) item),
+                Arb.Default.String().Generator.Where(item => !string.IsNullOrEmpty(item)).Select(item => (object) item),
+                Arb.Default.Int16().Generator.Select(item => (object) item),
+                Arb.Default.Int32().Generator.Select(item => (object) item),
+                Arb.Default.Int64().Generator.Select(item => (object) item),
+                Arb.Default.DateTime().Generator.Select(item => (object) item),
+                Arb.Default.DateTimeOffset().Generator.Select(item => (object) item),
+                Arb.Default.Byte().Generator.Select(item => (object) item),
+                Arb.Default.Guid().Generator.Select(item => (object) item)
+            };
+
+            return Gen.OneOf(generators).Select(generatedValue => new ConstantValueExpression(generatedValue))
+                       .ToArbitrary();
         }
     }
 }
