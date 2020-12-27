@@ -74,7 +74,7 @@ namespace DataFilters
 
             static Expression ComputeIsNotEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
                     ? Not(ComputeIsEmpty(property))
-                    : (Expression)NotEqual(property, Constant(string.Empty));
+                    : NotEqual(property, Constant(string.Empty));
 
             static bool IsNotAStringAndIsEnumerable(Type propertyType) => propertyType != typeof(string)
                                                                           && propertyType.IsAssignableToGenericType(typeof(IEnumerable<>));
@@ -84,7 +84,7 @@ namespace DataFilters
                           nameof(Enumerable.Any),
                           new Type[] { property.Type.GenericTypeArguments[0] },
                           property))
-                    : (Expression)Equal(property, Constant(string.Empty));
+                    : Equal(property, Constant(string.Empty));
 
             static Expression ComputeEquals(MemberExpression property, object value)
             {

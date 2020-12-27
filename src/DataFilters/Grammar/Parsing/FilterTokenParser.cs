@@ -113,7 +113,7 @@ namespace DataFilters.Grammar.Parsing
             .Or(from left in AlphaNumeric
                 from _ in Asterisk
                 from right in AlphaNumeric
-                select new AndExpression(new StartsWithExpression(left.Value), new EndsWithExpression(right.Value))),
+                select new AndExpression(new StartsWithExpression(left.Value.ToString()), new EndsWithExpression(right.Value.ToString()))),
             (_, left, right) => new AndExpression(left, right))
             ;
 
@@ -127,7 +127,7 @@ namespace DataFilters.Grammar.Parsing
         private static TokenListParser<FilterToken, RegularExpression> Regex => from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                 from regex in AlphaNumeric
                                                                                 from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                select new RegularExpression(regex.Value);
+                                                                                select new RegularExpression(regex.Value.ToString());
 
         /// <summary>
         /// Parses Range expressions
