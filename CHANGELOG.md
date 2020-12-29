@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Added support for [offset](/src/DataFilters/Grammar/Syntax/TimeOffset.cs) when parsing [`TimeExpression`](/src/DataFilters/Grammar/Syntax/TimeExpression.cs)s
-- Added support for objects when instanciating [`ConstantValueExpresssion`](/src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs)s
+- Changed [`ConstantValueExpresssion.Value`](/src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs) type from `string` to `object` [BREAKING]
+- Added support for [duration](/src/DataFilters/Grammar/Syntax/DurationExpression.cs) expressions
 
 ## [0.3.1] / 2020-12-19
 - Fixes `RepositoryUrl` metadata in nuget package

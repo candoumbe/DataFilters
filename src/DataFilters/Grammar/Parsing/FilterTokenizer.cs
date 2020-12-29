@@ -52,15 +52,8 @@ namespace DataFilters.Grammar.Parsing
                 switch (next.Value)
                 {
                     case char c when char.IsLetter(c):
-                        {
-                            TextSpan identifierStart = next.Location;
-                            while (next.HasValue && char.IsLetter(next.Value))
-                            {
-                                next = next.Remainder.ConsumeChar();
-                            }
-
-                            yield return Result.Value(Alpha, identifierStart, next.Location);
-                        }
+                        yield return Result.Value(Letter, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
                         break;
                     case char c when char.IsDigit(c):
                         {
@@ -138,7 +131,7 @@ namespace DataFilters.Grammar.Parsing
                         next = next.Remainder.ConsumeChar();
                         yield return next.HasValue && SpecialCharacters.Contains(next.Value)
                             ? Result.Value(Escaped, next.Location, next.Remainder)
-                            : Result.Value(Alpha, backSlashStart, next.Remainder);
+                            : Result.Value(Letter, backSlashStart, next.Remainder);
 
                         next = next.Remainder.ConsumeChar();
                         break;

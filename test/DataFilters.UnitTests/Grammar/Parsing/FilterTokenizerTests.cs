@@ -39,83 +39,129 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Firstname=Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(15)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("F") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("i") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("s") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("t") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("n") && result.Span.Position.Column == 6)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("m") && result.Span.Position.Column == 8)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 9)
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("=")  && result.Span.Position.Column == 10)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 11)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 12)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 13)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("c") && result.Span.Position.Column == 14)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 15)
                     )
                 };
 
                 yield return new object[]
                 {
                     "_Firstname=Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
-                                                                                && results.Once(result => result.Kind == Underscore && result.Span.EqualsValue("_"))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(16)
+                                                                                && results.Once(result => result.Kind == Underscore && result.Span.EqualsValue("_") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("F") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("i") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("s") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("t") && result.Span.Position.Column == 6)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("n") && result.Span.Position.Column == 7)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 8)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("m") && result.Span.Position.Column == 9)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 10)
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("=")  && result.Span.Position.Column == 11)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 12)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 13)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 14)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("c") && result.Span.Position.Column == 15)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 16)
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=Bru*",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bru"))
-                                                                                && results.Once(result => result.Kind == Asterisk && result.Span.EqualsValue("*"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(14)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("F") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("i") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("s") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("t") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("n") && result.Span.Position.Column == 6)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("m") && result.Span.Position.Column == 8)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 9)
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("=")  && result.Span.Position.Column == 10)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 11)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 12)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 13)
+                                                                                && results.Once(result => result.Kind == Asterisk && result.Span.EqualsValue("*") && result.Span.Position.Column == 14)
                     )
                 };
 
                 yield return new object[]
                 {
                     "prop1=Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("prop"))
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
-                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(11)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("p") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("o") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("p") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("=")  && result.Span.Position.Column == 6)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 7)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 8)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 9)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("c") && result.Span.Position.Column == 10)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 11)
                     )
                 };
 
                 yield return new object[]
                 {
                     "val1|val2",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(5)
-                                                                                && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("val"), 2)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
-                                                                                && results.Once(result => result.Kind == Or && result.Span.EqualsValue("|"))
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(9)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Or && result.Span.EqualsValue("|") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v")  && result.Span.Position.Column == 6)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 8)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2") && result.Span.Position.Column == 9)
                     )
                 };
 
                 yield return new object[]
                 {
                     "val1,val2",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(5)
-                                                                                && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("val"), 2)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1"))
-                                                                                && results.Once(result => result.Kind == And && result.Span.EqualsValue(","))
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(9)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == And && result.Span.EqualsValue(",") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v")  && result.Span.Position.Column == 6)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 8)
+                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2") && result.Span.Position.Column == 9)
                     )
                 };
 
                 yield return new object[]
                 {
                     "!Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(2)
-                                                                                && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!"))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "!Bruce",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(2)
-                                                                                && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!"))
-                                                                                && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bruce"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(6)
+                                                                                && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!") && result.Span.Position.Column == 1)
+                                                                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 3)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("c") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 6)
                     )
                 };
 
@@ -189,7 +235,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(2)
                         && results.Exactly(result => result.Kind == Underscore && result.Span.EqualsValue("_"), 1)
-                        && results.Exactly(result => result.Kind == Alpha && result.Span.EqualsValue("a"), 1)
+                        && results.Exactly(result => result.Kind == Letter && result.Span.EqualsValue("a"), 1)
                     )
                 };
 
@@ -198,12 +244,21 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     yield return new object[]
                     {
                         $"Firstname=Bru{FilterTokenizer.BackSlash}{c}",
-                        (Expression<Func<TokenList<FilterToken>, bool>>) (results =>
-                            results.Exactly(4)
-                            && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Firstname"))
-                            && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("="))
-                            && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("Bru"))
-                            && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue(c.ToString()))
+                        (Expression<Func<TokenList<FilterToken>, bool>>) (results => results.Exactly(14)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("F") && result.Span.Position.Column == 1)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("i") && result.Span.Position.Column == 2)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 3)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("s") && result.Span.Position.Column == 4)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("t") && result.Span.Position.Column == 5)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("n") && result.Span.Position.Column == 6)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("m") && result.Span.Position.Column == 8)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("e") && result.Span.Position.Column == 9)
+                                                                                     && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("=")  && result.Span.Position.Column == 10)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 11)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 12)
+                                                                                     && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 13)
+                                                                                     && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue(c.ToString()) && result.Span.Position.Column == 15)
                         )
                     };
                 }
@@ -213,7 +268,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     @"\",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(1)
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue(@"\"))
+                        && results.Once(result => result.Kind == Letter && result.Span.EqualsValue(@"\"))
                     )
                 };
 
@@ -223,7 +278,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(2)
                         && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue("\\"))
-                        && results.Once(result => result.Kind == Alpha && result.Span.EqualsValue("t"))
+                        && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("t"))
                     )
                 };
 
@@ -250,6 +305,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         [MemberData(nameof(RecognizeTokensCases))]
         public void RecognizeTokens(string input, Expression<Func<TokenList<FilterToken>, bool>> expectation)
         {
+            _outputHelper.WriteLine($"input : '{input}'");
             // Act
             TokenList<FilterToken> tokens = _sut.Tokenize(input);
 
