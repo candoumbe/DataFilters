@@ -172,23 +172,21 @@ public class Build : NukeBuild
             DotNetTest(s => s
                 .SetConfiguration(Configuration)
                 .EnableCollectCoverage()
-                //.EnableUseSourceLink()
+                .EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
                 .SetResultsDirectory(TestResultDirectory)
-                .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+                .SetCoverletOutputFormat(CoverletOutputFormat.lcov)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
                 .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
-                        //.CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
-                        //  .SetFramework(framework)
-                        .SetLogger($"trx;LogFileName={project.Name}.trx")
-                        .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))
-            );
+                                                               .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting.SetFramework(framework)
+                                                                                                                                          .SetLogger($"trx;LogFileName={project.Name}.trx")
+                                                                                                                                          .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml")))
+                );
 
             TestResultDirectory.GlobFiles("*.trx")
                                     .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
                                                                                                     title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                                                                    files: new string[] { testFileResult
-        })
+                                                                                                    files: new string[] { testFileResult })
                     );
 
             // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !

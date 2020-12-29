@@ -6,8 +6,10 @@ using Superpower;
 using Superpower.Model;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Transactions;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -80,6 +82,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseAlphaNumeric(string input, ConstantValueExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
 
@@ -166,6 +169,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseStartsWith(string input, StartsWithExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             _outputHelper.WriteLine($"Tokens : ${tokens.Select(token => new { token.Kind, token.Position.Line, token.Position.Column }).Jsonify()}");
 
@@ -246,6 +250,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseEndsWith(string input, EndsWithExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
 
@@ -296,6 +301,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseContains(string input, ContainsExpression expectedContains)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -347,6 +353,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseOrExpression(string input, OrExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -392,6 +399,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseAndExpression(string input, AndExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -442,6 +450,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseNotExpression(string input, NotExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -507,6 +516,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseOneOfExpression(string input, OneOfExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -577,6 +587,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseRange(string input, RangeExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -615,6 +626,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseGroup(string input, GroupExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -653,6 +665,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParsePropertyNameExpression(string input, PropertyNameExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -810,6 +823,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseCriteria(string input, Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>> expectation)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -858,6 +872,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseDateAndTime(string input, DateTimeExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -884,6 +899,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseDateCases(string input, DateExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -916,6 +932,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void CanParseTimeExpression(string input, TimeExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -924,9 +941,49 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             // Assert
             AssertThatCanParse(actual, expected);
         }
+
+        public static IEnumerable<object[]> DurationCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "P3Y6M4DT12H30M5S",
+                    new DurationExpression(years: 3, months: 6, days: 4, hours: 12, minutes: 30, seconds: 5)
+                };
+
+                yield return new object[]
+                {
+                    "PT12H30M5S",
+                    new DurationExpression(hours: 12, minutes: 30, seconds: 5)
+                };
+
+                yield return new object[]
+                {
+                    "PT0H",
+                    new DurationExpression()
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DurationCases))]
+        private void CanParseDurationExpression(string input, DurationExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            // Act
+            DurationExpression actual = FilterTokenParser.Duration.Parse(tokens);
+
+            // Assert
+            AssertThatCanParse(actual, expected);
+        }
+
         private static void AssertThatCanParse(FilterExpression expression, FilterExpression expected)
             => expression.Should()
-                .NotBeSameAs(expected).And
-                .Be(expected);
+                         .NotBeSameAs(expected).And
+                         .Be(expected);
     }
 }

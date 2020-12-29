@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using DataFilters.Grammar.Syntax;
 using FsCheck;
+using FsCheck.Experimental;
+using Microsoft.FSharp.Data.UnitSystems.SI.UnitNames;
 using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Helpers
@@ -42,7 +44,7 @@ namespace DataFilters.UnitTests.Helpers
             return Arb.Default.DateTime()
                             .Filter(dateTime => dateTime.Date.Year >= 0 && dateTime.Date.Month >= 0 && dateTime.Date.Day >= 0)
                             .Convert(convertTo: dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day),
-                                                  convertFrom: dateExpression => new DateTime(year: dateExpression.Year, month: dateExpression.Month, day: dateExpression.Day));
+                                     convertFrom: dateExpression => new DateTime(year: dateExpression.Year, month: dateExpression.Month, day: dateExpression.Day));
         }
 
         public static Arbitrary<ConstantValueExpression> GenerateConstantValueExpression()
@@ -62,6 +64,24 @@ namespace DataFilters.UnitTests.Helpers
 
             return Gen.OneOf(generators).Select(generatedValue => new ConstantValueExpression(generatedValue))
                        .ToArbitrary();
+        }
+
+        public static Arbitrary<DurationExpression> GenerateDurationExpression()
+        {
+            Arbitrary<Tuple<Tuple<Tuple<PositiveInt, PositiveInt, PositiveInt>, Tuple<PositiveInt, PositiveInt, PositiveInt>>, PositiveInt>> arb = Arb.Default.PositiveInt().Generator
+                                                                                                                                                              .Three()
+                                                                                                                                                              .Two()
+                                                                                                                                                              .Zip(Arb.Default.PositiveInt().Generator)
+                                                                                                                                                              .ToArbitrary();
+
+            return arb.Convert(convertTo: tuple => new DurationExpression(years: tuple.Item1.Item1.Item1.Item,
+                                           months: tuple.Item1.Item1.Item2.Item,
+                                           weeks: tuple.Item1.Item1.Item3.Item,
+                                           days: tuple.Item1.Item2.Item1.Item,
+                                           hours: tuple.Item1.Item2.Item2.Item,
+                                           minutes: tuple.Item1.Item2.Item3.Item,
+                                           seconds: tuple.Item2.Item),
+                               convertFrom: _ => default);
         }
     }
 }
