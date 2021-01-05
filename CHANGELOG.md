@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for [offset](/src/DataFilters/Grammar/Syntax/TimeOffset.cs) when parsing [`TimeExpression`](/src/DataFilters/Grammar/Syntax/TimeExpression.cs)s
 - Changed [`ConstantValueExpresssion.Value`](/src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs) type from `string` to `object` [BREAKING]
 - Added support for [duration](/src/DataFilters/Grammar/Syntax/DurationExpression.cs) expressions
+- Removed runtime dependency to [Candoumbe.MiscUtilities](https://www.nuget.org/packages/Candoumbe.MiscUtilities/) package [BREAKING]
 
 ## [0.3.1] / 2020-12-19
 - Fixes `RepositoryUrl` metadata in nuget package
