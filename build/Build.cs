@@ -24,6 +24,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
+using Nuke.Common.Utilities;
 
 [AzurePipelines(
     suffix: "release",
@@ -80,14 +81,14 @@ public class Build : NukeBuild
     public static int Main() => Execute<Build>(x => x.Compile);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    public readonly string Configuration = IsLocalBuild ? "Debug" : "Release";
+    public readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Parameter("Indicates wheter to restore nuget in interactive mode - Default is false")]
     public readonly bool Interactive = false;
 
     [Required] [Solution] public readonly Solution Solution;
     [Required] [GitRepository] public readonly GitRepository GitRepository;
-    [Required] [GitVersion(Framework = "net5.0", NoFetch = true)] public readonly GitVersion GitVersion;
+    [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
     [Partition(3)] public readonly Partition TestPartition;
@@ -234,7 +235,7 @@ public class Build : NukeBuild
 
     public Target Changelog => _ => _
         .Requires(() => IsLocalBuild)
-        .Requires(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
+        .OnlyWhenStatic(() => GitRepository.IsOnReleaseBranch() || GitRepository.IsOnHotfixBranch())
         .Description("Finalizes the change log so that its up to date for the release. ")
         .Executes(() =>
         {
@@ -298,6 +299,10 @@ public class Build : NukeBuild
 
                 Info($"{EnvironmentInfo.NewLine}Good bye !");
             }
+            else
+            {
+                FinishFeature();
+            }
         });
 
     public Target Release => _ => _
@@ -359,7 +364,6 @@ public class Build : NukeBuild
 
     private void FinishReleaseOrHotfix()
     {
-        Warn("The hotfix (or release) could not be created because you have uncommited changes pending.");
         Git($"checkout {MainBranchName}");
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
         Git($"tag {MajorMinorPatchVersion}");
@@ -368,7 +372,57 @@ public class Build : NukeBuild
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         Git($"branch -D {GitRepository.Branch}");
+
+        Git($"push origin -- follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+    }
+
+    private void FinishFeature()
+    {
+        Git($"rebase {DevelopBranch}");
+        Git($"checkout {DevelopBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+
+        Git($"branch -D {GitRepository.Branch}");
+        Git($"push origin {DevelopBranch}");
     }
 
     #endregion
+
+    [Parameter("API key used to publish artifacts to Nuget.org")]
+    public readonly string NugetApiKey;
+
+    [Parameter(@"URI where packages should be published (default : ""https://api.nuget.org/v3/index.json""")]
+    public string NugetPackageSource => "https://api.nuget.org/v3/index.json";
+
+    public Target Publish => _ => _
+        .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
+        .DependsOn(Clean, Tests, Pack)
+        .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
+        .Requires(() => !NugetApiKey.IsNullOrEmpty())
+        .Requires(() => GitHasCleanWorkingCopy())
+        .Requires(() => GitRepository.Branch == MainBranchName
+                        || GitRepository.IsOnReleaseBranch()
+                        || GitRepository.IsOnDevelopBranch())
+        .Requires(() => Configuration.Equals(Configuration.Release))
+        .Executes(() =>
+        {
+            void PushPackages(IReadOnlyCollection<AbsolutePath> nupkgs)
+            {
+                Info($"Publishing {nupkgs.Count} package{(nupkgs.Count > 1 ? "s" : string.Empty)}");
+                Info(string.Join(EnvironmentInfo.NewLine, nupkgs));
+
+                DotNetNuGetPush(s => s.SetApiKey(NugetApiKey)
+                    .SetSource(NugetPackageSource)
+                    .EnableSkipDuplicate()
+                    .EnableNoSymbols()
+                    .SetProcessLogTimestamp(true)
+                    .CombineWith(nupkgs, (_, nupkg) => _
+                                .SetTargetPath(nupkg)),
+                    degreeOfParallelism: 4,
+                    completeOnFailure: true);
+            }
+
+            PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg"));
+            PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg"));
+        });
 }

@@ -89,8 +89,8 @@ namespace DataFilters.Expressions.UnitTests
                         new Sort<Hero>(nameof(Hero.Name), Descending)
                     ),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
-                        && heroes.First().Name == "Batman"
-                        && heroes.Last().Name == "Flash"
+                                                                          && heroes.First().Name == "Batman"
+                                                                          && heroes.Last().Name == "Flash"
                     )
                 };
 
@@ -108,8 +108,8 @@ namespace DataFilters.Expressions.UnitTests
                         new Sort<Hero>(nameof(Hero.Age), Ascending)
                     ),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
-                        && heroes.First().Name == "Wonder Woman"
-                        && heroes.Last().Name == "Batman"
+                                                                          && heroes.First().Name == "Wonder Woman"
+                                                                          && heroes.Last().Name == "Batman"
                     )
                 };
 
@@ -123,10 +123,43 @@ namespace DataFilters.Expressions.UnitTests
                     new Sort<Hero>(nameof(Hero.FirstAppearance), Descending),
 
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
-                        && heroes.First().Name == "Flash"
-                        && heroes.Last().Name == "Batman"
+                                                                          && heroes.First().Name == "Flash"
+                                                                          && heroes.Last().Name == "Batman"
                     )
                 };
+
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new Hero
+                        {
+                            Name = "Batman",
+                            FirstAppearance = 1.May(1938),
+                            Acolyte = new Hero { Name = "Robin", Age = 13 }
+                        },
+                        new Hero
+                        {
+                            Name = "Flash",
+                            FirstAppearance = 1.May(1940),
+                            Acolyte = new Hero { Name = "Kid Flash", Age = 15 }
+                        },
+                        new Hero
+                        {
+                            Name = "Green Arrow",
+                            FirstAppearance = 1.May(1940),
+                            Acolyte = new Hero { Name = "Red Arrow", Age = 14 }
+                        }
+                    },
+                    new MultiSort<Hero>(
+                        new Sort<Hero>(nameof(Hero.FirstAppearance), Descending),
+                        new Sort<Hero>($@"{nameof(Hero.Acolyte)}.{nameof(Hero.Age)}", Ascending)
+                    ),
+
+                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Select(x => x.Name).SequenceEqual(new []{ "Green Arrow", "Flash", "Batman"}))
+                };
+
+
             }
         }
 
@@ -136,12 +169,12 @@ namespace DataFilters.Expressions.UnitTests
         {
             // Act
             IEnumerable<Hero> actual = heroes.AsQueryable()
-                .OrderBy(order)
-                .ToList();
+                                             .OrderBy(order)
+                                             .ToList();
 
             // Assert
             actual.Should()
-                .Match(expectation);
+                  .Match(expectation);
         }
     }
 }

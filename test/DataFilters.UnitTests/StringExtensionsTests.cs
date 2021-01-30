@@ -104,9 +104,11 @@ namespace DataFilters.UnitTests
             // Act
             ISort<SuperHero> actual = sort.ToSort<SuperHero>();
 
+            _outputHelper.WriteLine($"actual sort : '{actual}'");
+
             // Assert
             actual.Should()
-                .Be(expected);
+                  .Be(expected);
         }
     }
 }
