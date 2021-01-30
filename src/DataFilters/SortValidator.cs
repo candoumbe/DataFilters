@@ -10,7 +10,8 @@ namespace DataFilters
     /// </summary>
     public class SortValidator : AbstractValidator<string>
     {
-        public const string Pattern = @"^\s*(-|\+)?(([A-Za-z])\w*)+(\s*,\s*((-|\+)?(([A-Za-z])\w*)+)\s*)*$";
+        private const string FieldPattern = Filter.ValidFieldNamePattern;
+        public readonly static string Pattern = @$"^\s*(-|\+)?(({FieldPattern})\w*)+(\s*,\s*((-|\+)?(({FieldPattern})\w*)+)\s*)*$";
         private readonly Regex _sortRegex = new Regex(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
         private const char _separator = ',';
 

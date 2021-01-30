@@ -87,7 +87,7 @@ public class Build : NukeBuild
 
     [Required] [Solution] public readonly Solution Solution;
     [Required] [GitRepository] public readonly GitRepository GitRepository;
-    [Required] [GitVersion(Framework = "net5.0", NoFetch = true)] public readonly GitVersion GitVersion;
+    [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
     [Partition(3)] public readonly Partition TestPartition;
@@ -234,7 +234,7 @@ public class Build : NukeBuild
 
     public Target Changelog => _ => _
         .Requires(() => IsLocalBuild)
-        .Requires(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
+        .OnlyWhenStatic(() => GitRepository.IsOnReleaseBranch() || GitRepository.IsOnHotfixBranch())
         .Description("Finalizes the change log so that its up to date for the release. ")
         .Executes(() =>
         {
@@ -298,6 +298,10 @@ public class Build : NukeBuild
 
                 Info($"{EnvironmentInfo.NewLine}Good bye !");
             }
+            else
+            {
+                FinishFeature();
+            }
         });
 
     public Target Release => _ => _
@@ -359,7 +363,6 @@ public class Build : NukeBuild
 
     private void FinishReleaseOrHotfix()
     {
-        Warn("The hotfix (or release) could not be created because you have uncommited changes pending.");
         Git($"checkout {MainBranchName}");
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
         Git($"tag {MajorMinorPatchVersion}");
@@ -368,6 +371,18 @@ public class Build : NukeBuild
         Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
         Git($"branch -D {GitRepository.Branch}");
+
+        Git($"push origin {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+    }
+
+    private void FinishFeature()
+    {
+        Git($"rebase {DevelopBranch}");
+        Git($"checkout {DevelopBranch}");
+        Git($"merge --no-ff --no-edit {GitRepository.Branch}");
+
+        Git($"branch -D {GitRepository.Branch}");
+        Git($"push origin {DevelopBranch}");
     }
 
     #endregion

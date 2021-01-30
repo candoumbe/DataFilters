@@ -33,27 +33,25 @@ namespace System.Linq
             IEnumerable<OrderClause<T>> orders = orderBy.ToOrderClause();
             OrderClause<T> first = orders.First();
 
-            Expression sortExpression = Expression.Call(
-                typeof(Queryable),
-                first.Direction switch
-                {
-                    SortDirection.Ascending => nameof(Queryable.OrderBy),
-                    _ => nameof(Queryable.OrderByDescending)
-                },
-                new Type[] {entries.ElementType, first.Expression.ReturnType },
-                entries.Expression, first.Expression);
+            Expression sortExpression = Expression.Call(typeof(Queryable),
+                                                        first.Direction switch
+                                                        {
+                                                            SortDirection.Ascending => nameof(Queryable.OrderBy),
+                                                            _ => nameof(Queryable.OrderByDescending)
+                                                        },
+                                                        new Type[] { entries.ElementType, first.Expression.ReturnType },
+                                                        entries.Expression, first.Expression);
 
             foreach (var order in orders.Skip(1))
             {
-                sortExpression = Expression.Call(
-                typeof(Queryable),
-                order.Direction switch
-                {
-                    SortDirection.Ascending => nameof(Queryable.ThenBy),
-                    _ => nameof(Queryable.ThenByDescending)
-                },
-                new Type[] { entries.ElementType, order.Expression.ReturnType },
-                sortExpression, order.Expression);
+                sortExpression = Expression.Call(typeof(Queryable),
+                                                order.Direction switch
+                                                {
+                                                    SortDirection.Ascending => nameof(Queryable.ThenBy),
+                                                    _ => nameof(Queryable.ThenByDescending)
+                                                },
+                                                new Type[] { entries.ElementType, order.Expression.ReturnType },
+                                                sortExpression, order.Expression);
             }
 
             return (IOrderedQueryable<T>)entries.Provider.CreateQuery(sortExpression);
