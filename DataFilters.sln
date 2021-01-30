@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		build.yaml = build.yaml
+		CHANGELOG.md = CHANGELOG.md
 		core.props = core.props
 		global.json = global.json
 		Nuget.config = Nuget.config
@@ -32,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.Queries", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFilters.TestObjects", "test\DataFilters.TestObjects\DataFilters.TestObjects.csproj", "{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.TestObjects", "test\DataFilters.TestObjects\DataFilters.TestObjects.csproj", "{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,8 +41,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFCB995-FC9F-492A-86C8-00A40664B76E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9AFCB995-FC9F-492A-86C8-00A40664B76E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFCB995-FC9F-492A-86C8-00A40664B76E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -66,6 +65,8 @@ Global
 		{810E8E8B-9900-4C42-9391-306246CD166A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{810E8E8B-9900-4C42-9391-306246CD166A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{810E8E8B-9900-4C42-9391-306246CD166A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}.Release|Any CPU.ActiveCfg = Release|Any CPU
