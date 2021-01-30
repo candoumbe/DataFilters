@@ -89,7 +89,7 @@ public class Build : NukeBuild
 
     [Required] [Solution] public readonly Solution Solution;
     [Required] [GitRepository] public readonly GitRepository GitRepository;
-    [Required] [GitVersion(Framework = "net5.0", NoFetch = true)] public readonly GitVersion GitVersion;
+    [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
     [Partition(3)] public readonly Partition TestPartition;
@@ -233,7 +233,7 @@ public class Build : NukeBuild
 
     public Target Changelog => _ => _
         .Requires(() => IsLocalBuild)
-        .Requires(() => !GitRepository.IsOnReleaseBranch() || GitHasCleanWorkingCopy())
+        .OnlyWhenStatic(() => GitRepository.IsOnReleaseBranch() || GitRepository.IsOnHotfixBranch())
         .Description("Finalizes the change log so that its up to date for the release. ")
         .Executes(() =>
         {
@@ -371,7 +371,7 @@ public class Build : NukeBuild
 
         Git($"branch -D {GitRepository.Branch}");
 
-        Git($"push origin {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+        Git($"push origin -- follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
     }
 
     private void FinishFeature()

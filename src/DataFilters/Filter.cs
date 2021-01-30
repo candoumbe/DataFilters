@@ -14,7 +14,7 @@ using System.Text.Json.Serialization;
 namespace DataFilters
 {
     /// <summary>
-    /// An instance of this class holds a kendo filter
+    /// An instance of this class holds a filter
     /// </summary>
 #if NETSTANDARD1_3
     [JsonObject]
@@ -33,7 +33,7 @@ namespace DataFilters
         /// Pattern that field name should respect.
         /// </summary>
         /// <returns></returns>
-        public const string ValidFieldNamePattern = @"^[a-zA-Z_]+(?<subProperty>([""[a-zA-Z0-9_]*""])*)$";
+        public const string ValidFieldNamePattern = @"[a-zA-Z_]+((\[""[a-zA-Z0-9_]+""]|(\.[a-zA-Z0-9_]+))*)";
 
         /// <summary>
         /// Regular expression used to validate
@@ -128,7 +128,7 @@ namespace DataFilters
         }
 
         /// <summary>
-        /// Name of the field to filter
+        /// Name of the field  the filter will be applied to
         /// </summary>
 #if NETSTANDARD1_3
         [JsonProperty(FieldJsonPropertyName, Required = Always)]

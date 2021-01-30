@@ -265,6 +265,9 @@ Example :
 The generic syntax for filtering on in a hierarchical tree
 `property["subproperty"]...["subproperty-n"]=<expression>`
 
+you can also use the dot character (`.`).
+`property["subproperty"]["subproperty-n"]=<expression>` and `property.subproperty["subproperty-n"]=<expression>`
+are equivalent 
 
 ## <a href="logic-operators">Logical operators</a>
 
@@ -296,6 +299,7 @@ IFilter filter = new MultiFilter
 Use the pipe character `|`  to combine multiple expressions using logical AND operator 
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
+
 | Query string          | JSON                                                                                                                                    |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `"nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |

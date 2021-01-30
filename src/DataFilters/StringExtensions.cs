@@ -29,11 +29,12 @@ namespace System
         private static char Separator => ',';
 
         /// <summary>
-        /// Converts <paramref name="sortString"/> to <see cref="ISort{T}"/>
+        /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance
         /// </summary>
         /// <typeparam name="T">Type of the element to which the <see cref="ISort"/> will be generated from</typeparam>
         /// <param name="sortString"></param>
         /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException">when <paramref name="sortString"/> is <c>null</c> or whitespace</exception>
         public static ISort<T> ToSort<T>(this string sortString)
         {
             if (string.IsNullOrWhiteSpace(sortString) || sortString?.Length == 0)
