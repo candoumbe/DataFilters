@@ -16,7 +16,11 @@
     <PackageReference Include="GitVersion.CommandLine" Version="5.5.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    </PackageReference>    
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="CSharpToTypeScript.CLITool" Version="[2.5.1]" />
   </ItemGroup>
 
 </Project>

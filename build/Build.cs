@@ -10,21 +10,21 @@ using Nuke.Common.Tools.Coverlet;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.ReportGenerator;
+using Nuke.Common.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
-using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
-using Nuke.Common.Utilities;
+using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
 [AzurePipelines(
     suffix: "release",
@@ -94,6 +94,10 @@ public class Build : NukeBuild
 
     [Partition(3)] public readonly Partition TestPartition;
 
+    [PackageExecutable(packageId: "CSharpToTypeScript.CLITool",
+                       packageExecutable: "CSharpToTypeScript.CLITool.dll")]
+    public readonly Tool Csharp2Typescript;
+
     public AbsolutePath SourceDirectory => RootDirectory / "src";
 
     public AbsolutePath TestDirectory => RootDirectory / "test";
@@ -140,7 +144,10 @@ public class Build : NukeBuild
                 .SetIgnoreFailedSources(true)
                 .SetDisableParallel(false)
                 .When(IsLocalBuild && Interactive, _ => _.SetProperty("NugetInteractive", IsLocalBuild && Interactive))
+
             );
+
+            DotNet("tool restore");
         });
 
     public Target Compile => _ => _
@@ -394,7 +401,7 @@ public class Build : NukeBuild
 
     public Target Publish => _ => _
         .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
-        .DependsOn(Clean, Tests, Pack)
+        .DependsOn(Tests, Pack)
         .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
         .Requires(() => !NugetApiKey.IsNullOrEmpty())
         .Requires(() => GitHasCleanWorkingCopy())
@@ -422,5 +429,25 @@ public class Build : NukeBuild
 
             PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg"));
             PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg"));
+        });
+
+    public Target TypescriptModels => _ => _
+        .Description("Generates d.ts files from DataFilters' core classes using CSharpToTypeScript.CLITool tool")
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            Project project = Solution.GetProject("DataFilters");
+
+            AbsolutePath[] files = project.Directory.GlobFiles("*.cs")
+                                                    .ToArray();
+
+            Info($"Converting '{files.Length}' file(s) to typescript");
+            files.ForEach(file =>
+            {
+                Csharp2Typescript($"-ts 4 {file}");
+                Info($"{file}' converted");
+            });
+
+            Info($"Conversion successfull");
         });
 }
