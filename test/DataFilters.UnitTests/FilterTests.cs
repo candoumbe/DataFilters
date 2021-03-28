@@ -305,7 +305,7 @@ namespace DataFilters.UnitTests
         {
             // Act
 
-            Regex validFieldNameRegex = new(Filter.ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+            Regex validFieldNameRegex = new(Constants.ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
             Prop.ForAll<string, FilterOperator, object>((field, @operator, value) =>
             {

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace DataFilters.TestObjects
 {
+    [ExcludeFromCodeCoverage]
     public class SuperHero : Person
     {
         public DateTimeOffset? LastBattleDate { get; set; }

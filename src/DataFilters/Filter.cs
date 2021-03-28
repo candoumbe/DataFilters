@@ -30,16 +30,9 @@ namespace DataFilters
         public static Filter True => new(default, default);
 
         /// <summary>
-        /// Pattern that field name should respect.
-        /// </summary>
-        /// <returns></returns>
-        public const string ValidFieldNamePattern = @"[a-zA-Z_]+((\[""[a-zA-Z0-9_]+""]|(\.[a-zA-Z0-9_]+))*)";
-
-        /// <summary>
         /// Regular expression used to validate
         /// </summary>
-        /// <returns></returns>
-        public static readonly Regex ValidFieldNameRegex = new(ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+        public static readonly Regex ValidFieldNameRegex = new(Constants.ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
         /// <summary>
         /// Name of the json property that holds the field name
@@ -173,7 +166,7 @@ namespace DataFilters
         {
             if (!string.IsNullOrEmpty(field) && !ValidFieldNameRegex.IsMatch(field))
             {
-                throw new ArgumentOutOfRangeException(nameof(field), field, $"field name is not valid ({ValidFieldNamePattern}).");
+                throw new ArgumentOutOfRangeException(nameof(field), field, $"field name is not valid ({Constants.ValidFieldNamePattern}).");
             }
 
             Field = field;

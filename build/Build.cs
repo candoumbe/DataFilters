@@ -231,6 +231,7 @@ public class Build : NukeBuild
                 .SetVersion(GitVersion.NuGetVersion)
                 .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
                 .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
+                .SetIncludeSymbols(true)
             );
         });
 
@@ -431,23 +432,24 @@ public class Build : NukeBuild
             PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg"));
         });
 
-    public Target TypescriptModels => _ => _
-        .Description("Generates d.ts files from DataFilters' core classes using CSharpToTypeScript.CLITool tool")
-        .DependsOn(Compile)
-        .Executes(() =>
-        {
-            Project project = Solution.GetProject("DataFilters");
+    //public Target TypescriptModels => _ => _
+    //    .Description("Generates d.ts files from DataFilters' core classes using CSharpToTypeScript.CLITool tool")
+    //    .DependsOn(Compile)
+    //    .Executes(() =>
+    //    {
+    //        Project project = Solution.GetProject("DataFilters");
 
-            AbsolutePath[] files = project.Directory.GlobFiles("*.cs")
-                                                    .ToArray();
+    //        AbsolutePath[] files = project.Directory.GlobFiles("*.cs")
+    //                                                .ToArray();
 
-            Info($"Converting '{files.Length}' file(s) to typescript");
-            files.ForEach(file =>
-            {
-                Csharp2Typescript($"-ts 4 {file}");
-                Info($"{file}' converted");
-            });
+    //        Info($"Converting '{files.Length}' file(s) to typescript");
+    //        files.ForEach(file =>
+            
+    //        {
+    //            Csharp2Typescript($"-ts 4 {file}");
+    //            Info($"{file}' converted");
+    //        });
 
-            Info($"Conversion successfull");
-        });
+    //        Info($"Conversion successfull");
+    //    });
 }
