@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Optional;
+
+using System;
 
 namespace DataFilters.Grammar.Syntax
 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using static Newtonsoft.Json.JsonConvert;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -14,6 +13,11 @@ namespace DataFilters.Grammar.Syntax
         /// Time part of the expression
         /// </summary>
         public TimeExpression Time { get; }
+
+        /// <summary>
+        /// Definies the kind of the current <see cref="DateTimeExpression"/> instance.
+        /// </summary>
+        public DateTimeExpressionKind Kind { get; }
 
         /// <summary>
         /// Builds a new <see cref="DateTimeExpression"/> instance where only <see cref="Date"/> part is set
@@ -46,19 +50,31 @@ namespace DataFilters.Grammar.Syntax
             }
             Date = date;
             Time = time;
+            Kind = time?.Offset is not null
+                ? DateTimeExpressionKind.Utc
+                : DateTimeExpressionKind.Unspecified;
         }
 
+        /// <summary>
+        /// Builds a new <see cref="DateTimeExpression"/> with both <see cref="Date"/> and <see cref="Time"/> values
+        /// extracted from .
+        /// </summary>
+        /// <param name="utc"><see cref="DateTime"/> value to use as source of the current instance</param>
         public DateTimeExpression(DateTime utc)
             : this(new DateExpression(utc.Year, utc.Month, utc.Day), new TimeExpression(utc.Hour, utc.Minute, utc.Second))
         {
         }
 
+        /// <inheritdoc/>
         public bool Equals(DateTimeExpression other) => (Date, Time).Equals((other?.Date, other?.Time));
 
+        /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as DateTimeExpression);
 
+        /// <inheritdoc/>
         public override int GetHashCode() => (Date, Time).GetHashCode();
 
+        /// <inheritdoc/>
         public void Deconstruct(out DateExpression date, out TimeExpression time)
         {
             date = Date;

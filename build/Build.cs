@@ -378,7 +378,7 @@ public class Build : NukeBuild
 
         Git($"branch -D {GitRepository.Branch}");
 
-        Git($"push origin -- follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+        Git($"push origin --follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
     }
 
     private void FinishFeature()

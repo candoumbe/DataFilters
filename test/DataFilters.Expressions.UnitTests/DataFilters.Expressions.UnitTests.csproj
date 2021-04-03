@@ -8,6 +8,11 @@
   <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="33.0.2" />
+    <PackageReference Include="NodaTime.Testing" Version="3.0.5" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Datafilters.Expressions\DataFilters.Expressions.csproj" />
     <ProjectReference Include="..\Datafilters.TestObjects\DataFilters.TestObjects.csproj" />

@@ -415,8 +415,8 @@ namespace DataFilters.UnitTests
 
             // Assert
             actual.Should()
-                .NotBeSameAs(expected).And
-                .Be(expected);
+                  .NotBeSameAs(expected).And
+                  .Be(expected);
         }
 
         [Fact]

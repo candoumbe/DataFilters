@@ -1,6 +1,8 @@
-﻿using DataFilters.Grammar.Exceptions;
+﻿using DataFilters.Converters;
+using DataFilters.Grammar.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -293,6 +295,7 @@ namespace DataFilters
             {
                 throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
             }
+
             Expression<Func<T, bool>> filterExpression = null;
 
             switch (filter)
@@ -325,17 +328,9 @@ namespace DataFilters
                     {
                         Expression<Func<T, bool>> expression = null;
                         // local function that can combine two expressions using either AND or OR operators
-                        Func<Expression<Func<T, bool>>, Expression<Func<T, bool>>, Expression<Func<T, bool>>> expressionMerger;
-
-                        if (dcf.Logic == FilterLogic.And)
-                        {
-                            expressionMerger = (first, second) => first.AndAlso(second);
-                        }
-                        else
-                        {
-                            expressionMerger = (first, second) => first.OrElse(second);
-                        }
-
+                        Func<Expression<Func<T, bool>>, Expression<Func<T, bool>>, Expression<Func<T, bool>>> expressionMerger = dcf.Logic == FilterLogic.And
+                            ? ((first, second) => first.AndAlso(second))
+                            : ((first, second) => first.OrElse(second));
                         foreach (IFilter item in dcf.Filters)
                         {
                             expression = expression == null
