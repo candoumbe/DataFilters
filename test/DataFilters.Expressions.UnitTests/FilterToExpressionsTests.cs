@@ -665,9 +665,7 @@ namespace DataFilters.UnitTests
         public void ToExpressionThrowsArgumentNullExceptionWhenParameterIsNull()
         {
             // Act
-#pragma warning disable IDE0039 // Utiliser une fonction locale
-            Action action = () => ((IFilter)null).ToExpression<TestObjects.Person>();
-#pragma warning restore IDE0039 // Utiliser une fonction locale
+            Action action = () => ((IFilter)null).ToExpression<Person>();
 
             // Assert
             action.Should().Throw<ArgumentNullException>().Which
