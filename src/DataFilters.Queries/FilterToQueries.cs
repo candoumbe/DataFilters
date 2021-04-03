@@ -40,7 +40,7 @@ namespace DataFilters
                             case FilterOperator.LessThan:
                                 clauseOperator = ClauseOperator.LessThan;
                                 break;
-                             case FilterOperator.LessThanOrEqualTo:
+                            case FilterOperator.LessThanOrEqualTo:
                                 clauseOperator = ClauseOperator.LessThanOrEqualTo;
                                 break;
                             case FilterOperator.GreaterThan:
@@ -57,13 +57,9 @@ namespace DataFilters
                                 {
                                     value = $"{value}%";
                                 }
-                                else if (f.Operator == FilterOperator.EndsWith)
-                                {
-                                    value = $"%{value}";
-                                }
                                 else
                                 {
-                                    value = $"%{value}%";
+                                    value = f.Operator == FilterOperator.EndsWith ? $"%{value}" : $"%{value}%";
                                 }
                                 break;
                             case FilterOperator.NotStartsWith:

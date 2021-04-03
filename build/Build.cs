@@ -10,21 +10,21 @@ using Nuke.Common.Tools.Coverlet;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.ReportGenerator;
+using Nuke.Common.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
-using static Nuke.Common.ChangeLog.ChangelogTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
-using Nuke.Common.Utilities;
+using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
 [AzurePipelines(
     suffix: "release",
@@ -76,6 +76,7 @@ using Nuke.Common.Utilities;
 )]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
+[DotNetVerbosityMapping]
 public class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.Compile);
@@ -139,7 +140,10 @@ public class Build : NukeBuild
                 .SetIgnoreFailedSources(true)
                 .SetDisableParallel(false)
                 .When(IsLocalBuild && Interactive, _ => _.SetProperty("NugetInteractive", IsLocalBuild && Interactive))
+
             );
+
+            DotNet("tool restore");
         });
 
     public Target Compile => _ => _
@@ -175,22 +179,19 @@ public class Build : NukeBuild
                 .EnableUseSourceLink()
                 .SetNoBuild(InvokedTargets.Contains(Compile))
                 .SetResultsDirectory(TestResultDirectory)
-                .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+                .SetCoverletOutputFormat(CoverletOutputFormat.lcov)
                 .AddProperty("ExcludeByAttribute", "Obsolete")
                 .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
-                    .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting
-                        .SetFramework(framework)
-                        .SetLogger($"trx;LogFileName={project.Name}.{framework}.trx")
-                        .SetCollectCoverage(true)
-                        .SetCoverletOutput(TestResultDirectory / $"{project.Name}.xml"))
-                    )
-            );
+                                                               .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting.SetFramework(framework)
+                                                                                                                                          .SetLogger($"trx;LogFileName={project.Name}.trx")
+                                                                                                                                          .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml")))
+                );
 
             TestResultDirectory.GlobFiles("*.trx")
-                               .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
-                                                                                             title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                                                             files: new string[] { testFileResult })
-            );
+                                    .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
+                                                                                                    title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
+                                                                                                    files: new string[] { testFileResult })
+                    );
 
             // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
             ReportGenerator(_ => _
@@ -199,10 +200,11 @@ public class Build : NukeBuild
                 .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
                 .SetTargetDirectory(CoverageReportDirectory)
                 .SetHistoryDirectory(CoverageReportHistoryDirectory)
+                .SetTag(GitRepository.Commit)
             );
 
             TestResultDirectory.GlobFiles("*.xml")
-                               .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
+                            .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
                                                                                     summaryFile: file,
                                                                                     reportDirectory: CoverageReportDirectory));
         });
@@ -373,7 +375,7 @@ public class Build : NukeBuild
 
         Git($"branch -D {GitRepository.Branch}");
 
-        Git($"push origin -- follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+        Git($"push origin --follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
     }
 
     private void FinishFeature()
@@ -396,7 +398,7 @@ public class Build : NukeBuild
 
     public Target Publish => _ => _
         .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
-        .DependsOn(Clean, Tests, Pack)
+        .DependsOn(Tests, Pack)
         .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
         .Requires(() => !NugetApiKey.IsNullOrEmpty())
         .Requires(() => GitHasCleanWorkingCopy())
@@ -422,7 +424,7 @@ public class Build : NukeBuild
                     completeOnFailure: true);
             }
 
-            PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg"));
-            PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg"));
+            PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg"));
+            PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg"));
         });
 }

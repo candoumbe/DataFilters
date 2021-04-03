@@ -42,7 +42,7 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(sortString), "cannot be be null or whitespace only");
             }
 
-            SortValidator validator = new SortValidator();
+            SortValidator validator = new();
             ValidationResult validationResult = validator.Validate(sortString);
 
             if (!validationResult.IsValid)
@@ -193,7 +193,8 @@ namespace System
                                 ConstantValueExpression ce => (ce, input.Included),
                                 DateTimeExpression { Time: null } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"), input.Included),
                                 DateTimeExpression { Date: null } dateTime => (new ConstantValueExpression($"{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
-                                DateTimeExpression dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}"), input.Included),
+                                DateTimeExpression { Date: var date, Time: { Offset: null } } dateTime => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}"), input.Included),
+                                DateTimeExpression { Date: var date, Time: { Offset: var offset } } dateTime => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}{offset}"), input.Included),
                                 DateExpression date => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
                                 TimeExpression time => (new ConstantValueExpression($"{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
@@ -244,35 +245,37 @@ namespace System
 
             if (!isEmptyQueryString)
             {
-                FilterTokenizer tokenizer = new FilterTokenizer();
+                FilterTokenizer tokenizer = new();
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
                 (PropertyNameExpression Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
 
                 if (expressions.Once())
                 {
-                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                         .SingleOrDefault(x => x.CanRead && x.Name == expressions.Single().Property.Name);
+                    (PropertyNameExpression property, FilterExpression expression) = expressions[0];
 
-                    if (pi != null)
+                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                                               .SingleOrDefault(x => x.CanRead && x.Name == property.Name);
+
+                    if (pi is not null)
                     {
                         TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                        filter = ConvertExpressionToFilter(expressions.Single().Expression, pi.Name, tc);
+                        filter = ConvertExpressionToFilter(expression, pi.Name, tc);
                     }
                 }
                 else
                 {
                     IList<IFilter> filters = new List<IFilter>();
 
-                    foreach ((PropertyNameExpression property, FilterExpression Expression) in expressions)
+                    foreach ((PropertyNameExpression property, FilterExpression expression) in expressions)
                     {
                         PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                             .SingleOrDefault(x => x.CanRead && x.Name == property.Name);
+                                                   .SingleOrDefault(x => x.CanRead && x.Name == property.Name);
 
-                        if (pi != null)
+                        if (pi is not null)
                         {
                             TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                            filters.Add(ConvertExpressionToFilter(Expression, property.Name, tc));
+                            filters.Add(ConvertExpressionToFilter(expression, property.Name, tc));
                         }
                     }
 

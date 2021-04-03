@@ -26,7 +26,7 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="max">Upper bound of the interval</param>
         /// <exception cref="ArgumentNullException">if both <paramref name="min"/> and <paramref name="max"/> are <c>null</c>.</exception>
         /// <exception cref="BoundariesTypeMismatchException">if <paramref name="min"/> and <paramref name="max"/> types are not "compatible".</exception>
-        /// <exception cref="IncorrectBoundaryException">if 
+        /// <exception cref="IncorrectBoundaryException">if
         /// <list type="bullet">
         ///     <item>both<paramref name="min"/> and <paramref name="max"/> types are <see cref="AsteriskExpression"/>.</item>
         ///     <item>both<paramref name="min"/> is <see cref="AsteriskExpression"/> and <paramref name="max"/> <c>null</c>.</item>
@@ -122,5 +122,11 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         public override string ToString() => this.Jsonify();
+
+        public void Deconstruct(out BoundaryExpression min, out BoundaryExpression max)
+        {
+            min = Min;
+            max = Max;
+        }
     }
 }

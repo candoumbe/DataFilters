@@ -264,7 +264,7 @@ namespace DataFilters.UnitTests
                 };
 
                 {
-                    Filter first = new Filter("Property", EqualTo, "value");
+                    Filter first = new("Property", EqualTo, "value");
                     yield return new object[]
                     {
                         first,
@@ -305,11 +305,11 @@ namespace DataFilters.UnitTests
         {
             // Act
 
-            Regex validFieldNameRegex = new Regex(Filter.ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+            Regex validFieldNameRegex = new(Filter.ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
             Prop.ForAll<string, FilterOperator, object>((field, @operator, value) =>
             {
-                Lazy<Filter> filterCtor = new Lazy<Filter>(() => new Filter(field, @operator, value));
+                Lazy<Filter> filterCtor = new(() => new Filter(field, @operator, value));
 
                 // Assertion
                 Prop.Throws<ArgumentOutOfRangeException, Filter>(filterCtor).When(field is not null && !validFieldNameRegex.IsMatch(field))

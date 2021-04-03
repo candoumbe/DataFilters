@@ -7,7 +7,7 @@ namespace DataFilters.Grammar.Syntax
     /// </summary>
     public class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
     {
-        public string Value { get; }
+        public object Value { get; }
 
         /// <summary>
         /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
@@ -15,27 +15,31 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="value"></param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
-        public ConstantValueExpression(string value)
+        public ConstantValueExpression(object value)
         {
-            if (value is null)
+            Value = value switch
             {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (value.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)} cannot be empty");
-            }
-
-            Value = value;
+                null => throw new ArgumentNullException(nameof(value)),
+                short shortValue => shortValue,
+                string stringValue when stringValue.Length == 0 => throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(value)} cannot be empty"),
+                string stringValue => stringValue,
+                DateTime dateTimeValue => dateTimeValue,
+                DateTimeOffset dateTimeOffsetValue => dateTimeOffsetValue,
+                Guid guidValue => guidValue,
+                long longValue => longValue,
+                bool boolValue => boolValue,
+                byte byteValue => byteValue,
+                int intValue => intValue,
+                _ => throw new ArgumentOutOfRangeException(nameof(value), $"Unsupported type '{value.GetType()}' for {nameof(ConstantValueExpression)}")
+            };
         }
 
-        public bool Equals(ConstantValueExpression other) => Value == other?.Value;
+        public bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
 
         public override bool Equals(object obj) => Equals(obj as ConstantValueExpression);
 
         public override int GetHashCode() => Value.GetHashCode();
 
-        public override string ToString() => $"{GetType().Name} : {nameof(Value)} -> {Value}";
+        public override string ToString() => this.Jsonify();
     }
 }

@@ -1,14 +1,23 @@
-﻿using DataFilters.TestObjects;
+﻿
+using DataFilters.TestObjects;
+
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Newtonsoft.Json;
+
+using FsCheck;
+
+using NodaTime;
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
+
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
@@ -630,18 +639,18 @@ namespace DataFilters.UnitTests
         /// <summary>
         /// Tests various filters
         /// </summary>
-        /// <param name="superheroes">Collections of </param>
+        /// <param name="elements">Collections of </param>
         /// <param name="filter">filter under test</param>
         /// <param name="expression">Expression the filter should match once built</param>
-        private void Build(IEnumerable<SuperHero> superheroes, IFilter filter, Expression<Func<SuperHero, bool>> expression)
+        private void Build<T>(IEnumerable<T> elements, IFilter filter, Expression<Func<T, bool>> expression)
         {
-            _output.WriteLine($"Filtering {JsonConvert.SerializeObject(superheroes)}");
+            _output.WriteLine($"Filtering {elements.Jsonify()}");
             _output.WriteLine($"Filter under test : {filter}");
             _output.WriteLine($"Reference expression : {expression.Body}");
 
             // Act
-            Expression<Func<SuperHero, bool>> filterExpression = filter.ToExpression<SuperHero>();
-            IEnumerable<SuperHero> filteredResult = superheroes
+            Expression<Func<T, bool>> filterExpression = filter.ToExpression<T>();
+            IEnumerable<T> filteredResult = elements
                 .Where(filterExpression.Compile())
                 .ToList();
             _output.WriteLine($"Current expression : {filterExpression.Body}");
@@ -649,16 +658,14 @@ namespace DataFilters.UnitTests
             // Assert
             filteredResult.Should()
                           .NotBeNull().And
-                          .BeEquivalentTo(superheroes?.Where(expression.Compile()));
+                          .BeEquivalentTo(elements?.Where(expression.Compile()));
         }
 
         [Fact]
         public void ToExpressionThrowsArgumentNullExceptionWhenParameterIsNull()
         {
             // Act
-#pragma warning disable IDE0039 // Utiliser une fonction locale
             Action action = () => ((IFilter)null).ToExpression<Person>();
-#pragma warning restore IDE0039 // Utiliser une fonction locale
 
             // Assert
             action.Should().Throw<ArgumentNullException>().Which
@@ -726,6 +733,17 @@ namespace DataFilters.UnitTests
                     new Filter(field: nameof(Appointment.Date), GreaterThanOrEqual, 23.July(2012)),
                     (Expression<Func<Appointment, bool>>)(app => app.Date >= 23.July(2012))
                 };
+
+                yield return new object[]
+                {
+                    new []
+                    {
+                        new Appointment { Name = "Medical appointment", Date = 12.April(2013).Add(14.Hours(1.Hours()) )},
+                        new Appointment { Name = "Medical appointment", Date = 12.April(2013).Add(14.Hours()) }
+                    },
+                    new Filter(field : nameof(Appointment.Date), EqualTo, 12.April(2013).Add(14.Hours(1.Hours()))),
+                    (Expression<Func<Appointment, bool>>)(app => app.Date == 12.April(2013).Add(14.Hours(1.Hours())))
+                };
             }
         }
 
@@ -733,21 +751,53 @@ namespace DataFilters.UnitTests
         [MemberData(nameof(DateTimeOffsetFilterCases))]
         public void Filter_DateTimeOffset(IEnumerable<Appointment> appointments, IFilter filter, Expression<Func<Appointment, bool>> expression)
         {
-            _output.WriteLine($"Filtering {JsonConvert.SerializeObject(appointments)}");
+            _output.WriteLine($"Filtering {appointments.Jsonify()}");
             _output.WriteLine($"Filter under test : {filter}");
             _output.WriteLine($"Reference expression : {expression.Body}");
 
             // Act
             Expression<Func<Appointment, bool>> buildResult = filter.ToExpression<Appointment>();
-            IEnumerable<Appointment> filteredResult = appointments
-                .Where(buildResult.Compile())
-                .ToList();
+            IEnumerable<Appointment> filteredResult = appointments.Where(buildResult.Compile())
+                                                                  .ToArray();
             _output.WriteLine($"Current expression : {buildResult.Body}");
 
             // Assert
+            _output.WriteLine($"Filtered result : {filteredResult.Jsonify()}");
             filteredResult.Should()
-                .NotBeNull()
-                .And.BeEquivalentTo(appointments?.Where(expression.Compile()));
+                          .NotBeNull().And
+                          .BeEquivalentTo(appointments?.Where(expression.Compile()));
+        }
+
+        public static IEnumerable<object[]> LocalDateFilterCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new[]
+                    {
+                        new NodaTimeClass{ LocalDate = LocalDate.FromDateTime(19.January(2019)) },
+                        new NodaTimeClass{ LocalDate = LocalDate.FromDateTime(21.January(2019)) }
+                    },
+                    new Filter(nameof(NodaTimeClass.LocalDate), EqualTo, LocalDate.FromDateTime(19.January(2019))),
+                    (Expression<Func<NodaTimeClass, bool>>)(x => x.LocalDate == LocalDate.FromDateTime(19.January(2019)))
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(LocalDateFilterCases))]
+        public void Filter_LocalDate(IEnumerable<NodaTimeClass> elements, IFilter filter, Expression<Func<NodaTimeClass, bool>> expression)
+            => Build(elements, filter, expression);
+
+        [ExcludeFromCodeCoverage]
+        public class NodaTimeClass
+        {
+            public LocalDate LocalDate { get; set; }
+
+            public LocalDateTime LocalDateTime { get; set; }
+
+            public Instant Instant { get; set; }
         }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using DataFilters.Grammar.Exceptions;
 using DataFilters.Grammar.Syntax;
-
+using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-
+using FsCheck;
+using FsCheck.Xunit;
 using System;
 using System.Collections.Generic;
 
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -154,11 +154,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void CtorLogic(BoundaryExpression min, BoundaryExpression max, RangeExpression expected, string reason)
         {
             // Act
-            RangeExpression actual = new RangeExpression(min, max);
+            RangeExpression actual = new(min, max);
 
             // Assert
             actual.Should()
-                .Be(expected, reason);
+                  .Be(expected, reason);
         }
 
         public static IEnumerable<object[]> EqualCases
@@ -204,6 +204,18 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     true,
                     $"comparing two {nameof(RangeExpression)} instances with same {nameof(DateTimeExpression)} min and max"
                 };
+
+                {
+                    RangeExpression range = new(min: new BoundaryExpression(new ConstantValueExpression("2012-10-19T15:03:45Z"), included: false),
+                                                max: new BoundaryExpression(new ConstantValueExpression("2012-10-19T15:30:45+01:00"), included: false));
+                    yield return new object[]
+                    {
+                        range,
+                        range,
+                        true,
+                        "Comparing two ranges"
+                    };
+                }
             }
         }
 
@@ -231,6 +243,70 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 actualHashCode.Should()
                     .NotBe(other?.GetHashCode(), reason);
             }
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Ctor_should_converts_Min_DateTimeExpression_to_DateExpression_when_TimeExpression_is_not_provided(DateExpression date, bool included)
+        {
+            // Arrange
+            Lazy<RangeExpression> lazyRangeExpression = new(() =>
+            {
+                DateTimeExpression dateTimeExpression = new(date);
+
+                return new(min: new BoundaryExpression(dateTimeExpression, included));
+            });
+
+            return Prop.Throws<ArgumentOutOfRangeException, RangeExpression>(lazyRangeExpression).When(date.Day < 0 || date.Month < 0 || date.Year < 0)
+                .Or(Prop.Throws<ArgumentNullException, RangeExpression>(lazyRangeExpression).When(date is null))
+                .Or(lazyRangeExpression.Value.Min.Expression is DateExpression dateExpression && dateExpression.Equals(date));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Ctor_should_converts_Min_DateTimeExpression_to_TimeExpression_when_DateExpression_is_not_provided(TimeExpression time, bool included)
+        {
+            // Arrange
+            Lazy<RangeExpression> lazyRangeExpression = new(() =>
+            {
+                DateTimeExpression dateTimeExpression = new(time);
+
+                return new(min: new BoundaryExpression(dateTimeExpression, included));
+            });
+
+            return Prop.Throws<ArgumentOutOfRangeException, RangeExpression>(lazyRangeExpression).When(time.Hours < 0 || time.Minutes < 0 || time.Seconds < 0)
+                .Or(Prop.Throws<ArgumentNullException, RangeExpression>(lazyRangeExpression).When(time is null))
+                    .Or(lazyRangeExpression.Value.Min.Expression is TimeExpression timeExpression && timeExpression.Equals(time));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Ctor_should_converts_Max_DateTimeExpression_to_DateExpression_when_TimeExpression_is_not_provided(DateExpression date, bool included)
+        {
+            // Arrange
+            Lazy<RangeExpression> lazyRangeExpression = new(() =>
+            {
+                DateTimeExpression dateTimeExpression = new(date);
+
+                return new(max: new BoundaryExpression(dateTimeExpression, included));
+            });
+
+            return Prop.Throws<ArgumentOutOfRangeException, RangeExpression>(lazyRangeExpression).When(date.Day < 0 || date.Month < 0 || date.Year < 0)
+                    .Or(Prop.Throws<ArgumentNullException, RangeExpression>(lazyRangeExpression).When(date is null))
+                    .Or(lazyRangeExpression.Value.Max.Expression is DateExpression dateExpression && dateExpression.Equals(date));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Ctor_should_converts_Max_DateTimeExpression_to_TimeExpression_when_DateExpression_is_not_provided(TimeExpression time, bool included)
+        {
+            // Arrange
+            Lazy<RangeExpression> lazyRangeExpression = new(() =>
+            {
+                DateTimeExpression dateTimeExpression = new(time);
+
+                return new(max: new BoundaryExpression(dateTimeExpression, included));
+            });
+
+            return Prop.Throws<ArgumentOutOfRangeException, RangeExpression>(lazyRangeExpression).When(time.Hours < 0 || time.Minutes < 0 || time.Seconds < 0)
+                    .Or(Prop.Throws<ArgumentNullException, RangeExpression>(lazyRangeExpression).When(time is null))
+                .Or(lazyRangeExpression.Value.Max.Expression is TimeExpression timeExpression && timeExpression.Equals(time));
         }
     }
 }

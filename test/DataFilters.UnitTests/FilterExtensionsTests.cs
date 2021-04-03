@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using DataFilters.TestObjects;
+using FluentAssertions;
+using FluentAssertions.Common;
 using FluentAssertions.Extensions;
 using System;
 using System.Collections.Generic;
@@ -14,21 +16,6 @@ namespace DataFilters.UnitTests
         private readonly ITestOutputHelper _outputHelper;
 
         public FilterExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
-        public class Person
-        {
-            public string Firstname { get; set; }
-
-            public string Lastname { get; set; }
-
-            public DateTime BirthDate { get; set; }
-
-            public string Nickname { get; set; }
-
-            public int Height { get; set; }
-
-            public string BattleCry { get; set; }
-        }
 
         public static IEnumerable<object[]> ToFilterCases
         {
@@ -400,6 +387,20 @@ namespace DataFilters.UnitTests
                         }
                     }
                 };
+
+                yield return new object[]
+                {
+                    "DateTimeWithOffset=]2016-10-18T18:00:00Z TO 2016-10-18T23:00:00-02:00[",
+                    new MultiFilter
+                    {
+                        Logic = And,
+                        Filters = new IFilter[]
+                        {
+                            new Filter("DateTimeWithOffset", GreaterThan, 18.October(2016).Add(18.Hours()).ToDateTimeOffset()),
+                            new Filter("DateTimeWithOffset", FilterOperator.LessThan,  18.October(2016).Add(23.Hours()).ToDateTimeOffset(-2.Hours()))
+                        }
+                    }
+                };
             }
         }
 
@@ -410,12 +411,12 @@ namespace DataFilters.UnitTests
             _outputHelper.WriteLine($"{nameof(filter)} : '{filter}'");
 
             // Act
-            IFilter actual = filter.ToFilter<Person>();
+            IFilter actual = filter.ToFilter<SuperHero>();
 
             // Assert
             actual.Should()
-                .NotBeSameAs(expected).And
-                .Be(expected);
+                  .NotBeSameAs(expected).And
+                  .Be(expected);
         }
 
         [Fact]

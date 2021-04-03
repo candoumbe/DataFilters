@@ -1,7 +1,9 @@
 ﻿using DataFilters.Grammar.Syntax;
 
 using FluentAssertions;
-
+using FsCheck;
+using FsCheck.Xunit;
+using System;
 using System.Collections.Generic;
 
 using Xunit;
@@ -27,7 +29,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 };
 
                 {
-                    BoundaryExpression instance = new BoundaryExpression(new ConstantValueExpression("10"), included: true);
+                    BoundaryExpression instance = new(new ConstantValueExpression("10"), included: true);
                     yield return new object[]
                     {
                         instance,
@@ -81,5 +83,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                               .Be(second?.GetHashCode(), reason);
             }
         }
+
+        [Property]
+        public Property Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included) => Prop.Throws<ArgumentNullException, BoundaryExpression>(new Lazy<BoundaryExpression>(() => new BoundaryExpression(null, included)));
     }
 }

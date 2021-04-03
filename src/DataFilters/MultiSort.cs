@@ -11,7 +11,7 @@ namespace DataFilters
 
         private readonly Sort<T>[] _sorts;
 
-        private static readonly ArrayEqualityComparer<Sort<T>> equalityComparer = new ArrayEqualityComparer<Sort<T>>();
+        private static readonly ArrayEqualityComparer<Sort<T>> equalityComparer = new();
 
         /// <summary>
         /// Builds a new <see cref="MultiSort{T}"/> instance

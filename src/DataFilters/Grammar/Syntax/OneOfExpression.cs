@@ -7,7 +7,7 @@ namespace DataFilters.Grammar.Syntax
 {
     public class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
     {
-        private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new ArrayEqualityComparer<FilterExpression>();
+        private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new();
 
         public IEnumerable<FilterExpression> Values => _values;
 

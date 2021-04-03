@@ -24,7 +24,7 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// alphabetical
         /// </summary>
-        Alpha,
+        Letter,
 
         /// <summary>
         /// Numeric value of some sort
