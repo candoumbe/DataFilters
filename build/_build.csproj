@@ -18,9 +18,4 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>    
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageDownload Include="CSharpToTypeScript.CLITool" Version="[2.5.1]" />
-  </ItemGroup>
-
 </Project>

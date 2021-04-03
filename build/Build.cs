@@ -94,10 +94,6 @@ public class Build : NukeBuild
 
     [Partition(3)] public readonly Partition TestPartition;
 
-    [PackageExecutable(packageId: "CSharpToTypeScript.CLITool",
-                       packageExecutable: "CSharpToTypeScript.CLITool.dll")]
-    public readonly Tool Csharp2Typescript;
-
     public AbsolutePath SourceDirectory => RootDirectory / "src";
 
     public AbsolutePath TestDirectory => RootDirectory / "test";
@@ -204,6 +200,7 @@ public class Build : NukeBuild
                 .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
                 .SetTargetDirectory(CoverageReportDirectory)
                 .SetHistoryDirectory(CoverageReportHistoryDirectory)
+                .SetTag(GitRepository.Commit)
             );
 
             TestResultDirectory.GlobFiles("*.xml")
@@ -429,25 +426,5 @@ public class Build : NukeBuild
 
             PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg"));
             PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg"));
-        });
-
-    public Target TypescriptModels => _ => _
-        .Description("Generates d.ts files from DataFilters' core classes using CSharpToTypeScript.CLITool tool")
-        .DependsOn(Compile)
-        .Executes(() =>
-        {
-            Project project = Solution.GetProject("DataFilters");
-
-            AbsolutePath[] files = project.Directory.GlobFiles("*.cs")
-                                                    .ToArray();
-
-            Info($"Converting '{files.Length}' file(s) to typescript");
-            files.ForEach(file =>
-            {
-                Csharp2Typescript($"-ts 4 {file}");
-                Info($"{file}' converted");
-            });
-
-            Info($"Conversion successfull");
         });
 }
