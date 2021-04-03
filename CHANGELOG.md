@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed [`ConstantValueExpresssion.Value`](/src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs) type from `string` to `object` [BREAKING]
 - Added support for [duration](/src/DataFilters/Grammar/Syntax/DurationExpression.cs) expressions
 - Removed runtime dependency to [Candoumbe.MiscUtilities](https://www.nuget.org/packages/Candoumbe.MiscUtilities/) package [BREAKING]
+- Moved classes from `DataFilters.Converters` to DataFilters.Serizalization` namespace.
+- Added [`Kind`](/src/DataFilters/Grammar/Syntax/DateTimeExpressionKind.cs) property to specify the [`DateTimeExpression`](/src/DataFilters/Grammar/Syntax/DateTimeExpression.cs) 
 
 ## [0.3.2] / 2021-01-31
 - Fixed parsing of sort expressions where a sub property name was specified.

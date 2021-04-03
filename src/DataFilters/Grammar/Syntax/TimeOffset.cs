@@ -2,6 +2,7 @@ using System;
 
 namespace DataFilters.Grammar.Syntax
 {
+
 #if NETSTANDARD2_1 || NET5_0
     public record TimeOffset
     {
@@ -14,7 +15,13 @@ namespace DataFilters.Grammar.Syntax
             Minutes = minutes;
         }
 
-        public override string ToString() => $"{{{(Hours < 0 ? "-" : string.Empty)}{Hours:D2}:{Minutes:D2}}}";
+        public override string ToString() => (Hours, Minutes) switch
+        {
+            (0, 0 ) => "Z",
+            ( > 0, >= 0) => $"+{Hours:D2}:{Minutes:D2}",
+            ( <= 0, < 0) => $"-{Math.Abs(Hours):D2}:{Math.Abs(Minutes):D2}",
+            _ => $"{Hours:D2}:{Minutes:D2}"
+        };
     } 
 #elif NETSTANDARD1_3 || NETSTANDARD2_0
     public class TimeOffset : IEquatable<TimeOffset>
@@ -29,7 +36,13 @@ namespace DataFilters.Grammar.Syntax
             Minutes = minutes;
         }
 
-        public override string ToString() => $"{{{Hours:D2}:{Minutes:D2}}}";
+        public override string ToString() => (Hours, Minutes) switch
+        {
+            (0, 0) => "Z",
+            ( > 0, >= 0) => $"+{Hours:D2}:{Minutes:D2}",
+            ( <= 0, < 0) => $"-{Math.Abs(Hours):D2}:{Math.Abs(Minutes):D2}",
+            _ => $"{Hours:D2}:{Minutes:D2}"
+        };
 
         public override bool Equals(object obj) => Equals(obj as TimeOffset);
 

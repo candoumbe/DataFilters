@@ -844,7 +844,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new DateTimeExpression(
                         new DateExpression(year : 2019, month: 01, day: 12),
                         new TimeExpression(hours: 14, minutes:33)
-                    )
+                    ),
+                    DateTimeExpressionKind.Unspecified
                 };
 
                 yield return new object[]
@@ -853,7 +854,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new DateTimeExpression(
                         new DateExpression(year : 2019, month: 01, day: 12),
                         new TimeExpression(hours: 14, minutes:33)
-                    )
+                    ),
+                    DateTimeExpressionKind.Unspecified
                 };
 
                 yield return new object[]
@@ -862,14 +864,25 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new DateTimeExpression(
                         new DateExpression(year : 2019, month: 01, day: 12),
                         new TimeExpression(hours: 14, minutes:33, offset: new(hours : 1, minutes: 25))
-                    )
+                    ),
+                    DateTimeExpressionKind.Utc
+                };
+
+                yield return new object[]
+                {
+                    "2019-01-12T14:33:00Z",
+                    new DateTimeExpression(
+                        new DateExpression(year : 2019, month: 01, day: 12),
+                        new TimeExpression(hours: 14, minutes:33, offset: new(hours : 0, minutes: 0))
+                    ),
+                    DateTimeExpressionKind.Utc
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(DateAndTimeCases))]
-        public void CanParseDateAndTime(string input, DateTimeExpression expected)
+        public void CanParseDateAndTime(string input, DateTimeExpression expected, DateTimeExpressionKind expectedKind)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -880,6 +893,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
             // Assert
             AssertThatCanParse(actual, expected);
+            actual.Kind.Should()
+                       .Be(expectedKind);
         }
 
         public static IEnumerable<object[]> DateCases
