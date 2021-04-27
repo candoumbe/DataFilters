@@ -1,6 +1,7 @@
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AzurePipelines;
+using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
@@ -26,6 +27,33 @@ using static Nuke.Common.Tools.Git.GitTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
+[GitHubActions(
+    "continuous",
+    GitHubActionsImage.WindowsLatest,
+    OnPushBranchesIgnore = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
+    OnPullRequestBranches = new[] { DevelopBranch },
+    PublishArtifacts = true,
+    InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
+    OnPullRequestExcludePaths = new[] {
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md"
+    }
+)]
+[GitHubActions(
+    "deployment",
+    GitHubActionsImage.WindowsLatest,
+    OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
+    InvokedTargets = new[] { nameof(Publish) },
+    ImportGitHubTokenAs = nameof(GitHubToken),
+    PublishArtifacts = true,
+    ImportSecrets = new[] { nameof(NugetApiKey) },
+    OnPullRequestExcludePaths = new [] {
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md"
+    }
+)]
 [AzurePipelines(
     suffix: "release",
     AzurePipelinesImage.WindowsLatest,
@@ -87,10 +115,16 @@ public class Build : NukeBuild
     [Parameter("Indicates wheter to restore nuget in interactive mode - Default is false")]
     public readonly bool Interactive = false;
 
+    [Parameter]
+    public readonly string GitHubToken;
+
     [Required] [Solution] public readonly Solution Solution;
     [Required] [GitRepository] public readonly GitRepository GitRepository;
     [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
+
+    [Parameter("Deterministic builds are important as they enable verification that the resulting binary was built from the specified source and provides traceability (Default : IsServerBuild). ")]
+    public bool DeterministicBuild = false;
 
     [Partition(3)] public readonly Partition TestPartition;
 
@@ -157,7 +191,7 @@ public class Build : NukeBuild
                 .SetAssemblyVersion(GitVersion.AssemblySemVer)
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
                 .SetInformationalVersion(GitVersion.InformationalVersion)
-                );
+            );
         });
 
     public Target Tests => _ => _
@@ -228,6 +262,8 @@ public class Build : NukeBuild
                 .SetVersion(GitVersion.NuGetVersion)
                 .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
                 .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
+                .SetRepositoryType("git")
+                .SetRepositoryUrl(GitRepository.HttpsUrl)
             );
         });
 

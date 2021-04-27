@@ -263,3 +263,4 @@ __pycache__/
 # VS code
 .vscode/
 output/
+/.nuke/temp
