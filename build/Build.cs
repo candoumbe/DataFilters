@@ -37,7 +37,8 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
     OnPullRequestExcludePaths = new[] {
         "docs/*",
         "README.md",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "LICENSE"
     }
 )]
 [GitHubActions(
@@ -51,7 +52,8 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
     OnPullRequestExcludePaths = new [] {
         "docs/*",
         "README.md",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "LICENSE"
     }
 )]
 [AzurePipelines(
@@ -66,7 +68,8 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
     {
         "docs/*",
         "README.md",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "LICENSE"
     }
 )]
 [AzurePipelines(
@@ -141,6 +144,8 @@ public class Build : NukeBuild
     public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
 
     public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "coverage-history";
+
+    private AbsolutePath LicenseFile => RootDirectory / "LICENSE";
 
     public const string MainBranchName = "main";
 
