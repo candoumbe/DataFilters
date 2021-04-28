@@ -3,8 +3,9 @@
     <LangVersion>latest</LangVersion>
     <Authors>Cyrille NDOUMBE</Authors>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://dev.azure.com/candoumbe/DataFilters</RepositoryUrl>
+    <RepositoryUrl>https://github.com/candoumbe/DataFilters</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PublishUrl>true</PublishUrl>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,13 +22,18 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
 
-  <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(TF_BUILD)' == 'true' ">
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
-  </ItemGroup>
+  <Choose>
+    <When Condition="'$(TF_BUILD)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">
+      <PropertyGroup>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+      </PropertyGroup>
+      <ItemGroup Condition="'$(IsTestProject)' == 'false'">
+        <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All" Condition="'$(TF_BUILD)' == 'true'"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
+      </ItemGroup>
+    </When>
+  </Choose>
 
   <!-- Set package references based on target framework -->
   <Choose>

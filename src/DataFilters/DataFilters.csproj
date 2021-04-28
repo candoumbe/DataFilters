@@ -29,7 +29,6 @@
   </Choose>
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.2.0" />
     <PackageReference Include="Superpower" Version="2.*" />
   </ItemGroup>
   <Choose>

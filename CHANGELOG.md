@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] / 2021-04-28
+- Fixes `FileNotFoundException` when calling `StringExtensions.ToFilter<T>` method after a fresh install.
+
 ## [0.4.0] / 2021-04-03
 - Added support for [offset](/src/DataFilters/Grammar/Syntax/TimeOffset.cs) when parsing [`TimeExpression`](/src/DataFilters/Grammar/Syntax/TimeExpression.cs)s
 - Changed [`ConstantValueExpresssion.Value`](/src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs) type from `string` to `object` [BREAKING]
@@ -38,7 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...HEAD
+[0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/candoumbe/DataFilters.git/compare/0.3.2...0.4.0
 [0.3.2]: https://github.com/candoumbe/DataFilters.git/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/candoumbe/DataFilters.git/compare/0.3.0...0.3.1
