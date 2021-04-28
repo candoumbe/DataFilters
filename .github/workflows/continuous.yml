@@ -28,6 +28,7 @@ on:
       - '!docs/*'
       - '!README.md'
       - '!CHANGELOG.md'
+      - '!LICENSE'
 
 jobs:
   windows-latest:
