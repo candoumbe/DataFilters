@@ -11,10 +11,16 @@ namespace DataFilters
     public class SortValidator : AbstractValidator<string>
     {
         private const string FieldPattern = Filter.ValidFieldNamePattern;
+        /// <summary>
+        /// Sort expression pattern.
+        /// </summary>
         public readonly static string Pattern = @$"^\s*(-|\+)?(({FieldPattern})\w*)+(\s*,\s*((-|\+)?(({FieldPattern})\w*)+)\s*)*$";
-        private readonly Regex _sortRegex = new Regex(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+        private readonly Regex _sortRegex = new(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
         private const char _separator = ',';
 
+        /// <summary>
+        /// Builds a new <see cref="SortValidator"/> instance.
+        /// </summary>
         public SortValidator() => RuleFor(x => x)
                 .Matches(Pattern)
                 .WithMessage(search =>

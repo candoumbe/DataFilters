@@ -11,7 +11,6 @@ namespace DataFilters.Converters
         /// <summary>
         /// Builds a new <see cref="CamelCaseEnumTypeConverter"/> instance
         /// </summary>
-
         public CamelCaseEnumTypeConverter() => NamingStrategy = new CamelCaseNamingStrategy();
     }
 }

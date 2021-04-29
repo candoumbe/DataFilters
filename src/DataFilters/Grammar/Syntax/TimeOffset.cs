@@ -2,7 +2,6 @@ using System;
 
 namespace DataFilters.Grammar.Syntax
 {
-
 #if NETSTANDARD2_1 || NET5_0
     public record TimeOffset
     {

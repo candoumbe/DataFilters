@@ -92,7 +92,7 @@ namespace DataFilters
 #else
         public override int GetHashCode()
         {
-            HashCode hash = new HashCode();
+            HashCode hash = new();
             hash.Add(Logic);
             foreach (IFilter filter in Filters)
             {

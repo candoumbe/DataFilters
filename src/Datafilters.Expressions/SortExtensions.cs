@@ -5,15 +5,27 @@ using System.Collections.Generic;
 
 namespace DataFilters
 {
+    /// <summary>
+    /// Extension methods for <see cref="ISort{T}"/> instances.
+    /// </summary>
     public static class SortExtensions
     {
         /// <summary>
-        /// Converts a 
+        /// Converts <paramref name="sort"/> to a collection of <see cref="OrderClause{T}"/>.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Type of element onto the sort expression will target.</typeparam>
         /// <param name="sort"></param>
-        /// <returns></returns>
+        /// <returns>a collection of <see cref="OrderClause{T}"/>s</returns>
         public static IEnumerable<OrderClause<T>> ToOrderClause<T>(this ISort<T> sort)
+        {
+            if (sort is not Sort<T> and not MultiSort<T>)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sort), "Unknown sort expression");
+            }
+
+            return BuildOrderClauses(sort);
+
+            static IEnumerable<OrderClause<T>> BuildOrderClauses(ISort<T> sort)
         {
             switch (sort)
             {
@@ -29,9 +41,8 @@ namespace DataFilters
                         }
                     }
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(sort), "Unknown sort expression");
             }
+        }
         }
     }
 }

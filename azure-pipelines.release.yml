@@ -23,7 +23,7 @@ trigger:
       - docs/*
       - README.md
       - CHANGELOG.md
-      - LICENSE
+      - LICENCE
 
 stages:
   - stage: windows_latest

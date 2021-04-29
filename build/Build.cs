@@ -69,7 +69,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
         "docs/*",
         "README.md",
         "CHANGELOG.md",
-        "LICENSE"
+        "LICENCE"
     }
 )]
 [AzurePipelines(
@@ -126,9 +126,6 @@ public class Build : NukeBuild
     [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
     [CI] public readonly AzurePipelines AzurePipelines;
 
-    [Parameter("Deterministic builds are important as they enable verification that the resulting binary was built from the specified source and provides traceability (Default : IsServerBuild). ")]
-    public bool DeterministicBuild = false;
-
     [Partition(3)] public readonly Partition TestPartition;
 
     public AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -144,8 +141,6 @@ public class Build : NukeBuild
     public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
 
     public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "coverage-history";
-
-    private AbsolutePath LicenseFile => RootDirectory / "LICENSE";
 
     public const string MainBranchName = "main";
 
@@ -182,7 +177,7 @@ public class Build : NukeBuild
 
             );
 
-            DotNet("tool restore");
+            DotNetToolRestore();
         });
 
     public Target Compile => _ => _
@@ -338,7 +333,9 @@ public class Build : NukeBuild
                             break;
                     }
 
+#pragma warning disable S2583 // Conditionally executed code should be reachable
                 } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
+#pragma warning restore S2583 // Conditionally executed code should be reachable
 
                 Info($"{EnvironmentInfo.NewLine}Good bye !");
             }

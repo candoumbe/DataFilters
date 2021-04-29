@@ -25,6 +25,7 @@ namespace DataFilters.UnitTests
 {
     [Feature("Filters")]
     [UnitTest]
+    [SuppressMessage("Blocker Code Smell", "S2699:Tests should include assertions", Justification = "Some tests calls a private method where the assertion is done.")]
     public class FilterToExpressionTests
     {
         private readonly ITestOutputHelper _output;
