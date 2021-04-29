@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) as extension point to configure the way to lookup 
+for a corresponding property
+- Added `ToFilter<T>(string, PropertyNameResolutionStrategy)`
 
 ## [0.4.1] / 2021-04-28
 - Fixes `FileNotFoundException` when calling `StringExtensions.ToFilter<T>` method after a fresh install.
@@ -27,7 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] / 2020-12-19
 - Added support for filtering over complex type collections by introducing sub property syntax
 - Moved `FilterExtensions.ToFilter<T>(this StringSegment)` method to `StringExtensions.ToFilter<T>(this StringSegment)` [BREAKING]
-- Moved `FilterExtensions.ToFilter<T>(this string)` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
+- Moved `FilterExtensions.ToFilter<T>(this string)
+- 
+` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
 - Changed `ConstantExpression` to `ConstantValueExpression` [BREAKING]
 - Changed subproperty syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
 - Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/RangeExpression.cs) with datetime values

@@ -15,7 +15,6 @@
         /// </summary>
         Local,
 
-
         /// <summary>
         /// Inidcates that the <see cref="DateTimeExpression"/> is a UTC datetime.
         /// </summary>

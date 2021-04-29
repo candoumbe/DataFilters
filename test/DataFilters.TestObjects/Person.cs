@@ -20,5 +20,4 @@ namespace DataFilters.TestObjects
 
         public DateTimeOffset DateTimeWithOffset { get; set; }
     }
-
 }

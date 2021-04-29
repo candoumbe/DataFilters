@@ -11,10 +11,11 @@
 
   <PropertyGroup>
     <IsTestProject>false</IsTestProject>
-    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests')) or $(MSBuildProjectName.EndsWith('.Test'))">true</IsTestProject>
+    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests'))">true</IsTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'false'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <!-- Embed source files that are not tracked by the source control manager in the PDB -->
@@ -52,7 +53,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.*"/>
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.5.0"/>
     <PackageReference Include="Optional" Version="4.0.0" />
     <PackageReference Include="Roslynator.Analyzers" Version="3.*">
       <PrivateAssets>all</PrivateAssets>

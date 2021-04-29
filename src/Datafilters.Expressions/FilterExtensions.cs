@@ -12,6 +12,9 @@ using static System.Linq.Expressions.Expression;
 
 namespace DataFilters
 {
+    /// <summary>
+    /// Extension methods for <see cref="IFilter"/> type.
+    /// </summary>
     public static class FilterExtensions
     {
         /// <summary>
@@ -36,7 +39,7 @@ namespace DataFilters
         };
 
         /// <summary>
-        /// Builds an <see cref="Expression{Func{T}}"/> tree from a <see cref="IFilter"/> instance.
+        /// Builds an <see cref="Expression{TDelegate}"/> tree from a <see cref="IFilter"/> instance.
         /// </summary>
         /// <typeparam name="T">Type of the </typeparam>
         /// <param name="filter"><see cref="IFilter"/> instance to build an <see cref="Expression{TDelegate}"/> tree from.</param>

@@ -28,7 +28,6 @@ namespace System.Linq
             {
                 throw new ArgumentNullException(nameof(orderBy));
             }
-            ParameterExpression param = Expression.Parameter(entries.ElementType);
 
             IEnumerable<OrderClause<T>> orders = orderBy.ToOrderClause();
             OrderClause<T> first = orders.First();

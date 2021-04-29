@@ -158,8 +158,6 @@ namespace DataFilters.Expressions.UnitTests
 
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Select(x => x.Name).SequenceEqual(new []{ "Green Arrow", "Flash", "Batman"}))
                 };
-
-
             }
         }
 

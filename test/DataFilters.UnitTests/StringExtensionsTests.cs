@@ -41,7 +41,7 @@ namespace DataFilters.UnitTests
 
             // Assert
             action.Should()
-                .ThrowExactly<InvalidSortExpression>(reason)
+                .ThrowExactly<InvalidSortExpressionException>(reason)
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null");
         }
 
