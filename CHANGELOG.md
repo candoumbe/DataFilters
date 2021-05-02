@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.5.0] / 2021-05-02
 - Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) as extension point to configure the way to lookup 
 for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issues/8))
 - Added `ToFilter<T>(string, PropertyNameResolutionStrategy)` overload
@@ -47,7 +49,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/candoumbe/DataFilters.git/compare/0.3.2...0.4.0
 [0.3.2]: https://github.com/candoumbe/DataFilters.git/compare/0.3.1...0.3.2
