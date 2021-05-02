@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) as extension point to configure the way to lookup 
-for a corresponding property
-- Added `ToFilter<T>(string, PropertyNameResolutionStrategy)`
+for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issues/8))
+- Added `ToFilter<T>(string, PropertyNameResolutionStrategy)` overload
+- Added `ToSort<T>(string, PropertyNameResolutionStrategy)` overload
 
 ## [0.4.1] / 2021-04-28
 - Fixes `FileNotFoundException` when calling `StringExtensions.ToFilter<T>` method after a fresh install.
