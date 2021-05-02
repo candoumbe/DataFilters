@@ -3,12 +3,23 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// A Date expression
+    /// A <see cref="FilterExpression"/> that holds a date.
     /// </summary>
-    public class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+    public sealed class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
     {
+        /// <summary>
+        /// Year part of the date
+        /// </summary>
         public int Year { get; }
+
+        /// <summary>
+        /// Month part of the date
+        /// </summary>
         public int Month { get; }
+
+        /// <summary>
+        /// Day part of the date
+        /// </summary>
         public int Day { get; }
 
         /// <summary>
@@ -18,8 +29,8 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="month"></param>
         /// <param name="day"></param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// either <paramref name="year"/>, <paramref name="month"/> or is less than 1
-        /// </exception
+        /// either <paramref name="year"/> / <paramref name="month"/> or <paramref name="day"/> is less than <c>1</c>.
+        /// </exception>
         public DateExpression(int year = 1, int month = 1, int day = 1)
         {
             if (year < 1)

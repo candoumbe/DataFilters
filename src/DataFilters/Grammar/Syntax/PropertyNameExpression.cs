@@ -3,9 +3,9 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// Expression that holds the name of a property a filter is build against
+    /// a <see cref="FilterExpression"/> that holds the name of a property a filter is build against.
     /// </summary>
-    public class PropertyNameExpression : FilterExpression, IEquatable<PropertyNameExpression>
+    public sealed class PropertyNameExpression : FilterExpression, IEquatable<PropertyNameExpression>
     {
         /// <summary>
         /// Name of the property a filter is applied to
@@ -33,12 +33,16 @@ namespace DataFilters.Grammar.Syntax
             Name = name;
         }
 
+        ///<inheritdoc/>
         public bool Equals(PropertyNameExpression other) => Name == other?.Name;
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as PropertyNameExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => Name.GetHashCode();
 
+        ///<inheritdoc/>
         public override string ToString() => $"{nameof(PropertyNameExpression)}[{Name}]";
     }
 }

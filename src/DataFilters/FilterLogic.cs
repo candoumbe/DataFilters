@@ -11,7 +11,7 @@
         And,
 
         /// <summary>
-        /// Logicial OR operatior will be applied 
+        /// Logicial OR operatior will be applied
         /// </summary>
         Or
     }

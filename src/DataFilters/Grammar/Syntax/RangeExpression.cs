@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// An expression that holds an interval between <see cref="Min"/> and <see cref="Max"/> values
+    /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
-    public class RangeExpression : FilterExpression, IEquatable<RangeExpression>
+    public sealed class RangeExpression : FilterExpression, IEquatable<RangeExpression>
     {
         /// <summary>
         /// Lower bound of the current instance
@@ -36,12 +36,12 @@ namespace DataFilters.Grammar.Syntax
         {
             if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
             {
-                throw new IncorrectBoundaryException(nameof(max), $"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
+                throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
             }
 
             if (min?.Expression is AsteriskExpression && max is null)
             {
-                throw new IncorrectBoundaryException(nameof(max), $"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
+                throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
             }
 
             if (min?.Expression is DateExpression && !(max is null || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
@@ -56,41 +56,43 @@ namespace DataFilters.Grammar.Syntax
 
             if (min is null && max is null)
             {
-                throw new ArgumentNullException($"{nameof(min)} or {nameof(max)} must not be null.");
+                throw new IncorrectBoundaryException($"{nameof(min)} or {nameof(max)} must not be null.");
             }
 
             if (min?.Expression is TimeExpression && !(max is null || max.Expression is TimeExpression))
             {
-                throw new BoundariesTypeMismatchException(nameof(max), $"{nameof(max)} must be a {nameof(TimeExpression)}");
+                throw new BoundariesTypeMismatchException($"{nameof(max)} must be a {nameof(TimeExpression)}", nameof(max));
             }
 
             Min = min?.Expression switch
             {
+                null => null,
+                AsteriskExpression _ => null,
                 DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
                 {
                     (null, { }) => new BoundaryExpression(time, included: min.Included),
                     ({ }, null) => new BoundaryExpression(date, included: min.Included),
                     _ => new BoundaryExpression(new DateTimeExpression(date, time), included: min.Included)
                 },
-                null => null,
-                AsteriskExpression _ => null,
                 _ => min
             };
+
             Max = max?.Expression switch
             {
+                null => null,
+                AsteriskExpression _ => null,
                 DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
                 {
                     (null, { }) => new BoundaryExpression(time, included: max.Included),
                     ({ }, null) => new BoundaryExpression(date, included: max.Included),
                     _ => new BoundaryExpression(new DateTimeExpression(date, time), included: max.Included)
                 },
-                null => null,
-                AsteriskExpression _ => null,
                 TimeExpression time when min?.Expression is DateTimeExpression minDateTime => new BoundaryExpression(new DateTimeExpression(minDateTime.Date, time), included: max.Included),
                 _ => max
             };
         }
 
+        ///<inheritdoc/>
         public bool Equals(RangeExpression other)
         {
             bool equals = false;
@@ -117,12 +119,20 @@ namespace DataFilters.Grammar.Syntax
             return equals;
         }
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as RangeExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
+        ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
 
+        /// <summary>
+        /// Deconstruction method
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
         public void Deconstruct(out BoundaryExpression min, out BoundaryExpression max)
         {
             min = Min;

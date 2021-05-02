@@ -45,16 +45,14 @@ namespace DataFilters.UnitTests
                     $"Two distinct {nameof(Sort<SuperHero>)} instances with same properties must be equal"
                 };
 
+                Sort<SuperHero> sort = new("Name");
+                yield return new object[]
                 {
-                    Sort<SuperHero> sort = new("Name");
-                    yield return new object[]
-                    {
-                        sort,
-                        sort,
-                        true,
-                        $"A {nameof(Sort<SuperHero>)} instance is equal to itself"
-                    };
-                }
+                    sort,
+                    sort,
+                    true,
+                    $"A {nameof(Sort<SuperHero>)} instance is equal to itself"
+                };
 
                 yield return new object[]
                 {

@@ -1,4 +1,5 @@
-﻿using DataFilters.TestObjects;
+﻿using DataFilters.Casing;
+using DataFilters.TestObjects;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -105,6 +106,66 @@ namespace DataFilters.UnitTests
             ISort<SuperHero> actual = sort.ToSort<SuperHero>();
 
             _outputHelper.WriteLine($"actual sort : '{actual}'");
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+        public static IEnumerable<object[]> ToSortWithPropertyNameResolutionStrategyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "-SnakeCaseProperty",
+                    PropertyNameResolutionStrategy.SnakeCase,
+                    new Sort<Model>("snake_case_property", Descending)
+                };
+
+                yield return new object[]
+                {
+                    "SnakeCaseProperty",
+                    PropertyNameResolutionStrategy.SnakeCase,
+                    new Sort<Model>("snake_case_property", Ascending)
+                };
+
+                yield return new object[]
+                {
+                    "-SnakeCaseProperty",
+                    PropertyNameResolutionStrategy.SnakeCase,
+                    new Sort<Model>("snake_case_property", Descending)
+                };
+
+                yield return new object[]
+                {
+                    "pascal_case_property",
+                    PropertyNameResolutionStrategy.PascalCase,
+                    new Sort<Model>("PascalCaseProperty", Ascending)
+                };
+
+                yield return new object[]
+                {
+                    "+pascal_case_property",
+                    PropertyNameResolutionStrategy.PascalCase,
+                    new Sort<Model>("PascalCaseProperty", Ascending)
+                };
+
+                yield return new object[]
+                {
+                    "-pascal_case_property",
+                    PropertyNameResolutionStrategy.PascalCase,
+                    new Sort<Model>("PascalCaseProperty", Descending)
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToSortWithPropertyNameResolutionStrategyCases))]
+        public void Given_input_and_PropertyNameResolutionStrategy_ToSort_should_return_appropriate_ISort_instance(string sort, PropertyNameResolutionStrategy propertyNameResolutionStrategy, ISort<Model> expected)
+        {
+            // Act
+            ISort<Model> actual = sort.ToSort<Model>(propertyNameResolutionStrategy);
 
             // Assert
             actual.Should()

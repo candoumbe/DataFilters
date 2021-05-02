@@ -3,10 +3,13 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// An expression that holds a string value
+    /// A <see cref="FilterExpression"/> that defines a string that starts with a specified <see cref="Value"/>.
     /// </summary>
-    public class StartsWithExpression : FilterExpression, IEquatable<StartsWithExpression>
+    public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWithExpression>
     {
+        /// <summary>
+        /// Value associated with the expression
+        /// </summary>
         public string Value { get; }
 
         /// <summary>
@@ -14,22 +17,32 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="value"></param>
         /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <c>null</c></exception>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <see cref="string.Empty"/>.</exception>
         public StartsWithExpression(string value)
         {
-            if (value == string.Empty)
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (value.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }
 
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Value = value;
         }
 
+        ///<inheritdoc/>
         public bool Equals(StartsWithExpression other) => Value == other?.Value;
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as StartsWithExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 
+        ///<inheritdoc/>
         public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> {Value}";
     }
 }

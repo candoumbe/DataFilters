@@ -4,16 +4,43 @@ using System.Text;
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// A duration expression (<see cref="https://en.wikipedia.org/wiki/ISO_8601#Durations"/>)
+    /// A <see cref="FilterExpression"/> implementation that contains values associated to a duration (see "https://en.wikipedia.org/wiki/ISO_8601#Durations")
     /// </summary>
-    public class DurationExpression : FilterExpression, IEquatable<DurationExpression>
+    public sealed class DurationExpression : FilterExpression, IEquatable<DurationExpression>
     {
+        /// <summary>
+        /// Years part of the expression
+        /// </summary>
         public int Years { get; }
+
+        /// <summary>
+        /// "Months" part of the expression
+        /// </summary>
         public int Months { get; }
+
+        /// <summary>
+        /// "Days" part of the expression
+        /// </summary>
         public int Days { get; }
+
+        /// <summary>
+        /// "Hours" part of the expression
+        /// </summary>
         public int Hours { get; }
+
+        /// <summary>
+        /// "Minutes" part of the expression
+        /// </summary>
         public int Minutes { get; }
+
+        /// <summary>
+        /// Seconds part of the expression
+        /// </summary>
         public int Seconds { get; }
+
+        /// <summary>
+        /// Weeks part of the expression
+        /// </summary>
         public int Weeks { get; }
 
         /// <summary>
@@ -72,12 +99,16 @@ namespace DataFilters.Grammar.Syntax
             Seconds = seconds;
         }
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as DurationExpression);
 
+        ///<inheritdoc/>
         public bool Equals(DurationExpression other) => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) == (other?.Years, other?.Months, other?.Weeks, other?.Days, other?.Hours, other?.Minutes, other?.Seconds);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
 
+        ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
             static DateTime ConvertToDateTime(DurationExpression duration)
@@ -107,6 +138,7 @@ namespace DataFilters.Grammar.Syntax
             return equivalent;
         }
 
+        ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
     }
 }

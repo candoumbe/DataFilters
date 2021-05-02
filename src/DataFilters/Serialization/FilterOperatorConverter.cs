@@ -42,8 +42,8 @@ namespace DataFilters.Converters
             ["nstartswith"] = FilterOperator.NotStartsWith
         }.ToImmutableDictionary();
 
-        /// <inheritdoc/>
 #if NETSTANDARD1_3
+        /// <inheritdoc/>
         public override bool CanConvert(Type objectType) => typeof(FilterOperator) == objectType;
 
         /// <inheritdoc/>
@@ -72,8 +72,8 @@ namespace DataFilters.Converters
         }
 #endif
 
-        /// <inheritdoc/>
 #if NETSTANDARD1_3
+        /// <inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             KeyValuePair<string, FilterOperator> result = _operators.Single(op => op.Value == (FilterOperator)value);

@@ -17,6 +17,7 @@ namespace DataFilters.UnitTests
             _outputHelper = outputHelper;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S1199:Nested code blocks should not be used")]
         public static IEnumerable<object[]> EqualsCases
         {
             get

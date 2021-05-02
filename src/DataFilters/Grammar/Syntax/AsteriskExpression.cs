@@ -3,14 +3,18 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// Expression that defines equality
+    /// <see cref="AsteriskExpression"/> represent a <c>*</c> that can be used as a building block for more
+    /// complex <see cref="FilterExpression"/>s.
     /// </summary>
-    public class AsteriskExpression : FilterExpression, IEquatable<AsteriskExpression>, IBoundaryExpression
+    public sealed class AsteriskExpression : FilterExpression, IEquatable<AsteriskExpression>, IBoundaryExpression
     {
-        public bool Equals(AsteriskExpression other) => !(other is null);
+        ///<inheritdoc/>
+        public bool Equals(AsteriskExpression other) => other is not null;
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as AsteriskExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => (nameof(AsteriskExpression)).GetHashCode();
     }
 }

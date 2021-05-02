@@ -14,7 +14,7 @@ using System.Text.Json.Serialization;
 namespace DataFilters.Converters
 {
     /// <summary>
-    /// <see cref="JsonConvert"/> implementation that can convert from/to <see cref="DataFilter"/>
+    /// <see cref="JsonConverter"/> implementation that can convert from/to <see cref="Filter"/>
     /// </summary>
 #if NETSTANDARD1_3 
     public class FilterConverter : JsonConverter
@@ -136,7 +136,10 @@ namespace DataFilters.Converters
             }
             else
             {
-                while (reader.Read() && reader.TokenType != JsonTokenType.EndObject) ;
+                while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+                {
+                    // empty loop to get to the end of the current JSON object
+                }
             }
 
             return new Filter(field, op, value);
@@ -144,15 +147,15 @@ namespace DataFilters.Converters
 
 #endif
 
-#if NETSTANDARD1_3
         ///<inheritdoc/>
+#if NETSTANDARD1_3
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             Filter filter = (Filter)value;
 #else
-        public override void Write(Utf8JsonWriter writer, Filter filter, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Filter value, JsonSerializerOptions options)
         {
-            //options.Converters.Add(new FilterOperatorConverter());
+            Filter filter = value;
 #endif
             writer.WriteStartObject();
 
@@ -171,7 +174,6 @@ namespace DataFilters.Converters
 #if NETSTANDARD1_3
             writer.WriteValue(kv.Key);
 #else
-            //options.Converters.Add(_stringEnumConverter);
             writer.WriteStringValue(kv.Key);
 #endif
 

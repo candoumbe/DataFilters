@@ -145,7 +145,6 @@ namespace DataFilters
         [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
 #else
         [JsonPropertyName(OperatorJsonPropertyName)]
-        //[System.Text.Json.Serialization.JsonConverter(typeof(FilterOperatorConverter))]
 #endif
         public FilterOperator Operator { get; }
 
@@ -192,6 +191,7 @@ namespace DataFilters
             }
         }
 
+        ///<inheritdoc/>
 #if NETSTANDARD1_3
         public string ToJson()
         {
@@ -201,21 +201,26 @@ namespace DataFilters
         public string ToJson() => this.Jsonify();
 #endif
 
+        ///<inheritdoc/>
         public override string ToString() => ToJson();
 
+        ///<inheritdoc/>
         public bool Equals(Filter other)
             => other != null
             && (ReferenceEquals(other, this)
             || (Equals(other.Field, Field) && Equals(other.Operator, Operator) && Equals(other.Value, Value)));
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as Filter);
 
+        ///<inheritdoc/>
 #if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Field, Operator, Value).GetHashCode();
 #else
         public override int GetHashCode() => HashCode.Combine(Field, Operator, Value);
 #endif
 
+        ///<inheritdoc/>
         public IFilter Negate()
         {
             FilterOperator @operator = Operator switch
@@ -240,8 +245,10 @@ namespace DataFilters
             return new Filter(Field, @operator, Value);
         }
 
+        ///<inheritdoc/>
         public bool Equals(IFilter other) => Equals(other as Filter);
 
+        ///<inheritdoc/>
         public void Deconstruct(out string field, out FilterOperator @operator, out object value)
         {
             field = Field;
