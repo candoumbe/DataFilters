@@ -84,12 +84,21 @@ namespace System
             }
             else if (sortString.StartsWith("+"))
             {
+#if NETSTANDARD1_3 || NETSTANDARD2_0
                 sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)));
+#else
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]));
+#endif
             }
-            else if (sortString.StartsWith("-"))
+                else if (sortString.StartsWith("-"))
             {
+#if NETSTANDARD1_3 || NETSTANDARD2_0
                 sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)),
-                                   direction: Descending);
+                           direction: Descending);
+#else
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]),
+                           direction: Descending);
+#endif
             }
             else
             {

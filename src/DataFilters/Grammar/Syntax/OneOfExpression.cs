@@ -9,7 +9,7 @@ namespace DataFilters.Grammar.Syntax
     /// a <see cref="FilterExpression"/> that contains multiple <see cref="FilterExpression"/>s as <see cref="Values"/>.
     /// </summary>
     /// <remarks>
-    /// <see cref="OneOfExpression"/> indicates that the filter expression should 
+    /// <see cref="OneOfExpression"/> indicates that the filter expression should
     /// </remarks>
     public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
     {

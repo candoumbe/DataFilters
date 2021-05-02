@@ -22,7 +22,7 @@ namespace DataFilters
 #else
     [System.Text.Json.Serialization.JsonConverter(typeof(MultiFilterConverter))]
 #endif
-    public class MultiFilter : IFilter, IEquatable<MultiFilter>
+    public sealed class MultiFilter : IFilter, IEquatable<MultiFilter>
     {
         /// <summary>
         /// Name of the json property that holds filter's filters collection.
@@ -34,6 +34,9 @@ namespace DataFilters
         /// </summary>
         public const string LogicJsonPropertyName = "logic";
 
+        /// <summary>
+        /// <see cref="MultiFilter"/> JSON schema
+        /// </summary>
         public static JSchema Schema => new()
         {
             Type = JSchemaType.Object,
@@ -67,8 +70,10 @@ namespace DataFilters
 #endif
         public FilterLogic Logic { get; set; }
 
-        public virtual string ToJson() => this.Jsonify();
+        ///<inheritdoc/>
+        public string ToJson() => this.Jsonify();
 
+        ///<inheritdoc/>
         public IFilter Negate()
         {
             MultiFilter filter = new()
@@ -87,6 +92,8 @@ namespace DataFilters
 
             return filter;
         }
+
+        ///<inheritdoc/>
 #if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Logic, Filters).GetHashCode();
 #else
@@ -102,10 +109,13 @@ namespace DataFilters
         }
 #endif
 
+        ///<inheritdoc/>
         public bool Equals(IFilter other) => Equals(other as MultiFilter);
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as MultiFilter);
 
+        ///<inheritdoc/>
         public bool Equals(MultiFilter other)
             => Logic == other?.Logic
             && Filters.Count() == other?.Filters?.Count()

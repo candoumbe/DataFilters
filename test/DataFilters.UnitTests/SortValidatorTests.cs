@@ -10,15 +10,12 @@ namespace DataFilters.UnitTests
     [Feature("Sorting")]
     public class SortValidatorTests
     {
-        private readonly ITestOutputHelper _outputHelper;
         private readonly SortValidator _sut;
 
-        public SortValidatorTests(ITestOutputHelper outputHelper)
+        public SortValidatorTests()
         {
-            _outputHelper = outputHelper;
             _sut = new();
         }
-
 
         [Theory]
         [InlineData("", false, "Empty sort")]

@@ -170,7 +170,6 @@ namespace DataFilters.UnitTests
             // Assert
             actual.Should()
                   .Be(expected);
-
         }
     }
 }

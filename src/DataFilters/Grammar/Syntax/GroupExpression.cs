@@ -5,10 +5,10 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that group wrapped inside
     /// </summary>
-    public class GroupExpression : FilterExpression, IEquatable<GroupExpression>
+    public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>
     {
         /// <summary>
-        /// Expression that the group is applied to
+        /// Expression that the group is applied onto
         /// </summary>
         public FilterExpression Expression { get; }
 
@@ -19,12 +19,16 @@ namespace DataFilters.Grammar.Syntax
         /// <exception cref="ArgumentNullException"><paramref name="innerExpression"/> is <c>null</c>.</exception>
         public GroupExpression(FilterExpression innerExpression) => Expression = innerExpression ?? throw new ArgumentNullException(nameof(innerExpression));
 
+        ///<inheritdoc/>
         public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as GroupExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => Expression.GetHashCode();
 
+        ///<inheritdoc/>
         public override string ToString() => $"{GetType().Name} : Expression ({Expression.GetType().Name }) -> {Expression}";
     }
 }

@@ -36,12 +36,12 @@ namespace DataFilters.Grammar.Syntax
         {
             if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
             {
-                throw new IncorrectBoundaryException(nameof(max), $"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
+                throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
             }
 
             if (min?.Expression is AsteriskExpression && max is null)
             {
-                throw new IncorrectBoundaryException(nameof(max), $"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
+                throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
             }
 
             if (min?.Expression is DateExpression && !(max is null || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
@@ -61,7 +61,7 @@ namespace DataFilters.Grammar.Syntax
 
             if (min?.Expression is TimeExpression && !(max is null || max.Expression is TimeExpression))
             {
-                throw new BoundariesTypeMismatchException(nameof(max), $"{nameof(max)} must be a {nameof(TimeExpression)}");
+                throw new BoundariesTypeMismatchException($"{nameof(max)} must be a {nameof(TimeExpression)}", nameof(max));
             }
 
             Min = min?.Expression switch

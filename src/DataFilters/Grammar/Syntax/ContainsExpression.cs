@@ -3,32 +3,43 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// An expression that holds a string value
+    /// A <see cref="FilterExpression"/> that holds a string value
     /// </summary>
-    public class ContainsExpression : FilterExpression, IEquatable<ContainsExpression>
+    public sealed class ContainsExpression : FilterExpression, IEquatable<ContainsExpression>
     {
+        /// <summary>
+        /// The value that was between two <see cref="AsteriskExpression"/>
+        /// </summary>
         public string Value { get; }
 
         /// <summary>
-        /// Builds a new <see cref="StartsWithExpression"/> that holds the specified <paramref name="value"/>.
+        /// Builds a new <see cref="ContainsExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value"></param>
         /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <c>null</c></exception>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <c>empty</c></exception>
         public ContainsExpression(string value)
         {
-            if (value == string.Empty)
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (value.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }
 
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Value = value;
         }
 
+        ///<inheritdoc/>
         public bool Equals(ContainsExpression other) => Value == other?.Value;
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as ContainsExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
     }
 }

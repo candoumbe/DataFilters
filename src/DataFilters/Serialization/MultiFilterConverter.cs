@@ -26,8 +26,10 @@ namespace DataFilters.Converters
             [nameof(FilterLogic.Or).ToLower()] = FilterLogic.Or
         }.ToImmutableDictionary();
 
+        ///<inheritdoc/>
         public override bool CanConvert(Type objectType) => objectType == typeof(MultiFilter);
 
+        ///<inheritdoc/>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             MultiFilter multiFilter = null;
@@ -72,11 +74,15 @@ namespace DataFilters.Converters
     {
         private readonly FilterConverter _filterConverter;
 
+        /// <summary>
+        /// Builds a new <see cref="MultiFilterConverter"/> isntance.
+        /// </summary>
         public MultiFilterConverter()
         {
             _filterConverter = new FilterConverter();
         }
 
+        ///<inheritdoc/>
         public override MultiFilter Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -110,7 +116,7 @@ namespace DataFilters.Converters
             reader.Read();
             if (reader.TokenType != JsonTokenType.StartArray)
             {
-                throw new JsonException($@"Expected ""["".");
+                throw new JsonException(@"Expected ""["".");
             }
 
             reader.Read();
@@ -128,7 +134,7 @@ namespace DataFilters.Converters
                 catch
                 {
                     // The json is not a Filter so we need to go back to where the parsing was performed
-                    // and try to get a MultFilter 
+                    // and try to get a MultFilter instead
 
                     // 1. The copyReader position is moved to where the original parser were before failing
                     while(readerCopy.TokenStartIndex < position)
@@ -151,7 +157,7 @@ namespace DataFilters.Converters
             reader.Read();
             if (reader.TokenType != JsonTokenType.EndObject)
             {
-                throw new JsonException($@"Expected ""}}"".");
+                throw new JsonException(@"Expected ""}"".");
             }
 
             return new MultiFilter
@@ -167,8 +173,9 @@ namespace DataFilters.Converters
         {
             MultiFilter mf = (MultiFilter)value;
 #else
-        public override void Write(Utf8JsonWriter writer, MultiFilter mf, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, MultiFilter value, JsonSerializerOptions options)
         {
+            MultiFilter mf = value;
 #endif
             writer.WriteStartObject();
 

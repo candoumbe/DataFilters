@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace DataFilters
 {
@@ -18,16 +19,9 @@ namespace DataFilters
         {
         }
 
-#if NETSTANDARD2_0 || NETSTANDARD2_1
-        /// <inheritdoc/>
-        protected InvalidSortExpressionException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
-        {
-        }
-#endif
-
-        /// <inheritdoc/>
-        public InvalidSortExpressionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
+    /// <inheritdoc/>
+    public InvalidSortExpressionException(string message, Exception innerException) : base(message, innerException)
+    {
     }
+}
 }
