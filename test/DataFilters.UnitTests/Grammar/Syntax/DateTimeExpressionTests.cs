@@ -27,14 +27,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                                             .HaveProperty<TimeExpression>("Time");
 
         [Fact]
-        public void CtorThrowsArgumentException_When_Date_And_Time_Are_Null()
+        public void Given_date_and_time_parameters_are_null_Constructor_should_throws_ArgumentException()
         {
             // Act
             Action ctor = () => new DateTimeExpression(null, null);
 
             // Assert
             ctor.Should()
-                .ThrowExactly<ArgumentNullException>("both date and time are null");
+                .ThrowExactly<ArgumentException>("both date and time are null");
         }
 
         public static IEnumerable<object[]> EqualsCases

@@ -32,14 +32,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             ;
 
         [Fact]
-        public void Ctor_Throws_ArgumentNullException_If_Value_Is_Null()
+        public void Given_min_and_max_are_null_Ctor_should_throws_IncorrectBoundaryException()
         {
             // Act
             Action action = () => new RangeExpression(null, null);
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentNullException>($"Either {nameof(RangeExpression.Min)}/{nameof(RangeExpression.Max)} must be set");
+                .ThrowExactly<IncorrectBoundaryException>($"Either {nameof(RangeExpression.Min)}/{nameof(RangeExpression.Max)} must not be null");
         }
 
         public static IEnumerable<object[]> IncorrectBoundariesCases
@@ -92,8 +92,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Assert
             action.Should()
-                .ThrowExactly<IncorrectBoundaryException>(reason)
-                .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
+                .ThrowExactly<IncorrectBoundaryException>(reason);
         }
 
         [Theory]
