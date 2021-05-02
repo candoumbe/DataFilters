@@ -22,10 +22,6 @@
           "type": "boolean",
           "description": "Indicates to continue a previously failed build attempt"
         },
-        "DeterministicBuild": {
-          "type": "boolean",
-          "description": "Deterministic builds are important as they enable verification that the resulting binary was built from the specified source and provides traceability (Default : IsServerBuild). "
-        },
         "GitHubToken": {
           "type": "string"
         },

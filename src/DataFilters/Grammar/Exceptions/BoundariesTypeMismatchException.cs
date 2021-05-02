@@ -4,10 +4,10 @@ namespace DataFilters.Grammar.Exceptions
 {
     /// <summary>
     /// Exception thrown when a <see cref="Syntax.RangeExpression"/> has incorrect <see cref="Syntax.RangeExpression.Min"/>
-    /// and/or
     /// </summary>
 #pragma warning disable RCS1194 // Implement exception constructors.
-    public class BoundariesTypeMismatchException : ArgumentException
+    [Serializable]
+    public sealed class BoundariesTypeMismatchException : ArgumentException
 #pragma warning restore RCS1194 // Implement exception constructors.
     {
         /// <summary>

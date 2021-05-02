@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using static DataFilters.FilterOperator;
+using DataFilters.Casing;
 
 #if STRING_SEGMENT
 using Microsoft.Extensions.Primitives;
@@ -24,18 +25,31 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
+    /// <summary>
+    /// String extensions methods
+    /// </summary>
     public static class StringExtensions
     {
         private static char Separator => ',';
 
         /// <summary>
-        /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance
+        /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance.
         /// </summary>
-        /// <typeparam name="T">Type of the element to which the <see cref="ISort"/> will be generated from</typeparam>
+        /// <typeparam name="T">Type of the element to which the <see cref="ISort{T}"/> will be generated from</typeparam>
         /// <param name="sortString"></param>
-        /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException">when <paramref name="sortString"/> is <c>null</c> or whitespace</exception>
-        public static ISort<T> ToSort<T>(this string sortString)
+        /// <exception cref="InvalidSortExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
+        public static ISort<T> ToSort<T>(this string sortString) => sortString.ToSort<T>(PropertyNameResolutionStrategy.Default);
+
+        /// <summary>
+        /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance.
+        /// </summary>
+        /// <typeparam name="T">Type of the element to which the <see cref="ISort{T}"/> will be generated from</typeparam>
+        /// <param name="sortString"></param>
+        /// <param name="propertyNameResolutionStrategy">The transformation to apply to each property name.</param>
+        /// <exception cref="ArgumentOutOfRangeException">when <paramref name="sortString"/> is <c>null</c> or whitespace</exception>
+        /// <exception cref="InvalidSortExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
+        public static ISort<T> ToSort<T>(this string sortString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         {
             if (string.IsNullOrWhiteSpace(sortString) || sortString?.Length == 0)
             {
@@ -47,7 +61,7 @@ namespace System
 
             if (!validationResult.IsValid)
             {
-                throw new InvalidSortExpression(sortString);
+                throw new InvalidSortExpressionException(sortString);
             }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
@@ -63,56 +77,76 @@ namespace System
             if (sorts.Length > 1)
             {
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-                sort = new MultiSort<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToSort<T>() as Sort<T>).ToArray());
+                sort = new MultiSort<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
 #else
-                sort = new MultiSort<T>(sorts.Select(s => s.ToSort<T>() as Sort<T>).ToArray());
+                sort = new MultiSort<T>(sorts.Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
+#endif
+            }
+            else if (sortString.StartsWith("+"))
+            {
+#if NETSTANDARD1_3 || NETSTANDARD2_0
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)));
+#else
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]));
+#endif
+            }
+                else if (sortString.StartsWith("-"))
+            {
+#if NETSTANDARD1_3 || NETSTANDARD2_0
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)),
+                           direction: Descending);
+#else
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]),
+                           direction: Descending);
 #endif
             }
             else
             {
-                if (sortString.StartsWith("+"))
-                {
-                    sort = new Sort<T>(sortString.Substring(1));
-                }
-                else if (sortString.StartsWith("-"))
-                {
-                    sort = new Sort<T>(sortString.Substring(1), direction: Descending);
-                }
-                else
-                {
-                    sort = new Sort<T>(sortString);
-                }
+                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString));
             }
 
             return sort;
         }
+
 #if STRING_SEGMENT
         /// <summary>
-        /// Builds a <see cref="IFilter{T}"/> from <paramref name="queryString"/>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/>
         /// </summary>
         /// <typeparam name="T">Type of element to filter</typeparam>
-        /// <param name="queryString"></param>
+        /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
+        /// <param name="propertyNameResolutionStrategy"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
-        public static IFilter ToFilter<T>(this string queryString)
-            => new StringSegment(queryString).ToFilter<T>();
+        public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
+            => new StringSegment(queryString).ToFilter<T>(propertyNameResolutionStrategy);
+
+        /// <summary>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/>
+        /// </summary>
+        /// <typeparam name="T">Type of element to filter</typeparam>
+        /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
+        public static IFilter ToFilter<T>(this string queryString) => ToFilter<T>(queryString, PropertyNameResolutionStrategy.Default);
 
 #endif
         /// <summary>
-        /// Builds a <see cref="IFilter{T}"/> from <paramref name="queryString"/>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/>
         /// </summary>
         /// <typeparam name="T">Type of element to filter</typeparam>
-        /// <param name="queryString"></param>
-        /// <returns></returns>
+        /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
+        /// <param name="propertyNameResolutionStrategy"></param>
+        /// <returns>The corresponding <see cref="IFilter"/></returns>
         /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
 #if STRING_SEGMENT
-        public static IFilter ToFilter<T>(this StringSegment queryString)
+        public static IFilter ToFilter<T>(this StringSegment queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         {
             string localQueryString = queryString.Value;
 #else
-        public static IFilter ToFilter<T>(this string queryString)
+        public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         {
             string localQueryString = queryString;
 #endif
@@ -255,7 +289,7 @@ namespace System
                     (PropertyNameExpression property, FilterExpression expression) = expressions[0];
 
                     PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                               .SingleOrDefault(x => x.CanRead && x.Name == property.Name);
+                                               .SingleOrDefault(x => x.CanRead && x.Name == propertyNameResolutionStrategy.Handle(property.Name));
 
                     if (pi is not null)
                     {
@@ -285,5 +319,20 @@ namespace System
 
             return filter;
         }
+
+        /// <summary>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/> using <see cref="DefaultPropertyNameResolutionStrategy"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of element to filter</typeparam>
+        /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
+        /// <returns>The corresponding <see cref="IFilter"/></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
+#if STRING_SEGMENT
+        public static IFilter ToFilter<T>(this StringSegment queryString) => ToFilter<T>(queryString.Value, PropertyNameResolutionStrategy.Default);
+
+#else
+        public static IFilter ToFilter<T>(this string queryString) => ToFilter<T>(queryString, PropertyNameResolutionStrategy.Default);
+#endif
     }
 }

@@ -1,4 +1,5 @@
-﻿using DataFilters.TestObjects;
+﻿using DataFilters.Casing;
+using DataFilters.TestObjects;
 using FluentAssertions;
 using FluentAssertions.Common;
 using FluentAssertions.Extensions;
@@ -6,11 +7,14 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Categories;
+
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
 namespace DataFilters.UnitTests
 {
+    [UnitTest]
     public class FilterExtensionsTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -420,18 +424,48 @@ namespace DataFilters.UnitTests
         }
 
         [Fact]
-        public void ToFilterThrowsArgumentNullExceptionWhenParameterIsNull()
+        public void Given_null_ToFilter_should_throw_ArgumentNullException()
         {
             // Act
-#pragma warning disable IDE0039 // Utiliser une fonction locale
             Action action = () => ((string)null).ToFilter<Person>();
-#pragma warning restore IDE0039 // Utiliser une fonction locale
 
             // Assert
             action.Should()
                 .Throw<ArgumentNullException>().Which
                 .ParamName.Should()
                 .NotBeNullOrWhiteSpace();
+        }
+
+        public static IEnumerable<object[]> ToFilterWithPropertyNameResolutionStrategyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "SnakeCaseProperty=10",
+                    PropertyNameResolutionStrategy.SnakeCase,
+                    new Filter("snake_case_property", EqualTo, "10")
+                };
+
+                yield return new object[]
+                {
+                    "pascal_case_property=10",
+                    PropertyNameResolutionStrategy.PascalCase,
+                    new Filter("PascalCaseProperty", EqualTo, "10")
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToFilterWithPropertyNameResolutionStrategyCases))]
+        public void Given_input_and_casing_resolution_strategy_ToFilter_should_create_corresponding_filter(string filter, PropertyNameResolutionStrategy propertyNameResolutionStrategy, IFilter expected)
+        {
+            // Act
+            IFilter actual = filter.ToFilter<Model>(propertyNameResolutionStrategy);
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
         }
     }
 }

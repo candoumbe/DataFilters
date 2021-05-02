@@ -657,6 +657,18 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     @"Henchmen[""Powers""][""Description""]=*strength*",
                     new PropertyNameExpression(@"Henchmen[""Powers""][""Description""]")
                 };
+
+                yield return new object[]
+                {
+                    @"Henchmen[""first_name""]=*rob*",
+                    new PropertyNameExpression(@"Henchmen[""first_name""]")
+                };
+
+                yield return new object[]
+                {
+                    "first_name=Bruce",
+                    new PropertyNameExpression("first_name")
+                };
             }
         }
 
@@ -684,6 +696,15 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=Vandal",
                     (
                         new PropertyNameExpression("Name"),
+                        (FilterExpression) new ConstantValueExpression("Vandal")
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "first_name=Vandal",
+                    (
+                        new PropertyNameExpression("first_name"),
                         (FilterExpression) new ConstantValueExpression("Vandal")
                     )
                 };
@@ -807,6 +828,19 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                             expressions => expressions.Exactly(2)
                                && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
                                && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                        )
+                    };
+                }
+
+                foreach (char c in FilterTokenizer.SpecialCharacters)
+                {
+                    yield return new object[]
+                    {
+                        $@"first_name=Vand\{c}al&last_name=Savage",
+                        (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
+                            expressions => expressions.Exactly(2)
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("first_name")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("last_name")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
                         )
                     };
                 }

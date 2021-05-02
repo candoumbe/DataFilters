@@ -5,8 +5,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-    public class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
+    public sealed class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
     {
+        /// <summary>
+        /// "Raw" value of the constant
+        /// </summary>
         public object Value { get; }
 
         /// <summary>
@@ -34,12 +37,16 @@ namespace DataFilters.Grammar.Syntax
             };
         }
 
+        ///<inheritdoc/>
         public bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as ConstantValueExpression);
 
+        ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 
+        ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
     }
 }

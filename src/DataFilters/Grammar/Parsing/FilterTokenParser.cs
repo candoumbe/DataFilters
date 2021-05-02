@@ -32,8 +32,8 @@ namespace DataFilters.Grammar.Parsing
                                                                                             );
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Alpha => Token.EqualTo(FilterToken.Letter).Try()
-                                                                                        .Or(Token.EqualTo(FilterToken.Escaped));
-
+                                                                                      .Or(Token.EqualTo(FilterToken.Escaped)).Try()
+                                                                                      .Or(Token.EqualTo(FilterToken.Underscore));
 
         /// <summary>
         /// Parser for '*' character
@@ -100,6 +100,9 @@ namespace DataFilters.Grammar.Parsing
                                                                                    from __ in Asterisk
                                                                                    select new ContainsExpression(string.Concat(data.Select(x => x.value)));
 
+        /// <summary>
+        /// Parser for logical OR expression.
+        /// </summary>
         public static TokenListParser<FilterToken, OrExpression> Or => from left in Expression
                                                                        from _ in Token.EqualTo(FilterToken.Or)
                                                                        from right in Expression
@@ -310,22 +313,20 @@ namespace DataFilters.Grammar.Parsing
                                                                                     .Or(OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>())
                                                                                     .Or(Expression);
 
-
         /// <summary>
         /// Property name parser
         /// </summary>
         public static TokenListParser<FilterToken, PropertyNameExpression> Property => from prop in AlphaNumeric
-                                                                                           //    .Select(a => a.ToStringValue())
                                                                                        from subProps in (
                                                                                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                            from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                            from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                                                                                            select @$"[""{subProp.Value}""]"
                                                                                        ).Many()
-                                                                                           //    from _ in Token.EqualTo(FilterToken.Equal).Try()
-                                                                                           //    from remaining in AnyExpression
                                                                                        select new PropertyNameExpression(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
-
+        /// <summary>
+        /// Parser for Regex expressions.
+        /// </summary>
         public static TokenListParser<FilterToken, OneOfExpression> OneOf => (from before in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                                                                 .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
                                                                                 .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -366,7 +367,7 @@ namespace DataFilters.Grammar.Parsing
                                 break;
                             }
                         default:
-                            throw new ArgumentOutOfRangeException($"Unsupported {nameof(item.before)} expression type when {nameof(item.after)} expression is null");
+                            throw new NotSupportedException($"Unsupported {nameof(item.before)} expression type when {nameof(item.after)} expression is null");
                     }
                 }
                 else if (item.before is null)
@@ -392,7 +393,7 @@ namespace DataFilters.Grammar.Parsing
                             }
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException($"Unsupported {nameof(item.after)} expression type when before expression is null");
+                            throw new NotSupportedException($"Unsupported {nameof(item.after)} expression type when before expression is null");
                     }
                 }
                 else
@@ -414,13 +415,16 @@ namespace DataFilters.Grammar.Parsing
                             }
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException($"Unsupported {nameof(item.before)} expression type when before expression is null");
+                            throw new NotSupportedException($"Unsupported {nameof(item.before)} expression type when before expression is null");
                     }
                 }
 
                 return new OneOfExpression(expressions.ToArray());
             });
 
+        /// <summary>
+        /// Parser for Date and Time
+        /// </summary>
         public static TokenListParser<FilterToken, DateTimeExpression> DateAndTime => (from date in Date
                                                                                        from separator in Token.EqualToValue(FilterToken.Letter, "T")
                                                                                                               .Or(Token.EqualTo(FilterToken.Whitespace))
@@ -447,7 +451,7 @@ namespace DataFilters.Grammar.Parsing
                                                                                         select new DateTimeExpression(time: time)
             );
 
-        public static TokenListParser<FilterToken, TimeOffset> Offset => (from _ in Token.EqualToValue(FilterToken.Letter, "Z")
+        private static TokenListParser<FilterToken, TimeOffset> Offset => (from _ in Token.EqualToValue(FilterToken.Letter, "Z")
                                                                           select new TimeOffset(0, 0)).Try()
                                                                           .Or(
                                                                                 from sign in Token.EqualTo(FilterToken.Dash)
@@ -462,8 +466,11 @@ namespace DataFilters.Grammar.Parsing
                                                                                 {
                                                                                     "-" => -hour,
                                                                                     _ => hour
-                                                                                }, minutes)
-                                                                          );
+                                                                                }, minutes));
+
+        /// <summary>
+        /// Parser for "date" expressions.
+        /// </summary>
         public static TokenListParser<FilterToken, DateExpression> Date => from year in Token.EqualTo(FilterToken.Numeric)
                                                                                 .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
@@ -480,6 +487,9 @@ namespace DataFilters.Grammar.Parsing
         private static TokenListParser<FilterToken, Token<FilterToken>> Colon => Token.EqualTo(FilterToken.Colon);
         private static TokenListParser<FilterToken, Token<FilterToken>> Dash => Token.EqualTo(FilterToken.Dash);
 
+        /// <summary>
+        /// Parser for time expression.
+        /// </summary>
         public static TokenListParser<FilterToken, TimeExpression> Time => from hour in Token.EqualTo(FilterToken.Numeric)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
                                                                            from _ in Colon
@@ -503,15 +513,24 @@ namespace DataFilters.Grammar.Parsing
                                                                                         .Or(Parse.Ref(() => AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
             ;
 
+        /// <summary>
+        /// Parser for <c>property=value</c> pair.
+        /// </summary>
         public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)> Criterion => from property in Property
                                                                                                             from _ in Token.EqualTo(FilterToken.Equal)
                                                                                                             from expression in AnyExpression
                                                                                                             select (new PropertyNameExpression(property.Name), expression);
 
+        /// <summary>
+        /// Parser for numeric expressions
+        /// </summary>
         public static TokenListParser<FilterToken, ConstantValueExpression> Number => from n in Token.EqualTo(FilterToken.Numeric)
                                                                                                      .Apply(Numerics.Decimal)
                                                                                       select new ConstantValueExpression(n.ToStringValue());
 
+        /// <summary>
+        /// Parser for many <see cref="Criterion"/> separated by <c>&amp;</c>.
+        /// </summary>
         public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
                                                                                                              select criteria;
 
@@ -530,6 +549,9 @@ namespace DataFilters.Grammar.Parsing
             select new ConstantValueExpression(c.ToStringValue())
         );
 
+        /// <summary>
+        /// Parser for duration
+        /// </summary>
         public static TokenListParser<FilterToken, DurationExpression> Duration => from p in Token.EqualToValue(FilterToken.Letter, "P")
 
                                                                                    from years in DurationPart("Y").OptionalOrDefault().Try()
@@ -557,6 +579,5 @@ namespace DataFilters.Grammar.Parsing
         private static TokenListParser<FilterToken, ConstantValueExpression> DurationPart(string designator) => from n in Number
                                                                                                                 from _ in Token.EqualToValue(FilterToken.Letter, designator).Try()
                                                                                                                 select n;
-
     }
 }

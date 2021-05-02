@@ -24,7 +24,7 @@ namespace DataFilters.Expressions
         /// <param name="direction">Order direction</param>
         /// <returns>A fully built OrderClause</returns>
         public static OrderClause<T> Create<TProperty>(Expression<Func<T, TProperty>> keySelector,
-            SortDirection direction = Ascending) => new OrderClause<T>(keySelector, direction);
+            SortDirection direction = Ascending) => new(keySelector, direction);
 
         /// <summary>
         /// Creates a new instance of <see cref="OrderClause{T}"/>
@@ -33,7 +33,7 @@ namespace DataFilters.Expressions
         /// <param name="direction">Order direction</param>
         /// <returns>A fully built OrderClause</returns>
         public static OrderClause<T> Create(LambdaExpression keySelector,
-            SortDirection direction = Ascending) => new OrderClause<T>(keySelector, direction);
+            SortDirection direction = Ascending) => new(keySelector, direction);
 
         public LambdaExpression Expression { get; }
 

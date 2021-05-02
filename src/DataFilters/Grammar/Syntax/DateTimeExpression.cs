@@ -2,7 +2,10 @@
 
 namespace DataFilters.Grammar.Syntax
 {
-    public class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
+    /// <summary>
+    /// A <see cref="FilterExpression"/> implementation that can holds a datetime value
+    /// </summary>
+    public sealed class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
     {
         /// <summary>
         /// Date part of the expression
@@ -41,12 +44,12 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="date">date part of the expression</param>
         /// <param name="time">time part of the expression</param>
-        /// <exception cref="ArgumentNullException">if both <paramref name="date"/> and <paramref name="time"/> are <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">if both <paramref name="date"/> and <paramref name="time"/> are <c>null</c>.</exception>
         public DateTimeExpression(DateExpression date, TimeExpression time)
         {
             if (date is null && time is null)
             {
-                throw new ArgumentNullException($"Both {nameof(date)} and {nameof(time)} cannot be null");
+                throw new ArgumentException($"Both {nameof(date)} and {nameof(time)} cannot be null");
             }
             Date = date;
             Time = time;
@@ -81,6 +84,7 @@ namespace DataFilters.Grammar.Syntax
             time = Time;
         }
 
+        ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
     }
 }

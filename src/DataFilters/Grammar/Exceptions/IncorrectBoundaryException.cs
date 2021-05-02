@@ -3,27 +3,32 @@
 namespace DataFilters.Grammar.Exceptions
 {
     /// <summary>
-    /// Exception thrown when <see cref="RangeExpression"/> constructor is passed an incorrect object
+    /// Exception thrown when <see cref="Syntax.RangeExpression"/> constructor is passed incorrect <see cref="Syntax.BoundaryExpression"/>s.
     /// </summary>
-    public class IncorrectBoundaryException : ArgumentOutOfRangeException
+    public class IncorrectBoundaryException : ArgumentException
     {
+        ///<inheritdoc/>
         public IncorrectBoundaryException() : base()
         {
         }
 
-        public IncorrectBoundaryException(string paramName) : base(paramName)
+        ///<inheritdoc/>
+        public IncorrectBoundaryException(string message) : base(message)
         {
         }
 
+        ///<inheritdoc/>
         public IncorrectBoundaryException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public IncorrectBoundaryException(string paramName, object actualValue, string message) : base(paramName, actualValue, message)
+        ///<inheritdoc/>
+        public IncorrectBoundaryException(string message, string paramName) : base(message, paramName)
         {
         }
 
-        public IncorrectBoundaryException(string paramName, string message) : base(paramName, message)
+        ///<inheritdoc/>
+        public IncorrectBoundaryException(string message, string paramName, Exception innerException) : base(message, paramName, innerException)
         {
         }
     }

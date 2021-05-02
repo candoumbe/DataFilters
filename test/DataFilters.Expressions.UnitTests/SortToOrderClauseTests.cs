@@ -153,13 +153,11 @@ namespace DataFilters.Expressions.UnitTests
                     },
                     new MultiSort<Hero>(
                         new Sort<Hero>(nameof(Hero.FirstAppearance), Descending),
-                        new Sort<Hero>($@"{nameof(Hero.Acolyte)}.{nameof(Hero.Age)}", Ascending)
+                        new Sort<Hero>($"{nameof(Hero.Acolyte)}.{nameof(Hero.Age)}", Ascending)
                     ),
 
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Select(x => x.Name).SequenceEqual(new []{ "Green Arrow", "Flash", "Batman"}))
                 };
-
-
             }
         }
 

@@ -1,14 +1,31 @@
-﻿using Optional;
-
+﻿
 using System;
 
 namespace DataFilters.Grammar.Syntax
 {
-    public class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression
+    /// <summary>
+    /// A <see cref="FilterExpression"/> that only consists of time part.
+    /// </summary>
+    public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression
     {
+        /// <summary>
+        /// Hours part of the expression
+        /// </summary>
         public int Hours { get; }
+
+        /// <summary>
+        /// Minutes of the expression
+        /// </summary>
         public int Minutes { get; }
+
+        /// <summary>
+        /// Seconds of the expression
+        /// </summary>
         public int Seconds { get; }
+
+        /// <summary>
+        /// Milliseconds of the expression
+        /// </summary>
         public int Milliseconds { get; }
 
         /// <summary>
@@ -17,7 +34,7 @@ namespace DataFilters.Grammar.Syntax
         public TimeOffset Offset { get; }
 
         /// <summary>
-        /// Builds a new <see cref="TimeExpression"> instance.
+        /// Builds a new <see cref="TimeExpression"/> instance.
         /// </summary>
         /// <param name="hours"></param>
         /// <param name="minutes"></param>
@@ -53,13 +70,17 @@ namespace DataFilters.Grammar.Syntax
             Offset = offset;
         }
 
+        ///<inheritdoc/>
         public bool Equals(TimeExpression other) => other != null
             && (Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset));
 
-        public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
-
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as TimeExpression);
 
+        ///<inheritdoc/>
+        public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
+
+        ///<inheritdoc/>
         public override string ToString() => $"{{{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}}}";
     }
 }
