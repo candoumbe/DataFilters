@@ -466,8 +466,11 @@ namespace DataFilters.Grammar.Parsing
                                                                                 {
                                                                                     "-" => -hour,
                                                                                     _ => hour
-                                                                                }, minutes)
-                                                                          );
+                                                                                }, minutes));
+
+        /// <summary>
+        /// Parser for "date" expressions.
+        /// </summary>
         public static TokenListParser<FilterToken, DateExpression> Date => from year in Token.EqualTo(FilterToken.Numeric)
                                                                                 .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
@@ -510,6 +513,9 @@ namespace DataFilters.Grammar.Parsing
                                                                                         .Or(Parse.Ref(() => AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
             ;
 
+        /// <summary>
+        /// Parser for <c>property=value</c> pair.
+        /// </summary>
         public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)> Criterion => from property in Property
                                                                                                             from _ in Token.EqualTo(FilterToken.Equal)
                                                                                                             from expression in AnyExpression
@@ -523,7 +529,7 @@ namespace DataFilters.Grammar.Parsing
                                                                                       select new ConstantValueExpression(n.ToStringValue());
 
         /// <summary>
-        /// Parser for many <see cref="Criterion"/>.
+        /// Parser for many <see cref="Criterion"/> separated by <c>&amp;</c>.
         /// </summary>
         public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
                                                                                                              select criteria;

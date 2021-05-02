@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// An expression that can be used to construct <see cref="RangeExpression"/> instances.
+    /// A <see cref="FilterExpression"/> that can be used to construct <see cref="RangeExpression"/> instances.
     /// </summary>
-    public class BoundaryExpression : IEquatable<BoundaryExpression>
+    public sealed class BoundaryExpression : IEquatable<BoundaryExpression>
     {
         /// <summary>
         /// Expression used as a boundary
@@ -14,7 +14,7 @@ namespace DataFilters.Grammar.Syntax
         public IBoundaryExpression Expression { get; }
 
         /// <summary>
-        /// Should the <see cref="Expresssion"/> be included or excluded in the <see cref="RangeExpression"/>
+        /// Should the <see cref="Expression"/> be included or excluded in the <see cref="RangeExpression"/>
         /// </summary>
         public bool Included { get; }
 
@@ -29,12 +29,15 @@ namespace DataFilters.Grammar.Syntax
             Included = included;
         }
 
+        ///<inheritdoc/>
         public bool Equals(BoundaryExpression other) => other != null
                                                         && Included == other.Included
                                                         && Expression.Equals(other.Expression);
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as BoundaryExpression);
 
+        ///<inheritdoc/>
 #if !(NETSTANDARD1_3 || NETSTANDARD2_0)
         public override int GetHashCode() => HashCode.Combine(Expression, Included);
 #else
@@ -47,14 +50,17 @@ namespace DataFilters.Grammar.Syntax
         }
 #endif
 
+        ///<inheritdoc/>
         public static bool operator ==(BoundaryExpression left, BoundaryExpression right) => left switch
         {
             null => right is null,
             _ => left.Equals(right),
         };
 
+        ///<inheritdoc/>
         public static bool operator !=(BoundaryExpression left, BoundaryExpression right) => !(left == right);
 
+        ///<inheritdoc/>
         public override string ToString() => $"{{{nameof(Expression)}:{Expression?.ToString()}, {nameof(Included)} : {Included}}}";
     }
 }

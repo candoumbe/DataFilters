@@ -5,14 +5,28 @@ using Utilities;
 
 namespace DataFilters.Grammar.Syntax
 {
-    public class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
+    /// <summary>
+    /// a <see cref="FilterExpression"/> that contains multiple <see cref="FilterExpression"/>s as <see cref="Values"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="OneOfExpression"/> indicates that the filter expression should 
+    /// </remarks>
+    public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
     {
         private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new();
 
+        /// <summary>
+        /// Collection of <see cref="FilterExpression"/> that the current instance holds.
+        /// </summary>
         public IEnumerable<FilterExpression> Values => _values;
 
         private readonly FilterExpression[] _values;
 
+        /// <summary>
+        /// Builds a new <see cref="OneOfExpression"/> instance.
+        /// </summary>
+        /// <param name="values"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
         public OneOfExpression(params FilterExpression[] values)
         {
             if (values is null)
@@ -23,6 +37,7 @@ namespace DataFilters.Grammar.Syntax
                             .ToArray();
         }
 
+        ///<inheritdoc/>
         public bool Equals(OneOfExpression other) => other != null && equalityComparer.Equals(_values, other._values);
 
         /// <inheritdoc/>
@@ -31,8 +46,10 @@ namespace DataFilters.Grammar.Syntax
         /// <inheritdoc/>
         public override int GetHashCode() => equalityComparer.GetHashCode(_values);
 
+        ///<inheritdoc/>
         public static bool operator ==(OneOfExpression left, OneOfExpression right) => EqualityComparer<OneOfExpression>.Default.Equals(left, right);
 
+        ///<inheritdoc/>
         public static bool operator !=(OneOfExpression left, OneOfExpression right) => !(left == right);
 
         /// <inheritdoc/>
