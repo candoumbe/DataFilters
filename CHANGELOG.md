@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.6.0] / 2021-05-03
 - Licence changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)
 
 
@@ -51,7 +53,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/candoumbe/DataFilters.git/compare/0.3.2...0.4.0
