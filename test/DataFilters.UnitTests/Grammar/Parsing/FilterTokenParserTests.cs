@@ -600,7 +600,6 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     )
                 };
 
-
                 yield return new object[]
                 {
                     "[2010-06-25 TO *[",

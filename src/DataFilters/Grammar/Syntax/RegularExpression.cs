@@ -3,7 +3,7 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// A <see cref="FilterExpression"/> that holds a set of a regular expression as its <see cref="Value"/>.
+    /// A <see cref="FilterExpression"/> that holds a regex pattern as its <see cref="Value"/>.
     /// </summary>
     public sealed class RegularExpression : FilterExpression, IEquatable<RegularExpression>
     {

@@ -1,5 +1,11 @@
 ﻿using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+
 using FluentAssertions;
+
+using FsCheck;
+using FsCheck.Xunit;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -143,6 +149,32 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             // Assert
             actual.Should()
                 .Be(expected, reason);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression)
+            => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression)
+            => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression)
+            => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(AsteriskExpression filterExpression)
+            => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
+
+        private static Property Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(FilterExpression filterExpression)
+        {
+            // Arrange
+            OrExpression orExpression = new(filterExpression, filterExpression);
+
+            // Act
+            return orExpression.IsEquivalentTo(filterExpression)
+                               .ToProperty();
         }
     }
 }
