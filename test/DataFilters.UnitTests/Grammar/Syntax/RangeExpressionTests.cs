@@ -85,7 +85,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(IncorrectBoundariesCases))]
-        public void Ctor_throws_IncorrectBoundaryException_if_boundaries_are_incoherent(BoundaryExpression min, BoundaryExpression max, string reason)
+        public void Given_incorrect_boundaries_Ctor_should_throws_IncorrectBoundaryException(BoundaryExpression min, BoundaryExpression max, string reason)
         {
             // Act
             Action action = () => new RangeExpression(min, max);
@@ -97,7 +97,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(BoundariesTypeMismatchCases))]
-        public void Ctor_throws_BoundaryTypeMismatchException_if_boundaries_type_are_not_compatible(BoundaryExpression min, BoundaryExpression max, string reason)
+        public void Given_boundaries_that_are_not_compatible_Ctor_should_throws_BoundaryTypeMismatchException(BoundaryExpression min, BoundaryExpression max, string reason)
         {
             // Act
             Action action = () => new RangeExpression(min, max);
@@ -114,14 +114,27 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new BoundaryExpression(new DateExpression(), included: false), new BoundaryExpression(new TimeExpression(), included: false)
+                    new BoundaryExpression(new DateExpression(), included: false),
+                    new BoundaryExpression(new TimeExpression(), included: false)
+                };
+
+                yield return new object[]
+                {
+                    new BoundaryExpression(new AsteriskExpression(), included: false),
+                    new BoundaryExpression(new TimeExpression(), included: false)
+                };
+
+                yield return new object[]
+                {
+                    new BoundaryExpression(new TimeExpression(), included: false),
+                    new BoundaryExpression(new AsteriskExpression(), included: false)
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(ValidCtorCases))]
-        public void Ctor_does_not_throws(BoundaryExpression min, BoundaryExpression max)
+        public void Given_valid_min_and_max_boundaries_Ctor_should_not_throws(BoundaryExpression min, BoundaryExpression max)
         {
             // Act
             Action ctor = () => new RangeExpression(min, max);

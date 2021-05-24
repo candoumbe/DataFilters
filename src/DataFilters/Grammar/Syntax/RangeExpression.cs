@@ -59,9 +59,9 @@ namespace DataFilters.Grammar.Syntax
                 throw new IncorrectBoundaryException($"{nameof(min)} or {nameof(max)} must not be null.");
             }
 
-            if (min?.Expression is TimeExpression && !(max is null || max.Expression is TimeExpression))
+            if (min?.Expression is TimeExpression && max is not null && max.Expression is not TimeExpression && max.Expression is not AsteriskExpression)
             {
-                throw new BoundariesTypeMismatchException($"{nameof(max)} must be a {nameof(TimeExpression)}", nameof(max));
+                throw new BoundariesTypeMismatchException($"{nameof(max)} must be either {nameof(TimeExpression)} or {nameof(AsteriskExpression)}", nameof(max));
             }
 
             Min = min?.Expression switch

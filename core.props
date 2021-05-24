@@ -22,10 +22,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType>embedded</DebugType>
-
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
 
   <Choose>
     <When Condition="'$(TF_BUILD)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">
@@ -47,11 +44,9 @@
       </ItemGroup>
     </When>
     <Otherwise>
-
       <ItemGroup>
         <PackageReference Include="FluentValidation" Version="8.*" />
       </ItemGroup>
-
     </Otherwise>
   </Choose>
   <ItemGroup>

@@ -330,11 +330,13 @@ namespace DataFilters.Grammar.Parsing
         public static TokenListParser<FilterToken, OneOfExpression> OneOf => (from before in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                                                                 .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
                                                                                 .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                                                 .OptionalOrDefault()
                                                                               from regex in Regex
                                                                               from after in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                                                                 .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
                                                                                 .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                                                 .OptionalOrDefault()
                                                                               select new { before, regex, after })
             .Select(item =>
@@ -361,11 +363,13 @@ namespace DataFilters.Grammar.Parsing
                                 break;
                             }
                         case StartsWithExpression startsWith: // Syntax like ma*[Nn]
-                            {
-                                expressions.AddRange(item.regex.Value.Select(chr => new AndExpression(new StartsWithExpression(startsWith.Value), new EndsWithExpression(chr.ToString())))
+                            expressions.AddRange(item.regex.Value.Select(chr => new AndExpression(new StartsWithExpression(startsWith.Value), new EndsWithExpression(chr.ToString())))
                                     .ToArray());
                                 break;
-                            }
+                        case AsteriskExpression asterisk: // Syntax like *[Nn]
+                            expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression($"{chr}"))
+                                    .ToArray());
+                            break;
                         default:
                             throw new NotSupportedException($"Unsupported {nameof(item.before)} expression type when {nameof(item.after)} expression is null");
                     }
@@ -414,8 +418,26 @@ namespace DataFilters.Grammar.Parsing
                                 }
                             }
                             break;
+                        case AsteriskExpression asterisk:
+                            {
+                                switch (item.after)
+                                {
+                                    case ConstantValueExpression constantAfter: // Syntax like Bat[Mm]an
+                                        expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression($"{chr}{constantAfter.Value}"))
+                                            .ToArray());
+                                        break;
+                                    case null:
+                                        expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression(chr.ToString()))
+                                            .ToArray());
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException($"Unsupported type {item.after.GetType()} for {nameof(item.after)} " +
+                                            $"when {nameof(item.before)} and {item.after} are not null expression type when before expression is null");
+                                }
+                            }
+                            break;
                         default:
-                            throw new NotSupportedException($"Unsupported {nameof(item.before)} expression type when before expression is null");
+                            throw new NotSupportedException($"Unsupported {nameof(item.before)} {item.before.GetType()} expression type when after expression is null");
                     }
                 }
 
