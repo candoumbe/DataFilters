@@ -23,7 +23,8 @@
           "description": "Indicates to continue a previously failed build attempt"
         },
         "GitHubToken": {
-          "type": "string"
+          "type": "string",
+          "default": "Secrets must be entered via 'nuke :secret [profile]'"
         },
         "Help": {
           "type": "boolean",
@@ -56,7 +57,8 @@
         },
         "NugetApiKey": {
           "type": "string",
-          "description": "API key used to publish artifacts to Nuget.org"
+          "description": "API key used to publish artifacts to Nuget.org",
+          "default": "Secrets must be entered via 'nuke :secret [profile]'"
         },
         "NugetPackageSource": {
           "type": "string",
