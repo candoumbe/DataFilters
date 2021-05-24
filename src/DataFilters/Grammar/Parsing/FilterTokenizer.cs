@@ -6,20 +6,65 @@ using static DataFilters.Grammar.Parsing.FilterToken;
 
 namespace DataFilters.Grammar.Parsing
 {
+    /// <summary>
+    /// <see cref="FilterTokenizer"/> is the base class used to "tokenize" a string.
+    /// </summary>
+    /// <remarks>
+    /// The tokenizer reads a string input and associated to one or more character a <see cref="FilterToken"/> which is the first step in the process of building <see cref="IFilter"/> instances.
+    /// </remarks>
     public class FilterTokenizer : Tokenizer<FilterToken>
     {
+        /// <summary>
+        /// The <c>_</c> character
+        /// </summary>
         public const char Underscore = '_';
+        /// <summary>
+        /// The <c>*</c> character
+        /// </summary>
         public const char Asterisk = '*';
+        /// <summary>
+        /// The <c>=</c> character
+        /// </summary>
         public const char EqualSign = '=';
+        /// <summary>
+        /// The <c>(</c> character
+        /// </summary>
         public const char LeftParenthesis = '(';
+        /// <summary>
+        /// The <c>)</c> character
+        /// </summary>
         public const char RightParenthesis = ')';
+        /// <summary>
+        /// The <c>[</c> character
+        /// </summary>
         public const char LeftSquareBracket = '[';
+        /// <summary>
+        /// The <c>]</c> character
+        /// </summary>
         public const char RightSquareBracket = ']';
+        /// <summary>
+        /// The <c>-</c> character
+        /// </summary>
         public const char Hyphen = '-';
+        /// <summary>
+        /// The <c>\</c> character
+        /// </summary>
         public const char BackSlash = '\\';
+        /// <summary>
+        /// The <c>|</c> character
+        /// </summary>
         public const char Pipe = '|';
+        /// <summary>
+        /// The <c>,</c> character
+        /// </summary>
         public const char Comma = ',';
+        /// <summary>
+        /// The <c>!</c> character
+        /// </summary>
         public const char Bang = '!';
+        /// <summary>
+        /// The <c>"</c> character
+        /// </summary>
         public const char DoubleQuote = '"';
 
         /// <summary>
@@ -38,6 +83,7 @@ namespace DataFilters.Grammar.Parsing
             Bang
         };
 
+        ///<inheritdoc/>
         protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
         {
             Result<char> next = span.ConsumeChar();
