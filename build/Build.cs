@@ -12,6 +12,7 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.ReportGenerator;
 using Nuke.Common.Utilities;
+using Nuke.Common.Tools.GitReleaseManager;
 
 using System;
 using System.Collections.Generic;
@@ -24,9 +25,10 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
-using static Nuke.Common.Tools.GitHub.GitHubTasks;
+using static Nuke.Common.Tools.GitReleaseManager.GitReleaseManagerTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+using System.Threading.Tasks;
 
 namespace DataFilters.ContinuousIntegration
 {
@@ -420,6 +422,7 @@ namespace DataFilters.ContinuousIntegration
             Git($"branch -D {GitRepository.Branch}");
 
             Git($"push origin --follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
+
         }
 
         private void FinishFeature()
@@ -451,7 +454,7 @@ namespace DataFilters.ContinuousIntegration
             .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
             .Requires(() => !(NugetApiKey.IsNullOrEmpty() || GitHubToken.IsNullOrEmpty()))
             .Requires(() => GitHasCleanWorkingCopy())
-            .Requires(() => GitRepository.Branch == MainBranchName
+            .Requires(() => GitCurrentBranch() == MainBranchName
                             || GitRepository.IsOnReleaseBranch()
                             || GitRepository.IsOnDevelopBranch())
             .Requires(() => Configuration.Equals(Configuration.Release))
@@ -472,22 +475,43 @@ namespace DataFilters.ContinuousIntegration
                         degreeOfParallelism: 4,
                         completeOnFailure: true);
 
-                    if (IsOnGithub)
-                    {
-                        DotNetNuGetPush(s => s.SetApiKey(GitHubToken)
-                            .SetSource(GitHubPackageSource)
-                            .EnableSkipDuplicate()
-                            .EnableNoSymbols()
-                            .SetProcessLogTimestamp(true)
-                            .CombineWith(nupkgs, (_, nupkg) => _
-                                        .SetTargetPath(nupkg)),
-                            degreeOfParallelism: 4,
-                            completeOnFailure: true);
-                    }
+                    DotNetNuGetPush(s => s.SetApiKey(GitHubToken)
+                        .SetSource(GitHubPackageSource)
+                        .EnableSkipDuplicate()
+                        .EnableNoSymbols()
+                        .SetProcessLogTimestamp(true)
+                        .CombineWith(nupkgs, (_, nupkg) => _
+                                    .SetTargetPath(nupkg)),
+                        degreeOfParallelism: 4,
+                        completeOnFailure: true);
                 }
 
                 PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg"));
                 PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg"));
+            });
+
+        public Target AddGithubRelease => _ => _
+            .After(Publish)
+            .Unlisted()
+            .Description("Creates a new GitHub release after *.nupkgs/*.snupkg were successfully published.")
+            .Requires(() => IsServerBuild && (GitCurrentBranch() == MainBranchName))
+            .Executes(async () =>
+            {
+                Info("Creating a new release");
+                Octokit.GitHubClient gitHubClient = new(new Octokit.ProductHeaderValue(nameof(DataFilters)))
+                {
+                    Credentials = new Octokit.Credentials(GitHubToken)
+                };
+
+                Octokit.NewRelease newRelease = new(MajorMinorPatchVersion)
+                {
+                    TargetCommitish = GitRepository.Commit,
+                    Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
+                };
+
+                Octokit.Release release = await gitHubClient.Repository.Release.Create(long.Parse(GitRepository.Identifier), newRelease);
+
+                Info($"Github release {release.TagName} created successfully");
             });
     }
 }
