@@ -4,20 +4,24 @@ using System.Collections.Generic;
 
 namespace DataFilters
 {
-    public static class SortToQueries
+    /// <summary>
+    /// Extensions method for <see cref="ISort{T}"/> types
+    /// </summary>
+    public static class SortExtensions
     {
         /// <summary>
         /// Converts <paramref name="sort"/> to <see cref="IOrder"/>.
         /// </summary>
         /// <typeparam name="T">Type of element the sort will be apply to.</typeparam>
         /// <param name="sort"></param>
-        /// <returns></returns>
+        /// <exception cref="NotSupportedException"><paramref name="sort"/> is neither <see cref="Sort{T}"/> nor <see cref="MultiSort{T}"/>.</exception>
         public static IEnumerable<IOrder> ToOrder<T>(this ISort<T> sort)
         {
             static OrderExpression CreateOrderExpressionFromSort(in Sort<T> instance)
             {
                 return new OrderExpression(instance.Expression.Field(), direction: instance.Direction == SortDirection.Ascending
-                    ? OrderDirection.Ascending : OrderDirection.Descending);
+                    ? OrderDirection.Ascending
+                    : OrderDirection.Descending);
             }
 
             switch (sort)
@@ -36,7 +40,7 @@ namespace DataFilters
                     }
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort type");
+                    throw new NotSupportedException("Unsupported sort type");
             }
         }
     }
