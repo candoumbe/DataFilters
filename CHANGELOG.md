@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
+- Fixed parsing `*<regex>`, `<regex>*` expressions ([#18](https://github.com/candoumbe/datafilters/issues/18))
 
 ## [0.6.0] / 2021-05-03
 - License changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)
@@ -38,9 +39,7 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 ## [0.3.0] / 2020-12-19
 - Added support for filtering over complex type collections by introducing sub property syntax
 - Moved `FilterExtensions.ToFilter<T>(this StringSegment)` method to `StringExtensions.ToFilter<T>(this StringSegment)` [BREAKING]
-- Moved `FilterExtensions.ToFilter<T>(this string)
-- 
-` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
+- Moved `FilterExtensions.ToFilter<T>(this string)` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
 - Changed `ConstantExpression` to `ConstantValueExpression` [BREAKING]
 - Changed subproperty syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
 - Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/RangeExpression.cs) with datetime values

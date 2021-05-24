@@ -36,11 +36,15 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// Builds a new <see cref="TimeExpression"/> instance.
         /// </summary>
+        /// <remarks>
+        /// A time expression can optionally specify an <paramref name="offset"/> with the UTC time
+        /// </remarks>
         /// <param name="hours"></param>
         /// <param name="minutes"></param>
         /// <param name="seconds"></param>
         /// <param name="milliseconds"></param>
         /// <param name="offset"></param>
+        /// <exception cref="ArgumentOutOfRangeException">either <paramref name="hours"/>, <paramref name="minutes"/>, <paramref name="seconds"/>, <paramref name="milliseconds"/> </exception>
         public TimeExpression(int hours = 0, int minutes = 0, int seconds = 0, int milliseconds = 0, TimeOffset offset = null)
         {
             if (hours < 0)

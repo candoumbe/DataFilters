@@ -24,6 +24,7 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
+using static Nuke.Common.Tools.GitHub.GitHubTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
@@ -121,12 +122,15 @@ namespace DataFilters.ContinuousIntegration
         public readonly bool Interactive = false;
 
         [Parameter]
+        [Secret]
         public readonly string GitHubToken;
 
         [Required] [Solution] public readonly Solution Solution;
         [Required] [GitRepository] public readonly GitRepository GitRepository;
         [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
+
         [CI] public readonly AzurePipelines AzurePipelines;
+        [CI] public readonly GitHubActions GitHubActions;
 
         [Partition(3)] public readonly Partition TestPartition;
 
@@ -229,15 +233,15 @@ namespace DataFilters.ContinuousIntegration
                                                                                                         files: new string[] { testFileResult })
                         );
 
-            // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
-            ReportGenerator(_ => _
-                    .SetFramework("net5.0")
-                    .SetReports(TestResultDirectory / "*.xml")
-                    .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
-                    .SetTargetDirectory(CoverageReportDirectory)
-                    .SetHistoryDirectory(CoverageReportHistoryDirectory)
-                    .SetTag(GitRepository.Commit)
-                );
+                // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
+                ReportGenerator(_ => _
+                        .SetFramework("net5.0")
+                        .SetReports(TestResultDirectory / "*.xml")
+                        .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
+                        .SetTargetDirectory(CoverageReportDirectory)
+                        .SetHistoryDirectory(CoverageReportHistoryDirectory)
+                        .SetTag(GitRepository.Commit)
+                    );
 
                 TestResultDirectory.GlobFiles("*.xml")
                                 .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
@@ -336,10 +340,10 @@ namespace DataFilters.ContinuousIntegration
                         }
 
 #pragma warning disable S2583 // Conditionally executed code should be reachable
-                } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
+                    } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
 #pragma warning restore S2583 // Conditionally executed code should be reachable
 
-                Info($"{EnvironmentInfo.NewLine}Good bye !");
+                    Info($"{EnvironmentInfo.NewLine}Good bye !");
                 }
                 else
                 {
@@ -431,16 +435,21 @@ namespace DataFilters.ContinuousIntegration
         #endregion
 
         [Parameter("API key used to publish artifacts to Nuget.org")]
+        [Secret]
         public readonly string NugetApiKey;
 
         [Parameter(@"URI where packages should be published (default : ""https://api.nuget.org/v3/index.json""")]
         public string NugetPackageSource => "https://api.nuget.org/v3/index.json";
 
+        public string GitHubPackageSource => $"https://nuget.pkg.github.com/{GitHubActions.GitHubRepositoryOwner}/index.json";
+
+        public bool IsOnGithub => GitHubActions is not null;
+
         public Target Publish => _ => _
             .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
             .DependsOn(Tests, Pack)
             .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
-            .Requires(() => !NugetApiKey.IsNullOrEmpty())
+            .Requires(() => !(NugetApiKey.IsNullOrEmpty() || GitHubToken.IsNullOrEmpty()))
             .Requires(() => GitHasCleanWorkingCopy())
             .Requires(() => GitRepository.Branch == MainBranchName
                             || GitRepository.IsOnReleaseBranch()
@@ -462,6 +471,19 @@ namespace DataFilters.ContinuousIntegration
                                     .SetTargetPath(nupkg)),
                         degreeOfParallelism: 4,
                         completeOnFailure: true);
+
+                    if (IsOnGithub)
+                    {
+                        DotNetNuGetPush(s => s.SetApiKey(GitHubToken)
+                            .SetSource(GitHubPackageSource)
+                            .EnableSkipDuplicate()
+                            .EnableNoSymbols()
+                            .SetProcessLogTimestamp(true)
+                            .CombineWith(nupkgs, (_, nupkg) => _
+                                        .SetTargetPath(nupkg)),
+                            degreeOfParallelism: 4,
+                            completeOnFailure: true);
+                    }
                 }
 
                 PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg"));

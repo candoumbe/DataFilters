@@ -508,6 +508,25 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Bo[Bb]",
                     new OneOfExpression(new ConstantValueExpression("BoB"), new ConstantValueExpression("Bob"))
                 };
+
+                yield return new object[]
+                {
+                    "[Bb]*ob",
+                    new OneOfExpression(new AndExpression(new StartsWithExpression("B"), new EndsWithExpression("ob")),
+                                        new AndExpression(new StartsWithExpression("b"), new EndsWithExpression("ob")))
+                };
+
+                yield return new object[]
+                {
+                    "*[Mm]an",
+                    new OneOfExpression(new EndsWithExpression("Man"), new EndsWithExpression("man"))
+                };
+
+                yield return new object[]
+                {
+                    "*[Mm]",
+                    new OneOfExpression(new EndsWithExpression("M"), new EndsWithExpression("m"))
+                };
             }
         }
 
@@ -552,17 +571,40 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "[2010-06-25 TO 2010-06-29]",
-                    new RangeExpression(
-                        min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
-                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
+                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
+                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
                     )
                 };
 
                 yield return new object[]
                 {
-                    "[2010-06-25 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true)
+                    "]2010-06-25 TO 2010-06-29[",
+                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
+                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
                     )
+                };
+
+                yield return new object[]
+                {
+                    "]2010-06-25 TO 2010-06-29]",
+                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
+                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "[2010-06-25 TO 2010-06-29[",
+                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
+                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
+                    )
+                };
+
+
+                yield return new object[]
+                {
+                    "[2010-06-25 TO *[",
+                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true))
                 };
 
                 yield return new object[]
@@ -573,11 +615,20 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
                 yield return new object[]
                 {
-                    "]2010-06-25 TO 2010-06-29[",
-                    new RangeExpression(
-                        min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
-                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
-                    )
+                    "]13:30:00 TO *[",
+                    new RangeExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
+                };
+
+                yield return new object[]
+                {
+                    "]* TO 13:30:00[",
+                    new RangeExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
+                };
+
+                yield return new object[]
+                {
+                    "]* TO 13:30:00]",
+                    new RangeExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included: true))
                 };
             }
         }
@@ -762,6 +813,16 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         )
                     )
                 };
+
+                yield return new object[]
+                {
+                    "Name=*[Mm]an",
+                    (
+                        new PropertyNameExpression("Name"),
+                        (FilterExpression) new OneOfExpression(new EndsWithExpression("Man"),
+                                                               new EndsWithExpression("man"))
+                    )
+                };
             }
         }
 
@@ -815,7 +876,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(1)
                         && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname"))
-                            && expr.expression.Equals(new OneOfExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("vandal"))))
+                            && expr.expression.Equals(new OneOfExpression(new ConstantValueExpression("Vandal"),
+                                                                          new ConstantValueExpression("vandal"))))
                     )
                 };
 
