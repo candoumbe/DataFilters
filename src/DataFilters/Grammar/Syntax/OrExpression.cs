@@ -57,9 +57,12 @@ namespace DataFilters.Grammar.Syntax
 
             if (other is OrExpression or)
             {
-                equivalent = or.Right.Equals(Right)
-                    ? or.Left.Equals(Left)
-                    : or.Left.Equals(Right) && or.Right.Equals(Left);
+                equivalent = or.Right.Equals(Right) && or.Left.Equals(Left)
+                    || (or.Left.Equals(Right) && or.Right.Equals(Left));
+            }
+            else
+            {
+                equivalent = Left.Equals(Right) && Left.Equals(other);
             }
 
             return equivalent;

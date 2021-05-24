@@ -68,6 +68,16 @@ namespace DataFilters.Grammar.Syntax
                     equivalent = !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any());
                 }
             }
+            else
+            {
+                int i = 0;
+                do
+                {
+                    equivalent = _values[i].Equals(other);
+                    i++;
+                }
+                while (i < _values.Length && equivalent);
+            }
 
             return equivalent;
         }

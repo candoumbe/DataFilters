@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using DataFilters.Grammar.Syntax;
+
 using FsCheck;
-using FsCheck.Experimental;
-using Microsoft.FSharp.Data.UnitSystems.SI.UnitNames;
-using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Helpers
 {

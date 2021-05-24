@@ -3,6 +3,9 @@
     /// <summary>
     /// Base class for filter expression
     /// </summary>
+    /// <para>
+    /// <see cref="FilterExpression"/>s can take many forms : from the simplest <see cref="ConstantValueExpression"/> to more complex <see cref="GroupExpression"/>s.
+    /// </para>
     public abstract class FilterExpression
     {
         /// <summary>
