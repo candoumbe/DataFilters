@@ -128,6 +128,25 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
 
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+        {
+            bool equivalent = false;
+            if (other is not null)
+            {
+                if (other is RangeExpression range)
+                {
+                    equivalent = Equals(range);
+                }
+                else if (Min is not null && Min.Included && Max is not null && Max.Included && Min.Equals(Max))
+                {
+                    equivalent = other.Equals(Min.Expression.As(other.GetType()));
+                }
+            }
+
+            return equivalent;
+        }
+
         /// <summary>
         /// Deconstruction method
         /// </summary>
