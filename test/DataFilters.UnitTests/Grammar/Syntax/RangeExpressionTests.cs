@@ -320,5 +320,37 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .Or(Prop.Throws<ArgumentNullException, RangeExpression>(lazyRangeExpression).When(time is null))
                 .Or(lazyRangeExpression.Value.Max.Expression is TimeExpression timeExpression && timeExpression.Equals(time));
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(ConstantValueExpression constant, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(constant, constant, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_DateExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateExpression(DateExpression date, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(date, date, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateTimeExpression(DateTimeExpression dateTime, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(dateTime, dateTime, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_TimeExpression(TimeExpression dateTime, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(dateTime, dateTime, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        private static Property CreateIsEquivalentPropeprty(FilterExpression filterExpression, IBoundaryExpression boundaryExpression, bool minIncluded, bool maxIsIncluded)
+        {
+            // Arrange
+            RangeExpression range = new(new (boundaryExpression, minIncluded), new (boundaryExpression, maxIsIncluded));
+
+            return range.IsEquivalentTo(filterExpression).ToProperty();
+        }
     }
 }
