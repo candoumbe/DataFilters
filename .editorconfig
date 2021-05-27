@@ -1,0 +1,9 @@
+﻿[*.cs]
+
+# IDE0065: Directive using mal placée
+csharp_using_directive_placement = inside_namespace
+dotnet_diagnostic.RCS1046.severity=silent
+
+[*.{cs,vb}]
+dotnet_style_prefer_conditional_expression_over_assignment=false:silent
+dotnet_style_prefer_conditional_expression_over_return=false:silent

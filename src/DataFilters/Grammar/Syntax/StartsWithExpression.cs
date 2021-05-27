@@ -5,7 +5,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that defines a string that starts with a specified <see cref="Value"/>.
     /// </summary>
+#if NETSTANDARD1_3
     public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWithExpression>
+#else
+    public record StartsWithExpression : FilterExpression, IEquatable<StartsWithExpression>
+#endif
     {
         /// <summary>
         /// Value associated with the expression
@@ -33,6 +37,7 @@ namespace DataFilters.Grammar.Syntax
             Value = value;
         }
 
+#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(StartsWithExpression other) => Value == other?.Value;
 
@@ -44,5 +49,6 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> {Value}";
+#endif
     }
 }

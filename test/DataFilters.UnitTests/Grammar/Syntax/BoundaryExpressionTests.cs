@@ -1,4 +1,5 @@
 ﻿using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
 
 using FluentAssertions;
 using FsCheck;
@@ -84,7 +85,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             }
         }
 
-        [Property]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included) => Prop.Throws<ArgumentNullException, BoundaryExpression>(new Lazy<BoundaryExpression>(() => new BoundaryExpression(null, included)));
     }
 }

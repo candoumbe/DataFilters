@@ -1,9 +1,13 @@
 ﻿using DataFilters.Grammar.Syntax;
 using FluentAssertions;
+using FsCheck.Xunit;
+using FsCheck;
+
 using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using DataFilters.UnitTests.Helpers;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -103,5 +107,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .NotBe(other?.GetHashCode(), reason);
             }
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_EndsWithExpression_Complexity_should_return_1(EndsWithExpression endsWith)
+            => (endsWith.Complexity == 1.5).ToProperty();
     }
 }

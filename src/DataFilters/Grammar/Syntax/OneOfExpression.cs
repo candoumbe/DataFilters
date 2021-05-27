@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Utilities;
@@ -11,7 +13,11 @@ namespace DataFilters.Grammar.Syntax
     /// <remarks>
     /// <see cref="OneOfExpression"/> indicates that the filter expression should
     /// </remarks>
+#if NETSTANDARD1_3
     public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
+#else
+    public record OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
+#endif
     {
         private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new();
 
@@ -36,21 +42,6 @@ namespace DataFilters.Grammar.Syntax
             _values = values.Where(x => x != null)
                             .ToArray();
         }
-
-        ///<inheritdoc/>
-        public bool Equals(OneOfExpression other) => other != null && equalityComparer.Equals(_values, other._values);
-
-        /// <inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as OneOfExpression);
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => equalityComparer.GetHashCode(_values);
-
-        ///<inheritdoc/>
-        public static bool operator ==(OneOfExpression left, OneOfExpression right) => EqualityComparer<OneOfExpression>.Default.Equals(left, right);
-
-        ///<inheritdoc/>
-        public static bool operator !=(OneOfExpression left, OneOfExpression right) => !(left == right);
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
@@ -81,5 +72,31 @@ namespace DataFilters.Grammar.Syntax
 
             return equivalent;
         }
+
+#if NETSTANDARD1_3
+        ///<inheritdoc/>
+        public bool Equals(OneOfExpression other) => other != null && equalityComparer.Equals(_values, other._values);
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => Equals(obj as OneOfExpression);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => equalityComparer.GetHashCode(_values);
+
+        ///<inheritdoc/>
+        public static bool operator ==(OneOfExpression left, OneOfExpression right) => EqualityComparer<OneOfExpression>.Default.Equals(left, right);
+
+        ///<inheritdoc/>
+        public static bool operator !=(OneOfExpression left, OneOfExpression right) => !(left == right);
+#else
+        ///<inheritdoc/>
+        public virtual bool Equals(OneOfExpression other) => other is OneOfExpression oneOf && equalityComparer.Equals(_values, oneOf._values);
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => equalityComparer.GetHashCode(_values);
+#endif
+
+        ///<inheritdoc/>
+        public override double Complexity => Values.Sum(expression => expression.Complexity);
     }
 }

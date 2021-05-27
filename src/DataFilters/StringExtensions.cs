@@ -282,11 +282,11 @@ namespace System
                 FilterTokenizer tokenizer = new();
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
-                (PropertyNameExpression Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
+                (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
 
                 if (expressions.Once())
                 {
-                    (PropertyNameExpression property, FilterExpression expression) = expressions[0];
+                    (PropertyName property, FilterExpression expression) = expressions[0];
 
                     PropertyInfo pi = typeof(T).GetRuntimeProperties()
                                                .SingleOrDefault(x => x.CanRead && x.Name == propertyNameResolutionStrategy.Handle(property.Name));
@@ -301,7 +301,7 @@ namespace System
                 {
                     IList<IFilter> filters = new List<IFilter>();
 
-                    foreach ((PropertyNameExpression property, FilterExpression expression) in expressions)
+                    foreach ((PropertyName property, FilterExpression expression) in expressions)
                     {
                         PropertyInfo pi = typeof(T).GetRuntimeProperties()
                                                    .SingleOrDefault(x => x.CanRead && x.Name == property.Name);

@@ -37,7 +37,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         public void IsParser() => typeof(FilterTokenParser).Should()
                                                            .BeStatic().And
                                                            .HaveProperty<TokenListParser<FilterToken, ConstantValueExpression>>("AlphaNumeric").And
-                                                           .HaveProperty<TokenListParser<FilterToken, PropertyNameExpression>>("Property").And
+                                                           .HaveProperty<TokenListParser<FilterToken, PropertyName>>("Property").And
                                                            .HaveProperty<TokenListParser<FilterToken, StartsWithExpression>>("StartsWith").And
                                                            .HaveProperty<TokenListParser<FilterToken, EndsWithExpression>>("EndsWith").And
                                                            .HaveProperty<TokenListParser<FilterToken, OneOfExpression>>("OneOf").And
@@ -693,48 +693,50 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Firstname=Bruce",
-                    new PropertyNameExpression("Firstname")
+                    new PropertyName("Firstname")
                 };
 
                 yield return new object[]
                 {
                     @"Henchmen[""Name""]=*rob*",
-                    new PropertyNameExpression(@"Henchmen[""Name""]")
+                    new PropertyName(@"Henchmen[""Name""]")
                 };
 
                 yield return new object[]
                 {
                     @"Henchmen[""Powers""][""Description""]=*strength*",
-                    new PropertyNameExpression(@"Henchmen[""Powers""][""Description""]")
+                    new PropertyName(@"Henchmen[""Powers""][""Description""]")
                 };
 
                 yield return new object[]
                 {
                     @"Henchmen[""first_name""]=*rob*",
-                    new PropertyNameExpression(@"Henchmen[""first_name""]")
+                    new PropertyName(@"Henchmen[""first_name""]")
                 };
 
                 yield return new object[]
                 {
                     "first_name=Bruce",
-                    new PropertyNameExpression("first_name")
+                    new PropertyName("first_name")
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(PropertyNameCases))]
-        public void CanParsePropertyNameExpression(string input, PropertyNameExpression expected)
+        public void CanParsePropertyNameExpression(string input, PropertyName expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            PropertyNameExpression expression = FilterTokenParser.Property.Parse(tokens);
+            PropertyName expression = FilterTokenParser.Property.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            expression.Should()
+                      .NotBeSameAs(expected).And
+                      .Be(expected);
         }
 
         public static IEnumerable<object[]> CriterionCases
@@ -745,7 +747,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "Name=Vandal",
                     (
-                        new PropertyNameExpression("Name"),
+                        new PropertyName("Name"),
                         (FilterExpression) new ConstantValueExpression("Vandal")
                     )
                 };
@@ -754,7 +756,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "first_name=Vandal",
                     (
-                        new PropertyNameExpression("first_name"),
+                        new PropertyName("first_name"),
                         (FilterExpression) new ConstantValueExpression("Vandal")
                     )
                 };
@@ -763,7 +765,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "Name=Vandal|Banner",
                     (
-                        new PropertyNameExpression("Name"),
+                        new PropertyName("Name"),
                         (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
                     )
                 };
@@ -772,7 +774,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "Name=Vandal|Banner",
                     (
-                        new PropertyNameExpression("Name"),
+                        new PropertyName("Name"),
                         (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
                     )
                 };
@@ -781,7 +783,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "Size=[10 TO 20]",
                     (
-                        new PropertyNameExpression("Size"),
+                        new PropertyName("Size"),
                         (FilterExpression) new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"),
                                                                                            included: true),
                                                                max: new BoundaryExpression(new ConstantValueExpression("20"),
@@ -793,7 +795,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     @"Acolytes[""Name""][""Superior""]=Vandal|Banner",
                     (
-                        new PropertyNameExpression(@"Acolytes[""Name""][""Superior""]"),
+                        new PropertyName(@"Acolytes[""Name""][""Superior""]"),
                         (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
                     )
                 };
@@ -802,7 +804,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     @"Appointment[""Date""]=]2012-10-19T15:03:45Z TO 2012-10-19T15:30:45+01:00[",
                     (
-                        new PropertyNameExpression(@"Appointment[""Date""]"),
+                        new PropertyName(@"Appointment[""Date""]"),
                         (FilterExpression) new RangeExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
                                                                                                                   new TimeExpression(hours : 15, minutes: 03, seconds: 45, offset: new TimeOffset())),
                                                                                            included: false),
@@ -817,7 +819,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "Name=*[Mm]an",
                     (
-                        new PropertyNameExpression("Name"),
+                        new PropertyName("Name"),
                         (FilterExpression) new OneOfExpression(new EndsWithExpression("Man"),
                                                                new EndsWithExpression("man"))
                     )
@@ -832,7 +834,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         /// <param name="expected"></param>
         [Theory]
         [MemberData(nameof(CriterionCases))]
-        public void CanParseCriterion(string input, (PropertyNameExpression prop, FilterExpression expression) expected)
+        public void CanParseCriterion(string input, (PropertyName prop, FilterExpression expression) expected)
         {
             _outputHelper.WriteLine($"{nameof(input)} : '{input}'");
 
@@ -840,7 +842,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            (PropertyNameExpression prop, FilterExpression expression) = FilterTokenParser.Criterion.Parse(tokens);
+            (PropertyName prop, FilterExpression expression) = FilterTokenParser.Criterion.Parse(tokens);
 
             // Assert
             using (new AssertionScope())
@@ -862,19 +864,19 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Firstname=Vandal&Lastname=Savage",
-                    (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
+                    (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(2)
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantValueExpression("Vandal")))
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new ConstantValueExpression("Vandal")))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
                     )
                 };
 
                 yield return new object[]
                 {
                     "Firstname=[Vv]andal",
-                    (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
+                    (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(1)
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname"))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname"))
                             && expr.expression.Equals(new OneOfExpression(new ConstantValueExpression("Vandal"),
                                                                           new ConstantValueExpression("vandal"))))
                     )
@@ -885,10 +887,10 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     yield return new object[]
                     {
                         $@"Firstname=Vand\{c}al&Lastname=Savage",
-                        (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
+                        (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                             expressions => expressions.Exactly(2)
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Firstname")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
                         )
                     };
                 }
@@ -898,10 +900,10 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     yield return new object[]
                     {
                         $@"first_name=Vand\{c}al&last_name=Savage",
-                        (Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>>)(
+                        (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                             expressions => expressions.Exactly(2)
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("first_name")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyNameExpression("last_name")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("first_name")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("last_name")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
                         )
                     };
                 }
@@ -915,14 +917,14 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         /// <param name="expectation"></param>
         [Theory]
         [MemberData(nameof(CriteriaCases))]
-        public void CanParseCriteria(string input, Expression<Func<IEnumerable<(PropertyNameExpression prop, FilterExpression expression)>, bool>> expectation)
+        public void CanParseCriteria(string input, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            IEnumerable<(PropertyNameExpression prop, FilterExpression expression)> actual = FilterTokenParser.Criteria.Parse(tokens);
+            IEnumerable<(PropertyName prop, FilterExpression expression)> actual = FilterTokenParser.Criteria.Parse(tokens);
 
             // Assert
             actual.Should()

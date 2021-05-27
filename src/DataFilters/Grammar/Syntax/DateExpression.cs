@@ -5,12 +5,17 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a date.
     /// </summary>
-    public sealed class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+#if NETSTANDARD1_3
+    public class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+#else
+    public record DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+
+#endif
     {
-        /// <summary>
-        /// Year part of the date
-        /// </summary>
-        public int Year { get; }
+    /// <summary>
+    /// Year part of the date
+    /// </summary>
+    public int Year { get; }
 
         /// <summary>
         /// Month part of the date
@@ -53,6 +58,7 @@ namespace DataFilters.Grammar.Syntax
             Day = day;
         }
 
+#if NETSTANDARD1_3
         /// <inheritdoc />
         public bool Equals(DateExpression other) => other != null
             && (Year, Month, Day).Equals((other.Year, other.Month, other.Day));
@@ -65,5 +71,6 @@ namespace DataFilters.Grammar.Syntax
 
         /// <inheritdoc />
         public override string ToString() => this.Jsonify();
+#endif
     }
 }

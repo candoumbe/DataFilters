@@ -82,5 +82,45 @@ namespace DataFilters.UnitTests.Helpers
                                            seconds: tuple.Item2.Item),
                                convertFrom: _ => default);
         }
+
+        public static Arbitrary<EndsWithExpression> GenerateEndsWithExpression()
+            => Arb.Default.NonEmptyString()
+                          .Convert(convertTo: nonWhiteSpaceString => new EndsWithExpression(nonWhiteSpaceString.Item),
+                                   convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
+
+        public static Arbitrary<StartsWithExpression> GenerateStartsWithExpression()
+            => Arb.Default.NonEmptyString()
+                          .Convert(convertTo: nonWhiteSpaceString => new StartsWithExpression(nonWhiteSpaceString.Item),
+                                   convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
+
+        public static Arbitrary<FilterExpression> GenerateAndExpression()
+        {
+            IList<Gen<FilterExpression>> generators = new List<Gen<FilterExpression>>
+            {
+                GenerateEndsWithExpression().Generator.Select(item => (FilterExpression) item),
+                GenerateStartsWithExpression().Generator.Select(item => (FilterExpression) item),
+                GenerateContainsExpression().Generator.Select(item => (FilterExpression) item),
+            };
+
+            return Gen.OneOf(generators).ToArbitrary();
+        }
+
+
+        public static Arbitrary<IBoundaryExpression> GenerateBoundaryExpression()
+        {
+            IList<Gen<IBoundaryExpression>> generators = new List<Gen<IBoundaryExpression>>
+            {
+                GenerateConstantValueExpression().Generator.Select(item => (IBoundaryExpression) item)
+            };
+
+            return Gen.OneOf(generators).ToArbitrary();
+        }
+
+        public static Arbitrary<ContainsExpression> GenerateContainsExpression()
+            => Arb.Default.NonEmptyString()
+                          .Convert(convertTo: input => new ContainsExpression(input.Item),
+                                   convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
+
+
     }
 }

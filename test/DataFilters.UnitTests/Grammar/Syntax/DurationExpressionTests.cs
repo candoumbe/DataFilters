@@ -68,5 +68,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             return (!duration.Equals(null)).ToProperty();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_DurationExpression_GetComplexity_should_return_1(DurationExpression duration) => (duration.Complexity == 1).ToProperty();
     }
 }

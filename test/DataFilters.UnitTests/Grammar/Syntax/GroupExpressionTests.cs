@@ -1,9 +1,13 @@
 ﻿using DataFilters.Grammar.Syntax;
 using FluentAssertions;
+using FsCheck.Xunit;
+using FsCheck;
+
 using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using DataFilters.UnitTests.Helpers;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {

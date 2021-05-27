@@ -1,5 +1,10 @@
 ﻿using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+
 using FluentAssertions;
+using FsCheck;
+using FsCheck.Xunit;
+
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -81,5 +86,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .NotBe(other?.GetHashCode(), reason);
             }
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators)})]
+        public Property Given_NotExpression_GetComplexity_should_return_same_complexity_as_embedded_expression(NotExpression notExpression)
+            => (notExpression.Complexity == notExpression.Expression.Complexity).ToProperty();
     }
 }

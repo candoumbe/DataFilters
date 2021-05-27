@@ -509,7 +509,8 @@ namespace DataFilters.ContinuousIntegration
                     Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
                 };
 
-                Octokit.Release release = await gitHubClient.Repository.Release.Create(long.Parse(GitRepository.Identifier), newRelease);
+                Octokit.Release release = await gitHubClient.Repository.Release.Create(long.Parse(GitRepository.Identifier), newRelease)
+                                                                               .ConfigureAwait(false);
 
                 Info($"Github release {release.TagName} created successfully");
             });

@@ -1,9 +1,13 @@
 ﻿using DataFilters.Grammar.Syntax;
 using FluentAssertions;
+using FsCheck.Xunit;
+using FsCheck;
+
 using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using DataFilters.UnitTests.Helpers;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -15,10 +19,10 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Fact]
         public void IsFilterExpression() => typeof(ContainsExpression).Should()
-                                                                          .BeAssignableTo<FilterExpression>().And
-                                                .Implement<IEquatable<ContainsExpression>>().And
-                                                                          .HaveConstructor(new[] { typeof(string) }).And
-            .HaveProperty<string>("Value");
+                                                                      .BeAssignableTo<FilterExpression>().And
+                                                                      .Implement<IEquatable<ContainsExpression>>().And
+                                                                      .HaveConstructor(new[] { typeof(string) }).And
+                                                                      .HaveProperty<string>("Value");
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -102,5 +106,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .NotBe(other?.GetHashCode(), reason);
             }
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_ContainsExpression_GetComplexity_should_return_1_and_0_dot_5(ContainsExpression contains)
+            => (contains.Complexity == 1.5).ToProperty();
     }
 }
