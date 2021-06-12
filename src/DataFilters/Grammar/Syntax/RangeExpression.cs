@@ -1,13 +1,18 @@
-﻿using DataFilters.Grammar.Exceptions;
-using System;
-using System.Runtime.Serialization;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using Exceptions;
+
+    using System;
+
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
+#if NETSTANDARD1_3
     public sealed class RangeExpression : FilterExpression, IEquatable<RangeExpression>
+#else
+    public record RangeExpression : FilterExpression, IEquatable<RangeExpression>
+#endif
     {
         /// <summary>
         /// Lower bound of the current instance
@@ -92,6 +97,7 @@ namespace DataFilters.Grammar.Syntax
             };
         }
 
+#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(RangeExpression other)
         {
@@ -120,14 +126,12 @@ namespace DataFilters.Grammar.Syntax
         }
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as RangeExpression);
-
-        ///<inheritdoc/>
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
 
+#endif
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
@@ -157,5 +161,8 @@ namespace DataFilters.Grammar.Syntax
             min = Min;
             max = Max;
         }
+
+        /// <inheritdoc/>
+        public override double Complexity => (Min?.Expression?.Complexity ?? 0) + (Max?.Expression?.Complexity ?? 0);
     }
 }

@@ -6,9 +6,11 @@ using FsCheck.Xunit;
 using System;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    [UnitTest]
     public class ConstantValueExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -65,9 +67,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Instance_should_be_equals_to_itself(ConstantValueExpression instance) => object.Equals(instance, instance).ToProperty();
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Equals_is_commutative(ConstantValueExpression first, ConstantValueExpression second) => (first.Equals(second) == second.Equals(first)).ToProperty();
 
         [Property]
@@ -95,5 +94,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             return expression.Value.Equals(input).ToProperty()
                     .And(expression.Value.GetType() == input.GetType());
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_ConstantExpression_GetComplexity_should_return_1(ConstantValueExpression constant) => (constant.Complexity == 1).ToProperty();
     }
 }

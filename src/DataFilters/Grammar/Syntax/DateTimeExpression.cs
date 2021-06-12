@@ -5,7 +5,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> implementation that can holds a datetime value
     /// </summary>
+#if NETSTANDARD1_3
     public sealed class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
+#else
+    public record DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
+#endif
     {
         /// <summary>
         /// Date part of the expression
@@ -69,6 +73,14 @@ namespace DataFilters.Grammar.Syntax
         }
 
         /// <inheritdoc/>
+        public void Deconstruct(out DateExpression date, out TimeExpression time)
+        {
+            date = Date;
+            time = Time;
+        }
+
+#if NETSTANDARD1_3
+        /// <inheritdoc/>
         public bool Equals(DateTimeExpression other) => (Date, Time).Equals((other?.Date, other?.Time));
 
         /// <inheritdoc/>
@@ -77,14 +89,8 @@ namespace DataFilters.Grammar.Syntax
         /// <inheritdoc/>
         public override int GetHashCode() => (Date, Time).GetHashCode();
 
-        /// <inheritdoc/>
-        public void Deconstruct(out DateExpression date, out TimeExpression time)
-        {
-            date = Date;
-            time = Time;
-        }
-
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
+#endif 
     }
 }

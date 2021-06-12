@@ -352,5 +352,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             return range.IsEquivalentTo(filterExpression).ToProperty();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_RangeExpression_GetComplexity_should_return_sum_of_min_and_max_complexity(RangeExpression rangeExpression)
+            => (rangeExpression.Complexity == (rangeExpression.Min?.Expression?.Complexity ?? 0) + (rangeExpression.Max?.Expression?.Complexity ?? 0)).ToProperty();
     }
 }

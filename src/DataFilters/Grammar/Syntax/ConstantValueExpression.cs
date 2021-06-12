@@ -5,7 +5,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
+#if NETSTANDARD1_3
     public sealed class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
+#else
+    public record ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
+#endif
     {
         /// <summary>
         /// "Raw" value of the constant
@@ -36,7 +40,7 @@ namespace DataFilters.Grammar.Syntax
                 _ => throw new ArgumentOutOfRangeException(nameof(value), $"Unsupported type '{value.GetType()}' for {nameof(ConstantValueExpression)}")
             };
         }
-
+#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
 
@@ -48,5 +52,9 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
+#endif
+
+        ///<inheritdoc/>
+        public override double Complexity => 1;
     }
 }

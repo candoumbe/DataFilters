@@ -1,14 +1,22 @@
-﻿using DataFilters.Grammar.Syntax;
-using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
+﻿
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
     [UnitTest]
     [Feature(nameof(AndExpression))]
     public class AndExpressionTests
@@ -19,18 +27,18 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Fact]
         public void IsFilterExpression() => typeof(AndExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<AndExpression>>().And
-            .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
-            .HaveProperty<FilterExpression>("Left").And
-            .HaveProperty<FilterExpression>("Right");
+                                                                 .BeAssignableTo<FilterExpression>().And
+                                                                 .Implement<IEquatable<AndExpression>>().And
+                                                                 .Implement<IHaveComplexity>().And
+                                                                 .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
+                                                                 .HaveProperty<FilterExpression>("Left").And
+                                                                 .HaveProperty<FilterExpression>("Right");
 
         public static IEnumerable<object[]> ArgumentNullExceptionCases
         {
             get
             {
                 FilterExpression[] left = { new StartsWithExpression("ce"), null };
-                FilterExpression[] right = { new StartsWithExpression("ce"), null };
 
                 return left.CrossJoin(left, (left, right) => (left, right))
                     .Where(tuple => tuple.left == null || tuple.right is null)
@@ -97,5 +105,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .NotBe(other?.GetHashCode(), reason);
             }
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_AndExpression_GetComplexity_should_return_left_complexity_multiply_by_right_complexity(AndExpression and)
+            => (and.Complexity == and.Left.Complexity * and.Right.Complexity).ToProperty();
     }
 }

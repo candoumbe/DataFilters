@@ -5,7 +5,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
     /// </summary>
-    public sealed class AndExpression : FilterExpression, IEquatable<AndExpression>
+#if NETSTANDARD1_3
+    public sealed class AndExpression : FilterExpression, IEquatable<AndExpression>, IHaveComplexity
+#else
+    public record AndExpression : FilterExpression, IEquatable<AndExpression>, IHaveComplexity
+#endif
     {
         /// <summary>
         /// Left part of the expression
@@ -16,6 +20,9 @@ namespace DataFilters.Grammar.Syntax
         /// Right part of the expression
         /// </summary>
         public FilterExpression Right { get; }
+
+        /// <inheritdoc/>
+        public override double Complexity => Right.Complexity * Left.Complexity;
 
         /// <summary>
         /// Builds a new <see cref="AndExpression"/> that combiens <paramref name="left"/> and <paramref name="right"/> using the logical
@@ -30,6 +37,7 @@ namespace DataFilters.Grammar.Syntax
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
+#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(AndExpression other) => Left.Equals(other?.Left) && Right.Equals(other?.Right);
 
@@ -37,13 +45,11 @@ namespace DataFilters.Grammar.Syntax
         public override bool Equals(object obj) => Equals(obj as AndExpression);
 
         ///<inheritdoc/>
-#if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Left, Right).GetHashCode();
-#else
-        public override int GetHashCode() => HashCode.Combine(Left, Right);
-#endif
 
         ///<inheritdoc/>
         public override string ToString() => $"{nameof(AndExpression)} : {{{nameof(Left)} ({Left.GetType().Name}) -> {Left}, {{{nameof(Right)} ({Right.GetType().Name}) -> {Right}}}";
+#endif
+        
     }
 }

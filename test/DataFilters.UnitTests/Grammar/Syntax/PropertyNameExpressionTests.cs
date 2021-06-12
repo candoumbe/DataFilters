@@ -7,27 +7,25 @@ using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    public class PropertyNameExpressionTests
+    public class PropertyNameTests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        public PropertyNameExpressionTests(ITestOutputHelper outputHelper)
+        public PropertyNameTests(ITestOutputHelper outputHelper)
         {
             _outputHelper = outputHelper;
         }
 
         [Fact]
-        public void IsFilterExpression() => typeof(PropertyNameExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<PropertyNameExpression>>().And
-            .HaveConstructor(new[] { typeof(string) }).And
-            .HaveProperty<string>("Name");
+        public void IsFilterExpression() => typeof(PropertyName).Should()
+                                                                .HaveConstructor(new[] { typeof(string) }).And
+                                                                .HaveProperty<string>("Name");
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => new PropertyNameExpression(null);
+            Action action = () => new PropertyName(null);
 
             // Assert
             action.Should()
@@ -40,7 +38,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void Ctor_Throws_ArgumentOutyException_When_Argument_Is_Null(string name)
         {
             // Act
-            Action action = () => new PropertyNameExpression(name);
+            Action action = () => new PropertyName(name);
 
             // Assert
             action.Should()
@@ -53,16 +51,16 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new PropertyNameExpression("prop1"),
-                    new PropertyNameExpression("prop1"),
+                    new PropertyName("prop1"),
+                    new PropertyName("prop1"),
                     true,
                     "comparing two different instances with same property name"
                 };
 
                 yield return new object[]
                 {
-                    new PropertyNameExpression("prop1"),
-                    new PropertyNameExpression("prop2"),
+                    new PropertyName("prop1"),
+                    new PropertyName("prop2"),
                     false,
                     "comparing two different instances with different property name"
                 };
@@ -71,7 +69,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(PropertyNameExpression first, object other, bool expected, string reason)
+        public void ImplementsEqualsCorrectly(PropertyName first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
             _outputHelper.WriteLine($"Second instance : {other}");

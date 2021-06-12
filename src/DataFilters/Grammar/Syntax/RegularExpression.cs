@@ -5,7 +5,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a regex pattern as its <see cref="Value"/>.
     /// </summary>
+#if NETSTANDARD1_3
     public sealed class RegularExpression : FilterExpression, IEquatable<RegularExpression>
+#else
+    public record RegularExpression : FilterExpression, IEquatable<RegularExpression>
+#endif
     {
         /// <summary>
         /// Content of the regular expression.
@@ -19,6 +23,7 @@ namespace DataFilters.Grammar.Syntax
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         public RegularExpression(string value) => Value = value ?? throw new ArgumentNullException(nameof(value));
 
+#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(RegularExpression other) => Value == other?.Value;
 
@@ -30,5 +35,6 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => $"{nameof(RegularExpression)} : Value -> {Value}";
+#endif
     }
 }

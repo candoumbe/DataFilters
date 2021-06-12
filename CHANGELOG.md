@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
 - Fixed parsing `*<regex>`, `<regex>*` expressions ([#18](https://github.com/candoumbe/datafilters/issues/18))
+- Added complexity measurement of a `FilterExpression` ([#19](https://github.com/candoumbe/datafilters/issues/19))
+- Renamed `PropertyNameExpression` to `PropertyName` as its no longer a `FilterExpression` [BREAKING]
+- Removed `EqualExpression`
 
 ## [0.6.0] / 2021-05-03
 - License changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)

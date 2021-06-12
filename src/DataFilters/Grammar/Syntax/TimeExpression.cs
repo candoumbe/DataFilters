@@ -6,7 +6,11 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that only consists of time part.
     /// </summary>
+#if NETSTANDARD1_3
     public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression
+#else
+    public record TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression
+#endif
     {
         /// <summary>
         /// Hours part of the expression
@@ -74,6 +78,7 @@ namespace DataFilters.Grammar.Syntax
             Offset = offset;
         }
 
+#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(TimeExpression other) => other != null
             && (Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset));
@@ -83,7 +88,7 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
-
+#endif
         ///<inheritdoc/>
         public override string ToString() => $"{{{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}}}";
     }

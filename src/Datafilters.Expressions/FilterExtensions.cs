@@ -201,7 +201,7 @@ namespace DataFilters
                     IsEmpty => ComputeIsEmpty(property),
                     IsNotEmpty => ComputeIsNotEmpty(property),
                     EqualTo => ComputeEquals(property, value),
-                    _ => throw new ArgumentOutOfRangeException(nameof(@operator), @operator, "Unsupported operator")
+                    _ => throw new NotSupportedException($"Unsupported {@operator} operator when computing a body expression")
                 };
             }
 

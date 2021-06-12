@@ -176,5 +176,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             return orExpression.IsEquivalentTo(filterExpression)
                                .ToProperty();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_OrExpression_GetComplexity_should_return_sum_of_left_and_right_complexity(OrExpression orExpression)
+            => (orExpression.Complexity == orExpression.Left.Complexity + orExpression.Right.Complexity).ToProperty();
     }
 }

@@ -316,28 +316,28 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Property name parser
         /// </summary>
-        public static TokenListParser<FilterToken, PropertyNameExpression> Property => from prop in AlphaNumeric
+        public static TokenListParser<FilterToken, PropertyName> Property => from prop in AlphaNumeric
                                                                                        from subProps in (
                                                                                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                            from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                            from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                                                                                            select @$"[""{subProp.Value}""]"
                                                                                        ).Many()
-                                                                                       select new PropertyNameExpression(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
+                                                                                       select new PropertyName(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
         /// <summary>
         /// Parser for Regex expressions.
         /// </summary>
         public static TokenListParser<FilterToken, OneOfExpression> OneOf => (from before in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                .OptionalOrDefault()
+                                                                                                     .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                                                                                     .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                     .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                                     .OptionalOrDefault()
                                                                               from regex in Regex
                                                                               from after in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                .OptionalOrDefault()
+                                                                                                    .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                                                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                    .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                                    .OptionalOrDefault()
                                                                               select new { before, regex, after })
             .Select(item =>
             {
@@ -538,10 +538,10 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parser for <c>property=value</c> pair.
         /// </summary>
-        public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)> Criterion => from property in Property
+        public static TokenListParser<FilterToken, (PropertyName, FilterExpression)> Criterion => from property in Property
                                                                                                             from _ in Token.EqualTo(FilterToken.Equal)
                                                                                                             from expression in AnyExpression
-                                                                                                            select (new PropertyNameExpression(property.Name), expression);
+                                                                                                            select (new PropertyName(property.Name), expression);
 
         /// <summary>
         /// Parser for numeric expressions
@@ -553,7 +553,7 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Parser for many <see cref="Criterion"/> separated by <c>&amp;</c>.
         /// </summary>
-        public static TokenListParser<FilterToken, (PropertyNameExpression, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
+        public static TokenListParser<FilterToken, (PropertyName, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
                                                                                                              select criteria;
 
         private static TokenListParser<FilterToken, ConstantValueExpression> Punctuation =>
