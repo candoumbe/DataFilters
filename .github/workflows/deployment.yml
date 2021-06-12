@@ -41,8 +41,8 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Publish'
-        run: ./build.cmd Publish
+      - name: Run './build.cmd Publish AddGithubRelease'
+        run: ./build.cmd Publish AddGithubRelease
         env:
           GitHubToken: ${{ secrets.GITHUB_TOKEN }}
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}

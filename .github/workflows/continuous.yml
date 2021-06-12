@@ -43,8 +43,8 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Tests Pack'
-        run: ./build.cmd Tests Pack
+      - name: Run './build.cmd Tests Pack AddGithubRelease'
+        run: ./build.cmd Tests Pack AddGithubRelease
       - uses: actions/upload-artifact@v1
         with:
           name: tests-results
