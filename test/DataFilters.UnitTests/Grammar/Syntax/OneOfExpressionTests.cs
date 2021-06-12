@@ -187,7 +187,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OneOfExpression_GetComplexity_should_return_sum_of_inner_expressions(OneOfExpression oneOfExpression)
+        public Property Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(OneOfExpression oneOfExpression)
             => (oneOfExpression.Complexity == oneOfExpression.Values.Sum(expr => expr.Complexity)).ToProperty();
     }
 }

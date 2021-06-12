@@ -328,16 +328,16 @@ namespace DataFilters.Grammar.Parsing
         /// Parser for Regex expressions.
         /// </summary>
         public static TokenListParser<FilterToken, OneOfExpression> OneOf => (from before in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                .OptionalOrDefault()
+                                                                                                     .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                                                                                     .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                     .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                                     .OptionalOrDefault()
                                                                               from regex in Regex
                                                                               from after in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                .OptionalOrDefault()
+                                                                                                    .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                                                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                    .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                                    .OptionalOrDefault()
                                                                               select new { before, regex, after })
             .Select(item =>
             {

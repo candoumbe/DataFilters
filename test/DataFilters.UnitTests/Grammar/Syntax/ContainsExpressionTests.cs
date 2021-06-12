@@ -21,6 +21,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void IsFilterExpression() => typeof(ContainsExpression).Should()
                                                                       .BeAssignableTo<FilterExpression>().And
                                                                       .Implement<IEquatable<ContainsExpression>>().And
+                                                                      .Implement<IHaveComplexity>().And
                                                                       .HaveConstructor(new[] { typeof(string) }).And
                                                                       .HaveProperty<string>("Value");
 
@@ -32,7 +33,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
+                .ThrowExactly<ArgumentNullException>("The parameter of the constructor was null");
         }
 
         [Fact]

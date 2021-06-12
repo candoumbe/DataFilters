@@ -3,8 +3,16 @@
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// An expression that group wrapped inside
+    /// Allows to treat several expressions as a single unit.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A group expression can be used whenever there is a need to apply a logical operator to several expressions at once.
+    /// </para>
+    /// <para>
+    /// The <see cref="Complexity"/> value of a <see cref="GroupExpression"/> is equivalent to the complexity of its inner <see cref="Expression"/>.
+    /// </para>
+    /// </remarks>
 #if NETSTANDARD1_3
     public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>
 #else
@@ -36,5 +44,11 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override string ToString() => $"{GetType().Name} : Expression ({Expression.GetType().Name }) -> {Expression}";
 #endif
+
+        ///<inheritdoc/>
+        public override double Complexity => Expression.Complexity;
+
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other) => Expression.IsEquivalentTo(other);
     }
 }

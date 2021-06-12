@@ -93,34 +93,41 @@ namespace DataFilters.UnitTests.Helpers
                           .Convert(convertTo: nonWhiteSpaceString => new StartsWithExpression(nonWhiteSpaceString.Item),
                                    convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
 
-        public static Arbitrary<FilterExpression> GenerateAndExpression()
+        /// <summary>
+        /// Generates an arbitrary random <see cref="FilterExpression"/>.
+        /// </summary>
+        public static Arbitrary<FilterExpression> GenerateFilterExpressions()
         {
             IList<Gen<FilterExpression>> generators = new List<Gen<FilterExpression>>
             {
                 GenerateEndsWithExpression().Generator.Select(item => (FilterExpression) item),
                 GenerateStartsWithExpression().Generator.Select(item => (FilterExpression) item),
                 GenerateContainsExpression().Generator.Select(item => (FilterExpression) item),
+                GenerateRangeExpression().Generator.Select(item => (FilterExpression) item)
             };
 
             return Gen.OneOf(generators).ToArbitrary();
         }
 
-
-        public static Arbitrary<IBoundaryExpression> GenerateBoundaryExpression()
+        public static Arbitrary<RangeExpression> GenerateRangeExpression()
         {
             IList<Gen<IBoundaryExpression>> generators = new List<Gen<IBoundaryExpression>>
             {
-                GenerateConstantValueExpression().Generator.Select(item => (IBoundaryExpression) item)
+                GenerateDateExpression().Generator.Select(item => (IBoundaryExpression) item),
+                GenerateDateTimeExpression().Generator.Select(item => (IBoundaryExpression) item)
             };
 
-            return Gen.OneOf(generators).ToArbitrary();
+            return Gen.OneOf(generators)
+                      .Zip(Arb.Default.Bool().Generator)
+                      .Two()
+                      .Select(tuple => new RangeExpression(min: new BoundaryExpression(expression : tuple.Item1.Item1, included: tuple.Item1.Item2),
+                                                           max: new BoundaryExpression(expression : tuple.Item2.Item1, included: tuple.Item2.Item2)))
+                      .ToArbitrary();
         }
 
         public static Arbitrary<ContainsExpression> GenerateContainsExpression()
             => Arb.Default.NonEmptyString()
                           .Convert(convertTo: input => new ContainsExpression(input.Item),
                                    convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
-
-
     }
 }

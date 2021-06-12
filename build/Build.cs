@@ -38,7 +38,7 @@ namespace DataFilters.ContinuousIntegration
         OnPushBranchesIgnore = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
+        InvokedTargets = new[] { nameof(Tests), nameof(Pack), nameof(AddGithubRelease) },
         OnPullRequestExcludePaths = new[] {
         "docs/*",
         "README.md",
@@ -50,7 +50,7 @@ namespace DataFilters.ContinuousIntegration
         "deployment",
         GitHubActionsImage.WindowsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
-        InvokedTargets = new[] { nameof(Publish) },
+        InvokedTargets = new[] { nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
         PublishArtifacts = true,
         ImportSecrets = new[] { nameof(NugetApiKey) },
@@ -122,6 +122,10 @@ namespace DataFilters.ContinuousIntegration
 
         [Parameter("Indicates wheter to restore nuget in interactive mode - Default is false")]
         public readonly bool Interactive = false;
+
+        [Parameter("Generic name placeholder. Can be used wherever a name is required")]
+        public readonly string Name;
+
 
         [Parameter]
         [Secret]
@@ -309,7 +313,7 @@ namespace DataFilters.ContinuousIntegration
                     bool exitCreatingFeature = false;
                     do
                     {
-                        featureName = (Console.ReadLine() ?? string.Empty).Trim()
+                        featureName = (Name ?? Console.ReadLine() ?? string.Empty).Trim()
                                                                         .Trim('/');
 
                         switch (featureName)
@@ -507,6 +511,7 @@ namespace DataFilters.ContinuousIntegration
                 {
                     TargetCommitish = GitRepository.Commit,
                     Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
+                    Name = MajorMinorPatchVersion
                 };
 
                 Octokit.Release release = await gitHubClient.Repository.Release.Create(long.Parse(GitRepository.Identifier), newRelease)

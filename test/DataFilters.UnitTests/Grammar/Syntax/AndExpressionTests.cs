@@ -27,11 +27,12 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Fact]
         public void IsFilterExpression() => typeof(AndExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<AndExpression>>().And
-            .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
-            .HaveProperty<FilterExpression>("Left").And
-            .HaveProperty<FilterExpression>("Right");
+                                                                 .BeAssignableTo<FilterExpression>().And
+                                                                 .Implement<IEquatable<AndExpression>>().And
+                                                                 .Implement<IHaveComplexity>().And
+                                                                 .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
+                                                                 .HaveProperty<FilterExpression>("Left").And
+                                                                 .HaveProperty<FilterExpression>("Right");
 
         public static IEnumerable<object[]> ArgumentNullExceptionCases
         {
