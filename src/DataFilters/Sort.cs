@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Primitives;
 # endif
 using System;
+
 using static DataFilters.SortDirection;
 
 namespace DataFilters

@@ -41,10 +41,13 @@
             "GitHubActions",
             "GitLab",
             "Jenkins",
+            "Rider",
             "SpaceAutomation",
             "TeamCity",
             "Terminal",
-            "TravisCI"
+            "TravisCI",
+            "VisualStudio",
+            "VSCode"
           ]
         },
         "Interactive": {
@@ -67,6 +70,10 @@
         "NugetPackageSource": {
           "type": "string",
           "description": "URI where packages should be published (default : \"https://api.nuget.org/v3/index.json\""
+        },
+        "Partition": {
+          "type": "string",
+          "description": "Partition to use on CI"
         },
         "Plan": {
           "type": "boolean",

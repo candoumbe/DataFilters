@@ -5,14 +5,10 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-#if NETSTANDARD1_3
     public sealed class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
-#else
-    public record ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
-#endif
     {
         /// <summary>
-        /// "Raw" value of the constant
+        /// Gets the "raw" value hold by the current instance.
         /// </summary>
         public object Value { get; }
 
@@ -20,7 +16,8 @@ namespace DataFilters.Grammar.Syntax
         /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value"></param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported
+        /// </exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         public ConstantValueExpression(object value)
         {
@@ -40,7 +37,7 @@ namespace DataFilters.Grammar.Syntax
                 _ => throw new ArgumentOutOfRangeException(nameof(value), $"Unsupported type '{value.GetType()}' for {nameof(ConstantValueExpression)}")
             };
         }
-#if NETSTANDARD1_3
+
         ///<inheritdoc/>
         public bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
 
@@ -52,7 +49,6 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
-#endif
 
         ///<inheritdoc/>
         public override double Complexity => 1;

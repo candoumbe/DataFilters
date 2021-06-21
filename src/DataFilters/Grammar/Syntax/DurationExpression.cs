@@ -1,16 +1,11 @@
 using System;
-using System.Text;
 
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
     /// A <see cref="FilterExpression"/> implementation that contains values associated to a duration (see "https://en.wikipedia.org/wiki/ISO_8601#Durations")
-    /// </summary>
-#if NETSTANDARD1_3
+    /// </summary>   
     public sealed class DurationExpression : FilterExpression, IEquatable<DurationExpression>
-#else
-    public record DurationExpression : FilterExpression, IEquatable<DurationExpression>
-#endif
     {
         /// <summary>
         /// Years part of the expression
@@ -133,7 +128,6 @@ namespace DataFilters.Grammar.Syntax
             return equivalent;
         }
 
-#if NETSTANDARD1_3
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as DurationExpression);
 
@@ -142,6 +136,5 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
-#endif
     }
 }

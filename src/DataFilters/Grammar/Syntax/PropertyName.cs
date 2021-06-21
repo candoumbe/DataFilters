@@ -6,8 +6,7 @@ namespace DataFilters.Grammar.Syntax
     /// a <see cref="PropertyName"/> holds the name of a property a filter is build against.
     /// </summary>
 #if NETSTANDARD1_3
-    public class PropertyName 
-        : IEquatable<PropertyName>
+    public class PropertyName : IEquatable<PropertyName>
 #else
     public record PropertyName
 #endif

@@ -5,11 +5,7 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// An expression that combine two <see cref="FilterExpression"/> expressions using the logical <c>OR</c> operator
     /// </summary>
-#if NETSTANDARD1_3
     public sealed class OrExpression : FilterExpression, IEquatable<OrExpression>
-#else
-    public record OrExpression : FilterExpression, IEquatable<OrExpression>
-#endif
     {
         /// <summary>
         /// Left member of the expression
@@ -34,7 +30,6 @@ namespace DataFilters.Grammar.Syntax
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
-#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(OrExpression other) => Left.Equals(other?.Left) && Right.Equals(other?.Right);
 
@@ -55,7 +50,6 @@ namespace DataFilters.Grammar.Syntax
             Right = new { Type = Right.GetType().Name, Right },
         }.Jsonify();
 
-#endif
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {

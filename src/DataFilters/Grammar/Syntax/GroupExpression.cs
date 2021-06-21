@@ -13,11 +13,7 @@ namespace DataFilters.Grammar.Syntax
     /// The <see cref="Complexity"/> value of a <see cref="GroupExpression"/> is equivalent to the complexity of its inner <see cref="Expression"/>.
     /// </para>
     /// </remarks>
-#if NETSTANDARD1_3
     public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>
-#else
-    public record GroupExpression : FilterExpression, IEquatable<GroupExpression>
-#endif
     {
         /// <summary>
         /// Expression that the group is applied onto
@@ -31,7 +27,6 @@ namespace DataFilters.Grammar.Syntax
         /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <c>null</c>.</exception>
         public GroupExpression(FilterExpression expression) => Expression = expression ?? throw new ArgumentNullException(nameof(expression));
 
-#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);
 
@@ -43,7 +38,6 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => $"{GetType().Name} : Expression ({Expression.GetType().Name }) -> {Expression}";
-#endif
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;

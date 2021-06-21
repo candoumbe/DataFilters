@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
+
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
+
 using FsCheck;
 using FsCheck.Xunit;
-using Xunit;
+
 using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax

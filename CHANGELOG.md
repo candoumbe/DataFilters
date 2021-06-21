@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added complexity measurement of a `FilterExpression` ([#19](https://github.com/candoumbe/datafilters/issues/19))
 - Renamed `PropertyNameExpression` to `PropertyName` as its no longer a `FilterExpression` [BREAKING]
 - Removed `EqualExpression`
+- Added support for `[<start>-<end>]` regex syntax
 
 ## [0.6.0] / 2021-05-03
 - License changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)

@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,6 @@ using static DataFilters.FilterOperator;
 using static DataFilters.FilterLogic;
 using Xunit.Categories;
 using Newtonsoft.Json.Schema;
-using DataFilters.Converters;
 #if NETCOREAPP2_1
 using static Newtonsoft.Json.JsonConvert;
 #endif

@@ -1,7 +1,8 @@
 using FluentAssertions;
+
 using FluentValidation.Results;
+
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.Categories;
 
 namespace DataFilters.UnitTests
