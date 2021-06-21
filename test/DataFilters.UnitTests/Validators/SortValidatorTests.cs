@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
+
 using FluentValidation.Results;
-using System;
+
 using Xunit;
 
 namespace DataFilters.UnitTests.Validators

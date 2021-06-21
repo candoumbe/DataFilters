@@ -4,7 +4,6 @@ using FluentAssertions;
 
 using FsCheck.Xunit;
 
-
 using FsCheck;
 
 using System;
@@ -13,7 +12,6 @@ using System.Linq;
 
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {

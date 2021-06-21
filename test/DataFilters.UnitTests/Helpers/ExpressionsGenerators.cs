@@ -129,5 +129,21 @@ namespace DataFilters.UnitTests.Helpers
             => Arb.Default.NonEmptyString()
                           .Convert(convertTo: input => new ContainsExpression(input.Item),
                                    convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
+
+        public static Arbitrary<RegexValue> GenerateRegexValues()
+        {
+            Arbitrary<char> letterOrNumberCharacter = Arb.Default.Char()
+                                                 .Filter(chr => (('a' <= chr && chr <= 'Z') || ('0' <= chr && chr <= '9')));
+            Gen<RegexValue> regexRangeGenerator = letterOrNumberCharacter
+                                     .Generator
+                                     .Two()
+                                     .Where(tuple => tuple.Item1 <= tuple.Item2)
+                                     .Select(tuple => (RegexValue) new RegexRangeValue(tuple.Item1, tuple.Item2));
+            Gen<RegexValue> regexConstantGenerator = letterOrNumberCharacter
+                .Generator
+                .Select(chr => (RegexValue) new RegexConstantValue(chr));
+
+            return Gen.OneOf(regexConstantGenerator, regexRangeGenerator).ToArbitrary();
+        }
     }
 }

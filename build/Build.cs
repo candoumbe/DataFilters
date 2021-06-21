@@ -25,10 +25,8 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Logger;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.Git.GitTasks;
-using static Nuke.Common.Tools.GitReleaseManager.GitReleaseManagerTasks;
 using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
-using System.Threading.Tasks;
 
 namespace DataFilters.ContinuousIntegration
 {
@@ -498,7 +496,7 @@ namespace DataFilters.ContinuousIntegration
             .After(Publish)
             .Unlisted()
             .Description("Creates a new GitHub release after *.nupkgs/*.snupkg were successfully published.")
-            .Requires(() => IsServerBuild && (GitCurrentBranch() == MainBranchName))
+            .OnlyWhenStatic(() => IsServerBuild && (GitCurrentBranch() == MainBranchName))
             .Executes(async () =>
             {
                 Info("Creating a new release");

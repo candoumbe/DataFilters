@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Utilities;
 
 namespace DataFilters.Grammar.Syntax
@@ -13,11 +13,7 @@ namespace DataFilters.Grammar.Syntax
     /// <remarks>
     /// <see cref="OneOfExpression"/> indicates that the filter expression should
     /// </remarks>
-#if NETSTANDARD1_3
     public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
-#else
-    public record OneOfExpression : FilterExpression, IEquatable<OneOfExpression>
-#endif
     {
         private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new();
 
@@ -73,9 +69,8 @@ namespace DataFilters.Grammar.Syntax
             return equivalent;
         }
 
-#if NETSTANDARD1_3
         ///<inheritdoc/>
-        public bool Equals(OneOfExpression other) => other != null && equalityComparer.Equals(_values, other._values);
+        public bool Equals(OneOfExpression other) => other is not null && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OneOfExpression);
@@ -84,19 +79,15 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => equalityComparer.GetHashCode(_values);
 
         ///<inheritdoc/>
-        public static bool operator ==(OneOfExpression left, OneOfExpression right) => EqualityComparer<OneOfExpression>.Default.Equals(left, right);
+        public static bool operator ==(OneOfExpression left, OneOfExpression right) => left?.Equals(right) ?? false;
 
         ///<inheritdoc/>
         public static bool operator !=(OneOfExpression left, OneOfExpression right) => !(left == right);
-#else
-        ///<inheritdoc/>
-        public virtual bool Equals(OneOfExpression other) => other is OneOfExpression oneOf && equalityComparer.Equals(_values, oneOf._values);
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => equalityComparer.GetHashCode(_values);
-#endif
 
         ///<inheritdoc/>
         public override double Complexity => Values.Sum(expression => expression.Complexity);
+
+        ///<inheritdoc/>
+        public override string ToString() => $"{{{nameof(Complexity)}:{Complexity}, {nameof(Values)}: [{string.Join(",", Values)}]}}";
     }
 }

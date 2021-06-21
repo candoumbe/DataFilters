@@ -5,11 +5,7 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
     /// </summary>
-#if NETSTANDARD1_3
     public sealed class AndExpression : FilterExpression, IEquatable<AndExpression>, IHaveComplexity
-#else
-    public record AndExpression : FilterExpression, IEquatable<AndExpression>, IHaveComplexity
-#endif
     {
         /// <summary>
         /// Left part of the expression
@@ -37,7 +33,6 @@ namespace DataFilters.Grammar.Syntax
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
-#if NETSTANDARD1_3
         ///<inheritdoc/>
         public bool Equals(AndExpression other) => Left.Equals(other?.Left) && Right.Equals(other?.Right);
 
@@ -48,8 +43,6 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => (Left, Right).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{nameof(AndExpression)} : {{{nameof(Left)} ({Left.GetType().Name}) -> {Left}, {{{nameof(Right)} ({Right.GetType().Name}) -> {Right}}}";
-#endif
-        
+        public override string ToString() => this.Jsonify();
     }
 }

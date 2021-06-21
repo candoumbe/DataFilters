@@ -8,11 +8,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
-#if NETSTANDARD1_3
     public sealed class RangeExpression : FilterExpression, IEquatable<RangeExpression>
-#else
-    public record RangeExpression : FilterExpression, IEquatable<RangeExpression>
-#endif
     {
         /// <summary>
         /// Lower bound of the current instance
@@ -97,7 +93,8 @@
             };
         }
 
-#if NETSTANDARD1_3
+        public override bool Equals(object obj) => Equals(obj as RangeExpression);
+
         ///<inheritdoc/>
         public bool Equals(RangeExpression other)
         {
@@ -131,7 +128,6 @@
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
 
-#endif
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {

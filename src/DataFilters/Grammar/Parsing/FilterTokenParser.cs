@@ -1,13 +1,15 @@
-﻿using DataFilters.Grammar.Syntax;
-using Superpower;
-using Superpower.Model;
-using Superpower.Parsers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace DataFilters.Grammar.Parsing
+﻿namespace DataFilters.Grammar.Parsing
 {
+    using DataFilters.Grammar.Syntax;
+
+    using Superpower;
+    using Superpower.Model;
+    using Superpower.Parsers;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     /// Parses a tree of <see cref="FilterToken"/> into <see cref="FilterExpression"/>
     /// </summary>
@@ -130,10 +132,23 @@ namespace DataFilters.Grammar.Parsing
                                                                          from expression in Expression
                                                                          select new NotExpression(expression);
 
-        private static TokenListParser<FilterToken, RegularExpression> Regex => from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
-                                                                                from regex in AlphaNumeric
-                                                                                from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                select new RegularExpression(regex.Value.ToString());
+        private static TokenListParser<FilterToken, RegularExpression> Regex => (
+                                                                                    from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from rangeStart in Alpha
+                                                                                    from _ in Token.EqualTo(FilterToken.Dash)
+                                                                                    from rangeEnd in Alpha
+                                                                                    from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    select new RegularExpression(new RegexRangeValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
+                                                                                ).Try()
+                                                                                .Or
+                                                                                (
+                                                                                    from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from alpha in Alpha.AtLeastOnce()
+                                                                                    from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    select new RegularExpression(alpha.Select(chr => new RegexConstantValue(chr.ToStringValue()[0]))
+                                                                                                                      .ToArray()
+                                                                                                                )
+                                                                                );
 
         /// <summary>
         /// Parses Range expressions
@@ -317,132 +332,113 @@ namespace DataFilters.Grammar.Parsing
         /// Property name parser
         /// </summary>
         public static TokenListParser<FilterToken, PropertyName> Property => from prop in AlphaNumeric
-                                                                                       from subProps in (
-                                                                                           from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
-                                                                                           from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
-                                                                                           from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                           select @$"[""{subProp.Value}""]"
-                                                                                       ).Many()
-                                                                                       select new PropertyName(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
-        /// <summary>
-        /// Parser for Regex expressions.
-        /// </summary>
-        public static TokenListParser<FilterToken, OneOfExpression> OneOf => (from before in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                                     .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                                     .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                                     .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                                     .OptionalOrDefault()
-                                                                              from regex in Regex
-                                                                              from after in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                                    .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                                    .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                                    .OptionalOrDefault()
-                                                                              select new { before, regex, after })
-            .Select(item =>
-            {
-                List<FilterExpression> expressions = new();
-                if (item.before is null && item.after is null)
-                {
-                    expressions.AddRange(item.regex.Value.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray());
-                }
-                else if (item.after is null)
-                {
-                    switch (item.before)
-                    {
-                        case ConstantValueExpression constant: // Syntax like ma[Nn]
-                            {
-                                expressions.AddRange(item.regex.Value.Select(chr => new ConstantValueExpression($"{constant.Value}{chr}"))
-                                    .ToArray());
-                                break;
-                            }
-                        case EndsWithExpression endsWith: // Syntax like *ma[Nn]
-                            {
-                                expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression($"{endsWith.Value}{chr}"))
-                                    .ToArray());
-                                break;
-                            }
-                        case StartsWithExpression startsWith: // Syntax like ma*[Nn]
-                            expressions.AddRange(item.regex.Value.Select(chr => new AndExpression(new StartsWithExpression(startsWith.Value), new EndsWithExpression(chr.ToString())))
-                                    .ToArray());
-                                break;
-                        case AsteriskExpression asterisk: // Syntax like *[Nn]
-                            expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression($"{chr}"))
-                                    .ToArray());
-                            break;
-                        default:
-                            throw new NotSupportedException($"Unsupported {nameof(item.before)} expression type when {nameof(item.after)} expression is null");
-                    }
-                }
-                else if (item.before is null)
-                {
-                    switch (item.after)
-                    {
-                        case ConstantValueExpression constant: // Syntaxt like [Mm]an
-                            {
-                                expressions.AddRange(item.regex.Value.Select(chr => new ConstantValueExpression($"{chr}{constant.Value}"))
-                                    .ToArray());
-                            }
-                            break;
-                        case EndsWithExpression endsWith: // Syntax like [Mm]*an
-                            {
-                                expressions.AddRange(item.regex.Value.Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), new EndsWithExpression(endsWith.Value)))
-                                    .ToArray());
-                            }
-                            break;
-                        case StartsWithExpression startsWith: // Syntax like [Mm]an*
-                            {
-                                expressions.AddRange(item.regex.Value.Select(chr => new StartsWithExpression($"{chr}{startsWith.Value}"))
-                                    .ToArray());
-                            }
-                            break;
-                        default:
-                            throw new NotSupportedException($"Unsupported {nameof(item.after)} expression type when before expression is null");
-                    }
-                }
-                else
-                {
-                    switch (item.before)
-                    {
-                        case ConstantValueExpression constantBefore:
-                            {
-                                switch (item.after)
-                                {
-                                    case ConstantValueExpression constantAfter: // Syntax like Bat[Mm]an
-                                        expressions.AddRange(item.regex.Value.Select(chr => new ConstantValueExpression($"{constantBefore.Value}{chr}{constantAfter.Value}"))
-                                            .ToArray());
-                                        break;
-                                    default:
-                                        throw new ArgumentOutOfRangeException($"Unsupported type {item.after.GetType()} for {nameof(item.after)} " +
-                                            $"when {nameof(item.before)} and {item.after} are not null expression type when before expression is null");
-                                }
-                            }
-                            break;
-                        case AsteriskExpression asterisk:
-                            {
-                                switch (item.after)
-                                {
-                                    case ConstantValueExpression constantAfter: // Syntax like Bat[Mm]an
-                                        expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression($"{chr}{constantAfter.Value}"))
-                                            .ToArray());
-                                        break;
-                                    case null:
-                                        expressions.AddRange(item.regex.Value.Select(chr => new EndsWithExpression(chr.ToString()))
-                                            .ToArray());
-                                        break;
-                                    default:
-                                        throw new ArgumentOutOfRangeException($"Unsupported type {item.after.GetType()} for {nameof(item.after)} " +
-                                            $"when {nameof(item.before)} and {item.after} are not null expression type when before expression is null");
-                                }
-                            }
-                            break;
-                        default:
-                            throw new NotSupportedException($"Unsupported {nameof(item.before)} {item.before.GetType()} expression type when after expression is null");
-                    }
-                }
+                                                                             from subProps in (
+                                                                                 from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                 from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
+                                                                                 from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                 select @$"[""{subProp.Value}""]"
+                                                                             ).Many()
+                                                                             select new PropertyName(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
 
-                return new OneOfExpression(expressions.ToArray());
-            });
+        private static IEnumerable<char> ConvertRegexToCharArray(RegexValue value)
+        {
+            return value switch
+            {
+                RegexRangeValue rangeValue => Enumerable.Range((int)rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
+                                          .Select(ascii => (char)ascii),
+                RegexConstantValue constantValue => new[] { constantValue.Value },
+                _ => throw new NotSupportedException("Unexpected regex value")
+            };
+        }
+
+        /// <summary>
+        /// Parser for expressions that contains one or more regex parts.
+        /// </summary>
+        public static TokenListParser<FilterToken, OneOfExpression> OneOf => (
+                                                                                from head in Regex
+                                                                                from body in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
+                                                                                                        .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                        .OptionalOrDefault()
+                                                                                from tail in Regex
+
+                                                                                select (head: (FilterExpression)head, body, tail: (FilterExpression)tail)
+                                                                             ).Try()
+                                                                             .Or(
+                                                                                 from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                                                                                         .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                                                                                         .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                         .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                                         .OptionalOrDefault()
+                                                                                 from body in Regex
+                                                                                 from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                                                                                      .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                                                                                      .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                                                                                      .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                                                                      .OptionalOrDefault()
+
+                                                                                 select (head, body: (FilterExpression)body, tail)
+                                                                               )
+            .Select<FilterToken, (FilterExpression, FilterExpression, FilterExpression), OneOfExpression>(item =>
+            {
+                return item switch
+                {
+                    // *<regex>
+                    (AsteriskExpression _, RegularExpression regex, null) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new EndsWithExpression(chr.ToString())))
+                                                                     .SelectMany(x => x)
+                                                                     .ToArray()),
+
+                    // *<regex><constant>
+                    (AsteriskExpression _, RegularExpression regex, ConstantValueExpression tail) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new EndsWithExpression($"{chr}{tail.Value}")))
+                                                                     .SelectMany(x => x)
+                                                                     .ToArray()),
+
+                    // <regex>*
+                    (null, RegularExpression regex, AsteriskExpression _) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new StartsWithExpression(chr.ToString())))
+                                                                     .SelectMany(x => x)
+                                                                     .ToArray()),
+                    // <regex><startwith>*
+                    (null, RegularExpression regex, StartsWithExpression body) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new StartsWithExpression($"{chr}{body.Value}")))
+                                                                     .SelectMany(x => x)
+                                                                     .ToArray()),
+                    // <constant><regex><constant>
+                    (ConstantValueExpression head, RegularExpression regex, ConstantValueExpression tail) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}{tail.Value}")))
+                                                                     .SelectMany(x => x)
+                                                                     .ToArray()),
+                    // <constant><regex>
+                    (ConstantValueExpression head, RegularExpression regex, null) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}"))).SelectMany(x => x).ToArray()),
+
+                    // <regex><constant>
+                    (null, RegularExpression regex, ConstantValueExpression tail) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression($"{chr}{tail.Value}"))).SelectMany(x => x).ToArray()),
+
+                    // <regex>
+                    (null, RegularExpression regex, null) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression(chr.ToString()))).SelectMany(x => x).ToArray()),
+
+                    // <regex><constant><regex>
+                    (RegularExpression head, ConstantValueExpression body, RegularExpression tail) => new(head.Values.CrossJoin(tail.Values)
+                                                                            .Select(tuple => new { start = ConvertRegexToCharArray(tuple.Item1), end = ConvertRegexToCharArray(tuple.Item2) })
+                                                                            .Select(tuple => tuple.start.CrossJoin(tuple.end)
+                                                                                                        .Select(tuple => new {head = tuple.Item1, tail = tuple.Item2 })
+                                                                                                        .Select(tuple => new ConstantValueExpression($"{tuple.head}{body.Value}{tuple.tail}")))
+                                                                            .SelectMany(x => x)
+                                                                            .ToArray()),
+
+                    // <endswith><regex>
+                    (EndsWithExpression head, RegularExpression body, null) => new(body.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new EndsWithExpression($"{head.Value}{chr}")))
+                                                                                                                                         .SelectMany(x => x)
+                                                                                                                                         .ToArray()),
+                    // <startswith><regex>
+                    (StartsWithExpression head, RegularExpression body, null) => new(body.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => (FilterExpression)new AndExpression(head,
+                                                                                                                                                                                                  new EndsWithExpression(chr.ToString()))))
+                                                                                                                  .SelectMany(x => x)
+                                                                                                                  .ToArray()),
+                    // <regex><endswith>
+                    (null, RegularExpression body, EndsWithExpression tail) => new(body.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => (FilterExpression)new AndExpression(new StartsWithExpression(chr.ToString()),
+                                                                                                                                                                       tail)))
+                                                                                                                  .SelectMany(x => x)
+                                                                                                                  .ToArray()),
+                    _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
+                };
+                });
 
         /// <summary>
         /// Parser for Date and Time
@@ -474,7 +470,7 @@ namespace DataFilters.Grammar.Parsing
             );
 
         private static TokenListParser<FilterToken, TimeOffset> Offset => (from _ in Token.EqualToValue(FilterToken.Letter, "Z")
-                                                                          select new TimeOffset(0, 0)).Try()
+                                                                           select new TimeOffset(0, 0)).Try()
                                                                           .Or(
                                                                                 from sign in Token.EqualTo(FilterToken.Dash)
                                                                                                   .Or(Token.EqualToValue(FilterToken.None, "+"))
@@ -539,9 +535,9 @@ namespace DataFilters.Grammar.Parsing
         /// Parser for <c>property=value</c> pair.
         /// </summary>
         public static TokenListParser<FilterToken, (PropertyName, FilterExpression)> Criterion => from property in Property
-                                                                                                            from _ in Token.EqualTo(FilterToken.Equal)
-                                                                                                            from expression in AnyExpression
-                                                                                                            select (new PropertyName(property.Name), expression);
+                                                                                                  from _ in Token.EqualTo(FilterToken.Equal)
+                                                                                                  from expression in AnyExpression
+                                                                                                  select (new PropertyName(property.Name), expression);
 
         /// <summary>
         /// Parser for numeric expressions
@@ -554,7 +550,7 @@ namespace DataFilters.Grammar.Parsing
         /// Parser for many <see cref="Criterion"/> separated by <c>&amp;</c>.
         /// </summary>
         public static TokenListParser<FilterToken, (PropertyName, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualToValue(FilterToken.None, "&"))
-                                                                                                             select criteria;
+                                                                                                   select criteria;
 
         private static TokenListParser<FilterToken, ConstantValueExpression> Punctuation =>
         (

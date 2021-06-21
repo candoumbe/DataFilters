@@ -17,7 +17,6 @@ using static DataFilters.FilterOperator;
 #if NETCOREAPP2_1
 using static Newtonsoft.Json.JsonConvert;
 #else
-using static System.Text.Json.JsonSerializer;
 #endif
 
 namespace DataFilters.UnitTests

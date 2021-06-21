@@ -1,7 +1,14 @@
 ﻿using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+
 using FluentAssertions;
+
+using FsCheck;
+using FsCheck.Xunit;
+
 using System;
 using System.Collections.Generic;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,8 +27,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void IsFilterExpression() => typeof(RegularExpression).Should()
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<RegularExpression>>().And
-            .HaveConstructor(new[] { typeof(string) }).And
-            .HaveProperty<string>("Value")
+            .Implement<IHaveComplexity>().And
+            .HaveConstructor(new[] { typeof(RegexValue[]) }).And
+            .HaveProperty<IReadOnlyList<RegexValue>>("Values")
             ;
 
         [Fact]
@@ -32,63 +40,35 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentNullException>($"{nameof(RegularExpression)}.{nameof(RegularExpression.Value)} cannot be null");
+                .ThrowExactly<ArgumentNullException>($"{nameof(RegularExpression)}.{nameof(RegularExpression.Values)} cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Two_RegularExpression_instances_built_with_same_input_should_be_equals(NonEmptyArray<RegexValue> inputs)
         {
-            get
-            {
-                yield return new object[]
-                {
-                    new RegularExpression("prop2"),
-                    new RegularExpression("prop2"),
-                    true,
-                    "comparing two different instances with same values"
-                };
-
-                yield return new object[]
-                {
-                    new RegularExpression("regex_pattern"),
-                    new RegularExpression("another_regex_pattern"),
-                    false,
-                    "comparing two different instances with different values"
-                };
-
-                yield return new object[]
-                {
-                    new RegularExpression("regex_pattern"),
-                    null,
-                    false,
-                    "comparing two different instances with different values"
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(RegularExpression first, object other, bool expected, string reason)
-        {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            // Arrange
+            RegularExpression first = new(inputs.Item);
+            RegularExpression second = new(inputs.Item);
 
             // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+            bool actual = first.Equals(second);
 
             // Assert
-            actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+            return actual.ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Two_RegularExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<RegexValue> one, NonEmptyArray<RegexValue> two)
+        {
+            // Arrange
+            RegularExpression first = new(one.Item);
+            RegularExpression second = new(two.Item);
+
+            // Act
+            bool actual = !first.Equals(second);
+
+            // Assert
+            return actual.ToProperty();
         }
     }
 }

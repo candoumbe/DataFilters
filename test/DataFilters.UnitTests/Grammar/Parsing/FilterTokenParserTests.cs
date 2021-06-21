@@ -1,15 +1,18 @@
 ﻿using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
+
 using FluentAssertions;
 using FluentAssertions.Execution;
+
 using Superpower;
 using Superpower.Model;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Transactions;
+
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -527,6 +530,18 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "*[Mm]",
                     new OneOfExpression(new EndsWithExpression("M"), new EndsWithExpression("m"))
                 };
+
+                {
+                    const char regexStart = 'a';
+                    const char regexEnd = 'z';
+                    IEnumerable<char> characters = Enumerable.Range((int)regexStart, regexEnd - regexStart + 1)
+                                                             .Select(ascii => (char)ascii);
+                    yield return new object[]
+                    {
+                        "[a-z]",
+                        new OneOfExpression(characters.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray())
+                    };
+                }
             }
         }
 
@@ -822,6 +837,18 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         new PropertyName("Name"),
                         (FilterExpression) new OneOfExpression(new EndsWithExpression("Man"),
                                                                new EndsWithExpression("man"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "Name=[Bb]o[Bb]",
+                    (
+                        new PropertyName("Name"),
+                        (FilterExpression)new OneOfExpression(new ConstantValueExpression("BoB"),
+                                                              new ConstantValueExpression("Bob"),
+                                                              new ConstantValueExpression("boB"),
+                                                              new ConstantValueExpression("bob"))
                     )
                 };
             }

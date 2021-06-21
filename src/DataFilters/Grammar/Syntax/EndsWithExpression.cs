@@ -5,11 +5,7 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a string value
     /// </summary>
-#if NETSTANDARD1_3
     public sealed class EndsWithExpression : FilterExpression, IEquatable<EndsWithExpression>
-#else
-    public record EndsWithExpression : FilterExpression, IEquatable<EndsWithExpression>
-#endif
     {
         /// <summary>
         /// The value of the expression
@@ -34,7 +30,7 @@ namespace DataFilters.Grammar.Syntax
             }
             Value = value;
         }
-#if NETSTANDARD1_3
+
         ///<inheritdoc/>
         public bool Equals(EndsWithExpression other) => Value == other?.Value;
 
@@ -46,7 +42,7 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> '{Value}'";
-#endif
+
         ///<inheritdoc/>
         public override double Complexity => 1.5;
     }
