@@ -13,6 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.UnitTests", "te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{70099B24-D56E-4CDA-9839-C4DBA6F2FE8F}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		CHANGELOG.md = CHANGELOG.md
 		core.props = core.props
@@ -34,6 +35,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{BAD421FA-40A8-4CBB-AFC5-4EDA9CF537BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.TestObjects", "test\DataFilters.TestObjects\DataFilters.TestObjects.csproj", "{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{D5276318-323B-4EB9-A143-6C7154D8F01B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{D9057B44-29C0-48A5-A93B-F06F00C27DC6}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
+		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +92,8 @@ Global
 		{222A254D-7105-45CF-843B-1F4D1E4CD56B} = {D0CE23E3-5516-4A96-B70B-AA26C60E823F}
 		{810E8E8B-9900-4C42-9391-306246CD166A} = {A3AD4940-4FD5-4DA8-B207-36A5DE22EC8E}
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C} = {D0CE23E3-5516-4A96-B70B-AA26C60E823F}
+		{D5276318-323B-4EB9-A143-6C7154D8F01B} = {70099B24-D56E-4CDA-9839-C4DBA6F2FE8F}
+		{D9057B44-29C0-48A5-A93B-F06F00C27DC6} = {D5276318-323B-4EB9-A143-6C7154D8F01B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C91610A1-3BAC-4C7B-A4C1-0B95652A7931}

@@ -69,6 +69,13 @@ namespace DataFilters.Grammar.Syntax
         }
 
         /// <inheritdoc/>
+        public void Deconstruct(out DateExpression date, out TimeExpression time)
+        {
+            date = Date;
+            time = Time;
+        }
+
+        /// <inheritdoc/>
         public bool Equals(DateTimeExpression other) => (Date, Time).Equals((other?.Date, other?.Time));
 
         /// <inheritdoc/>
@@ -76,13 +83,6 @@ namespace DataFilters.Grammar.Syntax
 
         /// <inheritdoc/>
         public override int GetHashCode() => (Date, Time).GetHashCode();
-
-        /// <inheritdoc/>
-        public void Deconstruct(out DateExpression date, out TimeExpression time)
-        {
-            date = Date;
-            time = Time;
-        }
 
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();

@@ -1,11 +1,10 @@
 using System;
-using System.Text;
 
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
     /// A <see cref="FilterExpression"/> implementation that contains values associated to a duration (see "https://en.wikipedia.org/wiki/ISO_8601#Durations")
-    /// </summary>
+    /// </summary>   
     public sealed class DurationExpression : FilterExpression, IEquatable<DurationExpression>
     {
         /// <summary>
@@ -100,15 +99,6 @@ namespace DataFilters.Grammar.Syntax
         }
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as DurationExpression);
-
-        ///<inheritdoc/>
-        public bool Equals(DurationExpression other) => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) == (other?.Years, other?.Months, other?.Weeks, other?.Days, other?.Hours, other?.Minutes, other?.Seconds);
-
-        ///<inheritdoc/>
-        public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
-
-        ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
             static DateTime ConvertToDateTime(DurationExpression duration)
@@ -139,6 +129,12 @@ namespace DataFilters.Grammar.Syntax
         }
 
         ///<inheritdoc/>
-        public override string ToString() => this.Jsonify();
+        public override bool Equals(object obj) => Equals(obj as DurationExpression);
+
+        ///<inheritdoc/>
+        public bool Equals(DurationExpression other) => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) == (other?.Years, other?.Months, other?.Weeks, other?.Days, other?.Hours, other?.Minutes, other?.Seconds);
+
+        ///<inheritdoc/>
+        public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
     }
 }

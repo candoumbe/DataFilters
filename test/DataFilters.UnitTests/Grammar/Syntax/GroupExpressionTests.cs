@@ -1,9 +1,13 @@
 ﻿using DataFilters.Grammar.Syntax;
 using FluentAssertions;
+using FsCheck.Xunit;
+using FsCheck;
+
 using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using DataFilters.UnitTests.Helpers;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -15,10 +19,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Fact]
         public void IsFilterExpression() => typeof(GroupExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<GroupExpression>>().And
-            .HaveConstructor(new[] { typeof(FilterExpression) }).And
-            .HaveProperty<FilterExpression>("Expression");
+                                                                   .BeAssignableTo<FilterExpression>().And
+                                                                   .Implement<IEquatable<GroupExpression>>().And
+                                                                   .Implement<IHaveComplexity>().And
+                                                                   .HaveConstructor(new[] { typeof(FilterExpression) }).And
+                                                                   .HaveProperty<FilterExpression>("Expression");
 
         public static IEnumerable<object[]> EqualsCases
         {
@@ -77,6 +82,23 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 actualHashCode.Should()
                     .NotBe(other?.GetHashCode(), reason);
             }
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_GroupExpression_Complexity_should_be_equal_to_inner_expression_complexity(GroupExpression group)
+            => (group.Complexity == group.Expression.Complexity).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_Group_Expression_which_contains_an_arbitrary_expression_IsEquivalent_should_be_return_true_when_compares_to_that_arbitrary_expression(FilterExpression filterExpression)
+        {
+            // Arrange
+            GroupExpression group = new(filterExpression);
+
+            // Act
+            bool actual = group.IsEquivalentTo(filterExpression);
+
+            // Assert
+            return actual.ToProperty();
         }
     }
 }

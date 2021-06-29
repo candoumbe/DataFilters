@@ -23,7 +23,8 @@
           "description": "Indicates to continue a previously failed build attempt"
         },
         "GitHubToken": {
-          "type": "string"
+          "type": "string",
+          "default": "Secrets must be entered via 'nuke :secret [profile]'"
         },
         "Help": {
           "type": "boolean",
@@ -40,15 +41,22 @@
             "GitHubActions",
             "GitLab",
             "Jenkins",
+            "Rider",
             "SpaceAutomation",
             "TeamCity",
             "Terminal",
-            "TravisCI"
+            "TravisCI",
+            "VisualStudio",
+            "VSCode"
           ]
         },
         "Interactive": {
           "type": "boolean",
           "description": "Indicates wheter to restore nuget in interactive mode - Default is false"
+        },
+        "Name": {
+          "type": "string",
+          "description": "Generic name placeholder. Can be used wherever a name is required"
         },
         "NoLogo": {
           "type": "boolean",
@@ -56,11 +64,16 @@
         },
         "NugetApiKey": {
           "type": "string",
-          "description": "API key used to publish artifacts to Nuget.org"
+          "description": "API key used to publish artifacts to Nuget.org",
+          "default": "Secrets must be entered via 'nuke :secret [profile]'"
         },
         "NugetPackageSource": {
           "type": "string",
           "description": "URI where packages should be published (default : \"https://api.nuget.org/v3/index.json\""
+        },
+        "Partition": {
+          "type": "string",
+          "description": "Partition to use on CI"
         },
         "Plan": {
           "type": "boolean",
@@ -83,6 +96,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "AddGithubRelease",
               "Changelog",
               "Clean",
               "Compile",
@@ -106,6 +120,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "AddGithubRelease",
               "Changelog",
               "Clean",
               "Compile",

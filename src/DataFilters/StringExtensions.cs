@@ -122,24 +122,24 @@ namespace System
             => new StringSegment(queryString).ToFilter<T>(propertyNameResolutionStrategy);
 
         /// <summary>
-        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/> using <see cref="PropertyNameResolutionStrategy.Default"/>
         /// </summary>
         /// <typeparam name="T">Type of element to filter</typeparam>
         /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
-        /// <returns></returns>
+        /// <returns>a <see cref="IFilter"/> that correspond to the <paramref name="queryString"/>.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
         public static IFilter ToFilter<T>(this string queryString) => ToFilter<T>(queryString, PropertyNameResolutionStrategy.Default);
 
 #endif
         /// <summary>
-        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/> with the specified <paramref name="propertyNameResolutionStrategy"/>.
         /// </summary>
         /// <typeparam name="T">Type of element to filter</typeparam>
         /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
         /// <param name="propertyNameResolutionStrategy"></param>
         /// <returns>The corresponding <see cref="IFilter"/></returns>
-        /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">either <paramref name="queryString"/> or <paramref name="propertyNameResolutionStrategy"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
 #if STRING_SEGMENT
         public static IFilter ToFilter<T>(this StringSegment queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
@@ -192,7 +192,7 @@ namespace System
                             }
                         };
                         break;
-                    case RegularExpression regex:
+                    case BracketExpression regex:
                         filter = new MultiFilter
                         {
                             Logic = FilterLogic.Or,
@@ -282,11 +282,11 @@ namespace System
                 FilterTokenizer tokenizer = new();
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
-                (PropertyNameExpression Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
+                (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
 
                 if (expressions.Once())
                 {
-                    (PropertyNameExpression property, FilterExpression expression) = expressions[0];
+                    (PropertyName property, FilterExpression expression) = expressions[0];
 
                     PropertyInfo pi = typeof(T).GetRuntimeProperties()
                                                .SingleOrDefault(x => x.CanRead && x.Name == propertyNameResolutionStrategy.Handle(property.Name));
@@ -301,7 +301,7 @@ namespace System
                 {
                     IList<IFilter> filters = new List<IFilter>();
 
-                    foreach ((PropertyNameExpression property, FilterExpression expression) in expressions)
+                    foreach ((PropertyName property, FilterExpression expression) in expressions)
                     {
                         PropertyInfo pi = typeof(T).GetRuntimeProperties()
                                                    .SingleOrDefault(x => x.CanRead && x.Name == property.Name);

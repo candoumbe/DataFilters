@@ -1,10 +1,13 @@
 using FluentAssertions;
+
 using Queries.Core.Parts.Clauses;
-using Queries.Core.Parts.Columns;
+
 using System;
 using System.Collections.Generic;
+
 using Xunit;
 using Xunit.Abstractions;
+
 using static DataFilters.FilterOperator;
 
 namespace DataFilters.Queries.UnitTests

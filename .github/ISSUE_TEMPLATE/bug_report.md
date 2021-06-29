@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG]"
-labels: bug
+title: "[BUG] \U0001F41E"
+labels: ''
 assignees: candoumbe
 
 ---

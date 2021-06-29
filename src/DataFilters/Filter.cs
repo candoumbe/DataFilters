@@ -240,7 +240,7 @@ namespace DataFilters
                 FilterOperator.IsEmpty => FilterOperator.IsNotEmpty,
                 FilterOperator.IsNotEmpty => FilterOperator.IsEmpty,
                 FilterOperator.LessThanOrEqualTo => FilterOperator.GreaterThanOrEqual,
-                _ => throw new ArgumentOutOfRangeException(nameof(Operator), "Unknown operator"),
+                _ => throw new NotSupportedException("Unknown operator"),
             };
             return new Filter(Field, @operator, Value);
         }

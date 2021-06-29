@@ -35,7 +35,7 @@ namespace DataFilters.UnitTests
         [InlineData("prop1,prop2,", "sort expression cannot ends with a comma")]
         [InlineData(",prop1,prop2", "sort expression cannot starts with a comma")]
         [InlineData("--prop", "sort expression can start with only one hyphen")]
-        public void Throws_InvalidSortExpression_When_Expression_IsNotValid(string invalidExpression, string reason)
+        public void Given_invalid_expression_ToSort_throws_InvalidSortExpression(string invalidExpression, string reason)
         {
             // Act
             Action action = () => invalidExpression.ToSort<SuperHero>();

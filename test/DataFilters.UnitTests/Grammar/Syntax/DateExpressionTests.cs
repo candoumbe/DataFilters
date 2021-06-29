@@ -1,9 +1,13 @@
 ﻿using DataFilters.Grammar.Syntax;
 using FluentAssertions;
+using FsCheck.Xunit;
+using FsCheck;
+
 using System;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
+using DataFilters.UnitTests.Helpers;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -32,10 +36,19 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             Action ctor = () => new DateExpression(year, month, day);
 
             // Assert
-            string expectedParamName = year < 1
-                ? nameof(year)
-                : month < 1
-                    ? nameof(month) : nameof(day);
+            string expectedParamName;
+            if (year < 1)
+            {
+                expectedParamName = nameof(year);
+            }
+            else if (month < 1)
+            {
+                expectedParamName = nameof(month);
+            }
+            else
+            {
+                expectedParamName = nameof(day);
+            }
 
             ctor.Should()
                 .ThrowExactly<ArgumentOutOfRangeException>()
@@ -124,5 +137,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .NotBe(other?.GetHashCode(), reason);
             }
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_DateExpression_GetComplexity_should_return_1(DateExpression date) => (date.Complexity == 1).ToProperty();
     }
 }

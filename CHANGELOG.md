@@ -7,8 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] / 2021-06-29
+- Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
+- Fixed parsing `*<regex>`, `<regex>*` expressions ([#18](https://github.com/candoumbe/datafilters/issues/18))
+- Added complexity measurement of a `FilterExpression` ([#19](https://github.com/candoumbe/datafilters/issues/19))
+- Renamed `PropertyNameExpression` to `PropertyName` as its no longer a `FilterExpression` [BREAKING]
+- Removed `EqualExpression`
+- Added support for `[<start>-<end>]` regex syntax [BREAKING]
+- Renamed `RegularExpression` to `BracketExpression` [BREAKING]
+- Renamed `RegularValue` to `BracketValue` [BREAKING]
+- Renamed `RegularConstantValue` to `ConstantBracketValue` [BREAKING]
+- Renamed `RegularRangeValue` to `RangeBracketValue` [BREAKING]
+- Replaced `ConstantValueExpression(object)` constructor by : [BREAKING]
+  - `ConstantValueExpression(string)`
+  - `ConstantValueExpression(int)`
+  - `ConstantValueExpression(long)`
+  - `ConstantValueExpression(bool)`
+  - `ConstantValueExpression(Guid)`
+  - `ConstantValueExpression(DateTime)`
+  - `ConstantValueExpression(DateTimeOffset)`
+  - `ConstantValueExpression(byte)`
+  - `ConstantValueExpression(char)`
+
 ## [0.6.0] / 2021-05-03
-- Licence changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)
+- License changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)
 
 
 ## [0.5.0] / 2021-05-02
@@ -37,9 +59,7 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 ## [0.3.0] / 2020-12-19
 - Added support for filtering over complex type collections by introducing sub property syntax
 - Moved `FilterExtensions.ToFilter<T>(this StringSegment)` method to `StringExtensions.ToFilter<T>(this StringSegment)` [BREAKING]
-- Moved `FilterExtensions.ToFilter<T>(this string)
-- 
-` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
+- Moved `FilterExtensions.ToFilter<T>(this string)` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
 - Changed `ConstantExpression` to `ConstantValueExpression` [BREAKING]
 - Changed subproperty syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
 - Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/RangeExpression.cs) with datetime values
@@ -53,7 +73,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1

@@ -55,14 +55,21 @@ namespace DataFilters.Grammar.Syntax
         {
             bool equivalent = false;
 
-            if (other is OrExpression or)
+            switch (other)
             {
-                equivalent = or.Right.Equals(Right)
-                    ? or.Left.Equals(Left)
-                    : or.Left.Equals(Right) && or.Right.Equals(Left);
+                case OrExpression or:
+                    equivalent = (or.Right.Equals(Right) && or.Left.Equals(Left))
+                                 || (or.Left.Equals(Right) && or.Right.Equals(Left));
+                    break;
+                default:
+                    equivalent = Left.Equals(Right) && Left.Equals(other);
+                    break;
             }
 
             return equivalent;
         }
+
+        ///<inheritdoc/>
+        public override double Complexity => Left.Complexity + Right.Complexity;
     }
 }

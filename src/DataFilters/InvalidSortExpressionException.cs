@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace DataFilters
 {
@@ -19,9 +18,9 @@ namespace DataFilters
         {
         }
 
-    /// <inheritdoc/>
-    public InvalidSortExpressionException(string message, Exception innerException) : base(message, innerException)
-    {
+        /// <inheritdoc/>
+        public InvalidSortExpressionException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
-}
 }

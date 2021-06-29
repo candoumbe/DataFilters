@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Primitives;
-
+﻿
 using System;
 
 namespace DataFilters.Casing

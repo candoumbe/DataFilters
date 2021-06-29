@@ -2,10 +2,16 @@
 
 namespace DataFilters.Grammar.Parsing
 {
+    /// <summary>
+    /// Enumeration of token used throughout the parsing process.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="FilterToken"/>s acts as "markers" with special meaning. They can be combined to created a syntax tree with a higher meaning.
+    /// </remarks>
     public enum FilterToken
     {
         /// <summary>
-        /// Default token
+        /// A token that has no specific meaning
         /// </summary>
         None,
 
@@ -16,28 +22,29 @@ namespace DataFilters.Grammar.Parsing
         OpenParenthese,
 
         /// <summary>
-        /// End of a group
+        /// Token that indicates the end of a group of token.
         /// </summary>
+        /// <see cref="OpenParenthese"/>
         [Token(Example = ")")]
         CloseParenthese,
 
         /// <summary>
-        /// alphabetical
+        /// Letter
         /// </summary>
         Letter,
 
         /// <summary>
         /// Numeric value of some sort
         /// </summary>
-        Numeric,
+        Digit,
 
         /// <summary>
-        /// '[' character
+        /// <c>[</c> character
         /// </summary>
         OpenSquaredBracket,
 
         /// <summary>
-        /// ']' character
+        /// <c>]</c> character
         /// </summary>
         CloseSquaredBracket,
 
@@ -89,24 +96,33 @@ namespace DataFilters.Grammar.Parsing
         [Token(Example = " ")]
         Whitespace,
 
+        /// <summary>
+        /// The <c>:</c> character
+        /// </summary>
         [Token(Example = ":")]
         Colon,
 
         /// <summary>
-        /// The dot character
+        /// The <c>.</c> character.
         /// </summary>
         [Token(Example = ".")]
         Dot,
 
         /// <summary>
-        /// The backslash character
+        /// The <c>\</c> (backslash) character
         /// </summary>
         [Token(Example = @"\")]
         Backslash,
 
-        [Token(Description = "Expression that allow to escape character with a special meaning", Example = @"\\")]
+        /// <summary>
+        /// Token that allow to escape the token that comes right after itself.
+        /// </summary>
+        [Token(Description = "Token that allow to escape character with a special meaning", Example = @"\\")]
         Escaped,
 
+        /// <summary>
+        /// The <c>"</c> charater
+        /// </summary>
         [Token(Example = @"""")]
         DoubleQuote
     }

@@ -5,12 +5,12 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a date.
     /// </summary>
-    public sealed class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+    public class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
     {
-        /// <summary>
-        /// Year part of the date
-        /// </summary>
-        public int Year { get; }
+    /// <summary>
+    /// Year part of the date
+    /// </summary>
+    public int Year { get; }
 
         /// <summary>
         /// Month part of the date

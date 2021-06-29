@@ -1,12 +1,9 @@
-﻿using DataFilters.Converters;
-using DataFilters.Grammar.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
+
 using static DataFilters.FilterOperator;
 using static System.Linq.Expressions.Expression;
 
@@ -201,7 +198,7 @@ namespace DataFilters
                     IsEmpty => ComputeIsEmpty(property),
                     IsNotEmpty => ComputeIsNotEmpty(property),
                     EqualTo => ComputeEquals(property, value),
-                    _ => throw new ArgumentOutOfRangeException(nameof(@operator), @operator, "Unsupported operator")
+                    _ => throw new NotSupportedException($"Unsupported {@operator} operator when computing a body expression")
                 };
             }
 

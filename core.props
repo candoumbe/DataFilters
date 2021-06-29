@@ -24,7 +24,6 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-
   <Choose>
     <When Condition="'$(TF_BUILD)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">
       <PropertyGroup>
@@ -45,15 +44,13 @@
       </ItemGroup>
     </When>
     <Otherwise>
-
       <ItemGroup>
         <PackageReference Include="FluentValidation" Version="8.*" />
       </ItemGroup>
-
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.5.0"/>
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.5.3"/>
     <PackageReference Include="Optional" Version="4.0.0" />
     <PackageReference Include="Roslynator.Analyzers" Version="3.*">
       <PrivateAssets>all</PrivateAssets>

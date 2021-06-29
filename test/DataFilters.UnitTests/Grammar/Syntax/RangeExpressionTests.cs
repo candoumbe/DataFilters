@@ -85,7 +85,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(IncorrectBoundariesCases))]
-        public void Ctor_throws_IncorrectBoundaryException_if_boundaries_are_incoherent(BoundaryExpression min, BoundaryExpression max, string reason)
+        public void Given_incorrect_boundaries_Ctor_should_throws_IncorrectBoundaryException(BoundaryExpression min, BoundaryExpression max, string reason)
         {
             // Act
             Action action = () => new RangeExpression(min, max);
@@ -97,7 +97,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(BoundariesTypeMismatchCases))]
-        public void Ctor_throws_BoundaryTypeMismatchException_if_boundaries_type_are_not_compatible(BoundaryExpression min, BoundaryExpression max, string reason)
+        public void Given_boundaries_that_are_not_compatible_Ctor_should_throws_BoundaryTypeMismatchException(BoundaryExpression min, BoundaryExpression max, string reason)
         {
             // Act
             Action action = () => new RangeExpression(min, max);
@@ -114,14 +114,27 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new BoundaryExpression(new DateExpression(), included: false), new BoundaryExpression(new TimeExpression(), included: false)
+                    new BoundaryExpression(new DateExpression(), included: false),
+                    new BoundaryExpression(new TimeExpression(), included: false)
+                };
+
+                yield return new object[]
+                {
+                    new BoundaryExpression(new AsteriskExpression(), included: false),
+                    new BoundaryExpression(new TimeExpression(), included: false)
+                };
+
+                yield return new object[]
+                {
+                    new BoundaryExpression(new TimeExpression(), included: false),
+                    new BoundaryExpression(new AsteriskExpression(), included: false)
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(ValidCtorCases))]
-        public void Ctor_does_not_throws(BoundaryExpression min, BoundaryExpression max)
+        public void Given_valid_min_and_max_boundaries_Ctor_should_not_throws(BoundaryExpression min, BoundaryExpression max)
         {
             // Act
             Action ctor = () => new RangeExpression(min, max);
@@ -307,5 +320,41 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .Or(Prop.Throws<ArgumentNullException, RangeExpression>(lazyRangeExpression).When(time is null))
                 .Or(lazyRangeExpression.Value.Max.Expression is TimeExpression timeExpression && timeExpression.Equals(time));
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(ConstantValueExpression constant, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(constant, constant, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_DateExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateExpression(DateExpression date, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(date, date, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateTimeExpression(DateTimeExpression dateTime, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(dateTime, dateTime, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_TimeExpression(TimeExpression dateTime, bool minIsIncluded, bool maxIsIncluded)
+        {
+            return CreateIsEquivalentPropeprty(dateTime, dateTime, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        private static Property CreateIsEquivalentPropeprty(FilterExpression filterExpression, IBoundaryExpression boundaryExpression, bool minIncluded, bool maxIsIncluded)
+        {
+            // Arrange
+            RangeExpression range = new(new (boundaryExpression, minIncluded), new (boundaryExpression, maxIsIncluded));
+
+            return range.IsEquivalentTo(filterExpression).ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_RangeExpression_GetComplexity_should_return_sum_of_min_and_max_complexity(RangeExpression rangeExpression)
+            => (rangeExpression.Complexity == (rangeExpression.Min?.Expression?.Complexity ?? 0) + (rangeExpression.Max?.Expression?.Complexity ?? 0)).ToProperty();
     }
 }

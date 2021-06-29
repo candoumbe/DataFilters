@@ -42,5 +42,8 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> '{Value}'";
+
+        ///<inheritdoc/>
+        public override double Complexity => 1.5;
     }
 }

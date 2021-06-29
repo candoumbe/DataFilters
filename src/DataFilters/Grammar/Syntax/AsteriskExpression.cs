@@ -11,10 +11,10 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public bool Equals(AsteriskExpression other) => other is not null;
 
-        ///<inheritdoc/>
+        ///<inheritdoc/> 
         public override bool Equals(object obj) => Equals(obj as AsteriskExpression);
 
-        ///<inheritdoc/>
-        public override int GetHashCode() => (nameof(AsteriskExpression)).GetHashCode();
+        ///<inheritdoc/> 
+        public override int GetHashCode() => 1;
     }
 }

@@ -6,9 +6,11 @@ using FsCheck.Xunit;
 using System;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    [UnitTest]
     public class ConstantValueExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -65,35 +67,130 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Instance_should_be_equals_to_itself(ConstantValueExpression instance) => object.Equals(instance, instance).ToProperty();
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Equals_is_commutative(ConstantValueExpression first, ConstantValueExpression second) => (first.Equals(second) == second.Equals(first)).ToProperty();
 
         [Property]
-        public Property Value_should_be_DateTimeOffset(DateTimeOffset input) => Value_retains_the_underlying_type(input);
-
-        [Property]
-        public Property Value_should_be_Guid(Guid input) => Value_retains_the_underlying_type(input);
-
-        [Property]
-        public Property Value_should_be_Bool(bool input) => Value_retains_the_underlying_type(input);
-
-        [Property]
-        public Property Value_should_be_int(int input) => Value_retains_the_underlying_type(input);
-
-        [Property]
-        public Property Value_should_be_long(long input) => Value_retains_the_underlying_type(input);
-
-        [Property]
-        public Property Value_should_be_byte(byte input) => Value_retains_the_underlying_type(input);
-
-        private Property Value_retains_the_underlying_type(object input)
+        public Property Value_should_be_DateTimeOffset(DateTimeOffset input)
         {
             ConstantValueExpression expression = new(input);
 
             return expression.Value.Equals(input).ToProperty()
                     .And(expression.Value.GetType() == input.GetType());
         }
+
+        [Property]
+        public Property Value_should_be_Guid(Guid input)
+        {
+            ConstantValueExpression expression = new(input);
+
+            return expression.Value.Equals(input).ToProperty()
+                    .And(expression.Value.GetType() == input.GetType());
+        }
+
+        [Property]
+        public Property Value_should_be_Bool(bool input)
+        {
+            ConstantValueExpression expression = new(input);
+
+            return expression.Value.Equals(input).ToProperty()
+                    .And(expression.Value.GetType() == input.GetType());
+        }
+
+        [Property]
+        public Property Value_should_be_int(int input) {
+            ConstantValueExpression expression = new(input);
+            return expression.Value.Equals(input).ToProperty().And(expression.Value.GetType() == input.GetType());
+        }
+
+        [Property]
+        public Property Value_should_be_long(long input) {
+            ConstantValueExpression expression = new(input);
+            return expression.Value.Equals(input).ToProperty().And(expression.Value.GetType() == input.GetType());
+        }
+
+        [Property]
+        public Property Value_should_be_byte(byte input) {
+            ConstantValueExpression expression = new(input);
+            return expression.Value.Equals(input).ToProperty().And(expression.Value.GetType() == input.GetType());
+        }
+
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_int_input_only(int input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input);
+            ConstantValueExpression second = new(input);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_long_input_only(long input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input);
+            ConstantValueExpression second = new(input);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_DateTime_input_only(DateTime input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input);
+            ConstantValueExpression second = new(input);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_DateTimeOffset_input_only(DateTimeOffset input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input);
+            ConstantValueExpression second = new(input);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_bool_input_only(bool input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input);
+            ConstantValueExpression second = new(input);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_byte_input_only(byte input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input);
+            ConstantValueExpression second = new(input);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+
+        [Property]
+        public Property Given_two_ConstantExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
+        {
+            // Arrange
+            ConstantValueExpression first = new(input.Get);
+            ConstantValueExpression second = new(input.Get);
+
+            // Act
+            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_ConstantExpression_GetComplexity_should_return_1(ConstantValueExpression constant) => (constant.Complexity == 1).ToProperty();
     }
 }

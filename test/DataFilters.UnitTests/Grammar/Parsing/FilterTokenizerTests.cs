@@ -110,7 +110,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 2)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("o") && result.Span.Position.Column == 3)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("p") && result.Span.Position.Column == 4)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1") && result.Span.Position.Column == 5)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("1") && result.Span.Position.Column == 5)
                                                                                 && results.Once(result => result.Kind == Equal && result.Span.EqualsValue("=")  && result.Span.Position.Column == 6)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 7)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 8)
@@ -127,12 +127,12 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v") && result.Span.Position.Column == 1)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 2)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 3)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("1") && result.Span.Position.Column == 4)
                                                                                 && results.Once(result => result.Kind == Or && result.Span.EqualsValue("|") && result.Span.Position.Column == 5)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v")  && result.Span.Position.Column == 6)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 8)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2") && result.Span.Position.Column == 9)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Span.Position.Column == 9)
                     )
                 };
 
@@ -143,12 +143,12 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v") && result.Span.Position.Column == 1)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 2)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 3)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("1") && result.Span.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("1") && result.Span.Position.Column == 4)
                                                                                 && results.Once(result => result.Kind == And && result.Span.EqualsValue(",") && result.Span.Position.Column == 5)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("v")  && result.Span.Position.Column == 6)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Span.Position.Column == 7)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("l") && result.Span.Position.Column == 8)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2") && result.Span.Position.Column == 9)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Span.Position.Column == 9)
                     )
                 };
 
@@ -185,9 +185,9 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "10-20",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("10"))
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("10"))
                                                                                 && results.Once(result => result.Kind == Dash && result.Span.EqualsValue("-"))
-                                                                                && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("20"))
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("20"))
                     )
                 };
 
@@ -214,9 +214,9 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                      (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
                         results.Exactly(5)
                         && results.Exactly(result => result.Kind == Dash && result.Span.EqualsValue("-"), 2)
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("2019"))
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("10"))
-                        && results.Once(result => result.Kind == Numeric && result.Span.EqualsValue("22"))
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2019"))
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("10"))
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("22"))
                     )
                 };
 

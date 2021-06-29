@@ -1,17 +1,20 @@
 ﻿using Queries.Core.Parts.Clauses;
-using Queries.Core.Parts.Columns;
+
 using System;
 using System.Linq;
 
 namespace DataFilters
 {
+    /// <summary>
+    /// Extensions method <see cref="IFilter"/> type.
+    /// </summary>
     public static class FilterToQueries
     {
         /// <summary>
         /// Converts <paramref name="filter"/> to <see cref="IWhereClause"/>.
         /// </summary>
         /// <param name="filter">The filter to convert</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="IWhereClause"/> equivalent of the given <paramref name="filter"/>.</returns>
         public static IWhereClause ToWhere(this IFilter filter)
         {
             IWhereClause clause = null;
@@ -57,9 +60,13 @@ namespace DataFilters
                                 {
                                     value = $"{value}%";
                                 }
+                                else if (f.Operator == FilterOperator.EndsWith)
+                                {
+                                    value = $"%{value}";
+                                }
                                 else
                                 {
-                                    value = f.Operator == FilterOperator.EndsWith ? $"%{value}" : $"%{value}%";
+                                    value = $"%{value}%";
                                 }
                                 break;
                             case FilterOperator.NotStartsWith:
@@ -80,7 +87,7 @@ namespace DataFilters
                                 }
                                 break;
                             default:
-                                throw new ArgumentOutOfRangeException(nameof(Filter.Operator), f.Operator, $"Unsupported operator");
+                                throw new NotSupportedException($"Unsupported {f.Operator} operator");
                         }
 
                         clause = new WhereClause(f.Field.Field(), clauseOperator, value switch
@@ -94,7 +101,7 @@ namespace DataFilters
                             decimal decimalValue => decimalValue.Literal(),
                             double doubleValue => doubleValue.Literal(),
                             int intValue => intValue.Literal(),
-                            _ => throw new ArgumentOutOfRangeException(nameof(value), value, $"Unexpected value when building WhereClause")
+                            _ => throw new NotSupportedException("Unexpected value type when building WhereClause")
                         }
                         );
                         break;
@@ -111,6 +118,8 @@ namespace DataFilters
                         };
                         break;
                     }
+                default:
+                    throw new NotSupportedException("Unsupported filter type");
             }
 
             return clause;

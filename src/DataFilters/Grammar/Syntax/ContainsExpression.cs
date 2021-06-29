@@ -27,19 +27,25 @@ namespace DataFilters.Grammar.Syntax
 
             if (value.Length == 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)} cannot be empty");
             }
 
             Value = value;
         }
 
         ///<inheritdoc/>
-        public bool Equals(ContainsExpression other) => Value == other?.Value;
+        public override double Complexity => 1.5;
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as ContainsExpression);
 
         ///<inheritdoc/>
+        public bool Equals(ContainsExpression other) => Value == other?.Value;
+
+        ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
+
+        ///<inheritdoc/>
+        public override string ToString() => this.Jsonify();
     }
 }

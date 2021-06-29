@@ -13,11 +13,11 @@ namespace DataFilters.Grammar.Syntax
         public FilterExpression Expression { get; }
 
         /// <summary>
-        /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="innerExpression"/>.
+        /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
         /// </summary>
-        /// <param name="innerExpression"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="innerExpression"/> is <c>null</c>.</exception>
-        public NotExpression(FilterExpression innerExpression) => Expression = innerExpression ?? throw new ArgumentNullException(nameof(innerExpression));
+        /// <param name="expression"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <c>null</c>.</exception>
+        public NotExpression(FilterExpression expression) => Expression = expression ?? throw new ArgumentNullException(nameof(expression));
 
         ///<inheritdoc/>
         public bool Equals(NotExpression other) => Expression.Equals(other?.Expression);
@@ -30,5 +30,8 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => $"{GetType().Name} : Expression ({Expression.GetType().Name}) -> {Expression}";
+
+        ///<inheritdoc/>
+        public override double Complexity => Expression.Complexity;
     }
 }

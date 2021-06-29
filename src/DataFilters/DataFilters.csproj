@@ -5,6 +5,7 @@
     <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1'  or '$(TargetFramework)' == 'net5.0'">
@@ -18,7 +19,7 @@
         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
       </ItemGroup>
     </When>
-
+    
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
@@ -34,6 +35,7 @@
       <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Primitives" Version="1.1.1" />
         <PackageReference Include="Newtonsoft.Json.Schema" Version="2.0.13" />
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       </ItemGroup>
     </When>
     <Otherwise>

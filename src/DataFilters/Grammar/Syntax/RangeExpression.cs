@@ -1,9 +1,9 @@
-﻿using DataFilters.Grammar.Exceptions;
-using System;
-using System.Runtime.Serialization;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using Exceptions;
+
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
@@ -59,9 +59,9 @@ namespace DataFilters.Grammar.Syntax
                 throw new IncorrectBoundaryException($"{nameof(min)} or {nameof(max)} must not be null.");
             }
 
-            if (min?.Expression is TimeExpression && !(max is null || max.Expression is TimeExpression))
+            if (min?.Expression is TimeExpression && max is not null && max.Expression is not TimeExpression && max.Expression is not AsteriskExpression)
             {
-                throw new BoundariesTypeMismatchException($"{nameof(max)} must be a {nameof(TimeExpression)}", nameof(max));
+                throw new BoundariesTypeMismatchException($"{nameof(max)} must be either {nameof(TimeExpression)} or {nameof(AsteriskExpression)}", nameof(max));
             }
 
             Min = min?.Expression switch
@@ -93,6 +93,9 @@ namespace DataFilters.Grammar.Syntax
         }
 
         ///<inheritdoc/>
+        public override bool Equals(object obj) => Equals(obj as RangeExpression);
+
+        ///<inheritdoc/>
         public bool Equals(RangeExpression other)
         {
             bool equals = false;
@@ -120,13 +123,29 @@ namespace DataFilters.Grammar.Syntax
         }
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as RangeExpression);
-
-        ///<inheritdoc/>
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
+
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+        {
+            bool equivalent = false;
+            if (other is not null)
+            {
+                if (other is RangeExpression range)
+                {
+                    equivalent = Equals(range);
+                }
+                else if (Min?.Included == true && Max?.Included == true && Min.Equals(Max))
+                {
+                    equivalent = other.Equals(Min.Expression.As(other.GetType()));
+                }
+            }
+
+            return equivalent;
+        }
 
         /// <summary>
         /// Deconstruction method
@@ -138,5 +157,8 @@ namespace DataFilters.Grammar.Syntax
             min = Min;
             max = Max;
         }
+
+        /// <inheritdoc/>
+        public override double Complexity => (Min?.Expression?.Complexity ?? 0) + (Max?.Expression?.Complexity ?? 0);
     }
 }
