@@ -456,7 +456,7 @@ namespace DataFilters.ContinuousIntegration
             .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
             .Requires(() => !(NugetApiKey.IsNullOrEmpty() || GitHubToken.IsNullOrEmpty()))
             .Requires(() => GitHasCleanWorkingCopy())
-            .Requires(() => GitCurrentBranch() == MainBranchName
+            .Requires(() => GitRepository.IsOnMainBranch()
                             || GitRepository.IsOnReleaseBranch()
                             || GitRepository.IsOnDevelopBranch())
             .Requires(() => Configuration.Equals(Configuration.Release))
@@ -496,7 +496,7 @@ namespace DataFilters.ContinuousIntegration
             .After(Publish)
             .Unlisted()
             .Description("Creates a new GitHub release after *.nupkgs/*.snupkg were successfully published.")
-            .OnlyWhenStatic(() => IsServerBuild && (GitCurrentBranch() == MainBranchName))
+            .OnlyWhenStatic(() => IsServerBuild && GitRepository.IsOnMainBranch())
             .Executes(async () =>
             {
                 Info("Creating a new release");

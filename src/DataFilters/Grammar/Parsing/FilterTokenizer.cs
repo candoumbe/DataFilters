@@ -109,7 +109,7 @@ namespace DataFilters.Grammar.Parsing
                                 next = next.Remainder.ConsumeChar();
                             }
 
-                            yield return Result.Value(Numeric, numberStart, next.Location);
+                            yield return Result.Value(Digit, numberStart, next.Location);
                         }
                         break;
                     case Underscore:

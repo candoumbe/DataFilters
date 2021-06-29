@@ -19,9 +19,9 @@
         /// Parser for many <see cref="FilterToken.Letter"/>
         /// </summary>
         public static TokenListParser<FilterToken, ConstantValueExpression> AlphaNumeric => from data in (
-                                                                                            from numberBefore in Token.EqualTo(FilterToken.Numeric).Optional()
+                                                                                            from numberBefore in Token.EqualTo(FilterToken.Digit).Optional()
                                                                                             from value in Alpha.Optional()
-                                                                                            from numberAfter in Token.EqualTo(FilterToken.Numeric).Optional()
+                                                                                            from numberAfter in Token.EqualTo(FilterToken.Digit).Optional()
                                                                                             where numberBefore != null || value != null || numberAfter != null
                                                                                             select new { numberBefore, value, numberAfter }
                                                                                             ).AtLeastOnce()
@@ -36,6 +36,8 @@
         private static TokenListParser<FilterToken, Token<FilterToken>> Alpha => Token.EqualTo(FilterToken.Letter).Try()
                                                                                       .Or(Token.EqualTo(FilterToken.Escaped)).Try()
                                                                                       .Or(Token.EqualTo(FilterToken.Underscore));
+
+        private static TokenListParser<FilterToken, Token<FilterToken>> Digit => Token.EqualTo(FilterToken.Digit);
 
         /// <summary>
         /// Parser for '*' character
@@ -132,21 +134,29 @@
                                                                          from expression in Expression
                                                                          select new NotExpression(expression);
 
-        private static TokenListParser<FilterToken, RegularExpression> Regex => (
+        private static TokenListParser<FilterToken, BracketExpression> Bracket => (
                                                                                     from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                     from rangeStart in Alpha
                                                                                     from _ in Token.EqualTo(FilterToken.Dash)
                                                                                     from rangeEnd in Alpha
                                                                                     from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                    select new RegularExpression(new RegexRangeValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
+                                                                                    select new BracketExpression(new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
+                                                                                ).Try()
+                                                                                .Or(
+                                                                                    from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from rangeStart in Digit
+                                                                                    from _ in Token.EqualTo(FilterToken.Dash)
+                                                                                    from rangeEnd in Digit
+                                                                                    from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    select new BracketExpression(new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
                                                                                 ).Try()
                                                                                 .Or
                                                                                 (
                                                                                     from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
-                                                                                    from alpha in Alpha.AtLeastOnce()
+                                                                                    from alpha in Alpha.Try().Or(Digit).AtLeastOnce()
                                                                                     from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                    select new RegularExpression(alpha.Select(chr => new RegexConstantValue(chr.ToStringValue()[0]))
-                                                                                                                      .ToArray()
+                                                                                    select new BracketExpression(new ConstantBracketValue(alpha.Select(chr => chr.ToStringValue())
+                                                                                                                                                     .Aggregate((total, current) => $"{total}{current}"))
                                                                                                                 )
                                                                                 );
 
@@ -340,13 +350,13 @@
                                                                              ).Many()
                                                                              select new PropertyName(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
 
-        private static IEnumerable<char> ConvertRegexToCharArray(RegexValue value)
+        private static IEnumerable<char> ConvertRegexToCharArray(BracketValue value)
         {
             return value switch
             {
-                RegexRangeValue rangeValue => Enumerable.Range((int)rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
+                RangeBracketValue rangeValue => Enumerable.Range((int)rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
                                           .Select(ascii => (char)ascii),
-                RegexConstantValue constantValue => new[] { constantValue.Value },
+                ConstantBracketValue constantValue => constantValue.Value.ToCharArray(),
                 _ => throw new NotSupportedException("Unexpected regex value")
             };
         }
@@ -355,11 +365,11 @@
         /// Parser for expressions that contains one or more regex parts.
         /// </summary>
         public static TokenListParser<FilterToken, OneOfExpression> OneOf => (
-                                                                                from head in Regex
+                                                                                from head in Bracket
                                                                                 from body in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
                                                                                                         .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                                                                         .OptionalOrDefault()
-                                                                                from tail in Regex
+                                                                                from tail in Bracket
 
                                                                                 select (head: (FilterExpression)head, body, tail: (FilterExpression)tail)
                                                                              ).Try()
@@ -369,7 +379,7 @@
                                                                                                          .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                                                                          .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                                                                          .OptionalOrDefault()
-                                                                                 from body in Regex
+                                                                                 from body in Bracket
                                                                                  from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                                                                                       .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
                                                                                                       .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -383,62 +393,51 @@
                 return item switch
                 {
                     // *<regex>
-                    (AsteriskExpression _, RegularExpression regex, null) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new EndsWithExpression(chr.ToString())))
-                                                                     .SelectMany(x => x)
-                                                                     .ToArray()),
+                    (AsteriskExpression _, BracketExpression regex, null) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new EndsWithExpression(chr.ToString()))
+                                                                                                                     .ToArray()),
 
                     // *<regex><constant>
-                    (AsteriskExpression _, RegularExpression regex, ConstantValueExpression tail) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new EndsWithExpression($"{chr}{tail.Value}")))
-                                                                     .SelectMany(x => x)
-                                                                     .ToArray()),
+                    (AsteriskExpression _, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
+                                                                                                                                             .ToArray()),
 
                     // <regex>*
-                    (null, RegularExpression regex, AsteriskExpression _) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new StartsWithExpression(chr.ToString())))
-                                                                     .SelectMany(x => x)
-                                                                     .ToArray()),
+                    (null, BracketExpression regex, AsteriskExpression _) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new StartsWithExpression(chr.ToString()))
+                                                                                                                     .ToArray()),
+
                     // <regex><startwith>*
-                    (null, RegularExpression regex, StartsWithExpression body) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new StartsWithExpression($"{chr}{body.Value}")))
-                                                                     .SelectMany(x => x)
+                    (null, BracketExpression regex, StartsWithExpression body) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))
                                                                      .ToArray()),
                     // <constant><regex><constant>
-                    (ConstantValueExpression head, RegularExpression regex, ConstantValueExpression tail) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}{tail.Value}")))
-                                                                     .SelectMany(x => x)
+                    (ConstantValueExpression head, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}{tail.Value}"))
                                                                      .ToArray()),
                     // <constant><regex>
-                    (ConstantValueExpression head, RegularExpression regex, null) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}"))).SelectMany(x => x).ToArray()),
+                    (ConstantValueExpression head, BracketExpression regex, null) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}")).ToArray()),
 
                     // <regex><constant>
-                    (null, RegularExpression regex, ConstantValueExpression tail) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression($"{chr}{tail.Value}"))).SelectMany(x => x).ToArray()),
+                    (null, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression($"{chr}{tail.Value}")).ToArray()),
 
                     // <regex>
-                    (null, RegularExpression regex, null) => new(regex.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new ConstantValueExpression(chr.ToString()))).SelectMany(x => x).ToArray()),
+                    (null, BracketExpression regex, null) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression(chr.ToString())).ToArray()),
 
                     // <regex><constant><regex>
-                    (RegularExpression head, ConstantValueExpression body, RegularExpression tail) => new(head.Values.CrossJoin(tail.Values)
-                                                                            .Select(tuple => new { start = ConvertRegexToCharArray(tuple.Item1), end = ConvertRegexToCharArray(tuple.Item2) })
-                                                                            .Select(tuple => tuple.start.CrossJoin(tuple.end)
-                                                                                                        .Select(tuple => new {head = tuple.Item1, tail = tuple.Item2 })
-                                                                                                        .Select(tuple => new ConstantValueExpression($"{tuple.head}{body.Value}{tuple.tail}")))
-                                                                            .SelectMany(x => x)
+                    (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new(ConvertRegexToCharArray(head.Value).CrossJoin(ConvertRegexToCharArray(tail.Value))
+                                                                            .Select(tuple => new {start = tuple.Item1, end = tuple.Item2 })
+                                                                            .Select(tuple => new ConstantValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
                                                                             .ToArray()),
 
                     // <endswith><regex>
-                    (EndsWithExpression head, RegularExpression body, null) => new(body.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => new EndsWithExpression($"{head.Value}{chr}")))
-                                                                                                                                         .SelectMany(x => x)
-                                                                                                                                         .ToArray()),
+                    (EndsWithExpression head, BracketExpression body, null) => new(ConvertRegexToCharArray(body.Value).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))
+                                                                                                                      .ToArray()),
                     // <startswith><regex>
-                    (StartsWithExpression head, RegularExpression body, null) => new(body.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => (FilterExpression)new AndExpression(head,
-                                                                                                                                                                                                  new EndsWithExpression(chr.ToString()))))
-                                                                                                                  .SelectMany(x => x)
+                    (StartsWithExpression head, BracketExpression body, null) => new(ConvertRegexToCharArray(body.Value).Select(chr => (FilterExpression)new AndExpression(head,
+                                                                                                                                                                           new EndsWithExpression(chr.ToString())))
                                                                                                                   .ToArray()),
                     // <regex><endswith>
-                    (null, RegularExpression body, EndsWithExpression tail) => new(body.Values.Select(value => ConvertRegexToCharArray(value).Select(chr => (FilterExpression)new AndExpression(new StartsWithExpression(chr.ToString()),
-                                                                                                                                                                       tail)))
-                                                                                                                  .SelectMany(x => x)
+                    (null, BracketExpression body, EndsWithExpression tail) => new(ConvertRegexToCharArray(body.Value).Select(chr => (FilterExpression)new AndExpression(new StartsWithExpression(chr.ToString()), tail))
                                                                                                                   .ToArray()),
                     _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
                 };
-                });
+            });
 
         /// <summary>
         /// Parser for Date and Time
@@ -475,10 +474,10 @@
                                                                                 from sign in Token.EqualTo(FilterToken.Dash)
                                                                                                   .Or(Token.EqualToValue(FilterToken.None, "+"))
                                                                                                   .Select(n => n.ToStringValue())
-                                                                                from hour in Token.EqualTo(FilterToken.Numeric)
+                                                                                from hour in Token.EqualTo(FilterToken.Digit)
                                                                                                 .Select(n => int.Parse(n.ToStringValue()))
                                                                                 from _ in Colon
-                                                                                from minutes in Token.EqualTo(FilterToken.Numeric)
+                                                                                from minutes in Token.EqualTo(FilterToken.Digit)
                                                                                     .Select(n => int.Parse(n.ToStringValue()))
                                                                                 select new TimeOffset(hours: sign switch
                                                                                 {
@@ -489,15 +488,15 @@
         /// <summary>
         /// Parser for "date" expressions.
         /// </summary>
-        public static TokenListParser<FilterToken, DateExpression> Date => from year in Token.EqualTo(FilterToken.Numeric)
+        public static TokenListParser<FilterToken, DateExpression> Date => from year in Token.EqualTo(FilterToken.Digit)
                                                                                 .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
                                                                            from _ in Dash
-                                                                           from month in Token.EqualTo(FilterToken.Numeric)
+                                                                           from month in Token.EqualTo(FilterToken.Digit)
                                                                                 .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
                                                                            from __ in Dash
-                                                                           from day in Token.EqualTo(FilterToken.Numeric)
+                                                                           from day in Token.EqualTo(FilterToken.Digit)
                                                                                 .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
                                                                            select new DateExpression(year, month, day);
@@ -508,13 +507,13 @@
         /// <summary>
         /// Parser for time expression.
         /// </summary>
-        public static TokenListParser<FilterToken, TimeExpression> Time => from hour in Token.EqualTo(FilterToken.Numeric)
+        public static TokenListParser<FilterToken, TimeExpression> Time => from hour in Token.EqualTo(FilterToken.Digit)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
                                                                            from _ in Colon
-                                                                           from minutes in Token.EqualTo(FilterToken.Numeric)
+                                                                           from minutes in Token.EqualTo(FilterToken.Digit)
                                                                                .Select(n => int.Parse(n.ToStringValue()))
                                                                            from __ in Colon
-                                                                           from seconds in Token.EqualTo(FilterToken.Numeric)
+                                                                           from seconds in Token.EqualTo(FilterToken.Digit)
                                                                                .Select(n => int.Parse(n.ToStringValue()))
                                                                            select new TimeExpression(hour, minutes, seconds);
 
@@ -542,7 +541,7 @@
         /// <summary>
         /// Parser for numeric expressions
         /// </summary>
-        public static TokenListParser<FilterToken, ConstantValueExpression> Number => from n in Token.EqualTo(FilterToken.Numeric)
+        public static TokenListParser<FilterToken, ConstantValueExpression> Number => from n in Token.EqualTo(FilterToken.Digit)
                                                                                                      .Apply(Numerics.Decimal)
                                                                                       select new ConstantValueExpression(n.ToStringValue());
 
@@ -583,8 +582,13 @@
                                                                                    from minutes in DurationPart("M").OptionalOrDefault().Try()
                                                                                    from seconds in DurationPart("S").OptionalOrDefault().Try()
 
-                                                                                   where years is not null || months is not null || weeks is not null
-                                                                                        || days is not null || hours is not null || minutes is not null || seconds is not null
+                                                                                   where years is not null
+                                                                                         || months is not null
+                                                                                         || weeks is not null
+                                                                                         || days is not null
+                                                                                         || hours is not null
+                                                                                         || minutes is not null
+                                                                                         || seconds is not null
 
                                                                                    select new DurationExpression(years: years is not null ? int.Parse(years.Value.ToString()) : 0,
                                                                                                                  months: months is not null ? int.Parse(months.Value.ToString()) : 0,

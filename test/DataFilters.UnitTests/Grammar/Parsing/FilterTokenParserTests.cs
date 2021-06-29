@@ -1,8 +1,12 @@
 ﻿using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
 
 using FluentAssertions;
 using FluentAssertions.Execution;
+
+using FsCheck;
+using FsCheck.Xunit;
 
 using Superpower;
 using Superpower.Model;
@@ -542,6 +546,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         new OneOfExpression(characters.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray())
                     };
                 }
+
             }
         }
 
@@ -558,6 +563,29 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
             // Assert
             AssertThatCanParse(expression, expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_bracket_expression_OneOf_can_parse_input(NonNull<BracketValue> bracketExpression)
+        {
+            // Arrange
+            string input = bracketExpression.Item.ToString();
+            _outputHelper.WriteLine($"input : '{input}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            OneOfExpression expected = bracketExpression.Item switch {
+                ConstantBracketValue constant => new(constant.Value.Select(chr => new ConstantValueExpression(chr)).ToArray()),
+                RangeBracketValue range => new(Enumerable.Range(range.Start, range.End - range.Start + 1)
+                                                         .Select(ascii => (char)ascii)
+                                                         .Select(chr =>  new ConstantValueExpression(chr)).ToArray()),
+                _ => throw new NotSupportedException()
+            };
+
+            // Act
+            OneOfExpression expression = FilterTokenParser.OneOf.Parse(tokens);
+
+            // Assert
+            expression.IsEquivalentTo(expected).ToProperty().VerboseCheck(_outputHelper);
         }
 
         public static IEnumerable<object[]> RangeCases

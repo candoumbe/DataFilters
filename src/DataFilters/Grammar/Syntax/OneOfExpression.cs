@@ -42,8 +42,7 @@ namespace DataFilters.Grammar.Syntax
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
-            bool equivalent = false;
-
+            bool equivalent;
             if (other is OneOfExpression oneOfExpression)
             {
                 if (equalityComparer.Equals(oneOfExpression._values, _values))
@@ -60,7 +59,7 @@ namespace DataFilters.Grammar.Syntax
                 int i = 0;
                 do
                 {
-                    equivalent = _values[i].Equals(other);
+                    equivalent = _values[i].IsEquivalentTo(other);
                     i++;
                 }
                 while (i < _values.Length && equivalent);

@@ -70,22 +70,49 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public Property Equals_is_commutative(ConstantValueExpression first, ConstantValueExpression second) => (first.Equals(second) == second.Equals(first)).ToProperty();
 
         [Property]
-        public Property Value_should_be_DateTimeOffset(DateTimeOffset input) => Value_retains_the_underlying_type(input);
+        public Property Value_should_be_DateTimeOffset(DateTimeOffset input)
+        {
+            ConstantValueExpression expression = new(input);
+
+            return expression.Value.Equals(input).ToProperty()
+                    .And(expression.Value.GetType() == input.GetType());
+        }
 
         [Property]
-        public Property Value_should_be_Guid(Guid input) => Value_retains_the_underlying_type(input);
+        public Property Value_should_be_Guid(Guid input)
+        {
+            ConstantValueExpression expression = new(input);
+
+            return expression.Value.Equals(input).ToProperty()
+                    .And(expression.Value.GetType() == input.GetType());
+        }
 
         [Property]
-        public Property Value_should_be_Bool(bool input) => Value_retains_the_underlying_type(input);
+        public Property Value_should_be_Bool(bool input)
+        {
+            ConstantValueExpression expression = new(input);
+
+            return expression.Value.Equals(input).ToProperty()
+                    .And(expression.Value.GetType() == input.GetType());
+        }
 
         [Property]
-        public Property Value_should_be_int(int input) => Value_retains_the_underlying_type(input);
+        public Property Value_should_be_int(int input) {
+            ConstantValueExpression expression = new(input);
+            return expression.Value.Equals(input).ToProperty().And(expression.Value.GetType() == input.GetType());
+        }
 
         [Property]
-        public Property Value_should_be_long(long input) => Value_retains_the_underlying_type(input);
+        public Property Value_should_be_long(long input) {
+            ConstantValueExpression expression = new(input);
+            return expression.Value.Equals(input).ToProperty().And(expression.Value.GetType() == input.GetType());
+        }
 
         [Property]
-        public Property Value_should_be_byte(byte input) => Value_retains_the_underlying_type(input);
+        public Property Value_should_be_byte(byte input) {
+            ConstantValueExpression expression = new(input);
+            return expression.Value.Equals(input).ToProperty().And(expression.Value.GetType() == input.GetType());
+        }
 
         [Property]
         public Property Given_two_ConstantExpressions_Equals_should_depends_on_int_input_only(int input)
@@ -162,14 +189,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Act
             return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
-        }
-
-        private Property Value_retains_the_underlying_type(object input)
-        {
-            ConstantValueExpression expression = new(input);
-
-            return expression.Value.Equals(input).ToProperty()
-                    .And(expression.Value.GetType() == input.GetType());
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

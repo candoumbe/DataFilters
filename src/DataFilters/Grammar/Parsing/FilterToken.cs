@@ -36,7 +36,7 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Numeric value of some sort
         /// </summary>
-        Numeric,
+        Digit,
 
         /// <summary>
         /// <c>[</c> character

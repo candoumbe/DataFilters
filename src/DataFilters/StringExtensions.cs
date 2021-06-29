@@ -192,7 +192,7 @@ namespace System
                             }
                         };
                         break;
-                    case RegularExpression regex:
+                    case BracketExpression regex:
                         filter = new MultiFilter
                         {
                             Logic = FilterLogic.Or,

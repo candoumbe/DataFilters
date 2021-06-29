@@ -7,7 +7,7 @@ Highly inspired by the elastic query syntax, it offers a powerful way to build a
 
 **Table of contents**
 - [<a href='#' id='parsing'>Parsing</a>](#parsing)
-- [<a href='#' id='filtering'>Filtering</a>](#filtering)
+- [<a href='#' id='filtering'>Filters syntax</a>](#filtering)
   - [<a href='#' id='equals-expression'>Equals</a>](#equals)
   - [<a href='#' id='starts-with-expression'>Starts with</a>](#starts-with)
   - [<a href='#' id='ends-with-expression'>Ends with</a>](#ends-with)
@@ -17,6 +17,7 @@ Highly inspired by the elastic query syntax, it offers a powerful way to build a
     - [<a href='#' id='gte-expression'>Greater than or equal</a>](#greater-than-or-equal)
     - [<a href='#' id='lte-expression'>Less than or equal</a>](#less-than-or-equal)
     - [<a href='#' id='btw-expression'>Between</a>](#between)
+  - [<a href='#' id='regular-expression'>Regular expression support</a>](#regex-expression)
   - [<a href="logic-operators">Logical operators</a>](#logical-operators)
     - [<a href='#' id='and-expression'>And</a>](#and)
     - [<a href='#' id='or-expression'>Or</a>](#or)
@@ -113,7 +114,7 @@ The currently supported syntax mimic the query string syntax : a key-value pair 
 To parse an expression, simply call  `ToFilter<T>` extension method
 (see unit tests for more details on the syntax)
 
-# <a href='#' id='filtering'>Filtering</a>
+# <a href='#' id='filtering'>Filters syntax</a>
 
 Several expressions are supported and here's how you can start using them in your search queries.
 
@@ -269,6 +270,14 @@ you can also use the dot character (`.`).
 `property["subproperty"]["subproperty-n"]=<expression>` and `property.subproperty["subproperty-n"]=<expression>`
 are equivalent 
 
+## <a href="regex-expression">Regular expression</a>
+The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported. 
+A bracket expression. Matches a single character that is contained within the brackets. 
+For example, `[abc]` matches "a", "b", or "c". `[a-z]` specifies a range which matches any lowercase letter from "a" to "z".
+
+`BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
+
+
 ## <a href="logic-operators">Logical operators</a>
 
 Logicial operators can be used combine several instances of [IFilter][class-ifilter] together.
@@ -276,8 +285,9 @@ Logicial operators can be used combine several instances of [IFilter][class-ifil
 ### <a href='#' id='and-expression'>And</a>
 
 Use the coma character `,` to combine multiple expressions using logical AND operator 
-| Query string          | JSON                                                                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+
+| Query string          | JSON                                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------|
 | `"nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 
