@@ -19,8 +19,6 @@ namespace DataFilters.Grammar.Syntax
     /// </remarks>
     public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>, IHaveComplexity
     {
-        private static readonly ArrayEqualityComparer<BracketValue> _equalityComparer = new();
-
         /// <summary>
         /// Builds a new <see cref="BracketExpression"/> instance.
         /// </summary>
@@ -50,7 +48,8 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override double Complexity => Value switch {
             ConstantBracketValue constant => 1.5 * constant.Value.Length,
-            RangeBracketValue  range  => 1.5 * (range.End - range.Start + 1)
+            RangeBracketValue  range  => 1.5 * (range.End - range.Start + 1),
+            _ => throw new NotSupportedException("Unsupported value")
         };
 
         ///<inheritdoc/>
@@ -76,7 +75,8 @@ namespace DataFilters.Grammar.Syntax
                             ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString()))),
                             RangeBracketValue range => Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                                  .Select(ascii => (char)ascii)
-                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString())))
+                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString()))),
+                            _ => throw new NotSupportedException("Unsupported value")
                         };
                 }
             }

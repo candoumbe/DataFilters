@@ -546,7 +546,6 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         new OneOfExpression(characters.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray())
                     };
                 }
-
             }
         }
 

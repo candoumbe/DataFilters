@@ -33,5 +33,13 @@
 
             return actual.ToProperty().Label($"Range expression : {rangeBracketValue} and Constant expression is {constantBracketValue.Value}");
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_ConstantBracketValues_left_eq_right_should_be_returns_same_value_as_Equals(ConstantBracketValue left, ConstantBracketValue right)
+            => (left == right).When(left.Equals(right)).Label($"Left, Right : {(left, right)}");
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_ConstantBracketValues_left_neq_right_should_be_returns_same_value_as_Equals(ConstantBracketValue left, ConstantBracketValue right)
+            => (left != right).When(!left.Equals(right)).Label($"Left, Right : {(left, right)}");
     }
 }

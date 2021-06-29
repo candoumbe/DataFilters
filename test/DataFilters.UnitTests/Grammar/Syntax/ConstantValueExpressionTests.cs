@@ -179,7 +179,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
         }
 
-
         [Property]
         public Property Given_two_ConstantExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
         {

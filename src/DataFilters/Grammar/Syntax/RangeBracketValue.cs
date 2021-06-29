@@ -41,11 +41,11 @@
                 case ConstantBracketValue constantBracketValue:
                     char[] chrs = constantBracketValue.Value.ToCharArray();
                     char head = chrs[0];
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
+                    char tail = chrs[^1];
+#else
                     char tail = chrs[chrs.Length - 1];
-//#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
-//                    char tail = chrs[^1];
-//#else
-//#endif
+#endif
                     equals = (Start, End).Equals((head, tail));
                     break;
                 default:
@@ -55,25 +55,23 @@
             return equals;
         }
 
-
         ///<inheritdoc />
         public static bool operator ==(RangeBracketValue left, RangeBracketValue right) => EqualityComparer<RangeBracketValue>.Default.Equals(left, right);
 
         ///<inheritdoc />
         public static bool operator !=(RangeBracketValue left, RangeBracketValue right) => !(left == right);
 
-            ///<inheritdoc />
-            public static bool operator <(RangeBracketValue left, RangeBracketValue right) => !(left.Start < right.Start);
+        ///<inheritdoc />
+        public static bool operator <(RangeBracketValue left, RangeBracketValue right) => left.Start < right.Start;
 
-            ///<inheritdoc />
-            public static bool operator >(RangeBracketValue left, RangeBracketValue right) => !(left.Start > right.Start);
+        ///<inheritdoc />
+        public static bool operator >(RangeBracketValue left, RangeBracketValue right) => left.Start > right.Start;
 
-            ///<inheritdoc />
-            public static bool operator <=(RangeBracketValue left, RangeBracketValue right) => !(left.Start <=  right.Start);
+        ///<inheritdoc />
+        public static bool operator <=(RangeBracketValue left, RangeBracketValue right) => left < right || left == right;
 
-            ///<inheritdoc />
-            public static bool operator >=(RangeBracketValue left, RangeBracketValue right) => !(left.Start >= right.Start);
-
+        ///<inheritdoc />
+        public static bool operator >=(RangeBracketValue left, RangeBracketValue right) => left > right || left == right;
 
         ///<inheritdoc />
 #if NETSTANDARD2_1_OR_GREATER

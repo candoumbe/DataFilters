@@ -4,7 +4,6 @@
 
     using System;
 
-
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
@@ -93,6 +92,7 @@
             };
         }
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as RangeExpression);
 
         ///<inheritdoc/>
@@ -138,7 +138,7 @@
                 {
                     equivalent = Equals(range);
                 }
-                else if (Min is not null && Min.Included && Max is not null && Max.Included && Min.Equals(Max))
+                else if (Min?.Included == true && Max?.Included == true && Min.Equals(Max))
                 {
                     equivalent = other.Equals(Min.Expression.As(other.GetType()));
                 }

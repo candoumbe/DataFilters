@@ -37,10 +37,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         {
             get
             {
-                FilterExpression[] left = { new StartsWithExpression("ce"), null };
-                FilterExpression[] right = { new StartsWithExpression("ce"), null };
+                FilterExpression[] expression = { new StartsWithExpression("ce"), null };
 
-                return left.CrossJoin(left, (left, right) => (left, right))
+                return expression.CrossJoin(expression, (left, right) => (left, right))
                     .Where(tuple => tuple.left == null || tuple.right is null)
                     .Select(tuple => new object[] { tuple.left, tuple.right });
             }
