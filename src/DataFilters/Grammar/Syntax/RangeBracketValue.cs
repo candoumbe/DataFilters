@@ -41,11 +41,11 @@
                 case ConstantBracketValue constantBracketValue:
                     char[] chrs = constantBracketValue.Value.ToCharArray();
                     char head = chrs[0];
-#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
-                    char tail = chrs[^1];
-#else
                     char tail = chrs[chrs.Length - 1];
-#endif
+//#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
+//                    char tail = chrs[^1];
+//#else
+//#endif
                     equals = (Start, End).Equals((head, tail));
                     break;
                 default:

@@ -59,13 +59,13 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonNull<BracketValue> one, NonNull<BracketValue> two)
+        public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonNull<BracketValue> one, NonNull<BracketValue> two)
         {
             // Arrange
             BracketExpression first = new(one.Item);
             BracketExpression second = new(two.Item);
 
-            return first.Equals(second).When(one.Item.Equals(two.Item));
+            first.Equals(second).ToProperty().When(one.Item.Equals(two.Item)).VerboseCheck(_outputHelper);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

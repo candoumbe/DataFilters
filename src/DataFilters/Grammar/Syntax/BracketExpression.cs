@@ -65,7 +65,7 @@ namespace DataFilters.Grammar.Syntax
                 }
                 else if (other is BracketExpression bracketExpression)
                 {
-                    equivalent = Equals(this, bracketExpression);
+                    equivalent = Equals(bracketExpression);
                 }
                 else if (other is OneOfExpression oneOf)
                 {
