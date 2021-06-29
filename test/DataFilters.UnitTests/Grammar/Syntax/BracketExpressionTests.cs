@@ -65,11 +65,7 @@
             BracketExpression first = new(one.Item);
             BracketExpression second = new(two.Item);
 
-            // Act
-            bool actual = !first.Equals(second);
-
-            // Assert
-            return actual.ToProperty();
+            return first.Equals(second).When(one.Item.Equals(two.Item));
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
