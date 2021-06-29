@@ -11,7 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added complexity measurement of a `FilterExpression` ([#19](https://github.com/candoumbe/datafilters/issues/19))
 - Renamed `PropertyNameExpression` to `PropertyName` as its no longer a `FilterExpression` [BREAKING]
 - Removed `EqualExpression`
-- Added support for `[<start>-<end>]` regex syntax
+- Added support for `[<start>-<end>]` regex syntax [BREAKING]
+- Renamed `RegularExpression` to `BracketExpression` [BREAKING]
+- Renamed `RegularValue` to `BracketValue` [BREAKING]
+- Renamed `RegularConstantValue` to `ConstantBracketValue` [BREAKING]
+- Renamed `RegularRangeValue` to `RangeBracketValue` [BREAKING]
+- Replaced `ConstantValueExpression(object)` constructor by : [BREAKING]
+  - `ConstantValueExpression(string)`
+  - `ConstantValueExpression(int)`
+  - `ConstantValueExpression(long)`
+  - `ConstantValueExpression(bool)`
+  - `ConstantValueExpression(Guid)`
+  - `ConstantValueExpression(DateTime)`
+  - `ConstantValueExpression(DateTimeOffset)`
+  - `ConstantValueExpression(byte)`
+  - `ConstantValueExpression(char)`
 
 ## [0.6.0] / 2021-05-03
 - License changed to [Apache 2.0](https://spdx.org/licenses/Apache-2.0.html)
