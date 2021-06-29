@@ -17,7 +17,6 @@ namespace DataFilters.Expressions.UnitTests
 
         public bool Equals(Hero other) => other != null && Name == other.Name && Age == other.Age;
 
-
 #if NETCOREAPP1_0 || NETCOREAPP2_0
         public override int GetHashCode() => (Name, Age).GetHashCode();
 #else

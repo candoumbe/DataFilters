@@ -124,7 +124,6 @@ namespace DataFilters.ContinuousIntegration
         [Parameter("Generic name placeholder. Can be used wherever a name is required")]
         public readonly string Name;
 
-
         [Parameter]
         [Secret]
         public readonly string GitHubToken;
@@ -424,7 +423,6 @@ namespace DataFilters.ContinuousIntegration
             Git($"branch -D {GitRepository.Branch}");
 
             Git($"push origin --follow-tags {MainBranchName} {DevelopBranch} {MajorMinorPatchVersion}");
-
         }
 
         private void FinishFeature()

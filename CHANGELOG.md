@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.7.0] / 2021-06-29
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
 - Fixed parsing `*<regex>`, `<regex>*` expressions ([#18](https://github.com/candoumbe/datafilters/issues/18))
 - Added complexity measurement of a `FilterExpression` ([#19](https://github.com/candoumbe/datafilters/issues/19))
@@ -71,7 +73,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1
