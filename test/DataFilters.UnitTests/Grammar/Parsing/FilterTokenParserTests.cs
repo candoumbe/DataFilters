@@ -1,28 +1,28 @@
-﻿using DataFilters.Grammar.Parsing;
-using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-
-using FluentAssertions;
-using FluentAssertions.Execution;
-
-using FsCheck;
-using FsCheck.Xunit;
-
-using Superpower;
-using Superpower.Model;
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-namespace DataFilters.UnitTests.Grammar.Parsing
+﻿namespace DataFilters.UnitTests.Grammar.Parsing
 {
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+    using FluentAssertions.Execution;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using Superpower;
+    using Superpower.Model;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
     /// <summary>
     /// Unit tests for  <see cref="FilterTokenParser"/>
     /// </summary>

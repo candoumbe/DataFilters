@@ -1,16 +1,16 @@
-﻿using DataFilters.Grammar.Syntax;
-using FluentAssertions;
-using FsCheck.Xunit;
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
-using DataFilters.UnitTests.Helpers;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using FluentAssertions;
+    using FsCheck.Xunit;
+    using FsCheck;
+
+    using System;
+    using System.Collections.Generic;
+    using Xunit;
+    using Xunit.Abstractions;
+    using DataFilters.UnitTests.Helpers;
+
     public class EndsWithExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -22,9 +22,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Fact]
         public void IsFilterExpression() => typeof(EndsWithExpression).Should()
-                                                                          .BeAssignableTo<FilterExpression>().And
-                                                .Implement<IEquatable<EndsWithExpression>>().And
-                                                                          .HaveConstructor(new[] { typeof(string) }).And
+                                                                      .BeAssignableTo<FilterExpression>().And
+                                                                      .Implement<IEquatable<EndsWithExpression>>().And
+                                                                      .HaveConstructor(new[] { typeof(string) }).And
             .HaveProperty<string>("Value");
 
         [Fact]
@@ -109,7 +109,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_EndsWithExpression_Complexity_should_return_1(EndsWithExpression endsWith)
+        public Property Given_EndsWithExpression_Complexity_should_return_1U002E5(EndsWithExpression endsWith)
             => (endsWith.Complexity == 1.5).ToProperty();
     }
 }

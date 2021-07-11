@@ -1,16 +1,16 @@
-﻿using DataFilters.Grammar.Syntax;
-using FluentAssertions;
-using FsCheck.Xunit;
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
-using DataFilters.UnitTests.Helpers;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using FluentAssertions;
+    using FsCheck.Xunit;
+    using FsCheck;
+
+    using System;
+    using System.Collections.Generic;
+    using Xunit;
+    using Xunit.Abstractions;
+    using DataFilters.UnitTests.Helpers;
+
     public class GroupExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Utilities;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Utilities;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a regex pattern as its <see cref="Value"/>.
     /// </summary>
@@ -17,7 +17,7 @@ namespace DataFilters.Grammar.Syntax
     ///  <item>a combination of both : <c>[a-fMn]</c> by using<c>{ ('a', 'f', true), ('M', 'M', false), ('n', 'n', false),  }</c> to <see cref="Value"/></item>
     /// </list>
     /// </remarks>
-    public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>, IHaveComplexity
+    public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>
     {
         /// <summary>
         /// Builds a new <see cref="BracketExpression"/> instance.

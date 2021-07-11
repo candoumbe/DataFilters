@@ -1,30 +1,30 @@
-﻿using DataFilters;
+﻿namespace System
+{
+    using DataFilters;
 
-using FluentValidation.Results;
+    using FluentValidation.Results;
 
-using System.Linq;
+    using System.Linq;
 
-using DataFilters.Grammar.Parsing;
-using DataFilters.Grammar.Syntax;
-using Superpower;
-using Superpower.Model;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reflection;
-using static DataFilters.FilterOperator;
-using DataFilters.Casing;
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using Superpower;
+    using Superpower.Model;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Reflection;
+    using static DataFilters.FilterOperator;
+    using DataFilters.Casing;
 
 #if STRING_SEGMENT
-using Microsoft.Extensions.Primitives;
+    using Microsoft.Extensions.Primitives;
 #endif
 
-using static DataFilters.SortDirection;
+    using static DataFilters.SortDirection;
 #if NETSTANDARD2_0 || NETSTANDARD2_1
-using System.Runtime.InteropServices;
+    using System.Runtime.InteropServices;
 #endif
 
-namespace System
-{
     /// <summary>
     /// String extensions methods
     /// </summary>
@@ -90,7 +90,7 @@ namespace System
                 sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]));
 #endif
             }
-                else if (sortString.StartsWith("-"))
+            else if (sortString.StartsWith("-"))
             {
 #if NETSTANDARD1_3 || NETSTANDARD2_0
                 sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)),

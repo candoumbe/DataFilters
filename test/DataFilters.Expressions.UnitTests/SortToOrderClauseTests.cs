@@ -1,15 +1,18 @@
-﻿using FluentAssertions;
-using FluentAssertions.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Xunit;
-using Xunit.Categories;
-using static DataFilters.SortDirection;
-
-namespace DataFilters.Expressions.UnitTests
+﻿namespace DataFilters.Expressions.UnitTests
 {
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Categories;
+
+    using static DataFilters.SortDirection;
+
     [UnitTest]
     [Feature("Expressions")]
     public class SortToOrderClauseTests

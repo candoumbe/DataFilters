@@ -1,18 +1,18 @@
-﻿using DataFilters.Converters;
+﻿namespace DataFilters
+{
+    using DataFilters.Converters;
 
-using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
-using static Newtonsoft.Json.DefaultValueHandling;
-using static Newtonsoft.Json.Required;
-using System.Text.RegularExpressions;
+    using System;
+    using System.Collections.Generic;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Schema;
+    using static Newtonsoft.Json.DefaultValueHandling;
+    using static Newtonsoft.Json.Required;
+    using System.Text.RegularExpressions;
 #if !NETSTANDARD1_3
-using System.Text.Json.Serialization;
+    using System.Text.Json.Serialization;
 #endif
 
-namespace DataFilters
-{
     /// <summary>
     /// An instance of this class holds a filter
     /// </summary>

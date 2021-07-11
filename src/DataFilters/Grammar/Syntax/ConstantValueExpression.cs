@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
@@ -29,6 +29,8 @@ namespace DataFilters.Grammar.Syntax
                 DateTime dateTimeValue => dateTimeValue,
                 DateTimeOffset dateTimeOffsetValue => dateTimeOffsetValue,
                 Guid guidValue => guidValue,
+                decimal decimalValue => decimalValue,
+                double doubleValue => doubleValue,
                 long longValue => longValue,
                 bool boolValue => boolValue,
                 byte byteValue => byteValue,
@@ -47,6 +49,19 @@ namespace DataFilters.Grammar.Syntax
         /// </exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         public ConstantValueExpression(string value) : this((object)value) { }
+
+        /// <summary>
+        /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <see cref="decimal"/> <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value"></param>
+        public ConstantValueExpression(decimal value) : this((object)value) { }
+
+        /// <summary>
+        /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <see cref="float"/> <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value"></param>
+        public ConstantValueExpression(double value) : this((object)value) { }
+
 
         /// <summary>
         /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <see cref="DateTime"/> <paramref name="value"/>.

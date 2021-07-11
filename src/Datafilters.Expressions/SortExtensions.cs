@@ -1,10 +1,10 @@
-﻿
-using DataFilters.Expressions;
-using System;
-using System.Collections.Generic;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using DataFilters.Expressions;
+
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Extension methods for <see cref="ISort{T}"/> instances.
     /// </summary>
@@ -26,23 +26,23 @@ namespace DataFilters
             return BuildOrderClauses(sort);
 
             static IEnumerable<OrderClause<T>> BuildOrderClauses(ISort<T> sort)
-        {
-            switch (sort)
             {
-                case Sort<T> singleSort:
-                    yield return OrderClause<T>.Create(singleSort.Expression.ToLambda<T>(), singleSort.Direction);
-                    break;
-                case MultiSort<T> multiSort:
-                    foreach (Sort<T> item in multiSort.Sorts)
-                    {
-                        foreach (OrderClause<T> order in item.ToOrderClause())
+                switch (sort)
+                {
+                    case Sort<T> singleSort:
+                        yield return OrderClause<T>.Create(singleSort.Expression.ToLambda<T>(), singleSort.Direction);
+                        break;
+                    case MultiSort<T> multiSort:
+                        foreach (Sort<T> item in multiSort.Sorts)
                         {
-                            yield return order;
+                            foreach (OrderClause<T> order in item.ToOrderClause())
+                            {
+                                yield return order;
+                            }
                         }
-                    }
-                    break;
+                        break;
+                }
             }
-        }
         }
     }
 }

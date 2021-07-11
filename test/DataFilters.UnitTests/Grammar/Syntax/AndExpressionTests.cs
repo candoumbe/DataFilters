@@ -109,5 +109,41 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_AndExpression_GetComplexity_should_return_left_complexity_multiply_by_right_complexity(AndExpression and)
             => (and.Complexity == and.Left.Complexity * and.Right.Complexity).ToProperty();
+
+        public static IEnumerable<object[]> SimplifyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new AndExpression(new ConstantValueExpression("val"), new ConstantValueExpression("val")),
+                    new ConstantValueExpression("val")
+                };
+
+                yield return new object[]
+                {
+                    new AndExpression(new ConstantValueExpression("val"), new OrExpression(new ConstantValueExpression("val"), new ConstantValueExpression("val"))),
+                    new ConstantValueExpression("val")
+                };
+
+                yield return new object[]
+                {
+                    new AndExpression(new OrExpression(new ConstantValueExpression("val"), new ConstantValueExpression("val")), new ConstantValueExpression("val")),
+                    new ConstantValueExpression("val")
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_AndExpression_Simplify_should_return_the_expected_expression(AndExpression andExpression, FilterExpression expected)
+        {
+            // Act
+            FilterExpression actual = andExpression.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

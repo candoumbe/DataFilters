@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Exceptions
+﻿namespace DataFilters.Grammar.Exceptions
 {
+    using System;
+
     /// <summary>
     /// Exception thrown when <see cref="Syntax.RangeExpression"/> constructor is passed incorrect <see cref="Syntax.BoundaryExpression"/>s.
     /// </summary>

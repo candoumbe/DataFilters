@@ -1,7 +1,7 @@
-﻿using Superpower.Display;
-
-namespace DataFilters.Grammar.Parsing
+﻿namespace DataFilters.Grammar.Parsing
 {
+    using Superpower.Display;
+
     /// <summary>
     /// Enumeration of token used throughout the parsing process.
     /// </summary>

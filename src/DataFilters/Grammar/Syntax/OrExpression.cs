@@ -1,11 +1,11 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// An expression that combine two <see cref="FilterExpression"/> expressions using the logical <c>OR</c> operator
     /// </summary>
-    public sealed class OrExpression : FilterExpression, IEquatable<OrExpression>
+    public sealed class OrExpression : FilterExpression, IEquatable<OrExpression>, ISimplifiable
     {
         /// <summary>
         /// Left member of the expression
@@ -44,29 +44,27 @@ namespace DataFilters.Grammar.Syntax
 #endif
 
         ///<inheritdoc/>
-        public override string ToString() => new
-        {
-            Left = new { Type = Left.GetType().Name, Left },
-            Right = new { Type = Right.GetType().Name, Right },
-        }.Jsonify();
+        public override string ToString() => this.Jsonify();
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
-            bool equivalent = false;
-
-            switch (other)
+            return other switch
             {
-                case OrExpression or:
-                    equivalent = (or.Right.Equals(Right) && or.Left.Equals(Left))
-                                 || (or.Left.Equals(Right) && or.Right.Equals(Left));
-                    break;
-                default:
-                    equivalent = Left.Equals(Right) && Left.Equals(other);
-                    break;
-            }
+                OrExpression or => (or.Right.IsEquivalentTo(Right) && or.Left.IsEquivalentTo(Left))
+                                                || (or.Left.IsEquivalentTo(Right) && or.Right.IsEquivalentTo(Left)),
+                OneOfExpression oneOf => IsEquivalentTo(oneOf.Simplify()),
+                _ => Left.IsEquivalentTo(Right) && Left.IsEquivalentTo(other),
+            };
+        }
 
-            return equivalent;
+        ///<inheritdoc/>
+        public FilterExpression Simplify()
+        {
+            FilterExpression simplifiedLeft = (Left as ISimplifiable)?.Simplify() ?? Left;
+            FilterExpression simplifiedRigth = (Right as ISimplifiable)?.Simplify() ?? Right;
+
+            return simplifiedLeft.IsEquivalentTo(simplifiedRigth) ? simplifiedLeft : this;
         }
 
         ///<inheritdoc/>

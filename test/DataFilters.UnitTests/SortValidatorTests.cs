@@ -1,12 +1,12 @@
-using FluentAssertions;
-
-using FluentValidation.Results;
-
-using Xunit;
-using Xunit.Categories;
-
 namespace DataFilters.UnitTests
 {
+    using FluentAssertions;
+
+    using FluentValidation.Results;
+
+    using Xunit;
+    using Xunit.Categories;
+
     [UnitTest]
     [Feature("Sorting")]
     public class SortValidatorTests

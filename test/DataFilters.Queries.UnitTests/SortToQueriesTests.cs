@@ -1,15 +1,19 @@
-﻿using FluentAssertions;
-using Queries.Core.Parts.Sorting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Xunit;
-using Xunit.Abstractions;
-using static Queries.Core.Parts.Sorting.OrderDirection;
-
-namespace DataFilters.Queries.UnitTests
+﻿namespace DataFilters.Queries.UnitTests
 {
+    using FluentAssertions;
+
+    using global::Queries.Core.Parts.Sorting;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+
+    using static global::Queries.Core.Parts.Sorting.OrderDirection;
+
     public class SortToQueriesTests
     {
         private readonly ITestOutputHelper _outputHelper;

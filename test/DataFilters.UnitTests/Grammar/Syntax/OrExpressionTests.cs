@@ -1,20 +1,21 @@
-﻿using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-
-using FluentAssertions;
-
-using FsCheck;
-using FsCheck.Xunit;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
     [UnitTest]
     public class OrExpressionTests
     {
@@ -29,6 +30,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void IsFilterExpression() => typeof(OrExpression).Should()
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<OrExpression>>().And
+            .Implement<ISimplifiable>().And
             .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
             .HaveProperty<FilterExpression>("Left").And
             .HaveProperty<FilterExpression>("Right");
@@ -151,6 +153,26 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_two_OrExpression_instances_that_left_and_right_expressions_are_both_equals_IsEquivalentTo_should_return_true(FilterExpression left, FilterExpression right)
+        {
+            // Arrange
+            OrExpression one = new(left, right);
+            OrExpression two = new(left: right, right: left);
+
+            return one.IsEquivalentTo(two).ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_OneOfExpression_that_contains_only_two_expressions_IsEquivalentTo_should_return_true(FilterExpression left, FilterExpression right)
+        {
+            // Arrange
+            OneOfExpression oneOf = new(left, right);
+            OrExpression or = new(left: right, right: left);
+
+            return or.IsEquivalentTo(oneOf).ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
@@ -166,6 +188,22 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(AsteriskExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
+
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_eq_right_eq_OrExpression_Simplify_should_returns_the_inner_OrExpression(OrExpression filterExpression)
+        {
+            // Arrange
+            OrExpression orExpression = new(filterExpression, filterExpression);
+
+            // Act
+            FilterExpression simplified = orExpression.Simplify();
+
+            // Assert
+            simplified.Should()
+                      .Be(filterExpression);
+        }
+
         private static Property Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(FilterExpression filterExpression)
         {
             // Arrange
@@ -179,5 +217,43 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_OrExpression_GetComplexity_should_return_sum_of_left_and_right_complexity(OrExpression orExpression)
             => (orExpression.Complexity == orExpression.Left.Complexity + orExpression.Right.Complexity).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_eq_right_Simplify_should_return_left(FilterExpression expected)
+        {
+            // Arrange
+            OrExpression orExpression = new(expected, expected);
+
+            // Act
+            FilterExpression actual = orExpression.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+        public static IEnumerable<object[]> SimplifyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new OrExpression(new ConstantValueExpression(1), new OrExpression(new ConstantValueExpression(1), new ConstantValueExpression(1))),
+                    new ConstantValueExpression(1)
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_OrExpression_Simplify_should_return_expected_result(OrExpression orExpression, FilterExpression expected)
+        {
+            // Act
+            FilterExpression actual = orExpression.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿namespace DataFilters.Converters
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
 
 #if NETSTANDARD1_3
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 #else
-using System.Text.Json;
-using System.Text.Json.Serialization;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 #endif
 
-namespace DataFilters.Converters
-{
     /// <summary>
     /// <see cref="JsonConverter"/> implementation that can convert from/to <see cref="Filter"/>
     /// </summary>
-#if NETSTANDARD1_3 
+#if NETSTANDARD1_3
     public class FilterConverter : JsonConverter
 #else
     public class FilterConverter : JsonConverter<Filter>

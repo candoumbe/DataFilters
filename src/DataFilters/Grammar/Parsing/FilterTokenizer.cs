@@ -1,11 +1,13 @@
-﻿using Superpower;
-using Superpower.Model;
-using System.Collections.Generic;
-using System.Linq;
-using static DataFilters.Grammar.Parsing.FilterToken;
-
-namespace DataFilters.Grammar.Parsing
+﻿namespace DataFilters.Grammar.Parsing
 {
+    using Superpower;
+    using Superpower.Model;
+
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using static DataFilters.Grammar.Parsing.FilterToken;
+
     /// <summary>
     /// <see cref="FilterTokenizer"/> is the base class used to "tokenize" a string.
     /// </summary>

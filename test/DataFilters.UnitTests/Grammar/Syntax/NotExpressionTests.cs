@@ -1,17 +1,19 @@
-﻿using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-
-using FluentAssertions;
-using FsCheck;
-using FsCheck.Xunit;
-
-using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using System;
+    using System.Collections.Generic;
+
+    using Xunit;
+    using Xunit.Abstractions;
+
     public class NotExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;

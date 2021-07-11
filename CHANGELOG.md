@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Added `ISimplifiable` marker interface which defines a `FilterExpression Simplify()` method.
 
 ## [0.7.0] / 2021-06-29
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
@@ -34,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.5.0] / 2021-05-02
-- Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) as extension point to configure the way to lookup 
+- Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) base class as extension point to configure the way to lookup 
 for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issues/8))
 - Added `ToFilter<T>(string, PropertyNameResolutionStrategy)` overload
 - Added `ToSort<T>(string, PropertyNameResolutionStrategy)` overload

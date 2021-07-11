@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// a <see cref="PropertyName"/> holds the name of a property a filter is build against.
     /// </summary>

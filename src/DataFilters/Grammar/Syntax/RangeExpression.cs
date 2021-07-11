@@ -7,7 +7,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
-    public sealed class RangeExpression : FilterExpression, IEquatable<RangeExpression>
+    public sealed class RangeExpression : FilterExpression, IEquatable<RangeExpression>, ISimplifiable
     {
         /// <summary>
         /// Lower bound of the current instance
@@ -32,6 +32,9 @@
         ///     <item>both<paramref name="min"/> is <see cref="AsteriskExpression"/> and <paramref name="max"/> <c>null</c>.</item>
         /// </list>
         /// </exception>
+        /// <remarks>
+        ///     Either <paramref name="min"/> or <paramref name="max"/> can be null to indicate and unbounded lower (respectivelu upper) bound.
+        /// </remarks>
         public RangeExpression(BoundaryExpression min = null, BoundaryExpression max = null)
         {
             if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
@@ -160,5 +163,20 @@
 
         /// <inheritdoc/>
         public override double Complexity => (Min?.Expression?.Complexity ?? 0) + (Max?.Expression?.Complexity ?? 0);
+
+        /// <inheritdoc/>
+        public FilterExpression Simplify()
+        {
+            FilterExpression simplified = this;
+
+            if (Min is not null && Max is not null && Min.Included && Max.Included && Min.Equals(Max))
+            {
+                simplified = ((FilterExpression)Min.Expression).Complexity < ((FilterExpression)Max.Expression).Complexity
+                    ? (FilterExpression)Min.Expression
+                    : (FilterExpression)Max.Expression;
+            }
+
+            return simplified;
+        }
     }
 }

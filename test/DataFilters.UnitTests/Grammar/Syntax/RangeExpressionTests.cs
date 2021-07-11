@@ -1,18 +1,21 @@
-﻿using DataFilters.Grammar.Exceptions;
-using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-using FluentAssertions.Extensions;
-using FsCheck;
-using FsCheck.Xunit;
-using System;
-using System.Collections.Generic;
-
-using Xunit;
-using Xunit.Abstractions;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Exceptions;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using System;
+    using System.Collections.Generic;
+
+    using Xunit;
+    using Xunit.Abstractions;
+
     public class RangeExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -26,6 +29,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void IsFilterExpression() => typeof(RangeExpression).Should()
                                                                    .BeAssignableTo<FilterExpression>().And
                                                                    .Implement<IEquatable<RangeExpression>>().And
+                                                                   .Implement<ISimplifiable>().And
                                                                    .HaveConstructor(new[] { typeof(BoundaryExpression), typeof(BoundaryExpression) }).And
                                                                    .HaveProperty<BoundaryExpression>("Min").And
                                                                    .HaveProperty<BoundaryExpression>("Max")
@@ -356,5 +360,46 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_RangeExpression_GetComplexity_should_return_sum_of_min_and_max_complexity(RangeExpression rangeExpression)
             => (rangeExpression.Complexity == (rangeExpression.Min?.Expression?.Complexity ?? 0) + (rangeExpression.Max?.Expression?.Complexity ?? 0)).ToProperty();
+
+        public static IEnumerable<object[]> SimplifyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new RangeExpression(new (new ConstantValueExpression(10), true), new (new ConstantValueExpression(10), true)),
+                    new ConstantValueExpression(10),
+                    "Lower and upper bound are equal"
+                };
+
+                yield return new object[]
+                {
+                    new RangeExpression(new (new ConstantValueExpression(10), true), new (new ConstantValueExpression(12), true)),
+                    new RangeExpression(new (new ConstantValueExpression(10), true), new (new ConstantValueExpression(12), true)),
+                    "Lower and upper bound are not equals and not equivalent"
+                };
+
+                yield return new object[]
+                {
+                    new RangeExpression(new (new TimeExpression(1), true), new (new TimeExpression(minutes: 60), true)),
+                    new TimeExpression(1),
+                    "Lower and upper bound are equivalent"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_RangeExpression_Simplify_should_return_expected_expression(RangeExpression rangeExpression, FilterExpression expected, string reason)
+        {
+            _outputHelper.WriteLine($"Range expression : {rangeExpression}");
+
+            // Act
+            FilterExpression actual = rangeExpression.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
+        }
     }
 }

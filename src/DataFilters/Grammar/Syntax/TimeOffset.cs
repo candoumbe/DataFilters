@@ -1,7 +1,7 @@
-using System;
-
 namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// <see cref="TimeOffset"/> records the offset between a time and the UTC time
     /// </summary>

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that can be used to construct <see cref="RangeExpression"/> instances.
     /// </summary>
@@ -22,7 +22,7 @@ namespace DataFilters.Grammar.Syntax
         /// Builds a new <see cref="BoundaryExpression"/> instance.
         /// </summary>
         /// <param name="expression">an <see cref="IBoundaryExpression"/></param>
-        /// <param name="included"><c>true</c>if <paramref name="expression"/> should be included in the interval and <c>false</c> otherwise.</param>
+        /// <param name="included"><c>true</c> if <paramref name="expression"/> should be included in the interval and <c>false</c> otherwise.</param>
         public BoundaryExpression(IBoundaryExpression expression, bool included)
         {
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));

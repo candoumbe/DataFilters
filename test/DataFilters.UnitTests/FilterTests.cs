@@ -1,31 +1,32 @@
-﻿using FluentAssertions;
-
-using FsCheck;
-using FsCheck.Xunit;
-
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
-
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-using static DataFilters.FilterLogic;
-using static DataFilters.FilterOperator;
-#if NETCOREAPP2_1
+﻿#if NETCOREAPP2_1
 using static Newtonsoft.Json.JsonConvert;
 #else
 #endif
 
 namespace DataFilters.UnitTests
 {
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using System.Text.RegularExpressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
+    using static DataFilters.FilterLogic;
+    using static DataFilters.FilterOperator;
+
     [UnitTest]
     public class FilterTests
     {

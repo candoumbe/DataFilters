@@ -1,21 +1,22 @@
-﻿using FluentAssertions;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Linq.Expressions;
-using Xunit;
-using Xunit.Abstractions;
-using static DataFilters.FilterOperator;
-using static DataFilters.FilterLogic;
-using Xunit.Categories;
-using Newtonsoft.Json.Schema;
-#if NETCOREAPP2_1
+﻿#if NETCOREAPP2_1
 using static Newtonsoft.Json.JsonConvert;
 #endif
 namespace DataFilters.UnitTests.Converters
 {
+    using FluentAssertions;
+    using Newtonsoft.Json.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using Xunit;
+    using Xunit.Abstractions;
+    using static DataFilters.FilterOperator;
+    using static DataFilters.FilterLogic;
+    using Xunit.Categories;
+    using Newtonsoft.Json.Schema;
+
     [UnitTest]
     [Feature("Converters")]
     public class DataFilterConverterTests

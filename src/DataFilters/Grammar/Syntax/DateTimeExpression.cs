@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> implementation that can holds a datetime value
     /// </summary>
