@@ -1,8 +1,7 @@
-﻿
-using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that only consists of time part.
     /// </summary>
@@ -76,7 +75,8 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public bool Equals(TimeExpression other) => other != null
-            && (Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset));
+            && ((Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset))
+            || ((Offset == other.Offset) && (new TimeSpan(0, Hours, Minutes, Seconds, Milliseconds) == new TimeSpan(0, other.Hours, other.Minutes, other.Seconds, other.Milliseconds))));
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as TimeExpression);

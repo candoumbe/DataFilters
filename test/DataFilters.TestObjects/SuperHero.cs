@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace DataFilters.TestObjects
+﻿namespace DataFilters.TestObjects
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class SuperHero : Person
     {
         public DateTimeOffset? LastBattleDate { get; set; }

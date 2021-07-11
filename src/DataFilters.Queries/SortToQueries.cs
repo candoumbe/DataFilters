@@ -1,9 +1,10 @@
-﻿using Queries.Core.Parts.Sorting;
-using System;
-using System.Collections.Generic;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using Queries.Core.Parts.Sorting;
+
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Extensions method for <see cref="ISort{T}"/> types
     /// </summary>

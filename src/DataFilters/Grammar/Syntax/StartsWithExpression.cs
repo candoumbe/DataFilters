@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that defines a string that starts with a specified <see cref="Value"/>.
     /// </summary>

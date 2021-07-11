@@ -1,12 +1,12 @@
-﻿using DataFilters.Grammar.Syntax;
-
-using FluentAssertions;
-
-using Xunit;
-using Xunit.Categories;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+
+    using FluentAssertions;
+
+    using Xunit;
+    using Xunit.Categories;
+
     [UnitTest]
     public class TimeOffsetTests
     {

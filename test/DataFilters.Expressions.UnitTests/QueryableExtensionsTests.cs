@@ -1,13 +1,15 @@
-﻿using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-namespace DataFilters.Expressions.UnitTests
+﻿namespace DataFilters.Expressions.UnitTests
 {
+    using FluentAssertions;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
     [UnitTest]
     public class QueryableExtensionsTests
     {

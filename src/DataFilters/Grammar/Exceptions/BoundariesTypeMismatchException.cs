@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Exceptions
+﻿namespace DataFilters.Grammar.Exceptions
 {
+    using System;
+
     /// <summary>
     /// Exception thrown when a <see cref="Syntax.RangeExpression"/> has incorrect <see cref="Syntax.RangeExpression.Min"/>
     /// </summary>

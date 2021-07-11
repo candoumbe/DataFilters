@@ -1,11 +1,11 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
     /// </summary>
-    public sealed class AndExpression : FilterExpression, IEquatable<AndExpression>, IHaveComplexity
+    public sealed class AndExpression : FilterExpression, IEquatable<AndExpression>, ISimplifiable
     {
         /// <summary>
         /// Left part of the expression
@@ -44,5 +44,20 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override string ToString() => this.Jsonify();
+
+        ///<inheritdoc/>
+        public FilterExpression Simplify()
+        {
+            FilterExpression simplifiedExpression = this;
+            FilterExpression simplifiedLeft = (Left as ISimplifiable)?.Simplify() ?? Left;
+            FilterExpression simplifiedRight = (Right as ISimplifiable)?.Simplify() ?? Right;
+
+            if (simplifiedLeft.IsEquivalentTo(simplifiedRight))
+            {
+                simplifiedExpression = simplifiedLeft;
+            }
+
+            return simplifiedExpression;
+        }
     }
 }

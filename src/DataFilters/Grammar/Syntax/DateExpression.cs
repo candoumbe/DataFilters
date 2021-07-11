@@ -1,16 +1,16 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a date.
     /// </summary>
-    public class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+    public sealed class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
     {
-    /// <summary>
-    /// Year part of the date
-    /// </summary>
-    public int Year { get; }
+        /// <summary>
+        /// Year part of the date
+        /// </summary>
+        public int Year { get; }
 
         /// <summary>
         /// Month part of the date

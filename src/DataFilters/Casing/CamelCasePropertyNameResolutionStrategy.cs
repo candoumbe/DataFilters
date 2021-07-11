@@ -1,8 +1,7 @@
-﻿
-using System;
-
-namespace DataFilters.Casing
+﻿namespace DataFilters.Casing
 {
+    using System;
+
     /// <summary>
     /// <see cref="PropertyNameResolutionStrategy"/> that transform input to it <strong>camelCase</strong> equivalent.
     /// </summary>

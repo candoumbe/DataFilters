@@ -1,31 +1,29 @@
-﻿
-using DataFilters.TestObjects;
-
-using FluentAssertions;
-using FluentAssertions.Extensions;
-
-using FsCheck;
-
-using NodaTime;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Linq.Expressions;
-
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-using static DataFilters.FilterLogic;
-using static DataFilters.FilterOperator;
-
-namespace DataFilters.UnitTests
+﻿namespace DataFilters.UnitTests
 {
+    using DataFilters.TestObjects;
+
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
+
+    using FsCheck;
+
+    using NodaTime;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
+    using static DataFilters.FilterLogic;
+    using static DataFilters.FilterOperator;
+
     [Feature("Filters")]
     [UnitTest]
-    [SuppressMessage("Blocker Code Smell", "S2699:Tests should include assertions", Justification = "Some tests calls a private method where the assertion is done.")]
     public class FilterToExpressionTests
     {
         private readonly ITestOutputHelper _output;

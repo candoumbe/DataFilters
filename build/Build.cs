@@ -1,35 +1,35 @@
-using Nuke.Common;
-using Nuke.Common.CI;
-using Nuke.Common.CI.AzurePipelines;
-using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.Execution;
-using Nuke.Common.Git;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Coverlet;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Tools.ReportGenerator;
-using Nuke.Common.Utilities;
-using Nuke.Common.Tools.GitReleaseManager;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using static Nuke.Common.ChangeLog.ChangelogTasks;
-using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
-using static Nuke.Common.Logger;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.Git.GitTasks;
-using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
-using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
-
 namespace DataFilters.ContinuousIntegration
 {
+    using Nuke.Common;
+    using Nuke.Common.CI;
+    using Nuke.Common.CI.AzurePipelines;
+    using Nuke.Common.CI.GitHubActions;
+    using Nuke.Common.Execution;
+    using Nuke.Common.Git;
+    using Nuke.Common.IO;
+    using Nuke.Common.ProjectModel;
+    using Nuke.Common.Tooling;
+    using Nuke.Common.Tools.Coverlet;
+    using Nuke.Common.Tools.DotNet;
+    using Nuke.Common.Tools.GitVersion;
+    using Nuke.Common.Tools.ReportGenerator;
+    using Nuke.Common.Utilities;
+    using Nuke.Common.Tools.GitReleaseManager;
+
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    using static Nuke.Common.ChangeLog.ChangelogTasks;
+    using static Nuke.Common.IO.FileSystemTasks;
+    using static Nuke.Common.IO.PathConstruction;
+    using static Nuke.Common.Logger;
+    using static Nuke.Common.Tools.DotNet.DotNetTasks;
+    using static Nuke.Common.Tools.Git.GitTasks;
+    using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
+    using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+
     [GitHubActions(
         "continuous",
         GitHubActionsImage.WindowsLatest,
@@ -510,7 +510,9 @@ namespace DataFilters.ContinuousIntegration
                     Name = MajorMinorPatchVersion
                 };
 
-                Octokit.Release release = await gitHubClient.Repository.Release.Create(long.Parse(GitRepository.Identifier), newRelease)
+                string repositoryName = GitHubActions.GitHubRepository.Replace(GitHubActions.GitHubRepositoryOwner + "/", string.Empty);
+
+                Octokit.Release release = await gitHubClient.Repository.Release.Create(GitHubActions.GitHubRepositoryOwner, repositoryName, newRelease)
                                                                                .ConfigureAwait(false);
 
                 Info($"Github release {release.TagName} created successfully");

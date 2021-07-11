@@ -1,20 +1,20 @@
-﻿using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-
-using FsCheck.Xunit;
-
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Xunit;
-using Xunit.Abstractions;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+
+    using FsCheck.Xunit;
+
+    using FsCheck;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Xunit;
+    using Xunit.Abstractions;
+
     public class OneOfExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -40,6 +40,17 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             // Assert
             action.Should()
                 .ThrowExactly<ArgumentNullException>($"The parameter {nameof(OneOfExpression)}'s constructor cannot be null");
+        }
+
+        [Fact]
+        public void Constructor_throws_InvalidOperationException_when_values_is_empty()
+        {
+            // Act
+            Action ctorWithEmptyArray = () => new OneOfExpression(Array.Empty<FilterExpression>());
+
+            // Assert
+            ctorWithEmptyArray.Should()
+                              .ThrowExactly<InvalidOperationException>($"The parameter {nameof(OneOfExpression)}'s constructor cannot be a empty array");
         }
 
         public static IEnumerable<object[]> EqualsCases
@@ -185,7 +196,78 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(OneOfExpression oneOfExpression)
-            => (oneOfExpression.Complexity == oneOfExpression.Values.Sum(expr => expr.Complexity)).ToProperty();
+        public Property Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(NonEmptyArray<FilterExpression> expressions)
+        {
+            // Arrange
+            OneOfExpression oneOfExpression = new(expressions.Item);
+
+            return (oneOfExpression.Complexity == oneOfExpression.Values.Sum(expr => expr.Complexity)).ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_OneOfExpression_with_same_values_repetead_more_than_once_Simplify_should_filter_out_duplicated_values(NonEmptyArray<FilterExpression> expressions)
+        {
+            // Arrange
+            OneOfExpression oneOf = new(expressions.Item);
+
+            double complexityBeforeCallingSimplify = oneOf.Complexity;
+
+            // Act
+            oneOf.Simplify();
+
+            // Assert
+            return (oneOf.Complexity <= complexityBeforeCallingSimplify).ToProperty();
+        }
+
+        public static IEnumerable<object[]> SimplifyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new OneOfExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val2")),
+                    new OrExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val2"))
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val1")),
+                    new ConstantValueExpression("val1")
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new ConstantValueExpression("val1"), new OrExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val1"))),
+                    new ConstantValueExpression("val1")
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_OneOfExpression_Simplify_should_output_expected_expression(OneOfExpression input, FilterExpression expected)
+        {
+            // Act
+            FilterExpression actual = input.Simplify();
+
+            // Assert
+            actual.Should().Be(expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(NonEmptyArray<FilterExpression> expressions)
+        {
+            // Arrange
+            OneOfExpression oneOfExpression = new(expressions.Item);
+
+            double complexityBeforeFirstSimplification = oneOfExpression.Complexity;
+
+            // Act
+            FilterExpression simplified = oneOfExpression.Simplify();
+
+            // Assert
+            simplified.Complexity.Should()
+                                 .BeLessOrEqualTo(complexityBeforeFirstSimplification, "The first simplification may or may not simplify the expression");
+        }
     }
 }

@@ -1,15 +1,15 @@
-using System;
-
-using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-
-using FsCheck;
-using FsCheck.Xunit;
-
-using Xunit.Categories;
-
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using Xunit.Categories;
+
     [UnitTest]
     public class DurationExpressionTests
     {

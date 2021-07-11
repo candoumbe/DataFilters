@@ -1,9 +1,9 @@
-using Nuke.Common.Tooling;
-
-using System.ComponentModel;
-
 namespace DataFilters.ContinuousIntegration
 {
+    using Nuke.Common.Tooling;
+
+    using System.ComponentModel;
+
     [TypeConverter(typeof(TypeConverter<Configuration>))]
     public class Configuration : Enumeration
     {

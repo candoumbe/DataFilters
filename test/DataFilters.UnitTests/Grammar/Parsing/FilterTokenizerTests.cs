@@ -1,18 +1,23 @@
-﻿using DataFilters.Grammar.Parsing;
-using FluentAssertions;
-using Superpower;
-using Superpower.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-using static DataFilters.Grammar.Parsing.FilterToken;
-
-namespace DataFilters.UnitTests.Grammar.Parsing
+﻿namespace DataFilters.UnitTests.Grammar.Parsing
 {
+    using DataFilters.Grammar.Parsing;
+
+    using FluentAssertions;
+
+    using Superpower;
+    using Superpower.Model;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
+    using static DataFilters.Grammar.Parsing.FilterToken;
+
     [UnitTest]
     [Feature(nameof(DataFilters.Grammar.Parsing))]
     [Feature(nameof(FilterTokenizer))]

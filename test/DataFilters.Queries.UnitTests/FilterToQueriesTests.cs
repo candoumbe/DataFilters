@@ -1,17 +1,17 @@
-using FluentAssertions;
-
-using Queries.Core.Parts.Clauses;
-
-using System;
-using System.Collections.Generic;
-
-using Xunit;
-using Xunit.Abstractions;
-
-using static DataFilters.FilterOperator;
-
 namespace DataFilters.Queries.UnitTests
 {
+    using FluentAssertions;
+
+    using global::Queries.Core.Parts.Clauses;
+
+    using System;
+    using System.Collections.Generic;
+
+    using Xunit;
+    using Xunit.Abstractions;
+
+    using static DataFilters.FilterOperator;
+
     public class FilterToQueriesTests
     {
         private readonly ITestOutputHelper _outputHelper;

@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Casing
+﻿namespace DataFilters.Casing
 {
+    using System;
+
     /// <summary>
     /// <see cref="PropertyNameResolutionStrategy"/> that transform input to its snake_case equivalent.
     /// </summary>

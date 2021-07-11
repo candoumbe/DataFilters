@@ -1,15 +1,19 @@
-﻿using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-using FsCheck;
-using FsCheck.Xunit;
-using System;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
+    using System;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
     [UnitTest]
     public class ConstantValueExpressionTests
     {
@@ -47,14 +51,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Fact]
-        public void Ctor_Throws_ArgumentOutyException_When_Argument_Is_Whitespace()
+        public void Given_parameter_is_whitespace_Ctor_should_not_throw()
         {
             // Act
             Action action = () => new ConstantValueExpression(" ");
 
             // Assert
             action.Should()
-                .NotThrow($"The parameter of  {nameof(ConstantValueExpression)}'s constructor can be whitespace");
+                .NotThrow($"The parameter of {nameof(ConstantValueExpression)}'s constructor can be whitespace");
         }
 
         [Property]

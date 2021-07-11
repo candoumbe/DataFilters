@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using System;
+
     /// <summary>
     /// Defines the basic shape of a filter
     /// </summary>
