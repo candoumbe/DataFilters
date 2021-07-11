@@ -205,10 +205,14 @@ namespace DataFilters.ContinuousIntegration
 
         public Target Tests => _ => _
             .DependsOn(Compile)
+            .Before(Feature)
             .Description("Run unit tests and collect code coverage")
             .Produces(TestResultDirectory / "*.trx")
             .Produces(TestResultDirectory / "*.xml")
             .Produces(CoverageReportHistoryDirectory / "*.xml")
+            .OnlyWhenDynamic(() => IsServerBuild  || (IsLocalBuild && (GitRepository.IsOnHotfixBranch()
+                                                                       || GitRepository.IsOnReleaseBranch()
+                                                                       || GitRepository.IsOnFeatureBranch())))
             .Executes(() =>
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
@@ -451,6 +455,7 @@ namespace DataFilters.ContinuousIntegration
         public Target Publish => _ => _
             .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
             .DependsOn(Tests, Pack)
+            .Triggers(AddGithubRelease)
             .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
             .Requires(() => !(NugetApiKey.IsNullOrEmpty() || GitHubToken.IsNullOrEmpty()))
             .Requires(() => GitHasCleanWorkingCopy())
