@@ -33,7 +33,7 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions(
         "integration",
         GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest, GitHubActionsImage.Ubuntu1804, GitHubActionsImage.UbuntuLatest,
-        OnPushBranchesIgnore = new[] { MainBranchName, ReleaseBranchPrefix + "/*", FeatureBranchPrefix + "/*" },
+        OnPushBranchesIgnore = new[] { MainBranchName },
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(Pack) },

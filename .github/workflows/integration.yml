@@ -20,8 +20,6 @@ on:
   push:
     branches-ignore:
       - main
-      - 'release/*'
-      - 'feature/*'
   pull_request:
     branches:
       - develop
