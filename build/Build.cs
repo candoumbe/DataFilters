@@ -31,12 +31,12 @@ namespace DataFilters.ContinuousIntegration
     using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
     [GitHubActions(
-        "continuous",
-        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest, GitHubActionsImage.UbuntuLatest,
-        OnPushBranchesIgnore = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
+        "integration",
+        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
+        OnPushBranchesIgnore = new[] { MainBranchName },
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(Tests), nameof(Pack), nameof(AddGithubRelease) },
+        InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
         OnPullRequestExcludePaths = new[] {
         "docs/*",
         "README.md",
@@ -45,8 +45,8 @@ namespace DataFilters.ContinuousIntegration
         }
     )]
     [GitHubActions(
-        "deployment",
-        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest, GitHubActionsImage.UbuntuLatest,
+        "delivery",
+        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
