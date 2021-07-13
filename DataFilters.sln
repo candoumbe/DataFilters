@@ -44,6 +44,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEM
 		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFilters.PerformanceTests", "test\DataFilters.PerformanceTests\DataFilters.PerformanceTests.csproj", "{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +100,7 @@ Global
 		{2AE1C53E-17BE-4E6D-BFDE-C659BA74046C} = {D0CE23E3-5516-4A96-B70B-AA26C60E823F}
 		{D5276318-323B-4EB9-A143-6C7154D8F01B} = {70099B24-D56E-4CDA-9839-C4DBA6F2FE8F}
 		{D9057B44-29C0-48A5-A93B-F06F00C27DC6} = {D5276318-323B-4EB9-A143-6C7154D8F01B}
+		{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A} = {D0CE23E3-5516-4A96-B70B-AA26C60E823F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C91610A1-3BAC-4C7B-A4C1-0B95652A7931}
