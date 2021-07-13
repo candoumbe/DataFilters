@@ -7,11 +7,11 @@
     public class OneOfVsOr
     {   
         [Benchmark]
-        [Arguments("Name=Br[a-f]")]
+        [Arguments("Nickname=Br[a-f]")]
         public IFilter OneOf(string input) => input.ToFilter<SuperHero>();
 
         [Benchmark]
-        [Arguments("Name=Bra|Brb|Brc|Brd|Bre|Brf")]
+        [Arguments("Nickname=Bra|Brb|Brc|Brd|Bre|Brf")]
         public IFilter Or(string input) => input.ToFilter<SuperHero>();
     }
 }
