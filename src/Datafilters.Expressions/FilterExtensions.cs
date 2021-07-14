@@ -219,11 +219,7 @@
                         ParameterExpression localParameter = Parameter(enumerableGenericType);
                         Expression localBody;
 
-                        if (typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType))
-                        {
-                            localBody = ComputeBodyExpression(property, @operator, value);
-                        }
-                        else
+                        if (!(typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType)))
                         {
                             MemberExpression localProperty = Property(localParameter, fields.Single());
                             localBody = ComputeBodyExpression(localProperty, @operator, value);

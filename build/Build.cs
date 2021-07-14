@@ -218,8 +218,7 @@ namespace DataFilters.ContinuousIntegration
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
                 IEnumerable<Project> testsProjects = TestPartition.GetCurrent(projects);
-
-                RunTests(projects);
+                RunTests(testsProjects);
             });
 
         private void RunTests(IEnumerable<Project> testsProjects)

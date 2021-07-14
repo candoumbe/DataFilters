@@ -174,6 +174,10 @@ will result in a [IFilter][class-ifilter] instance equivalent to
 IFilter filter = new Filter("nickname", Contains, "bat");
 ```
 
+💡 `contains` also work on arrays. `powers=*strength*` will search for `vigilante`s who have `strength` related powers.
+
+
+
 ## <a href='#' id='isempty-expression'>Is empty</a>
 
 Search for `vigilante` resources that have no powers.
@@ -181,7 +185,6 @@ Search for `vigilante` resources that have no powers.
 | Query string | JSON                                   |
 | ------------ | -------------------------------------- |
 | `powers=!*`  | `{ "field":"powers", "op":"isempty" }` |
-
 
 ## <a href='#' id='range-expressions'>Range expressions</a>
 
@@ -273,7 +276,7 @@ are equivalent
 ## <a href="regex-expression">Regular expression</a>
 The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported. 
 A bracket expression. Matches a single character that is contained within the brackets. 
-For example, `[abc]` matches "a", "b", or "c". `[a-z]` specifies a range which matches any lowercase letter from "a" to "z".
+For example, `[abc]` matches `a`, `b`, or `c`. `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
 
 `BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
 
@@ -288,7 +291,7 @@ Use the coma character `,` to combine multiple expressions using logical AND ope
 
 | Query string          | JSON                                                                                                                                    |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------|
-| `"nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| `nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 
 will result in a [IFilter][class-ifilter] instance equivalent to
@@ -312,7 +315,7 @@ ends with `"man"`
 
 | Query string          | JSON                                                                                                                                    |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `"nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| `nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
 
@@ -336,7 +339,7 @@ Search for `vigilante` resources where the value of `nickname` property does not
 
 | Query string   | JSON                                                    |
 | -------------- | ------------------------------------------------------- |
-| `"nickname=!B` | `{"field":"nickname", "op":"nstartswith", "value":"B"}` |
+| `nickname=!B*` | `{"field":"nickname", "op":"nstartswith", "value":"B"}` |
 
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
 
@@ -401,7 +404,7 @@ a special character.
 
 | Query string   | JSON                                                |
 | -------------- | --------------------------------------------------- |
-| `"comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` |
+| `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` |
 
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
 
