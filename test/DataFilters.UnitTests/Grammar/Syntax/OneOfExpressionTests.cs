@@ -29,7 +29,7 @@
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<OneOfExpression>>().And
             .HaveConstructor(new[] { typeof(FilterExpression[]) }).And
-            .HaveProperty<IEnumerable<FilterExpression>>("Values");
+            .HaveProperty<IReadOnlyCollection<FilterExpression>>("Values");
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()

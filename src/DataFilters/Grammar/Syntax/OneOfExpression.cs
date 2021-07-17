@@ -16,7 +16,7 @@
         /// <summary>
         /// Collection of <see cref="FilterExpression"/> that the current instance holds.
         /// </summary>
-        public IEnumerable<FilterExpression> Values => _values;
+        public IReadOnlyCollection<FilterExpression> Values => _values.ToList().AsReadOnly();
 
         private readonly FilterExpression[] _values;
 
@@ -38,7 +38,7 @@
                 throw new InvalidOperationException($"{nameof(OneOfExpression)} cannot be empty");
             }
 
-            _values = values.Where(x => x != null)
+            _values = values.Where(x => x is not null)
                             .ToArray();
         }
 
@@ -48,7 +48,7 @@
             bool equivalent;
             if (other is OneOfExpression oneOfExpression)
             {
-                if (equalityComparer.Equals(oneOfExpression._values, _values))
+                if (equalityComparer.Equals(oneOfExpression._values.ToArray(), _values.ToArray()))
                 {
                     equivalent = true;
                 }
@@ -72,7 +72,7 @@
         }
 
         ///<inheritdoc/>
-        public bool Equals(OneOfExpression other) => other is not null && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
+        public bool Equals(OneOfExpression other) => other is not null && equalityComparer.Equals(_values, other._values);
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OneOfExpression);
