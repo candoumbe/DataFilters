@@ -8,7 +8,8 @@
         /// <summary>
         /// Builds a <see cref="FilterExpression"/> which is equivalent to the current instance but which complexity should be lower.
         /// </summary>
-        /// <returns>a rewritten version of the current <see cref="FilterExpression"/></returns>
+        /// <returns>a rewritten version of the current <see cref="FilterExpression"/> which 
+        /// <see cref="FilterExpression.Complexity"/> should be lower.</returns>
         FilterExpression Simplify();
     }
 }

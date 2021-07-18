@@ -269,5 +269,25 @@
             simplified.Complexity.Should()
                                  .BeLessOrEqualTo(complexityBeforeFirstSimplification, "The first simplification may or may not simplify the expression");
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }, Replay = "16965549319615628981,12290474172266243489")]
+        public void Given_OneOxpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
+        {
+            // Arrange
+            FilterExpression expected = new OneOfExpression(first.Item.Concat(second.Item)
+                                                                      .Concat(third.Item)
+                                                                      .ToArray()).Simplify();
+
+            OneOfExpression initial = new(new OneOfExpression(first.Item),
+                                          new OneOfExpression(second.Item),
+                                          new OneOfExpression(third.Item));
+
+            // Act
+            FilterExpression actual = initial.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

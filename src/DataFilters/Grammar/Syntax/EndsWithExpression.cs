@@ -41,7 +41,7 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{ GetType().Name } : {nameof(Value)} -> '{Value}'";
+        public override string ToString() => $"*{Value}";
 
         ///<inheritdoc/>
         public override double Complexity => 1.5;
