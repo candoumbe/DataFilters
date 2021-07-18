@@ -135,31 +135,36 @@
                                                                          select new NotExpression(expression);
 
         private static TokenListParser<FilterToken, BracketExpression> Bracket => (
-                                                                                    from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
-                                                                                    from rangeStart in Alpha
-                                                                                    from _ in Token.EqualTo(FilterToken.Dash)
-                                                                                    from rangeEnd in Alpha
-                                                                                    from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                    select new BracketExpression(new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
-                                                                                ).Try()
-                                                                                .Or(
-                                                                                    from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
-                                                                                    from rangeStart in Digit
-                                                                                    from _ in Token.EqualTo(FilterToken.Dash)
-                                                                                    from rangeEnd in Digit
-                                                                                    from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                    select new BracketExpression(new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
+                                                                                    from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from rangeValues in BuildRangeBracketValuesParser(Alpha).Or(BuildRangeBracketValuesParser(Digit)).AtLeastOnce()
+                                                                                    from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    select new BracketExpression(rangeValues)
                                                                                 ).Try()
                                                                                 .Or
                                                                                 (
-                                                                                    from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                     from alpha in Alpha.Try().Or(Digit).AtLeastOnce()
-                                                                                    from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                                                                                     select new BracketExpression(new ConstantBracketValue(alpha.Select(chr => chr.ToStringValue())
                                                                                                                                                      .Aggregate((total, current) => $"{total}{current}"))
                                                                                                                 )
                                                                                 );
+        /// <summary>
+        /// Builds a parser that can extract bracket expression values
+        /// </summary>
+        /// <param name="token">The parser that can parse values inside a <c>[</c> qnd <c>]</c></param>
+        /// <returns></returns>
+        private static TokenListParser<FilterToken, BracketValue> BuildRangeBracketValuesParser(TokenListParser<FilterToken, Token<FilterToken>> token)
+            => (from rangeStart in token
+               from _ in Token.EqualTo(FilterToken.Dash)
+               from rangeEnd in token
+               select (BracketValue) new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
+            .Try()
+            .Or(from values in token.AtLeastOnce()
+                select (BracketValue) new ConstantBracketValue(string.Concat(values.Select(value => value.ToStringValue()))))
 
+            
+            ;
         /// <summary>
         /// Parses Range expressions
         /// </summary>
@@ -350,16 +355,16 @@
                                                                              ).Many()
                                                                              select new PropertyName(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
 
-        private static IEnumerable<char> ConvertRegexToCharArray(BracketValue value)
-        {
-            return value switch
-            {
-                RangeBracketValue rangeValue => Enumerable.Range((int)rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
-                                          .Select(ascii => (char)ascii),
-                ConstantBracketValue constantValue => constantValue.Value.ToCharArray(),
-                _ => throw new NotSupportedException("Unexpected regex value")
-            };
-        }
+        private static IEnumerable<char> ConvertRegexToCharArray(IEnumerable<BracketValue> values)
+            => values.Select(value =>
+                    value switch
+                    {
+                        RangeBracketValue rangeValue => Enumerable.Range(rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
+                                                                    .Select(ascii => (char)ascii),
+                        ConstantBracketValue constantValue => constantValue.Value.ToCharArray(),
+                        _ => throw new NotSupportedException("Unexpected regex value")
+                    })
+                .SelectMany(x => x);
 
         /// <summary>
         /// Parser for expressions that contains one or more regex parts.
@@ -393,47 +398,47 @@
                 return item switch
                 {
                     // *<regex>
-                    (AsteriskExpression _, BracketExpression regex, null) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new EndsWithExpression(chr.ToString()))
+                    (AsteriskExpression _, BracketExpression bracket, null) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))
                                                                                                                      .ToArray()),
 
                     // *<regex><constant>
-                    (AsteriskExpression _, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
+                    (AsteriskExpression _, BracketExpression bracket, ConstantValueExpression tail) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
                                                                                                                                              .ToArray()),
 
                     // <regex>*
-                    (null, BracketExpression regex, AsteriskExpression _) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new StartsWithExpression(chr.ToString()))
+                    (null, BracketExpression bracket, AsteriskExpression _) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))
                                                                                                                      .ToArray()),
 
                     // <regex><startwith>*
-                    (null, BracketExpression regex, StartsWithExpression body) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))
+                    (null, BracketExpression bracket, StartsWithExpression body) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))
                                                                      .ToArray()),
                     // <constant><regex><constant>
-                    (ConstantValueExpression head, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}{tail.Value}"))
+                    (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Values).Select(chr => new ConstantValueExpression($"{bracket.Value}{chr}{tail.Value}"))
                                                                      .ToArray()),
                     // <constant><regex>
-                    (ConstantValueExpression head, BracketExpression regex, null) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression($"{head.Value}{chr}")).ToArray()),
+                    (ConstantValueExpression head, BracketExpression bracket, null) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression($"{head.Value}{chr}")).ToArray()),
 
                     // <regex><constant>
-                    (null, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression($"{chr}{tail.Value}")).ToArray()),
+                    (null, BracketExpression bracket, ConstantValueExpression tail) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression($"{chr}{tail.Value}")).ToArray()),
 
                     // <regex>
-                    (null, BracketExpression regex, null) => new(ConvertRegexToCharArray(regex.Value).Select(chr => new ConstantValueExpression(chr.ToString())).ToArray()),
+                    (null, BracketExpression bracket, null) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression(chr.ToString())).ToArray()),
 
                     // <regex><constant><regex>
-                    (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new(ConvertRegexToCharArray(head.Value).CrossJoin(ConvertRegexToCharArray(tail.Value))
-                                                                            .Select(tuple => new {start = tuple.Item1, end = tuple.Item2 })
+                    (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new(ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
+                                                                            .Select(tuple => new { start = tuple.Item1, end = tuple.Item2 })
                                                                             .Select(tuple => new ConstantValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
                                                                             .ToArray()),
 
                     // <endswith><regex>
-                    (EndsWithExpression head, BracketExpression body, null) => new(ConvertRegexToCharArray(body.Value).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))
+                    (EndsWithExpression head, BracketExpression body, null) => new(ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))
                                                                                                                       .ToArray()),
                     // <startswith><regex>
-                    (StartsWithExpression head, BracketExpression body, null) => new(ConvertRegexToCharArray(body.Value).Select(chr => (FilterExpression)new AndExpression(head,
+                    (StartsWithExpression head, BracketExpression body, null) => new(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression)new AndExpression(head,
                                                                                                                                                                            new EndsWithExpression(chr.ToString())))
                                                                                                                   .ToArray()),
                     // <regex><endswith>
-                    (null, BracketExpression body, EndsWithExpression tail) => new(ConvertRegexToCharArray(body.Value).Select(chr => (FilterExpression)new AndExpression(new StartsWithExpression(chr.ToString()), tail))
+                    (null, BracketExpression body, EndsWithExpression tail) => new(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression)new AndExpression(new StartsWithExpression(chr.ToString()), tail))
                                                                                                                   .ToArray()),
                     _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
                 };

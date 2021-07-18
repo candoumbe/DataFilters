@@ -85,6 +85,11 @@
         public override int GetHashCode() => (Date, Time).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => this.Jsonify();
+        public override string ToString() => (Date, Time) switch
+        {
+            ({ }, { }) => $"{Date}T{Time}",
+            (null, { }) => $"T{Time}",
+            _ => $"{Date}"
+        };
     }
 }

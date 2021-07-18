@@ -535,19 +535,27 @@
                     new OneOfExpression(new EndsWithExpression("M"), new EndsWithExpression("m"))
                 };
 
+                yield return new object[]
                 {
-                    const char regexStart = 'a';
-                    const char regexEnd = 'z';
-                    IEnumerable<char> characters = Enumerable.Range((int)regexStart, regexEnd - regexStart + 1)
-                                                             .Select(ascii => (char)ascii);
-                    yield return new object[]
-                    {
-                        "[a-z]",
-                        new OneOfExpression(characters.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray())
-                    };
-                }
+                    "[a-z]",
+                    new OneOfExpression(GetCharacters('a', 'z').Select(chr => new ConstantValueExpression(chr.ToString())).ToArray())
+                };
+
+
+                yield return new object[]
+                {
+                    "[a-zA-Z0-9]",
+                    new OneOfExpression(GetCharacters('a', 'z').Concat(GetCharacters('A', 'Z'))
+                                                               .Concat(GetCharacters('0', '9'))
+                                                               .Select(chr => new ConstantValueExpression(chr.ToString()))
+                                                               .ToArray())
+                };
             }
         }
+
+        private static IEnumerable<char> GetCharacters(char regexStart, char regexEnd)
+            => Enumerable.Range(regexStart, regexEnd - regexStart + 1)
+                         .Select(ascii => (char)ascii);
 
         [Theory]
         [MemberData(nameof(OneOfExpressionCases))]
@@ -572,11 +580,12 @@
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
-            OneOfExpression expected = bracketExpression.Item switch {
+            OneOfExpression expected = bracketExpression.Item switch
+            {
                 ConstantBracketValue constant => new(constant.Value.Select(chr => new ConstantValueExpression(chr)).ToArray()),
                 RangeBracketValue range => new(Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                          .Select(ascii => (char)ascii)
-                                                         .Select(chr =>  new ConstantValueExpression(chr)).ToArray()),
+                                                         .Select(chr => new ConstantValueExpression(chr)).ToArray()),
                 _ => throw new NotSupportedException()
             };
 

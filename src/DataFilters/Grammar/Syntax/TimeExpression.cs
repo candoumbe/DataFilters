@@ -85,6 +85,6 @@
         public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{{{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}}}";
+        public override string ToString() => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}";
     }
 }

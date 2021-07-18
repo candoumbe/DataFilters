@@ -16,7 +16,7 @@
         /// <summary>
         /// Collection of <see cref="FilterExpression"/> that the current instance holds.
         /// </summary>
-        public IEnumerable<FilterExpression> Values => _values;
+        public IReadOnlyCollection<FilterExpression> Values => _values.ToList().AsReadOnly();
 
         private readonly FilterExpression[] _values;
 
@@ -38,7 +38,7 @@
                 throw new InvalidOperationException($"{nameof(OneOfExpression)} cannot be empty");
             }
 
-            _values = values.Where(x => x != null)
+            _values = values.Where(x => x is not null)
                             .ToArray();
         }
 
@@ -48,7 +48,7 @@
             bool equivalent;
             if (other is OneOfExpression oneOfExpression)
             {
-                if (equalityComparer.Equals(oneOfExpression._values, _values))
+                if (equalityComparer.Equals(oneOfExpression._values.ToArray(), _values.ToArray()))
                 {
                     equivalent = true;
                 }
@@ -72,7 +72,7 @@
         }
 
         ///<inheritdoc/>
-        public bool Equals(OneOfExpression other) => other is not null && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
+        public bool Equals(OneOfExpression other) => other is not null && equalityComparer.Equals(_values, other._values);
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OneOfExpression);
@@ -92,28 +92,59 @@
         ///<inheritdoc/>
         public override string ToString() => $"{{{nameof(Complexity)}:{Complexity}, {nameof(Values)}: [{string.Join(",", Values)}]}}";
 
-        /// <summary>
-        /// Reduces the complexity of the current expression.
-        /// </summary>
+        /// <inheritdoc/>
         public FilterExpression Simplify()
         {
             ISet<FilterExpression> curatedExpressions = new HashSet<FilterExpression>();
 
-            foreach (FilterExpression expr in _values.Distinct())
+            foreach (IGrouping<bool, FilterExpression> expr in _values.ToLookup(x => x is OneOfExpression))
             {
-                FilterExpression simplifiedExpression = (expr as ISimplifiable)?.Simplify() ?? expr;
-                if (!curatedExpressions.Contains(simplifiedExpression) && !curatedExpressions.Any(existing => existing.IsEquivalentTo(simplifiedExpression)))
+                if (expr.Key)
                 {
-                    curatedExpressions.Add(simplifiedExpression);
+                    OneOfExpression oneOfExpression = new(expr.Select(item => ((OneOfExpression)item).Values)
+                                                              .SelectMany(x => x)
+                                                              .ToArray());
+
+                    curatedExpressions.Add(oneOfExpression.Simplify());
+                }
+                else
+                {
+                    foreach (FilterExpression expression in expr)
+                    {
+                        FilterExpression simplifiedExpression = (expression as ISimplifiable)?.Simplify() ?? expression;
+                        if (!curatedExpressions.Contains(simplifiedExpression) && !curatedExpressions.Any(existing => existing.IsEquivalentTo(simplifiedExpression)))
+                        {
+                            curatedExpressions.Add(simplifiedExpression);
+                        }
+                    }
                 }
             }
 
-            return curatedExpressions.Count switch
+            FilterExpression simplifiedResult;
+
+            switch (curatedExpressions.Count)
             {
-                1 => curatedExpressions.Single(),
-                2 => new OrExpression(curatedExpressions.First(), curatedExpressions.Last()),
-                _ => new OneOfExpression(curatedExpressions.ToArray()),
-            };
+                case 1:
+                    simplifiedResult = curatedExpressions.Single();
+                    break;
+                case 2 :
+                    FilterExpression first = curatedExpressions.First();
+                    FilterExpression other = curatedExpressions.Last();
+                    if (first is OneOfExpression oneOfFirst && other is OneOfExpression oneOfSecond)
+                    {
+                        simplifiedResult = new OneOfExpression(oneOfFirst.Values.Concat(oneOfSecond.Values).ToArray());
+                    }
+                    else
+                    {
+                        simplifiedResult = new OrExpression(first, other);
+                    }
+                    break;
+                default:
+                    simplifiedResult = new OneOfExpression(curatedExpressions.ToArray());
+                    break;
+            }
+
+            return simplifiedResult;
         }
     }
 }

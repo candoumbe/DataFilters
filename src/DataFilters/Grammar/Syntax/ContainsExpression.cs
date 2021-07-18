@@ -46,6 +46,6 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => this.Jsonify();
+        public override string ToString() => $"*{Value}*";
     }
 }

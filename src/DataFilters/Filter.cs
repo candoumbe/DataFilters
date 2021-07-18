@@ -22,7 +22,7 @@
 #else
     [System.Text.Json.Serialization.JsonConverter(typeof(FilterConverter))]
 #endif
-    public class Filter : IFilter, IEquatable<Filter>
+    public sealed class Filter : IFilter, IEquatable<Filter>
     {
         /// <summary>
         /// Filter that always returns <c>true</c>
@@ -214,6 +214,9 @@
         public override bool Equals(object obj) => Equals(obj as Filter);
 
         ///<inheritdoc/>
+        public bool Equals(IFilter other) => Equals(other as Filter);
+
+        ///<inheritdoc/>
 #if NETSTANDARD1_3 || NETSTANDARD2_0
         public override int GetHashCode() => (Field, Operator, Value).GetHashCode();
 #else
@@ -244,9 +247,6 @@
             };
             return new Filter(Field, @operator, Value);
         }
-
-        ///<inheritdoc/>
-        public bool Equals(IFilter other) => Equals(other as Filter);
 
         ///<inheritdoc/>
         public void Deconstruct(out string field, out FilterOperator @operator, out object value)

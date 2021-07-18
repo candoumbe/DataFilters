@@ -129,7 +129,10 @@
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => this.Jsonify();
+        public override string ToString() => $"{GetBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetBracket(Max?.Included)}"
+        ;
+
+        private static string GetBracket(bool? included) => true.Equals(included) ? "[" : "]";
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
