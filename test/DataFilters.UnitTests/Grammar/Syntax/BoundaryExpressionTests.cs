@@ -16,7 +16,7 @@
 
     [UnitTest]
     [Feature(nameof(DataFilters.Grammar.Syntax))]
-    [Feature(nameof(RangeExpression))]
+    [Feature(nameof(IntervalExpression))]
     public class BoundaryExpressionTests
     {
         public static IEnumerable<object[]> EqualsCases

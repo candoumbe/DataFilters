@@ -74,14 +74,14 @@
         public static bool operator >=(RangeBracketValue left, RangeBracketValue right) => left > right || left == right;
 
         ///<inheritdoc />
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public override int GetHashCode() => HashCode.Combine(Start, End);
 #else
         public override int GetHashCode()
         {
             int hashCode = -1676728671;
-            hashCode = hashCode * -1521134295 + Start.GetHashCode();
-            hashCode = hashCode * -1521134295 + End.GetHashCode();
+            hashCode = (hashCode * -1521134295) + Start.GetHashCode();
+            hashCode = (hashCode * -1521134295) + End.GetHashCode();
             return hashCode;
         }
 

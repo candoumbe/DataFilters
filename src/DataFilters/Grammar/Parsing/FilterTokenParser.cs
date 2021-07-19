@@ -168,15 +168,12 @@
         /// <summary>
         /// Parses Range expressions
         /// </summary>
-        public static TokenListParser<FilterToken, RangeExpression> Range
+        public static TokenListParser<FilterToken, IntervalExpression> Interval
         {
             get
             {
                 return  // Case [ min TO max ] 
                         (
-                            // from prop in Property
-                            // from eq in Token.EqualTo(FilterToken.Equal)
-                            // from _ in AnyExpression.Many()
                             from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
                             from min in DateAndTime.Try()
                                                     .Cast<FilterToken, DateTimeExpression, FilterExpression>()
@@ -193,7 +190,7 @@
                             from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
                             where min != default || max != default
-                            select new RangeExpression(
+                            select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
                                     ConstantValueExpression constant => constant,
@@ -208,11 +205,8 @@
                                 }, included: true)
                             )
                         ).Try()
-                      // Case ] min TO max ] : lower bound excluded from the range
+                      // Case ] min TO max ] : lower bound excluded from the interval
                       .Or(
-                            // from prop in Property
-                            // from eq in Token.EqualTo(FilterToken.Equal)
-                            // from _ in AnyExpression.Many()
                             from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -228,7 +222,7 @@
                             from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
                             where min != default || max != default
-                            select new RangeExpression(
+                            select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
@@ -244,7 +238,7 @@
                                 }, included: true)
                            )
                         ).Try()
-                      // Case syntax [ min TO max [ : upper bound excluded from the range
+                      // Case syntax [ min TO max [ : upper bound excluded from the interval
                       .Or(
                             // from prop in Property
                             // from eq in Token.EqualTo(FilterToken.Equal)
@@ -264,7 +258,7 @@
                             from end in Token.EqualTo(FilterToken.OpenSquaredBracket)
 
                             where min != default || max != default
-                            select new RangeExpression(
+                            select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
                                     ConstantValueExpression constant => constant,
@@ -280,11 +274,8 @@
                                 }, included: false)
                            )
                         ).Try()
-                      // Case  ] min TO max [ : lower and upper bounds excluded from the range
+                      // Case  ] min TO max [ : lower and upper bounds excluded from the interval
                       .Or(
-                            // from prop in Property
-                            // from eq in Token.EqualTo(FilterToken.Equal)
-                            // from _ in AnyExpression.Many()
                             from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
@@ -301,7 +292,7 @@
                             from end in Token.EqualTo(FilterToken.OpenSquaredBracket)
 
                             where min != default || max != default
-                            select new RangeExpression(
+                            select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
@@ -526,7 +517,7 @@
         /// Parser for full criteria
         /// </summary>
         public static TokenListParser<FilterToken, FilterExpression> Expression => Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>())
-                                                                                        .Or(Parse.Ref(() => Range.Try().Cast<FilterToken, RangeExpression, FilterExpression>()))
+                                                                                        .Or(Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
                                                                                         .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
                                                                                         .Or(Parse.Ref(() => Contains.Try().Cast<FilterToken, ContainsExpression, FilterExpression>()))
                                                                                         .Or(Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()))

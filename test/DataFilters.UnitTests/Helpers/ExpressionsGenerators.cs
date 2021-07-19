@@ -106,7 +106,7 @@ namespace DataFilters.UnitTests.Helpers
                 EndsWithExpressions().Generator.Select(item => (FilterExpression) item),
                 StartsWithExpressions().Generator.Select(item => (FilterExpression) item),
                 ContainsExpressions().Generator.Select(item => (FilterExpression) item),
-                RangeExpressions().Generator.Select(item => (FilterExpression) item),
+                IntervalExpressions().Generator.Select(item => (FilterExpression) item),
                 DateExpressions().Generator.Select(item => (FilterExpression) item),
                 DateTimeExpressions().Generator.Select(item => (FilterExpression) item),
                 TimeExpressions().Generator.Select(item => (FilterExpression) item),
@@ -171,7 +171,7 @@ namespace DataFilters.UnitTests.Helpers
         private static TFilterExpression CreateFilterExpression<TFilterExpression>((FilterExpression, FilterExpression) input, Func<(FilterExpression, FilterExpression), TFilterExpression> func)
             => func.Invoke(input);
 
-        public static Arbitrary<RangeExpression> RangeExpressions()
+        public static Arbitrary<IntervalExpression> IntervalExpressions()
         {
             IList<Gen<IBoundaryExpression>> generators = new List<Gen<IBoundaryExpression>>
             {
@@ -182,8 +182,8 @@ namespace DataFilters.UnitTests.Helpers
             return Gen.OneOf(generators)
                       .Zip(Arb.Default.Bool().Generator)
                       .Two()
-                      .Select(tuple => new RangeExpression(min: new(expression: tuple.Item1.Item1, included: tuple.Item1.Item2),
-                                                           max: new(expression: tuple.Item2.Item1, included: tuple.Item2.Item2)))
+                      .Select(tuple => new IntervalExpression(min: new(expression: tuple.Item1.Item1, included: tuple.Item1.Item2),
+                                                              max: new(expression: tuple.Item2.Item1, included: tuple.Item2.Item2)))
                       .ToArbitrary();
         }
 

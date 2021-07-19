@@ -4,7 +4,7 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// A <see cref="FilterExpression"/> that can be used to construct <see cref="RangeExpression"/> instances.
+    /// A <see cref="FilterExpression"/> that can be used to construct <see cref="IntervalExpression"/> instances.
     /// </summary>
     public sealed class BoundaryExpression : IEquatable<BoundaryExpression>
     {
@@ -14,7 +14,7 @@
         public IBoundaryExpression Expression { get; }
 
         /// <summary>
-        /// Should the <see cref="Expression"/> be included or excluded in the <see cref="RangeExpression"/>
+        /// Should the <see cref="Expression"/> be included or excluded in the <see cref="IntervalExpression"/>
         /// </summary>
         public bool Included { get; }
 
