@@ -52,7 +52,7 @@
                                                            .HaveProperty<TokenListParser<FilterToken, AsteriskExpression>>("Asterisk").And
                                                            .HaveProperty<TokenListParser<FilterToken, GroupExpression>>("Group").And
                                                            .HaveProperty<TokenListParser<FilterToken, AndExpression>>("And").And
-                                                           .HaveProperty<TokenListParser<FilterToken, IntervalExpression>>("Range").And
+                                                           .HaveProperty<TokenListParser<FilterToken, IntervalExpression>>("Interval").And
                                                            .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
         public static IEnumerable<object[]> AlphaNumericCases
