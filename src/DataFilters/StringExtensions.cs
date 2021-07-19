@@ -219,7 +219,7 @@
                             filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
                         }
                         break;
-                    case RangeExpression range:
+                    case IntervalExpression range:
 
                         static (ConstantValueExpression constantExpression, bool included) ConvertBounderyExpressionToConstantExpression(BoundaryExpression input)
                             => input?.Expression switch

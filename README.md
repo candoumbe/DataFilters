@@ -13,7 +13,7 @@ Highly inspired by the elastic query syntax, it offers a powerful way to build a
   - [<a href='#' id='ends-with-expression'>Ends with</a>](#ends-with)
   - [<a href='#' id='contains-expression'>Contains</a>](#contains)
   - [<a href='#' id='isempty-expression'>Is empty</a>](#is-empty)
-  - [<a href='#' id='range-expressions'>Range expressions</a>](#range-expressions)
+  - [<a href='#' id='interval-expressions'>Interval expressions</a>](#interval-expressions)
     - [<a href='#' id='gte-expression'>Greater than or equal</a>](#greater-than-or-equal)
     - [<a href='#' id='lte-expression'>Less than or equal</a>](#less-than-or-equal)
     - [<a href='#' id='btw-expression'>Between</a>](#between)
@@ -186,15 +186,15 @@ Search for `vigilante` resources that have no powers.
 | ------------ | -------------------------------------- |
 | `powers=!*`  | `{ "field":"powers", "op":"isempty" }` |
 
-## <a href='#' id='range-expressions'>Range expressions</a>
+## <a href='#' id='interval-expressions'>Interval expressions</a>
 
-Range expressions are delimited by upper and a lower bound. The generic syntax is
+Interval expressions are delimited by upper and a lower bound. The generic syntax is
 
 `<field>=<min> TO <max>`
 
 where
 
-- `field` is the name of the property current range expression will be apply to
+- `field` is the name of the property current interval expression will be apply to
 - `min` is the lowest bound of the interval
 - `max` is the highest bound of the interval
 

@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Added `ISimplifiable` marker interface which defines a `FilterExpression Simplify()` method.
+- Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
+`FilterExpression` to a less complex form.
+- Renamed `RangeExpression` to `IntervalExpression` [BREAKING]
 
 ## [0.7.0] / 2021-06-29
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))

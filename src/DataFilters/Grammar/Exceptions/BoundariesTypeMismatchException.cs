@@ -3,7 +3,7 @@
     using System;
 
     /// <summary>
-    /// Exception thrown when a <see cref="Syntax.RangeExpression"/> has incorrect <see cref="Syntax.RangeExpression.Min"/>
+    /// Exception thrown when a <see cref="Syntax.IntervalExpression"/> has incorrect <see cref="Syntax.IntervalExpression.Min"/>
     /// </summary>
 #pragma warning disable RCS1194 // Implement exception constructors.
     [Serializable]

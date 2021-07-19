@@ -52,7 +52,7 @@
                                                            .HaveProperty<TokenListParser<FilterToken, AsteriskExpression>>("Asterisk").And
                                                            .HaveProperty<TokenListParser<FilterToken, GroupExpression>>("Group").And
                                                            .HaveProperty<TokenListParser<FilterToken, AndExpression>>("And").And
-                                                           .HaveProperty<TokenListParser<FilterToken, RangeExpression>>("Range").And
+                                                           .HaveProperty<TokenListParser<FilterToken, IntervalExpression>>("Interval").And
                                                            .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
         public static IEnumerable<object[]> AlphaNumericCases
@@ -441,7 +441,7 @@
                 yield return new object[]
                 {
                     "![10 TO *[",
-                    new NotExpression(new RangeExpression(min : new BoundaryExpression(new ConstantValueExpression("10"), included: true)))
+                    new NotExpression(new IntervalExpression(min : new BoundaryExpression(new ConstantValueExpression("10"), included: true)))
                 };
 
                 yield return new object[]
@@ -603,26 +603,26 @@
                 yield return new object[]
                 {
                     "[10 TO 20]",
-                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included: true),
+                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included: true),
                                         max: new BoundaryExpression(new ConstantValueExpression("20"), included : true))
                 };
 
                 yield return new object[]
                 {
                     "]* TO 20]",
-                    new RangeExpression(max: new BoundaryExpression(new ConstantValueExpression("20"), included: true))
+                    new IntervalExpression(max: new BoundaryExpression(new ConstantValueExpression("20"), included: true))
                 };
 
                 yield return new object[]
                 {
                     "[10 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true))
+                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true))
                 };
 
                 yield return new object[]
                 {
                     "[2010-06-25 TO 2010-06-29]",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
+                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
                                         max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
                     )
                 };
@@ -630,7 +630,7 @@
                 yield return new object[]
                 {
                     "]2010-06-25 TO 2010-06-29[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
+                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
                                         max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
                     )
                 };
@@ -638,7 +638,7 @@
                 yield return new object[]
                 {
                     "]2010-06-25 TO 2010-06-29]",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
+                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
                                         max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
                     )
                 };
@@ -646,7 +646,7 @@
                 yield return new object[]
                 {
                     "[2010-06-25 TO 2010-06-29[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
+                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
                                         max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
                     )
                 };
@@ -654,45 +654,45 @@
                 yield return new object[]
                 {
                     "[2010-06-25 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true))
+                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true))
                 };
 
                 yield return new object[]
                 {
                     "[13:30:00 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : true))
+                    new IntervalExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : true))
                 };
 
                 yield return new object[]
                 {
                     "]13:30:00 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
+                    new IntervalExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
                 };
 
                 yield return new object[]
                 {
                     "]* TO 13:30:00[",
-                    new RangeExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
+                    new IntervalExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
                 };
 
                 yield return new object[]
                 {
                     "]* TO 13:30:00]",
-                    new RangeExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included: true))
+                    new IntervalExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included: true))
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(RangeCases))]
-        public void CanParseRange(string input, RangeExpression expected)
+        public void CanParseRange(string input, IntervalExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            RangeExpression expression = FilterTokenParser.Range.Parse(tokens);
+            IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
 
             // Assert
             AssertThatCanParse(expression, expected);
@@ -835,7 +835,7 @@
                     "Size=[10 TO 20]",
                     (
                         new PropertyName("Size"),
-                        (FilterExpression) new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"),
+                        (FilterExpression) new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"),
                                                                                            included: true),
                                                                max: new BoundaryExpression(new ConstantValueExpression("20"),
                                                                                            included: true))
@@ -856,7 +856,7 @@
                     @"Appointment[""Date""]=]2012-10-19T15:03:45Z TO 2012-10-19T15:30:45+01:00[",
                     (
                         new PropertyName(@"Appointment[""Date""]"),
-                        (FilterExpression) new RangeExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                        (FilterExpression) new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
                                                                                                                   new TimeExpression(hours : 15, minutes: 03, seconds: 45, offset: new TimeOffset())),
                                                                                            included: false),
                                                                max: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),

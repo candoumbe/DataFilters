@@ -7,7 +7,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
-    public sealed class RangeExpression : FilterExpression, IEquatable<RangeExpression>, ISimplifiable
+    public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalExpression>, ISimplifiable
     {
         /// <summary>
         /// Lower bound of the current instance
@@ -20,7 +20,7 @@
         public BoundaryExpression Max { get; }
 
         /// <summary>
-        /// Builds a new <see cref="RangeExpression"/> instance
+        /// Builds a new <see cref="IntervalExpression"/> instance
         /// </summary>
         /// <param name="min">Lower bound of the interval</param>
         /// <param name="max">Upper bound of the interval</param>
@@ -35,7 +35,7 @@
         /// <remarks>
         ///     Either <paramref name="min"/> or <paramref name="max"/> can be null to indicate and unbounded lower (respectivelu upper) bound.
         /// </remarks>
-        public RangeExpression(BoundaryExpression min = null, BoundaryExpression max = null)
+        public IntervalExpression(BoundaryExpression min = null, BoundaryExpression max = null)
         {
             if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
             {
@@ -96,10 +96,10 @@
         }
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as RangeExpression);
+        public override bool Equals(object obj) => Equals(obj as IntervalExpression);
 
         ///<inheritdoc/>
-        public bool Equals(RangeExpression other)
+        public bool Equals(IntervalExpression other)
         {
             bool equals = false;
 
@@ -129,8 +129,7 @@
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{GetBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetBracket(Max?.Included)}"
-        ;
+        public override string ToString() => $"{GetBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetBracket(Max?.Included)}";
 
         private static string GetBracket(bool? included) => true.Equals(included) ? "[" : "]";
 
@@ -140,7 +139,7 @@
             bool equivalent = false;
             if (other is not null)
             {
-                if (other is RangeExpression range)
+                if (other is IntervalExpression range)
                 {
                     equivalent = Equals(range);
                 }
