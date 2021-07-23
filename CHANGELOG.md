@@ -76,15 +76,15 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.7.0...HEAD
-[0.7.0]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...0.7.0
-[0.6.0]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...0.6.0
-[0.5.0]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...0.5.0
-[0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1
-[0.4.0]: https://github.com/candoumbe/DataFilters.git/compare/0.3.2...0.4.0
-[0.3.2]: https://github.com/candoumbe/DataFilters.git/compare/0.3.1...0.3.2
-[0.3.1]: https://github.com/candoumbe/DataFilters.git/compare/0.3.0...0.3.1
-[0.3.0]: https://github.com/candoumbe/DataFilters.git/compare/0.2.2...0.3.0
-[0.2.2]: https://github.com/candoumbe/DataFilters.git/compare/0.2.0...0.2.2
-[0.2.0]: https://github.com/candoumbe/DataFilters.git/tree/0.2.0
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/candoumbe/DataFilters/compare/0.6.0...0.7.0
+[0.6.0]: https://github.com/candoumbe/DataFilters/compare/0.5.0...0.6.0
+[0.5.0]: https://github.com/candoumbe/DataFilters/compare/0.4.1...0.5.0
+[0.4.1]: https://github.com/candoumbe/DataFilters/compare/0.4.0...0.4.1
+[0.4.0]: https://github.com/candoumbe/DataFilters/compare/0.3.2...0.4.0
+[0.3.2]: https://github.com/candoumbe/DataFilters/compare/0.3.1...0.3.2
+[0.3.1]: https://github.com/candoumbe/DataFilters/compare/0.3.0...0.3.1
+[0.3.0]: https://github.com/candoumbe/DataFilters/compare/0.2.2...0.3.0
+[0.2.2]: https://github.com/candoumbe/DataFilters/compare/0.2.0...0.2.2
+[0.2.0]: https://github.com/candoumbe/DataFilters/tree/0.2.0
 

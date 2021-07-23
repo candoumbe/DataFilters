@@ -255,5 +255,24 @@
             actual.Should()
                   .Be(expected);
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_two_OrExpression_instances_one_and_two_where_oneU002Eleft_eq_twoU002Eright_and_oneU002Eright_eq_twoU002Eleft_IsEquivalentTo_should_return_true(FilterExpression first, FilterExpression second)
+        {
+            // Arrange
+            OrExpression one = new(first, second);
+            OrExpression two = new(second, first);
+
+            // Act
+            bool actual = one.IsEquivalentTo(two);
+
+            // Assert
+            actual.Should()
+                  .BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_OrExpression_instance_one_oneU002EIsEquivalentTo_one_should_return_true(OrExpression or)
+            => or.IsEquivalentTo(or).ToProperty();
     }
 }

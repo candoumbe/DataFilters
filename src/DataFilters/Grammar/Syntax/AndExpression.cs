@@ -1,6 +1,7 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
     using System;
+    using System.Linq;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
@@ -43,7 +44,7 @@
         public override int GetHashCode() => (Left, Right).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => this.Jsonify();
+        public override string ToString() => new { Type = nameof(AndExpression), Left, Right, Complexity }.Jsonify();
 
         ///<inheritdoc/>
         public FilterExpression Simplify()
@@ -54,10 +55,35 @@
 
             if (simplifiedLeft.IsEquivalentTo(simplifiedRight))
             {
-                simplifiedExpression = simplifiedLeft;
+                simplifiedExpression = simplifiedLeft.Complexity < simplifiedRight.Complexity
+                    ? simplifiedLeft
+                    : simplifiedRight;
+                                                            ;
             }
 
             return simplifiedExpression;
+        }
+
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+        {
+            bool equivalent;
+            if (ReferenceEquals(this, other))
+            {
+                equivalent = true;
+            }
+            else
+            {
+                equivalent = other switch
+                {
+                    AndExpression and => (Left.IsEquivalentTo(and.Left) && Right.IsEquivalentTo(and.Right)) || (Left.IsEquivalentTo(and.Right) && Right.IsEquivalentTo(and.Left)),
+                    ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
+                    ISimplifiable simplifiable => IsEquivalentTo(simplifiable.Simplify()),
+                    _ => false
+                };
+            }
+
+            return equivalent;
         }
     }
 }
