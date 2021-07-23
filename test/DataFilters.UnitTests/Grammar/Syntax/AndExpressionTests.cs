@@ -145,5 +145,74 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             actual.Should()
                   .Be(expected);
         }
+
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public void Given_two_AndExpression_instances_one_and_two_where_oneU002Eleft_eq_twoU002Eright_and_oneU002Eright_eq_twoU002Eleft_IsEquivalentTo_should_return_true(FilterExpression first, FilterExpression second)
+        {
+            // Arrange
+            AndExpression one = new(first, second);
+            AndExpression two = new(second, first);
+
+            // Act
+            bool actual = one.IsEquivalentTo(two);
+
+            // Assert
+            actual.Should()
+                  .BeTrue();
+        }
+
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public Property Given_AndExpression_instance_one_oneU002EIsEquivalentTo_one_should_return_true(AndExpression and)
+            => and.IsEquivalentTo(and).ToProperty();
+
+        public static IEnumerable<object[]> IsEquivalentToCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1")),
+                    new ConstantValueExpression("prop1"),
+                    true,
+                    $"{nameof(AndExpression)} has left = right"
+                };
+
+                yield return new object[]
+                {
+                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1")),
+                    new OrExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1")),
+                    true,
+                    $"both expressions can be simplified to the same {nameof(ConstantValueExpression)}"
+                };
+
+                yield return new object[]
+                {
+                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new AndExpression(new ConstantValueExpression("prop3"), new ConstantValueExpression("prop4")),
+                    false,
+                    $"the current instance is not equal nor equivalent to the other"
+                };
+
+                yield return new object[]
+                {
+                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    null,
+                    false,
+                    $"the current instance is not equal nor equivalent null"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(IsEquivalentToCases))]
+        public void IsEquivalent_should_return_expected_result(AndExpression and, FilterExpression other, bool expected, string reason)
+        {
+            // Act
+            bool actual = and.IsEquivalentTo(other);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
+        }
     }
 }

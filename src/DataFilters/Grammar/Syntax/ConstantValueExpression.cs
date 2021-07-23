@@ -112,7 +112,7 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => this.Jsonify();
+        public override string ToString() => new { Type = nameof(ConstantValueExpression), Value, Complexity }.Jsonify();
 
         ///<inheritdoc/>
         public override double Complexity => 1;

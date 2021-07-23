@@ -44,7 +44,7 @@
 #endif
 
         ///<inheritdoc/>
-        public override string ToString() => $"{nameof(OrExpression)}{{{nameof(Left)}:{Left},{nameof(Right)}:{Right}}}";
+        public override string ToString() => new { Type = nameof(OrExpression), Left, Right, Complexity }.Jsonify();
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
