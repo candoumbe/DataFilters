@@ -46,7 +46,11 @@
         public override bool IsEquivalentTo(FilterExpression other)
         {
             bool equivalent;
-            if (other is OneOfExpression oneOfExpression)
+            if (ReferenceEquals(this, other))
+            {
+                equivalent = true;
+            }
+            else if (other is OneOfExpression oneOfExpression)
             {
                 if (equalityComparer.Equals(oneOfExpression._values.ToArray(), _values.ToArray()))
                 {
@@ -59,13 +63,15 @@
             }
             else
             {
-                int i = 0;
-                do
+                equivalent = other switch
                 {
-                    equivalent = _values[i].IsEquivalentTo(other);
-                    i++;
-                }
-                while (i < _values.Length && equivalent);
+                    AsteriskExpression asterisk => Simplify().IsEquivalentTo(asterisk),
+                    ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
+                    DateExpression date => Simplify().IsEquivalentTo(date),
+                    DateTimeExpression dateTime => Simplify().IsEquivalentTo(dateTime),
+                    ISimplifiable simplifiable => Simplify().IsEquivalentTo(simplifiable.Simplify()),
+                    _ => false
+                };
             }
 
             return equivalent;

@@ -196,7 +196,7 @@ namespace DataFilters.ContinuousIntegration
             .Executes(() =>
             {
                 DotNetBuild(s => s
-                    .SetNoRestore(InvokedTargets.Contains(Restore))
+                    .SetNoRestore(InvokedTargets.Contains(Restore) || SkippedTargets.Contains(Restore))
                     .SetConfiguration(Configuration)
                     .SetProjectFile(Solution)
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)

@@ -152,6 +152,14 @@
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds duplicates is equivalent a {nameof(OneOfExpression)} with no duplicate"
                 };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OrExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    true,
+                    $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to an {nameof(OrExpression)} with the same values"
+                };
             }
         }
 
