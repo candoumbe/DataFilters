@@ -46,6 +46,8 @@
         ///<inheritdoc/>
         public override string ToString() => new { Type = nameof(OrExpression), Left, Right, Complexity }.Jsonify();
 
+        public override string ParseableString => $"{Left.ParseableString}|{Right.ParseableString}";
+
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {

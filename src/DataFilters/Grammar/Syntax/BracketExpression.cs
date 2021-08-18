@@ -92,5 +92,8 @@
 
             return equivalent;
         }
+
+        ///<inheritdoc/>
+        public override string ParseableString => $"[{string.Join(",", Values)}]";
     }
 }

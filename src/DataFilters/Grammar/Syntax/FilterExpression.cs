@@ -6,7 +6,7 @@
     /// <para>
     /// <see cref="FilterExpression"/>s can take many forms : from the simplest <see cref="ConstantValueExpression"/> to more complex <see cref="GroupExpression"/>s.
     /// </para>
-    public abstract class FilterExpression : IHaveComplexity
+    public abstract class FilterExpression : IHaveComplexity, IParseableString
     {
         /// <summary>
         /// Tests if <paramref name="other"/> is equivalent to the current instance.
@@ -23,5 +23,11 @@
 
         ///<inheritdoc/>
         public virtual double Complexity => 1;
+
+        ///<inheritdoc/>
+        public override string ToString() => ParseableString;
+
+        ///<inheritdoc/>
+        public abstract string ParseableString { get; }
     }
 }

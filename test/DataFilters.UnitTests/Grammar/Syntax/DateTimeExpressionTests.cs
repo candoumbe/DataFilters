@@ -41,106 +41,57 @@
                 .ThrowExactly<ArgumentException>("both date and time are null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void A_non_null_DateTimeExpression_instance_should_never_be_equal_to_null(DateTimeExpression instance)
         {
-            get
-            {
-                {
-                    yield return new object[]
-                    {
-                        new DateTimeExpression(new DateExpression(year: 2012, month: 3, day: 1)),
-                        null,
-                        false,
-                        "Comparing instance to null"
-                    };
-
-                    yield return new object[]
-                    {
-                        new DateTimeExpression(new DateExpression(year: 2012, month: 3, day: 1)),
-                        new DateTimeExpression(new DateExpression(year: 2012, month: 3, day: 1)),
-                        true,
-                        "Comparing two instances with same dates"
-                    };
-
-                    yield return new object[]
-                    {
-                        new DateTimeExpression(new TimeExpression(hours: 10, minutes: 3)),
-                        new DateTimeExpression(new DateExpression(year: 2012, month: 3, day: 1)),
-                        false,
-                        "Comparing two instances with different date and time"
-                    };
-
-                    yield return new object[]
-                    {
-                        new DateTimeExpression(date: new DateExpression(year: 2012, month: 3, day: 1), time: new TimeExpression(hours: 10, minutes: 3)),
-                        new DateTimeExpression(date: new DateExpression(year: 2012, month: 3, day: 1), time: new TimeExpression(hours: 10, minutes: 3)),
-                        true,
-                        "Comparing two instances with same date and time"
-                    };
-                }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(DateTimeExpression first, object other, bool expected, string reason)
-        {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
-
             // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+            bool actual = instance.Equals(null);
 
             // Assert
             actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                  .BeFalse();
         }
 
-        public static IEnumerable<object[]> DeconstructCases
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void A_non_null_DateTimeExpression_instance_should_be_equal_to_itself(DateTimeExpression instance)
         {
-            get
-            {
-                yield return new object[]
-                {
-                    new DateTimeExpression(new DateExpression(year: 1983, month: 6, day: 23)),
-                    new DateExpression(year: 1983, month: 6, day: 23),
-                    null
-                };
-
-                yield return new object[]
-                {
-                    new DateTimeExpression(new TimeExpression(hours: 12, minutes: 25, seconds: 46)),
-                    null,
-                    new TimeExpression(hours: 12, minutes: 25, seconds: 46),
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(DeconstructCases))]
-        public void DeconstructTests(DateTimeExpression dateTime, DateExpression expectedDate, TimeExpression expectedTime)
-        {
-            _outputHelper.WriteLine($"DateTimeExpression is {dateTime}");
-
             // Act
-            (DateExpression date, TimeExpression time) = dateTime;
+            bool actual = instance.Equals(instance);
 
             // Assert
-            date.Should()
-                .Be(expectedDate);
-            time.Should()
-                .Be(expectedTime);
+            actual.Should()
+                  .BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Two_DateTimeExpression_instances_which_have_same_data_should_be_equal(DateExpression date, TimeExpression time)
+        {
+            // Arrange
+            DateTimeExpression first = new(date, time);
+            DateTimeExpression other = new(date, time);
+
+            // Act
+            bool actual = first.Equals(other);
+
+            // Assert
+            actual.Should()
+                  .BeTrue();
+            first.GetHashCode().Should()
+                               .Be(other.GetHashCode(), "Two instances that are equal should have same hashcode");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void A_DateTimeExpression_built_from_variables_obtained_from_deconstructing_a_DateTimeExpression_should_equal_the_original_DateTimeExpression_value(DateTimeExpression source)
+        {
+            _outputHelper.WriteLine(message: $"DateTimeExpression is {source}");
+            (DateExpression date, TimeExpression time) = source;
+
+            // Act
+            DateTimeExpression clone = new(date, time);
+
+            // Assert
+            clone.Should()
+                 .Be(source);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

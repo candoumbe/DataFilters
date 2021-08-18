@@ -129,9 +129,10 @@
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{GetBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetBracket(Max?.Included)}";
+        public override string ParseableString => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetMaxBracket(Max?.Included)}";
 
-        private static string GetBracket(bool? included) => true.Equals(included) ? "[" : "]";
+        private static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
+        private static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)

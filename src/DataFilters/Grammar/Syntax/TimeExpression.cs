@@ -74,7 +74,7 @@
         }
 
         ///<inheritdoc/>
-        public bool Equals(TimeExpression other) => other != null
+        public bool Equals(TimeExpression other) => other is not null
             && ((Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset))
             || ((Offset == other.Offset) && (new TimeSpan(0, Hours, Minutes, Seconds, Milliseconds) == new TimeSpan(0, other.Hours, other.Minutes, other.Seconds, other.Milliseconds))));
 
@@ -85,6 +85,16 @@
         public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}";
+        public override string ParseableString => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}";
+
+        ///<inheritdoc/>
+        public void Deconstruct(out int hours, out int minutes, out int seconds, out int milliseconds, out TimeOffset offset)
+        {
+            hours = Hours;
+            minutes = Minutes;
+            seconds = Seconds;
+            milliseconds = Milliseconds;
+            offset = Offset;
+        }
     }
 }

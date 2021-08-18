@@ -85,7 +85,7 @@
         public override int GetHashCode() => (Date, Time).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => (Date, Time) switch
+        public override string ParseableString => (Date, Time) switch
         {
             ({ }, { }) => $"{Date}T{Time}",
             (null, { }) => $"T{Time}",

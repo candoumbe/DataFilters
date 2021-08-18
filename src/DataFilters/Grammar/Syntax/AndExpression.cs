@@ -85,5 +85,8 @@
 
             return equivalent;
         }
+
+        ///<inheritdoc/>
+        public override string ParseableString => $"{Left.ParseableString},{Right.ParseableString}";
     }
 }

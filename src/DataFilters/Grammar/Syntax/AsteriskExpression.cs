@@ -16,5 +16,8 @@
 
         ///<inheritdoc/>
         public override int GetHashCode() => 1;
+
+        ///<inheritdoc/>
+        public override string ParseableString => "*";
     }
 }
