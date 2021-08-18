@@ -165,54 +165,52 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public Property Given_AndExpression_instance_one_oneU002EIsEquivalentTo_one_should_return_true(AndExpression and)
             => and.IsEquivalentTo(and).ToProperty();
 
-        public static IEnumerable<object[]> IsEquivalentToCases
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property An_AndExpression_instance_should_be_equivalent_to_itself(AndExpression andExpression)
+            => andExpression.IsEquivalentTo(andExpression).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_two_AndExpression_instances_first_and_second_and_firstU002ERight_eq_secondU002Eright_and_firstU002ELeft_eq_secondU002ELeft_Equals_should_returns_true(FilterExpression left, FilterExpression right)
         {
-            get
-            {
-                yield return new object[]
-                {
-                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1")),
-                    new ConstantValueExpression("prop1"),
-                    true,
-                    $"{nameof(AndExpression)} has left = right"
-                };
+            // Arrange
+            AndExpression first = new(left, right);
+            AndExpression second = new(left, right);
 
-                yield return new object[]
-                {
-                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1")),
-                    new OrExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1")),
-                    true,
-                    $"both expressions can be simplified to the same {nameof(ConstantValueExpression)}"
-                };
-
-                yield return new object[]
-                {
-                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new AndExpression(new ConstantValueExpression("prop3"), new ConstantValueExpression("prop4")),
-                    false,
-                    $"the current instance is not equal nor equivalent to the other"
-                };
-
-                yield return new object[]
-                {
-                    new AndExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    null,
-                    false,
-                    $"the current instance is not equal nor equivalent null"
-                };
-            }
+            // Assert
+            return first.Equals(second).ToProperty();
         }
 
-        [Theory]
-        [MemberData(nameof(IsEquivalentToCases))]
-        public void IsEquivalent_should_return_expected_result(AndExpression and, FilterExpression other, bool expected, string reason)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void An_AndExpression_Equals_should_neq_false(FilterExpression left, FilterExpression right)
         {
+            // Arrange
+            AndExpression first = new(left, right);
+
             // Act
-            bool actual = and.IsEquivalentTo(other);
+            bool actual = first.Equals(null);
 
             // Assert
             actual.Should()
-                  .Be(expected, reason);
+                  .BeFalse();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_AndExpression_instance_where_instanceU002ELeft_is_equivalent_to_instanceU002ERight_Simplify_should_return_the_expression_with_the_lowest_Complexity(FilterExpression expression, PositiveInt count)
+        {
+            // Arrange
+            OneOfExpression oneOfExpression = new(Enumerable.Repeat(expression, count.Item)
+                                                            .ToArray());
+
+            AndExpression and = new(oneOfExpression, expression);
+
+            // Act
+            FilterExpression actual = and.Simplify();
+
+            // Assert
+            return (actual.Complexity <= expression.Complexity)
+                .And(actual.Complexity < oneOfExpression.Complexity).When(count.Item > 1)
+                .And(actual.IsEquivalentTo(expression));
         }
     }
 }

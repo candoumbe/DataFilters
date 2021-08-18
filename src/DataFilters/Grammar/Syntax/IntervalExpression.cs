@@ -19,6 +19,9 @@
         /// </summary>
         public BoundaryExpression Max { get; }
 
+        private readonly Lazy<string> _lazyToString;
+        private readonly Lazy<string> _lazyParseableString;
+
         /// <summary>
         /// Builds a new <see cref="IntervalExpression"/> instance
         /// </summary>
@@ -47,14 +50,14 @@
                 throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
             }
 
-            if (min?.Expression is DateExpression && !(max is null || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
+            if (min?.Expression is DateExpression && max is not null && !(max.Expression is AsteriskExpression || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
             {
-                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
+                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
             }
 
             if (min?.Expression is ConstantValueExpression && !(max is null || max.Expression is ConstantValueExpression || max.Expression is AsteriskExpression))
             {
-                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min.GetType()}] and {nameof(max)}[{max.GetType()}] types are not compatible", nameof(max));
+                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
             }
 
             if (min is null && max is null)
@@ -69,8 +72,7 @@
 
             Min = min?.Expression switch
             {
-                null => null,
-                AsteriskExpression _ => null,
+                AsteriskExpression or null => null,
                 DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
                 {
                     (null, { }) => new BoundaryExpression(time, included: min.Included),
@@ -82,17 +84,28 @@
 
             Max = max?.Expression switch
             {
-                null => null,
-                AsteriskExpression _ => null,
+                AsteriskExpression or null => null,
                 DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
                 {
                     (null, { }) => new BoundaryExpression(time, included: max.Included),
                     ({ }, null) => new BoundaryExpression(date, included: max.Included),
                     _ => new BoundaryExpression(new DateTimeExpression(date, time), included: max.Included)
                 },
-                TimeExpression time when min?.Expression is DateTimeExpression minDateTime => new BoundaryExpression(new DateTimeExpression(minDateTime.Date, time), included: max.Included),
+                TimeExpression time when Min?.Expression is DateTimeExpression dateTime => new(new DateTimeExpression(dateTime.Date, time), max.Included),
+                TimeExpression time => new BoundaryExpression(time, included: max.Included),
                 _ => max
             };
+
+            _lazyToString = new(() => new
+            {
+                Min = new { Min?.Included, Value = Min?.Expression?.ParseableString ?? Min?.Expression.ToString() },
+                Max = new { Max?.Included, Value = Max?.Expression?.ParseableString ?? Max?.Expression.ToString() }
+            }.Jsonify());
+
+            _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetMaxBracket(Max?.Included)}");
+
+            static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
+            static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";
         }
 
         ///<inheritdoc/>
@@ -129,11 +142,12 @@
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ParseableString => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetMaxBracket(Max?.Included)}";
+        public override string ToString() => _lazyToString.Value;
 
-        private static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
-        private static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";
+        ///<inheritdoc/>
+        public override string ParseableString => _lazyParseableString.Value;
 
+       
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
