@@ -3,15 +3,11 @@
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
 
-    using FluentAssertions;
-
     using FsCheck;
     using FsCheck.Xunit;
 
     using System;
-    using System.Collections.Generic;
 
-    using Xunit;
     using Xunit.Categories;
 
     [UnitTest]
@@ -19,72 +15,23 @@
     [Feature(nameof(IntervalExpression))]
     public class BoundaryExpressionTests
     {
-        public static IEnumerable<object[]> EqualsCases
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property A_BoundaryExpression_instance_should_be_equals_to_itself(BoundaryExpression input)
+            => input.Equals(input).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property A_BoudnaryExpression_instance_should_not_be_equal_to_null(BoundaryExpression input)
+            => (!input.Equals(null)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Two_BoundaryExpression_instances_with_same_expression_and_included_should_be_equal(BoundaryExpression source)
         {
-            get
-            {
-                yield return new object[]
-                {
-                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                    true,
-                    $"both {nameof(BoundaryExpression)}'s {nameof(BoundaryExpression.Expression)} and {nameof(BoundaryExpression.Included)} are equals"
-                };
+            // Arrange
+            BoundaryExpression first = new(source.Expression, source.Included);
+            BoundaryExpression other = new(source.Expression, source.Included);
 
-                {
-                    BoundaryExpression instance = new(new ConstantValueExpression("10"), included: true);
-                    yield return new object[]
-                    {
-                        instance,
-                        instance,
-                        true,
-                        $"{nameof(BoundaryExpression)} instance is always equals to itself."
-                    };
-                }
-
-                yield return new object[]
-                {
-                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                    new BoundaryExpression(new ConstantValueExpression("10"), included: false),
-                    false,
-                    $"both {nameof(BoundaryExpression.Included)} are different"
-                };
-
-                yield return new object[]
-                {
-                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                    new BoundaryExpression(new DateExpression(), included: true),
-                    false,
-                    $"both {nameof(BoundaryExpression.Expression)} are different"
-                };
-
-                yield return new object[]
-                {
-                    new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                    null,
-                    false,
-                    "the argument is null"
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void Override_Equals_properly(BoundaryExpression first, object second, bool expected, string reason)
-        {
-            // Act
-            bool actual = first.Equals(second);
-
-            // Asser
-            actual.Should()
-                  .Be(expected, reason);
-
-            if (expected)
-            {
-                int actualHashcode = first.GetHashCode();
-                actualHashcode.Should()
-                              .Be(second?.GetHashCode(), reason);
-            }
+            return first.Equals(other)
+                .And(first.GetHashCode() == other.GetHashCode());
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

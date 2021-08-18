@@ -1,7 +1,5 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using System;
-
     /// <summary>
     /// Marks an expression that have a complexity value.
     /// </summary>

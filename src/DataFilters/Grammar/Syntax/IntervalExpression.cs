@@ -102,7 +102,7 @@
                 Max = new { Max?.Included, Value = Max?.Expression?.ParseableString ?? Max?.Expression.ToString() }
             }.Jsonify());
 
-            _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ToString() ?? "*"} TO {Max?.Expression?.ToString() ?? "*"}{GetMaxBracket(Max?.Included)}");
+            _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ParseableString ?? "*"} TO {Max?.Expression?.ParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
 
             static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
             static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";
@@ -142,12 +142,8 @@
         public override int GetHashCode() => (Min, Max).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => _lazyToString.Value;
-
-        ///<inheritdoc/>
         public override string ParseableString => _lazyParseableString.Value;
 
-       
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
