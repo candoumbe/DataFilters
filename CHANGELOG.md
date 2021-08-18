@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
 `FilterExpression` to a less complex form.
 - Renamed `RangeExpression` to `IntervalExpression` [BREAKING]
+- Added `IParseableString` interface which defines a `ParseableString` property that output a string representation of a `FilterExpression` instance ([#26](https://github.com/candoumbe/datafilters/issues/26)).
+- Added `Deconstruct` method for `TimeExpression` class.
 
 ## [0.7.0] / 2021-06-29
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
@@ -65,7 +67,7 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Moved `FilterExtensions.ToFilter<T>(this string)` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
 - Changed `ConstantExpression` to `ConstantValueExpression` [BREAKING]
 - Changed subproperty syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
-- Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/RangeExpression.cs) with datetime values
+- Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/IntervalExpression.cs) with datetime values
 - Enabled Source Link
 
 ## [0.2.2] / 2020-12-05

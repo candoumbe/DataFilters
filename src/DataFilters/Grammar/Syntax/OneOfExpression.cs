@@ -152,5 +152,8 @@
 
             return simplifiedResult;
         }
+
+        ///<inheritdoc/>
+        public override string ParseableString => string.Join("", Values.Select(v => v.ParseableString));
     }
 }

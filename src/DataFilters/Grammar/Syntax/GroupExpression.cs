@@ -40,6 +40,9 @@
         public override string ToString() => $"{GetType().Name} : Expression ({Expression.GetType().Name }) -> {Expression}";
 
         ///<inheritdoc/>
+        public override string ParseableString => $"({Expression.ParseableString})";
+
+        ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
 
         ///<inheritdoc/>

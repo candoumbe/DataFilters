@@ -64,6 +64,6 @@
         public override int GetHashCode() => (Year, Month, Day).GetHashCode();
 
         /// <inheritdoc />
-        public override string ToString() => $"{Year:D2}-{Month:D2}-{Day:D2}";
+        public override string ParseableString => $"{Year:D2}-{Month:D2}-{Day:D2}";
     }
 }

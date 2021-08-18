@@ -1,10 +1,13 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using System;
+    using Newtonsoft.Json.Linq;
 
-    /// <summary>
-    /// An expression that holds a constant value
-    /// </summary>
+    using System;
+using System.Globalization;
+
+/// <summary>
+/// An expression that holds a constant value
+/// </summary>
     public sealed class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
     {
         /// <summary>
@@ -116,5 +119,22 @@
 
         ///<inheritdoc/>
         public override double Complexity => 1;
+
+        ///<inheritdoc/>
+        public override string ParseableString => Value switch
+        {
+            short shortValue => shortValue.ToString(CultureInfo.InvariantCulture),
+            string stringValue => stringValue,
+            DateTime dateTimeValue => dateTimeValue.ToString(CultureInfo.InvariantCulture),
+            DateTimeOffset dateTimeOffsetValue => dateTimeOffsetValue.ToString(CultureInfo.InvariantCulture),
+            Guid guidValue => guidValue.ToString("x"),
+            decimal decimalValue => decimalValue.ToString(CultureInfo.InvariantCulture),
+            double doubleValue => doubleValue.ToString(CultureInfo.InvariantCulture),
+            long longValue => longValue.ToString(CultureInfo.InvariantCulture),
+            bool boolValue => boolValue.ToString(),
+            byte byteValue => byteValue.ToString(),
+            int intValue => intValue.ToString(CultureInfo.InvariantCulture),
+            char chrValue => chrValue.ToString(),
+        };
     }
 }

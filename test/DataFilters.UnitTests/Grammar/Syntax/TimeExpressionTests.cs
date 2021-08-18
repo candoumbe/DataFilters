@@ -2,6 +2,7 @@
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
 
     using FluentAssertions;
 
@@ -140,30 +141,62 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(TimeExpression first, object other, bool expected, string reason)
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public void An_instance_of_TimeExpression_should_be_equal_to_itself(TimeExpression time)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
-
             // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+            bool actual = time.Equals(time);
 
             // Assert
             actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                  .BeTrue();
+
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void An_instance_of_TimeExpression_should_not_be_equal_to_null(TimeExpression time)
+        {
+            // Act
+            bool actual = time.Equals(null);
+
+            // Assert
+            actual.Should()
+                  .BeFalse();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Two_instances_built_from_same_data_should_be_equal(PositiveInt hours,
+                                                                       PositiveInt minutes,
+                                                                       PositiveInt seconds,
+                                                                       PositiveInt milliseconds,
+                                                                       TimeOffset offset)
+        {
+            // Arrange
+            TimeExpression first = new(hours.Item, minutes.Item, seconds.Item, milliseconds.Item, offset);
+            TimeExpression other = new(hours.Item, minutes.Item, seconds.Item, milliseconds.Item, offset);
+
+            // Act
+            bool actual = first.Equals(other);
+
+            // Assert
+            actual.Should()
+                  .BeTrue();
+            first.GetHashCode().Should()
+                               .Be(other.GetHashCode(), $"two instances that are equal must have the same hashcode");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Creating_a_TimeExpression_from_variables_obtained_from_deconstruction_of_a_TimeExpression_source_should_equal_the_TimeExpression_source(TimeExpression source)
+        {
+            // Arrange
+            (int hours, int minutes, int seconds, int milliseconds, TimeOffset offset) = source;
+
+            // Act
+            TimeExpression actual = new(hours, minutes, seconds, milliseconds, offset);
+
+            // Assert
+            actual.Should()
+                  .Be(source);
         }
     }
 }
