@@ -156,7 +156,7 @@
                 switch (expression)
                 {
                     case ConstantValueExpression constant:
-                        filter = new Filter(propertyName, EqualTo, tc.ConvertFrom(constant.Value));
+                        filter = new Filter(propertyName, EqualTo, tc.ConvertFrom(constant.Value.Value));
                         break;
                     case StartsWithExpression startsWith:
                         filter = new Filter(propertyName, StartsWith, startsWith.Value);
@@ -248,18 +248,18 @@
                                 Logic = FilterLogic.And,
                                 Filters = new IFilter[]
                                 {
-                                    new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value)),
-                                    new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value))
+                                    new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value.Value)),
+                                    new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value.Value))
                                 }
                             };
                         }
                         else if (min != default)
                         {
-                            filter = new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value));
+                            filter = new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value.Value));
                         }
                         else
                         {
-                            filter = new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value));
+                            filter = new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value.Value));
                         }
                         break;
                     default:

@@ -56,9 +56,9 @@
                                                                                            select new
                                                                                            {
                                                                                                value = string.Concat(
-                                                                                                   string.Concat(puncBefore.Select(x => x.Value)),
-                                                                                                   string.Concat(alpha.Select(item => item.Value)),
-                                                                                                   string.Concat(puncAfter.Select(x => x.Value)))
+                                                                                                   string.Concat(puncBefore.Select(x => x.Value.Value)),
+                                                                                                   string.Concat(alpha.Select(item => item.Value.Value)),
+                                                                                                   string.Concat(puncAfter.Select(x => x.Value.Value)))
                                                                                            }).AtLeastOnce()
                                                                                        from escaped in Token.EqualTo(FilterToken.Backslash).Many()
                                                                                        from _ in Asterisk
@@ -77,9 +77,9 @@
                                                                                        select new
                                                                                        {
                                                                                            value = string.Concat(
-                                                                                               string.Concat(puncBefore.Select(x => x.Value)),
-                                                                                               string.Concat(alpha.Select(item => item.Value)),
-                                                                                               string.Concat(puncAfter.Select(x => x.Value)))
+                                                                                               string.Concat(puncBefore.Select(x => x.Value.Value)),
+                                                                                               string.Concat(alpha.Select(item => item.Value.Value)),
+                                                                                               string.Concat(puncAfter.Select(x => x.Value.Value)))
                                                                                        }
                                                                                        ).AtLeastOnce()
                                                                                    select new EndsWithExpression(string.Concat(data.Select(x => x.value)));
@@ -96,9 +96,9 @@
                                                                                    select new
                                                                                    {
                                                                                        value = string.Concat(
-                                                                                           string.Concat(puncBefore.Select(x => x.Value)),
-                                                                                           string.Concat(alpha.Select(item => item.Value)),
-                                                                                           string.Concat(puncAfter.Select(x => x.Value)))
+                                                                                           string.Concat(puncBefore.Select(x => x.Value.Value)),
+                                                                                           string.Concat(alpha.Select(item => item.Value.Value)),
+                                                                                           string.Concat(puncAfter.Select(x => x.Value.Value)))
                                                                                    }).AtLeastOnce()
                                                                                    from escaped in Token.EqualTo(FilterToken.Backslash).Many()
                                                                                    from __ in Asterisk
@@ -123,7 +123,7 @@
             .Or(from left in AlphaNumeric
                 from _ in Asterisk
                 from right in AlphaNumeric
-                select new AndExpression(new StartsWithExpression(left.Value.ToString()), new EndsWithExpression(right.Value.ToString()))),
+                select new AndExpression(new StartsWithExpression(left.Value.Value.ToString()), new EndsWithExpression(right.Value.Value.ToString()))),
             (_, left, right) => new AndExpression(left, right))
             ;
 
@@ -342,9 +342,9 @@
                                                                                  from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                                                                                  from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                  from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
-                                                                                 select @$"[""{subProp.Value}""]"
+                                                                                 select @$"[""{subProp.Value.Value}""]"
                                                                              ).Many()
-                                                                             select new PropertyName(string.Concat(prop.Value.ToString(), string.Concat(subProps)));
+                                                                             select new PropertyName(string.Concat(prop.Value.Value.ToString(), string.Concat(subProps)));
 
         private static IEnumerable<char> ConvertRegexToCharArray(IEnumerable<BracketValue> values)
             => values.Select(value =>
@@ -393,7 +393,7 @@
                                                                                                                      .ToArray()),
 
                     // *<regex><constant>
-                    (AsteriskExpression _, BracketExpression bracket, ConstantValueExpression tail) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
+                    (AsteriskExpression _, BracketExpression bracket, ConstantValueExpression tail) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value.Value}"))
                                                                                                                                              .ToArray()),
 
                     // <regex>*
@@ -404,13 +404,13 @@
                     (null, BracketExpression bracket, StartsWithExpression body) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))
                                                                      .ToArray()),
                     // <constant><regex><constant>
-                    (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Values).Select(chr => new ConstantValueExpression($"{bracket.Value}{chr}{tail.Value}"))
+                    (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new(ConvertRegexToCharArray(regex.Values).Select(chr => new ConstantValueExpression($"{bracket.Value.Value}{chr}{tail.Value.Value}"))
                                                                      .ToArray()),
                     // <constant><regex>
-                    (ConstantValueExpression head, BracketExpression bracket, null) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression($"{head.Value}{chr}")).ToArray()),
+                    (ConstantValueExpression head, BracketExpression bracket, null) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression($"{head.Value.Value}{chr}")).ToArray()),
 
                     // <regex><constant>
-                    (null, BracketExpression bracket, ConstantValueExpression tail) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression($"{chr}{tail.Value}")).ToArray()),
+                    (null, BracketExpression bracket, ConstantValueExpression tail) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression($"{chr}{tail.Value.Value}")).ToArray()),
 
                     // <regex>
                     (null, BracketExpression bracket, null) => new(ConvertRegexToCharArray(bracket.Values).Select(chr => new ConstantValueExpression(chr.ToString())).ToArray()),
@@ -418,7 +418,7 @@
                     // <regex><constant><regex>
                     (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new(ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
                                                                             .Select(tuple => new { start = tuple.Item1, end = tuple.Item2 })
-                                                                            .Select(tuple => new ConstantValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
+                                                                            .Select(tuple => new ConstantValueExpression($"{tuple.start}{body.Value.Value}{tuple.end}"))
                                                                             .ToArray()),
 
                     // <endswith><regex>
@@ -586,13 +586,13 @@
                                                                                          || minutes is not null
                                                                                          || seconds is not null
 
-                                                                                   select new DurationExpression(years: years is not null ? int.Parse(years.Value.ToString()) : 0,
-                                                                                                                 months: months is not null ? int.Parse(months.Value.ToString()) : 0,
-                                                                                                                 weeks: weeks is not null ? int.Parse(weeks.Value.ToString()) : 0,
-                                                                                                                 days: days is not null ? int.Parse(days.Value.ToString()) : 0,
-                                                                                                                 hours: hours is not null ? int.Parse(hours.Value.ToString()) : 0,
-                                                                                                                 minutes: minutes is not null ? int.Parse(minutes.Value.ToString()) : 0,
-                                                                                                                 seconds: seconds is not null ? int.Parse(seconds.Value.ToString()) : 0);
+                                                                                   select new DurationExpression(years: years is not null ? int.Parse(years.Value.Value.ToString()) : 0,
+                                                                                                                 months: months is not null ? int.Parse(months.Value.Value.ToString()) : 0,
+                                                                                                                 weeks: weeks is not null ? int.Parse(weeks.Value.Value.ToString()) : 0,
+                                                                                                                 days: days is not null ? int.Parse(days.Value.Value.ToString()) : 0,
+                                                                                                                 hours: hours is not null ? int.Parse(hours.Value.Value.ToString()) : 0,
+                                                                                                                 minutes: minutes is not null ? int.Parse(minutes.Value.Value.ToString()) : 0,
+                                                                                                                 seconds: seconds is not null ? int.Parse(seconds.Value.Value.ToString()) : 0);
 
         private static TokenListParser<FilterToken, ConstantValueExpression> DurationPart(string designator) => from n in Number
                                                                                                                 from _ in Token.EqualToValue(FilterToken.Letter, designator).Try()
