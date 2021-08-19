@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="Superpower" Version="2.*" />
+    <PackageReference Include="OneOf.Extended" Version="3.0.190" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)'=='netstandard1.3'">

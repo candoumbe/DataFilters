@@ -78,13 +78,13 @@
                 else if (other is OneOfExpression oneOf)
                 {
                     equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<ConstantValueExpression>().Count())
-                        && oneOf.Values.All(x => x is ConstantValueExpression constant && constant.Value is string)
+                        && oneOf.Values.All(x => x is ConstantValueExpression constant && constant.Value.Value is string)
                         && Values.All(value => value switch
                         {
-                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString()))),
+                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Value.Equals(chr.ToString()))),
                             RangeBracketValue range => Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                                  .Select(ascii => (char)ascii)
-                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString()))),
+                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Value.Equals(chr.ToString()))),
                             _ => throw new NotSupportedException("Unsupported value")
                         });
                 }
