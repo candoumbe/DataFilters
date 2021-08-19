@@ -263,6 +263,22 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_requivalent_to_the_inner_expression(FilterExpression expression)
+        {
+            // Arrange
+            OneOfExpression oneOf = new(expression);
+
+            // Act
+            FilterExpression simplified = oneOf.Simplify();
+
+            // Assert
+            simplified.IsEquivalentTo(expression)
+                      .Should()
+                      .BeTrue();
+
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(NonEmptyArray<FilterExpression> expressions)
         {
             // Arrange
@@ -278,7 +294,7 @@
                                  .BeLessOrEqualTo(complexityBeforeFirstSimplification, "The first simplification may or may not simplify the expression");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }, Replay = "16965549319615628981,12290474172266243489")]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_OneOxpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
         {
             // Arrange

@@ -9,7 +9,6 @@
     using FsCheck.Xunit;
 
     using System;
-    using System.Collections.Generic;
 
     using Xunit;
     using Xunit.Abstractions;
@@ -41,56 +40,26 @@
                 .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(NotExpression)}'s constructor cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new NotExpression(new ConstantValueExpression("prop1")),
-                    new NotExpression(new ConstantValueExpression("prop1")),
-                    true,
-                    "comparing two different instances with same expression"
-                };
-
-                yield return new object[]
-                {
-                    new NotExpression(new ConstantValueExpression("prop1")),
-                    new NotExpression(new ConstantValueExpression("prop2")),
-                    false,
-                    "comparing two different instances with different property name"
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(NotExpression first, object other, bool expected, string reason)
-        {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
-
-            // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
-
-            // Assert
-            actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators)})]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_NotExpression_GetComplexity_should_return_same_complexity_as_embedded_expression(NotExpression notExpression)
             => (notExpression.Complexity == notExpression.Expression.Complexity).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_NotExpression_Equals_should_return_true_when_comparing_to_itself(NotExpression notExpression)
+            => notExpression.Equals(notExpression).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Two_instances_holding_same_Expressions_should_be_equal(FilterExpression expression)
+        {
+            // Arrange
+            NotExpression first = new(expression);
+            NotExpression other = new(expression);
+
+            // Act
+            Property actual = first.Equals(other)
+                                   .And(first.GetHashCode() == other.GetHashCode());
+
+            return actual;
+        }
     }
 }

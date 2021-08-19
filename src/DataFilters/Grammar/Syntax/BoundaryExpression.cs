@@ -62,5 +62,12 @@
 
         ///<inheritdoc/>
         public override string ToString() => $"{{{Expression.GetType()}:{Expression}, {nameof(Included)} : {Included}}}";
+
+        ///<inheritdoc/>
+        public void Deconstruct(out IBoundaryExpression expression, out bool included)
+        {
+            expression = Expression;
+            included = Included;
+        }
     }
 }

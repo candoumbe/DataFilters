@@ -8,7 +8,7 @@ namespace DataFilters.UnitTests.Helpers
 
     using FsCheck;
 
-    public static class ExpressionsGenerators
+    public static partial class ExpressionsGenerators
     {
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
         {
@@ -16,7 +16,7 @@ namespace DataFilters.UnitTests.Helpers
                                 .Filter(dateTime => dateTime.Hour >= 0 && dateTime.Minute >= 0 && dateTime.Second >= 0 && dateTime.Millisecond >= 0)
                                 .Generator
                                 .Select(dateTime => new DateTimeExpression(date: new(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day),
-                                                                                                time: new(hours: dateTime.Hour, minutes: dateTime.Minute, seconds: dateTime.Second)))
+                                                                           time: new(hours: dateTime.Hour, minutes: dateTime.Minute, seconds: dateTime.Second, milliseconds: dateTime.Millisecond)))
                                 .ToArbitrary();
         }
 
@@ -26,9 +26,9 @@ namespace DataFilters.UnitTests.Helpers
                         .Filter(timespan => timespan.Hours >= 0 && timespan.Minutes >= 0 && timespan.Seconds >= 0 && timespan.Milliseconds >= 0)
                         .Generator
                         .Select(timespan => new TimeExpression(hours: timespan.Hours,
-                                                                                            minutes: timespan.Minutes,
-                                                                                            seconds: timespan.Seconds,
-                                                                                            milliseconds: timespan.Milliseconds))
+                                                               minutes: timespan.Minutes,
+                                                               seconds: timespan.Seconds,
+                                                               milliseconds: timespan.Milliseconds))
                         .ToArbitrary();
         }
 
@@ -55,7 +55,8 @@ namespace DataFilters.UnitTests.Helpers
                 Arb.Default.Byte().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.Guid().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.Decimal().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.Float().Generator.Select(value => new ConstantValueExpression(value))
+                Arb.Default.NormalFloat().Generator.Select(value => new ConstantValueExpression(value.Item)),
+                Arb.Default.Char().Generator.Select(value => new ConstantValueExpression(value))
             };
 
             return Gen.OneOf(generators)
@@ -173,18 +174,78 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<IntervalExpression> IntervalExpressions()
         {
-            IList<Gen<IBoundaryExpression>> generators = new List<Gen<IBoundaryExpression>>
+            Gen<bool> boolGenerator = Arb.Default.Bool().Generator;
+            (Gen<IBoundaryExpression> gen, Gen<bool> included)[] datesGen = new[]
             {
-                DateExpressions().Generator.Select(item => (IBoundaryExpression) item),
-                DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item)
+                (DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
+                (DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator)
+            };
+
+            (Gen<IBoundaryExpression> gen, Gen<bool> included)[] numericsGen = new[]
+            {
+                (Arb.Default.Int16().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
+                (Arb.Default.Int32().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
+                (Arb.Default.Int64().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
+                (Arb.Default.NormalFloat().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value.Item)), boolGenerator),
+                (Arb.Default.Decimal().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator)
+
+            };
+
+            (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
+            (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false));
+
+            (Gen<IBoundaryExpression>, Gen<bool> Generator) constanteGen = (ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
+            IEnumerable<Gen<IntervalExpression>> generatorsWithMinAndMax = datesGen.CrossJoin(datesGen)
+                                                                  .Concat(datesGen.CrossJoin(new[] { timeGen }))
+                                                                  .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                                                                  .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
+                                                                                                                     (tuple.max.gen, tuple.max.included)))
+                .Concat(new[] { CreateIntervalExpressionGenerator(constanteGen, constanteGen) })
+                .Concat(numericsGen.CrossJoin(numericsGen)
+                        .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                        .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
+                                                                            (tuple.max.gen, tuple.max.included))))
+                         ;
+
+            IEnumerable<Gen<IntervalExpression>> generatorsWithMinOrMaxOnly = datesGen.CrossJoin(new[] { asteriskGen })
+                                                                                   .Concat(new[] { asteriskGen }.CrossJoin(datesGen))
+                                                                                   .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                                                                  .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
+                                                                                                                     (tuple.max.gen, tuple.max.included)));
+
+            return Gen.OneOf(generatorsWithMinAndMax.Concat(generatorsWithMinOrMaxOnly))
+                      .ToArbitrary();
+        }
+
+        public static Arbitrary<BoundaryExpression> BoundariesExpressions()
+        {
+            IList<Gen<BoundaryExpression>> generators = new List<Gen<BoundaryExpression>>
+            {
+                CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
+                CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
+                CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
+                CreateBoundaryGenerator(ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
+                CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false)),
             };
 
             return Gen.OneOf(generators)
-                      .Zip(Arb.Default.Bool().Generator)
-                      .Two()
-                      .Select(tuple => new IntervalExpression(min: new(expression: tuple.Item1.Item1, included: tuple.Item1.Item2),
-                                                              max: new(expression: tuple.Item2.Item1, included: tuple.Item2.Item2)))
                       .ToArbitrary();
+        }
+
+        private static Gen<IntervalExpression> CreateIntervalExpressionGenerator((Gen<IBoundaryExpression> boundaryGenerator, Gen<bool> includedGenerator) genMin, (Gen<IBoundaryExpression> boundaryGenerator, Gen<bool> includedGenerator) genMax)
+        {
+            return CreateBoundaryGenerator(genMin.boundaryGenerator, genMin.includedGenerator)
+                    .Zip(CreateBoundaryGenerator(genMax.boundaryGenerator, genMax.includedGenerator))
+                    .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                    .Select(tuple => new IntervalExpression(min: new(tuple.min.Expression, tuple.min.Included),
+                                                            max: new(tuple.max.Expression, tuple.max.Included)));
+        }
+
+        private static Gen<BoundaryExpression> CreateBoundaryGenerator(Gen<IBoundaryExpression> boundaryGenerator, Gen<bool> includedGenerator)
+        {
+            return boundaryGenerator.Zip(includedGenerator)
+                                    .Select(tuple => new BoundaryExpression(expression: tuple.Item1,
+                                                                            included: tuple.Item2));
         }
 
         public static Arbitrary<ContainsExpression> ContainsExpressions()

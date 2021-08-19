@@ -46,6 +46,7 @@
         ///<inheritdoc/>
         public override string ToString() => new { Type = nameof(OrExpression), Left, Right, Complexity }.Jsonify();
 
+        ///<inheritdoc/>
         public override string ParseableString => $"{Left.ParseableString}|{Right.ParseableString}";
 
         /// <inheritdoc/>

@@ -1,13 +1,12 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using Newtonsoft.Json.Linq;
 
     using System;
-using System.Globalization;
+    using System.Globalization;
 
-/// <summary>
-/// An expression that holds a constant value
-/// </summary>
+    /// <summary>
+    /// An expression that holds a constant value
+    /// </summary>
     public sealed class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
     {
         /// <summary>

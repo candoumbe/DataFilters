@@ -1,5 +1,4 @@
-﻿
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
@@ -10,12 +9,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using FsCheck.Xunit;
 
     using System;
-    using System.Collections.Generic;
 
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-    
+
     [UnitTest]
     public class TimeExpressionTests
     {
@@ -76,88 +74,22 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 .VerboseCheck(_outputHelper);
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new TimeExpression(hours: 10, minutes:10, seconds: 1),
-                    new TimeExpression(hours: 10, minutes:10, seconds: 1),
-                    true,
-                    $"comparing two {nameof(TimeExpression)} instance with same value for each field"
-                };
-                {
-                    TimeExpression instance = new(hours: 2050, minutes: 10, seconds: 14);
-
-                    yield return new object[]
-                    {
-                        instance,
-                        instance,
-                        true,
-                        "comparing an instance to itself"
-                    };
-
-                    yield return new object[]
-                    {
-                        instance,
-                        null,
-                        false,
-                        "comparing an instance to null"
-                    };
-
-                    yield return new object[]
-                    {
-                        instance,
-                        new TimeExpression(instance.Hours, instance.Minutes, instance.Seconds - 1),
-                        false,
-                        $"comparing two {nameof(TimeExpression)} instance with that differs only by the {nameof(TimeExpression.Seconds)} value"
-                    };
-
-                    yield return new object[]
-                    {
-                        instance,
-                        new TimeExpression(instance.Hours, instance.Minutes - 1, instance.Seconds),
-                        false,
-                        $"comparing two {nameof(TimeExpression)} instance with that differs only by the {nameof(TimeExpression.Minutes)} value"
-                    };
-
-                    yield return new object[]
-                    {
-                        instance,
-                        new TimeExpression(instance.Hours - 1, instance.Minutes, instance.Seconds),
-                        false,
-                        $"comparing two {nameof(TimeExpression)} instance with that differs only by the {nameof(TimeExpression.Hours)} value"
-                    };
-                }
-
-                yield return new object[]
-                {
-                    new TimeExpression(hours: 10, minutes:10, seconds: 1),
-                    new TimeExpression(hours: 10, minutes:10, seconds: 1, offset : new (hours : 2, minutes : 10)),
-                    false,
-                    $"comparing two {nameof(TimeExpression)} instances with same time but not same offset"
-                };
-            }
-        }
-
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
-        public void An_instance_of_TimeExpression_should_be_equal_to_itself(TimeExpression time)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_TimeExpression_instance_should_be_equal_to_itself(TimeExpression instance)
         {
             // Act
-            bool actual = time.Equals(time);
+            bool actual = instance.Equals(instance);
 
             // Assert
             actual.Should()
                   .BeTrue();
-
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void An_instance_of_TimeExpression_should_not_be_equal_to_null(TimeExpression time)
+        public void Given_non_null_TimeExpression_instance_should_never_be_equal_to_null(TimeExpression instance)
         {
             // Act
-            bool actual = time.Equals(null);
+            bool actual = instance.Equals(null);
 
             // Assert
             actual.Should()
@@ -165,11 +97,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Two_instances_built_from_same_data_should_be_equal(PositiveInt hours,
-                                                                       PositiveInt minutes,
-                                                                       PositiveInt seconds,
-                                                                       PositiveInt milliseconds,
-                                                                       TimeOffset offset)
+        public void Given_two_TimeExpression_instances_that_have_same_values_should_be_equal(NonNegativeInt hours, NonNegativeInt minutes, NonNegativeInt seconds, NonNegativeInt milliseconds, TimeOffset offset)
         {
             // Arrange
             TimeExpression first = new(hours.Item, minutes.Item, seconds.Item, milliseconds.Item, offset);
@@ -182,21 +110,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             actual.Should()
                   .BeTrue();
             first.GetHashCode().Should()
-                               .Be(other.GetHashCode(), $"two instances that are equal must have the same hashcode");
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Creating_a_TimeExpression_from_variables_obtained_from_deconstruction_of_a_TimeExpression_source_should_equal_the_TimeExpression_source(TimeExpression source)
-        {
-            // Arrange
-            (int hours, int minutes, int seconds, int milliseconds, TimeOffset offset) = source;
-
-            // Act
-            TimeExpression actual = new(hours, minutes, seconds, milliseconds, offset);
-
-            // Assert
-            actual.Should()
-                  .Be(source);
+                               .Be(other.GetHashCode());
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DataFilters.PerfomanceTests
+﻿namespace DataFilters.PerfomanceTests
 {
     using BenchmarkDotNet.Running;
 

@@ -157,7 +157,7 @@
                     new BoundaryExpression(new DateTimeExpression(dateTime), included : true),
                     new BoundaryExpression(new TimeExpression(hours: 10), included : true),
                     new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(dateTime), included : true),
-                                        max: new BoundaryExpression(new DateTimeExpression(dateTime.AddHours(10)), included: true)),
+                                           max: new BoundaryExpression(new DateTimeExpression(dateTime.Add(10.Hours())), included: true)),
                     "max date part should be deduced from min date part when max date part is not specified"
                 };
             }
@@ -308,19 +308,23 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Ctor_should_converts_Max_DateTimeExpression_to_TimeExpression_when_DateExpression_is_not_provided(TimeExpression time, bool included)
+        public void Ctor_should_converts_Max_DateTimeExpression_to_TimeExpression_when_DateExpression_is_not_provided(PositiveInt hours,
+                                                                                                                      PositiveInt minutes,
+                                                                                                                      PositiveInt seconds,
+                                                                                                                      PositiveInt milliseconds,
+                                                                                                                      bool included)
         {
             // Arrange
-            Lazy<IntervalExpression> lazyRangeExpression = new(() =>
-            {
-                DateTimeExpression dateTimeExpression = new(time);
+            TimeExpression time = new(hours.Item, minutes.Item, seconds.Item, milliseconds.Item);
+            DateTimeExpression dateTimeExpression = new(time);
 
-                return new(max: new BoundaryExpression(dateTimeExpression, included));
-            });
+            // Act
+            IntervalExpression interval = new(max: new BoundaryExpression(dateTimeExpression, included));
+            (IBoundaryExpression expression, _) = interval.Max;
 
-            return Prop.Throws<ArgumentOutOfRangeException, IntervalExpression>(lazyRangeExpression).When(time.Hours < 0 || time.Minutes < 0 || time.Seconds < 0)
-                    .Or(Prop.Throws<ArgumentNullException, IntervalExpression>(lazyRangeExpression).When(time is null))
-                .Or(lazyRangeExpression.Value.Max.Expression is TimeExpression timeExpression && timeExpression.Equals(time));
+            // Assert
+            expression.Should()
+                      .Be(time);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -350,7 +354,7 @@
         private static Property CreateIsEquivalentPropeprty(FilterExpression filterExpression, IBoundaryExpression boundaryExpression, bool minIncluded, bool maxIsIncluded)
         {
             // Arrange
-            IntervalExpression range = new(new (boundaryExpression, minIncluded), new (boundaryExpression, maxIsIncluded));
+            IntervalExpression range = new(new(boundaryExpression, minIncluded), new(boundaryExpression, maxIsIncluded));
 
             return range.IsEquivalentTo(filterExpression).ToProperty();
         }
@@ -398,6 +402,21 @@
             // Assert
             actual.Should()
                   .Be(expected, reason);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void An_IntervalExpression_instance_built_from_data_from_a_previously_deconstructed_instance_should_be_equal(IntervalExpression expected)
+        {
+            // Arrange
+            (BoundaryExpression min, BoundaryExpression max) = expected;
+
+            // Act
+            IntervalExpression actual = new(min, max);
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
     using System;
-    using System.Linq;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
