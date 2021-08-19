@@ -218,48 +218,44 @@ namespace DataFilters.ContinuousIntegration
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
                 IEnumerable<Project> testsProjects = TestPartition.GetCurrent(projects);
-                RunTests(testsProjects);
-            });
 
-        private void RunTests(IEnumerable<Project> testsProjects)
-        {
-            testsProjects.ForEach(project => Info(project));
+                testsProjects.ForEach(project => Info(project));
 
-            DotNetTest(s => s
-                .SetConfiguration(Configuration)
-                .EnableCollectCoverage()
-                .EnableUseSourceLink()
-                .SetNoBuild(InvokedTargets.Contains(Compile))
-                .SetResultsDirectory(TestResultDirectory)
-                .SetCoverletOutputFormat(CoverletOutputFormat.lcov)
-                .AddProperty("ExcludeByAttribute", "Obsolete")
-                .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
-                                                               .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting.SetFramework(framework)
-                                                                                                                                          .SetLogger($"trx;LogFileName={project.Name}.trx")
-                                                                                                                                          .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml")))
-                );
-
-            TestResultDirectory.GlobFiles("*.trx")
-                                    .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
-                                                                                                    title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
-                                                                                                    files: new string[] { testFileResult })
+                DotNetTest(s => s
+                    .SetConfiguration(Configuration)
+                    .EnableCollectCoverage()
+                    .EnableUseSourceLink()
+                    .SetNoBuild(InvokedTargets.Contains(Compile))
+                    .SetResultsDirectory(TestResultDirectory)
+                    .SetCoverletOutputFormat(CoverletOutputFormat.lcov)
+                    .AddProperty("ExcludeByAttribute", "Obsolete")
+                    .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
+                                                                   .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting.SetFramework(framework)
+                                                                                                                                              .SetLogger($"trx;LogFileName={project.Name}.trx")
+                                                                                                                                              .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml")))
                     );
 
-            // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
-            ReportGenerator(_ => _
-                    .SetFramework("net5.0")
-                    .SetReports(TestResultDirectory / "*.xml")
-                    .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
-                    .SetTargetDirectory(CoverageReportDirectory)
-                    .SetHistoryDirectory(CoverageReportHistoryDirectory)
-                    .SetTag(GitRepository.Commit)
-                );
+                TestResultDirectory.GlobFiles("*.trx")
+                                        .ForEach(testFileResult => AzurePipelines?.PublishTestResults(type: AzurePipelinesTestResultsType.VSTest,
+                                                                                                        title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
+                                                                                                        files: new string[] { testFileResult })
+                        );
 
-            TestResultDirectory.GlobFiles("*.xml")
-                            .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
-                                                                                    summaryFile: file,
-                                                                                    reportDirectory: CoverageReportDirectory));
-        }
+                // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
+                ReportGenerator(_ => _
+                        .SetFramework("net5.0")
+                        .SetReports(TestResultDirectory / "*.xml")
+                        .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
+                        .SetTargetDirectory(CoverageReportDirectory)
+                        .SetHistoryDirectory(CoverageReportHistoryDirectory)
+                        .SetTag(GitRepository.Commit)
+                    );
+
+                TestResultDirectory.GlobFiles("*.xml")
+                                .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
+                                                                                        summaryFile: file,
+                                                                                        reportDirectory: CoverageReportDirectory));
+            });
 
         public Target Pack => _ => _
             .DependsOn(Tests, Compile)
@@ -359,7 +355,6 @@ namespace DataFilters.ContinuousIntegration
                 }
                 else
                 {
-                    RunTests(Solution.GetProjects("*.UnitTests"));
                     FinishFeature();
                 }
             });
@@ -423,7 +418,6 @@ namespace DataFilters.ContinuousIntegration
 
         private void FinishReleaseOrHotfix()
         {
-            RunTests(Solution.GetProjects("*.UnitTests"));
             Git($"checkout {MainBranchName}");
             Git($"merge --no-ff --no-edit {GitRepository.Branch}");
             Git($"tag {MajorMinorPatchVersion}");
