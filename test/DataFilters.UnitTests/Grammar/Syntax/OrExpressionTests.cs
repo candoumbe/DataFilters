@@ -162,14 +162,18 @@
             return one.IsEquivalentTo(two).ToProperty();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OneOfExpression_that_contains_only_two_expressions_IsEquivalentTo_should_return_true(FilterExpression left, FilterExpression right)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators)}, Replay = "13802116455375353263,6490926112197589173")]
+        public Property Given_OrExpression_and_OneOfExpression_that_contains_the_same_two_expression_then_calling_IsEquivalentTo_with_that_OneOfExpression_should_return_true(FilterExpression left, FilterExpression right)
         {
             // Arrange
             OneOfExpression oneOf = new(left, right);
             OrExpression or = new(left: right, right: left);
 
-            return or.IsEquivalentTo(oneOf).ToProperty();
+            // Act
+            bool actual = or.IsEquivalentTo(oneOf);
+
+            // Assert
+            return actual.ToProperty();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
