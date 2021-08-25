@@ -26,8 +26,8 @@ using OneOf;
         public void IsFilterExpression() => typeof(ConstantValueExpression).Should()
                                                                            .BeAssignableTo<FilterExpression>().And
                                                                            .Implement<IEquatable<ConstantValueExpression>>().And
-                                                                           .HaveConstructor(new[] { typeof(OneOf<string, DateTime, DateTimeOffset, short, int, long, Guid, decimal, double, float, bool, byte, char>) }).And
-                                                                           .HaveProperty<OneOf<string, DateTime, DateTimeOffset, short, int, long, Guid, decimal, double, float, bool, byte, char>>("Value");
+                                                                           .HaveConstructor(new[] { typeof(OneOf<string, DateTime, DateTimeOffset, Guid, double, float,int, long,  bool, char>) }).And
+                                                                           .HaveProperty<OneOf<string, DateTime, DateTimeOffset, Guid, double, float, int, long, bool, char>>("Value");
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -109,12 +109,6 @@ using OneOf;
 
         [Property]
         public Property Value_should_be_long(long input) {
-            ConstantValueExpression expression = new(input);
-            return expression.Value.Value.Equals(input).ToProperty().And(expression.Value.Value.GetType() == input.GetType());
-        }
-
-        [Property]
-        public Property Value_should_be_byte(byte input) {
             ConstantValueExpression expression = new(input);
             return expression.Value.Value.Equals(input).ToProperty().And(expression.Value.Value.GetType() == input.GetType());
         }

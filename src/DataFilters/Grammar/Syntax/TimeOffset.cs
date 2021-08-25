@@ -19,6 +19,11 @@ namespace DataFilters.Grammar.Syntax
         public int Minutes { get; }
 
         /// <summary>
+        /// The Zero time offset
+        /// </summary>
+        public static TimeOffset Zero => new();
+
+        /// <summary>
         /// Builds a new <see cref="TimeOffset"/> instance
         /// </summary>
         /// <param name="hours"></param>
@@ -39,7 +44,7 @@ namespace DataFilters.Grammar.Syntax
         };
     }
 #elif NETSTANDARD1_3 || NETSTANDARD2_0
-    public class TimeOffset : IEquatable<TimeOffset>
+    public sealed class TimeOffset : IEquatable<TimeOffset>
     {
         /// <summary>
         /// Gets the number of hours of offset with the UTC time
@@ -50,6 +55,11 @@ namespace DataFilters.Grammar.Syntax
         /// Gets the number of minutes of offset with the UTC time
         /// </summary>
         public int Minutes { get; }
+
+        /// <summary>
+        /// The Zero time offset
+        /// </summary>
+        public static TimeOffset Zero => new();
 
         /// <summary>
         /// Builds a new <see cref="TimeOffset"/> instance

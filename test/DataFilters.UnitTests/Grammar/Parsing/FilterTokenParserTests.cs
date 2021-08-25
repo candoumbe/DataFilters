@@ -16,6 +16,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -171,13 +172,29 @@
             }
         }
 
-        [Theory]
-        [MemberData(nameof(StartsWithCases))]
-        public void CanParseStartsWith(string input, StartsWithExpression expected)
+        [Property]
+        public void Given_double_as_string_Number_should_parse_to_a_ConstantValueExpression_where_Value_property_holds_the_input(NormalFloat value)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
+            ConstantValueExpression expected = new(value.Item);
+            string input = expected.ParseableString;
+
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
+
+            // Act
+            ConstantValueExpression actual = FilterTokenParser.Number.Parse(tokens);
+
+            // Assert
+            AssertThatCanParse(actual, expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void CanParseStartsWith(StartsWithExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
             _outputHelper.WriteLine($"Tokens : ${tokens.Select(token => new { token.Kind, token.Position.Line, token.Position.Column }).Jsonify()}");
 
             // Act
@@ -416,49 +433,12 @@
             AssertThatCanParse(expression, expected);
         }
 
-        public static IEnumerable<object[]> NotExpressionCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "!Bruce",
-                    new NotExpression(new ConstantValueExpression("Bruce"))
-                };
-
-                yield return new object[]
-                {
-                    "!!Bruce",
-                    new NotExpression(new NotExpression(new ConstantValueExpression("Bruce")))
-                };
-
-                yield return new object[]
-                {
-                    "!Bru*",
-                    new NotExpression(new StartsWithExpression("Bru"))
-                };
-
-                yield return new object[]
-                {
-                    "![10 TO *[",
-                    new NotExpression(new IntervalExpression(min : new BoundaryExpression(new ConstantValueExpression("10"), included: true)))
-                };
-
-                yield return new object[]
-                {
-                    "!(B*|C*)",
-                    new NotExpression(new GroupExpression(new OrExpression(new StartsWithExpression("B"), new StartsWithExpression("C"))))
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(NotExpressionCases))]
-        public void CanParseNotExpression(string input, NotExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void CanParseNotExpression(NotExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
 
             // Act
             NotExpression expression = FilterTokenParser.Not.Parse(tokens);
@@ -596,100 +576,27 @@
             expression.IsEquivalentTo(expected).ToProperty().VerboseCheck(_outputHelper);
         }
 
-        public static IEnumerable<object[]> RangeCases
+        public static IEnumerable<object[]> IntervalExpressionCases
         {
             get
             {
-                yield return new object[]
-                {
-                    "[10 TO 20]",
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                                        max: new BoundaryExpression(new ConstantValueExpression("20"), included : true))
-                };
 
                 yield return new object[]
                 {
-                    "]* TO 20]",
-                    new IntervalExpression(max: new BoundaryExpression(new ConstantValueExpression("20"), included: true))
-                };
-
-                yield return new object[]
-                {
-                    "[10 TO *[",
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "[2010-06-25 TO 2010-06-29]",
-                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "]2010-06-25 TO 2010-06-29[",
-                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "]2010-06-25 TO 2010-06-29]",
-                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "[2010-06-25 TO 2010-06-29[",
-                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "[2010-06-25 TO *[",
-                    new IntervalExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "[13:30:00 TO *[",
-                    new IntervalExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "]13:30:00 TO *[",
-                    new IntervalExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
-                };
-
-                yield return new object[]
-                {
-                    "]* TO 13:30:00[",
-                    new IntervalExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
-                };
-
-                yield return new object[]
-                {
-                    "]* TO 13:30:00]",
-                    new IntervalExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included: true))
+                    new IntervalExpression(new BoundaryExpression(new ConstantValueExpression(-1.3), false),
+                                           new BoundaryExpression(new ConstantValueExpression(1), false))
                 };
             }
         }
 
         [Theory]
-        [MemberData(nameof(RangeCases))]
-        public void CanParseRange(string input, IntervalExpression expected)
+        [MemberData(nameof(IntervalExpressionCases))]
+        //[Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public void CanParseRange(IntervalExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
 
             // Act
             IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
@@ -1040,21 +947,18 @@
             }
         }
 
-        [Theory]
-        [MemberData(nameof(DateAndTimeCases))]
-        public void CanParseDateAndTime(string input, DateTimeExpression expected, DateTimeExpressionKind expectedKind)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void CanParseDateAndTime(DateTimeExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
 
             // Act
             DateTimeExpression actual = FilterTokenParser.DateAndTime.Parse(tokens);
 
             // Assert
             AssertThatCanParse(actual, expected);
-            actual.Kind.Should()
-                       .Be(expectedKind);
         }
 
         public static IEnumerable<object[]> DateCases
@@ -1069,13 +973,12 @@
             }
         }
 
-        [Theory]
-        [MemberData(nameof(DateCases))]
-        public void CanParseDateCases(string input, DateExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void CanParseDateCases(DateExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
 
             // Act
             DateExpression actual = FilterTokenParser.Date.Parse(tokens);
@@ -1084,31 +987,12 @@
             AssertThatCanParse(actual, expected);
         }
 
-        public static IEnumerable<object[]> TimeCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "18:35:00",
-                    new TimeExpression(hours : 18, minutes: 35)
-                };
-
-                yield return new object[]
-                {
-                    "23:59:60",
-                    new TimeExpression(hours : 23, minutes: 59, seconds : 60)
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(TimeCases))]
-        public void CanParseTimeExpression(string input, TimeExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void CanParseTimeExpression(TimeExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
 
             // Act
             TimeExpression actual = FilterTokenParser.Time.Parse(tokens);
@@ -1141,13 +1025,12 @@
             }
         }
 
-        [Theory]
-        [MemberData(nameof(DurationCases))]
-        private void CanParseDurationExpression(string input, DurationExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        private void CanParseDurationExpression(DurationExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.ParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.ParseableString);
 
             // Act
             DurationExpression actual = FilterTokenParser.Duration.Parse(tokens);
@@ -1156,9 +1039,9 @@
             AssertThatCanParse(actual, expected);
         }
 
-        private static void AssertThatCanParse(FilterExpression expression, FilterExpression expected)
-            => expression.Should()
-                         .NotBeSameAs(expected).And
-                         .Be(expected);
+        private static void AssertThatCanParse(FilterExpression actual, FilterExpression expected, string reason = "")
+            => actual.Should()
+                     .NotBeSameAs(expected).And
+                     .Be(expected, reason);
     }
 }

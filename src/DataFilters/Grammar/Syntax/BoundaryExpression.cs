@@ -61,7 +61,7 @@
         public static bool operator !=(BoundaryExpression left, BoundaryExpression right) => !(left == right);
 
         ///<inheritdoc/>
-        public override string ToString() => $"{{{Expression.GetType()}:{Expression}, {nameof(Included)} : {Included}}}";
+        public override string ToString() => $"{{{Expression.GetType()}:{Expression.ParseableString}, {nameof(Included)} : {Included}}}";
 
         ///<inheritdoc/>
         public void Deconstruct(out IBoundaryExpression expression, out bool included)

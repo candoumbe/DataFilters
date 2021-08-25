@@ -232,7 +232,7 @@
                                 DateExpression date => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
                                 TimeExpression time => (new ConstantValueExpression($"{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
-                                _ => throw new ArgumentOutOfRangeException($"Unsupported boundary type {input.GetType()}")
+                                _ => throw new NotSupportedException($"Unsupported boundary type {input.GetType()}")
                             };
 
                         (ConstantValueExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);
@@ -263,7 +263,7 @@
                         }
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException($"Unsupported '{expression.GetType()}'s expression type.");
+                        throw new NotSupportedException($"Unsupported '{expression.GetType()}'s expression type.");
                 }
 
                 return filter;

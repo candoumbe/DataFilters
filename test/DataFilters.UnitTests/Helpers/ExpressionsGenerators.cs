@@ -47,16 +47,12 @@ namespace DataFilters.UnitTests.Helpers
             {
                 Arb.Default.Bool().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.NonWhiteSpaceString().Generator.Select(value => new ConstantValueExpression(value.Item)),
-                Arb.Default.Int16().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.Int32().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.Int64().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.DateTime().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.DateTimeOffset().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.Byte().Generator.Select(value => new ConstantValueExpression(value)),
                 Arb.Default.Guid().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.Decimal().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.NormalFloat().Generator.Select(value => new ConstantValueExpression(value.Item)),
-                Arb.Default.Char().Generator.Select(value => new ConstantValueExpression(value))
+                Arb.Default.NormalFloat().Generator.Select(value => new ConstantValueExpression(value.Item))
             };
 
             return Gen.OneOf(generators)
@@ -88,9 +84,9 @@ namespace DataFilters.UnitTests.Helpers
                           .ToArbitrary();
 
         public static Arbitrary<StartsWithExpression> StartsWithExpressions()
-            => Arb.Default.NonEmptyString()
+            => Arb.Default.NonWhiteSpaceString()
                           .Generator
-                          .Select(nonWhiteSpaceString => new StartsWithExpression(nonWhiteSpaceString.Item))
+                          .Select(value => new StartsWithExpression(value.Item))
                           .ToArbitrary();
 
         public static Arbitrary<OrExpression> OrExpressions() => Gen.Sized(SafeOrExpressionGenerator).ToArbitrary();
@@ -186,9 +182,7 @@ namespace DataFilters.UnitTests.Helpers
                 (Arb.Default.Int16().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
                 (Arb.Default.Int32().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
                 (Arb.Default.Int64().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
-                (Arb.Default.NormalFloat().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value.Item)), boolGenerator),
-                (Arb.Default.Decimal().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator)
-
+                (Arb.Default.NormalFloat().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value.Item)), boolGenerator)
             };
 
             (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
@@ -196,22 +190,22 @@ namespace DataFilters.UnitTests.Helpers
 
             (Gen<IBoundaryExpression>, Gen<bool> Generator) constanteGen = (ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
             IEnumerable<Gen<IntervalExpression>> generatorsWithMinAndMax = datesGen.CrossJoin(datesGen)
-                                                                  .Concat(datesGen.CrossJoin(new[] { timeGen }))
-                                                                  .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
-                                                                  .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
-                                                                                                                     (tuple.max.gen, tuple.max.included)))
-                .Concat(new[] { CreateIntervalExpressionGenerator(constanteGen, constanteGen) })
-                .Concat(numericsGen.CrossJoin(numericsGen)
-                        .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
-                        .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
-                                                                            (tuple.max.gen, tuple.max.included))))
-                         ;
+                                                                                   .Concat(datesGen.CrossJoin(new[] { timeGen }))
+                                                                                   .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                                                                                   .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
+                                                                                                                                      (tuple.max.gen, tuple.max.included)))
+                                                                                   .Concat(new[] { CreateIntervalExpressionGenerator(constanteGen, constanteGen) })
+                                                                                   .Concat(numericsGen.CrossJoin(numericsGen)
+                                                                                           .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                                                                                           .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
+                                                                                                                                              (tuple.max.gen, tuple.max.included))))
+                                         ;
 
             IEnumerable<Gen<IntervalExpression>> generatorsWithMinOrMaxOnly = datesGen.CrossJoin(new[] { asteriskGen })
-                                                                                   .Concat(new[] { asteriskGen }.CrossJoin(datesGen))
-                                                                                   .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
-                                                                  .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
-                                                                                                                     (tuple.max.gen, tuple.max.included)));
+                                                                                      .Concat(new[] { asteriskGen }.CrossJoin(datesGen))
+                                                                                      .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
+                                                                                      .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
+                                                                                                                                         (tuple.max.gen, tuple.max.included)));
 
             return Gen.OneOf(generatorsWithMinAndMax.Concat(generatorsWithMinOrMaxOnly))
                       .ToArbitrary();
@@ -219,12 +213,13 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<BoundaryExpression> BoundariesExpressions()
         {
+            Gen<bool> boolGenerator = Arb.Default.Bool().Generator;
             IList<Gen<BoundaryExpression>> generators = new List<Gen<BoundaryExpression>>
             {
-                CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
-                CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
-                CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
-                CreateBoundaryGenerator(ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression) item), Arb.Default.Bool().Generator),
+                CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
+                CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
+                CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
+                CreateBoundaryGenerator(ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false)),
             };
 
@@ -256,7 +251,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<BracketValue> GenerateRegexValues()
         {
             Gen<BracketValue> regexRangeGenerator = RangeBracketValueGenerator().Convert(range => (BracketValue)range,
-                                                                                            bracket => (RangeBracketValue)bracket)
+                                                                                         bracket => (RangeBracketValue)bracket)
                                                                                                           .Generator;
             Gen<BracketValue> regexConstantGenerator = BuildRegexConstantValueGenerator().Convert(range => (BracketValue)range,
                                                                                                   bracket => (ConstantBracketValue)bracket)
@@ -266,12 +261,12 @@ namespace DataFilters.UnitTests.Helpers
         }
 
         public static Arbitrary<ConstantBracketValue> BuildRegexConstantValueGenerator() => Arb.Default.String()
-                                                                                                   .Filter(input => !string.IsNullOrWhiteSpace(input)
-                                                                                                                    && input.Length > 1
-                                                                                                                    && input.All(chr => char.IsLetterOrDigit(chr)))
-                                                                                                   .Generator
-                                                                                                   .Select(item => new ConstantBracketValue(item))
-                                                                                                   .ToArbitrary();
+                                                                                                       .Filter(input => !string.IsNullOrWhiteSpace(input)
+                                                                                                                        && input.Length > 1
+                                                                                                                        && input.All(chr => char.IsLetterOrDigit(chr)))
+                                                                                                       .Generator
+                                                                                                       .Select(item => new ConstantBracketValue(item))
+                                                                                                       .ToArbitrary();
 
         public static Arbitrary<RangeBracketValue> RangeBracketValueGenerator()
         {

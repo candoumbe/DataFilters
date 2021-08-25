@@ -82,6 +82,7 @@
             RightSquareBracket,
             BackSlash,
             Pipe,
+            Comma,
             Bang
         };
 

@@ -85,7 +85,7 @@
         public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ParseableString => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{Offset}";
+        public override string ParseableString => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{(Milliseconds > 0 ? $".{Milliseconds}" : string.Empty)}{Offset}";
 
         ///<inheritdoc/>
         public void Deconstruct(out int hours, out int minutes, out int seconds, out int milliseconds, out TimeOffset offset)

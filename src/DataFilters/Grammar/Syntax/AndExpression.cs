@@ -57,7 +57,6 @@
                 simplifiedExpression = simplifiedLeft.Complexity < simplifiedRight.Complexity
                     ? simplifiedLeft
                     : simplifiedRight;
-                                                            ;
             }
 
             return simplifiedExpression;

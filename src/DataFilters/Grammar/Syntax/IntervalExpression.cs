@@ -98,9 +98,17 @@
 
             _lazyToString = new(() => new
             {
-                Min = new { Min?.Included, Value = Min?.Expression?.ParseableString ?? Min?.Expression.ToString() },
-                Max = new { Max?.Included, Value = Max?.Expression?.ParseableString ?? Max?.Expression.ToString() }
-            }.Jsonify());
+                Min = new { Min?.Included, Value = Min?.Expression?.ParseableString, DebugView = Min?.Expression?.ToString() },
+                Max = new { Max?.Included, Value = Max?.Expression?.ParseableString, DebugView = Max?.Expression?.ToString() },
+                ParseableString
+            }
+#if NETSTANDARD1_3
+        .Jsonify(new Newtonsoft.Json.JsonSerializerSettings() { Formatting = Newtonsoft.Json.Formatting.Indented })
+#elif NETSTANDARD2_0_OR_GREATER || NET5_0_OR_GREATER
+        .Jsonify(new() { WriteIndented = true, IgnoreNullValues = true })
+#endif
+                )
+        ;
 
             _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ParseableString ?? "*"} TO {Max?.Expression?.ParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
 
@@ -140,6 +148,9 @@
 
         ///<inheritdoc/>
         public override int GetHashCode() => (Min, Max).GetHashCode();
+
+        ///<inheritdoc/>
+        public override string ToString() => _lazyToString.Value;
 
         ///<inheritdoc/>
         public override string ParseableString => _lazyParseableString.Value;

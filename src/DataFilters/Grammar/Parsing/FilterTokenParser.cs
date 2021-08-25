@@ -8,6 +8,7 @@
 
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
 
     /// <summary>
@@ -18,11 +19,11 @@
         /// <summary>
         /// Parser for many <see cref="FilterToken.Letter"/>
         /// </summary>
-        public static TokenListParser<FilterToken, ConstantValueExpression> AlphaNumeric => from data in (
+        public static TokenListParser<FilterToken, ConstantValueExpression> AlphaNumeric => (from data in (
                                                                                             from numberBefore in Token.EqualTo(FilterToken.Digit).Optional()
                                                                                             from value in Alpha.Optional()
                                                                                             from numberAfter in Token.EqualTo(FilterToken.Digit).Optional()
-                                                                                            where numberBefore != null || value != null || numberAfter != null
+                                                                                            where numberBefore is not null || value is not null || numberAfter is not null
                                                                                             select new { numberBefore, value, numberAfter }
                                                                                             ).AtLeastOnce()
                                                                                             select new ConstantValueExpression(
@@ -31,11 +32,13 @@
                                                                                                         d.numberBefore?.ToStringValue() ?? string.Empty,
                                                                                                         d.value?.ToStringValue() ?? string.Empty,
                                                                                                         d.numberAfter?.ToStringValue() ?? string.Empty)))
-                                                                                            );
+                                                                                            )
+                                                                                            ).Try();
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Alpha => Token.EqualTo(FilterToken.Letter).Try()
                                                                                       .Or(Token.EqualTo(FilterToken.Escaped)).Try()
-                                                                                      .Or(Token.EqualTo(FilterToken.Underscore));
+                                                                                      .Or(Token.EqualTo(FilterToken.Underscore)).Try()
+                                                                                      .Or(Token.EqualTo(FilterToken.None));
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Digit => Token.EqualTo(FilterToken.Digit);
 
@@ -156,14 +159,14 @@
         /// <returns></returns>
         private static TokenListParser<FilterToken, BracketValue> BuildRangeBracketValuesParser(TokenListParser<FilterToken, Token<FilterToken>> token)
             => (from rangeStart in token
-               from _ in Token.EqualTo(FilterToken.Dash)
-               from rangeEnd in token
-               select (BracketValue) new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
+                from _ in Token.EqualTo(FilterToken.Dash)
+                from rangeEnd in token
+                select (BracketValue)new RangeBracketValue(rangeStart.ToStringValue()[0], rangeEnd.ToStringValue()[0]))
             .Try()
             .Or(from values in token.AtLeastOnce()
-                select (BracketValue) new ConstantBracketValue(string.Concat(values.Select(value => value.ToStringValue()))))
+                select (BracketValue)new ConstantBracketValue(string.Concat(values.Select(value => value.ToStringValue()))))
 
-            
+
             ;
         /// <summary>
         /// Parses Range expressions
@@ -174,20 +177,20 @@
             {
                 return  // Case [ min TO max ] 
                         (
-                            from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                             from min in DateAndTime.Try()
                                                     .Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                     .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                     .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from rangeSeparator in RangeSeparator
+                            from __ in RangeSeparator
 
                             from max in DateAndTime.Try()
                                                     .Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                     .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                     .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -195,31 +198,31 @@
                                 {
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
                                 {
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: true)
                             )
                         ).Try()
                       // Case ] min TO max ] : lower bound excluded from the interval
                       .Or(
-                            from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from rangeSeparator in RangeSeparator
+                            from __ in RangeSeparator
 
                             from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from end in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -228,34 +231,29 @@
                                     AsteriskExpression asterisk => asterisk,
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: false),
                                 max: new BoundaryExpression(max switch
                                 {
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: true)
                            )
                         ).Try()
                       // Case syntax [ min TO max [ : upper bound excluded from the interval
                       .Or(
-                            // from prop in Property
-                            // from eq in Token.EqualTo(FilterToken.Equal)
-                            // from _ in AnyExpression.Many()
-                            from start in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-
-                            from rangeSeparatpr in RangeSeparator
-
+                            from __ in RangeSeparator
                             from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from end in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.OpenSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -263,33 +261,31 @@
                                 {
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: false)
                            )
                         ).Try()
                       // Case  ] min TO max [ : lower and upper bounds excluded from the interval
                       .Or(
-                            from start in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                                    .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
 
-                            from _ in RangeSeparator
-
+                            from __ in RangeSeparator
                             from max in DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()
                                                    .Or(Number.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                   .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                                   .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                                    .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-
-                            from end in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.OpenSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -298,14 +294,14 @@
                                     AsteriskExpression asterisk => asterisk,
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{min?.GetType()}' for min value")
+                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: false),
                                 max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
                                     ConstantValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new ArgumentOutOfRangeException($"Unsupported '{max?.GetType()}' for max value")
+                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: false)
                            )
                         );
@@ -324,9 +320,9 @@
         /// <summary>
         /// Group expression
         /// </summary>
-        public static TokenListParser<FilterToken, GroupExpression> Group => from lbracket in Token.EqualTo(FilterToken.OpenParenthese)
+        public static TokenListParser<FilterToken, GroupExpression> Group => from _ in Token.EqualTo(FilterToken.OpenParenthese)
                                                                              from expression in AnyExpression
-                                                                             from rbracket in Token.EqualTo(FilterToken.CloseParenthese)
+                                                                             from __ in Token.EqualTo(FilterToken.CloseParenthese)
                                                                              select new GroupExpression(expression);
 
         private static TokenListParser<FilterToken, FilterExpression> AnyExpression => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()
@@ -447,6 +443,7 @@
                                                                                                                      new(hours: time.Hours,
                                                                                                                          minutes: time.Minutes,
                                                                                                                          seconds: time.Seconds,
+                                                                                                                         milliseconds: time.Milliseconds,
                                                                                                                          offset: offset))).Try()
                                                                                       // DATE AND TIME
                                                                                       .Or(
@@ -465,10 +462,9 @@
             );
 
         private static TokenListParser<FilterToken, TimeOffset> Offset => (from _ in Token.EqualToValue(FilterToken.Letter, "Z")
-                                                                           select new TimeOffset(0, 0)).Try()
+                                                                           select TimeOffset.Zero).Try()
                                                                           .Or(
-                                                                                from sign in Token.EqualTo(FilterToken.Dash)
-                                                                                                  .Or(Token.EqualToValue(FilterToken.None, "+"))
+                                                                                from sign in MinusSign.Or(PlusSign)
                                                                                                   .Select(n => n.ToStringValue())
                                                                                 from hour in Token.EqualTo(FilterToken.Digit)
                                                                                                 .Select(n => int.Parse(n.ToStringValue()))
@@ -498,20 +494,48 @@
                                                                            select new DateExpression(year, month, day);
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Colon => Token.EqualTo(FilterToken.Colon);
+
         private static TokenListParser<FilterToken, Token<FilterToken>> Dash => Token.EqualTo(FilterToken.Dash);
+
+        private static TokenListParser<FilterToken, Token<FilterToken>> MinusSign => Dash;
+
+        private static TokenListParser<FilterToken, Token<FilterToken>> PlusSign => Token.EqualToValue(FilterToken.None, "+");
+
+        private static TokenListParser<FilterToken, string> MinusOrPlusSign => MinusSign.Try().Or(PlusSign.Try()).Optional()
+                                                                                              .Select(token => token?.ToStringValue() switch
+                                                                                              {
+                                                                                                  "-" => "-",
+                                                                                                  _ => string.Empty
+                                                                                              });
+
 
         /// <summary>
         /// Parser for time expression.
         /// </summary>
-        public static TokenListParser<FilterToken, TimeExpression> Time => from hour in Token.EqualTo(FilterToken.Digit)
+        public static TokenListParser<FilterToken, TimeExpression> Time => (from hour in Token.EqualTo(FilterToken.Digit)
+                                                                                             .Apply(Numerics.Integer)
                                                                                 .Select(n => int.Parse(n.ToStringValue()))
-                                                                           from _ in Colon
-                                                                           from minutes in Token.EqualTo(FilterToken.Digit)
-                                                                               .Select(n => int.Parse(n.ToStringValue()))
-                                                                           from __ in Colon
-                                                                           from seconds in Token.EqualTo(FilterToken.Digit)
-                                                                               .Select(n => int.Parse(n.ToStringValue()))
-                                                                           select new TimeExpression(hour, minutes, seconds);
+                                                                            from _ in Colon
+                                                                            from minutes in Token.EqualTo(FilterToken.Digit)
+                                                                                .Select(n => int.Parse(n.ToStringValue()))
+                                                                            from __ in Colon
+                                                                            from seconds in Token.EqualTo(FilterToken.Digit)
+                                                                                .Select(n => int.Parse(n.ToStringValue()))
+                                                                            from ___ in Token.EqualTo(FilterToken.Dot)
+                                                                            from milliseconds in Token.EqualTo(FilterToken.Digit)
+                                                                                .Select(n => int.Parse(n.ToStringValue()))
+                                                                            select new TimeExpression(hour, minutes, seconds, milliseconds))
+                                                                           .Try()
+                                                                           .Or(from hour in Token.EqualTo(FilterToken.Digit)
+                                                                                             .Apply(Numerics.Integer)
+                                                                                .Select(n => int.Parse(n.ToStringValue()))
+                                                                               from _ in Colon
+                                                                               from minutes in Token.EqualTo(FilterToken.Digit)
+                                                                                   .Select(n => int.Parse(n.ToStringValue()))
+                                                                               from __ in Colon
+                                                                               from seconds in Token.EqualTo(FilterToken.Digit)
+                                                                                   .Select(n => int.Parse(n.ToStringValue()))
+                                                                               select new TimeExpression(hour, minutes, seconds));
 
         /// <summary>
         /// Parser for full criteria
@@ -537,9 +561,55 @@
         /// <summary>
         /// Parser for numeric expressions
         /// </summary>
-        public static TokenListParser<FilterToken, ConstantValueExpression> Number => from n in Token.EqualTo(FilterToken.Digit)
-                                                                                                     .Apply(Numerics.Decimal)
-                                                                                      select new ConstantValueExpression(n.ToStringValue());
+        public static TokenListParser<FilterToken, ConstantValueExpression> Number => FloatOrDouble.Try().Or(IntegerOrLong);
+
+        private static TokenListParser<FilterToken, ConstantValueExpression> FloatOrDouble
+            => (from sign in MinusOrPlusSign.Try()
+                from digitBeforeDot in Token.EqualTo(FilterToken.Digit).Apply(Numerics.NaturalUInt64)
+                from _ in Token.EqualTo(FilterToken.Dot)
+                from digitAfterDot in Token.EqualTo(FilterToken.Digit)
+                from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "d")
+                select new ConstantValueExpression(double.Parse($"{sign}{digitBeforeDot}.{digitAfterDot.ToStringValue()}", CultureInfo.InvariantCulture)))
+                .Try()
+                .Or(
+                     from sign in MinusOrPlusSign.Try()
+                     from digitBeforeDot in Token.EqualTo(FilterToken.Digit).Apply(Numerics.NaturalUInt64)
+                     from _ in Token.EqualTo(FilterToken.Dot)
+                     from digitAfterDot in Token.EqualTo(FilterToken.Digit)
+                     from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "f")
+                     select new ConstantValueExpression(float.Parse($"{sign}{digitBeforeDot}.{digitAfterDot.ToStringValue()}", CultureInfo.InvariantCulture)))
+                .Try()
+                .Or(
+                    from sign in MinusOrPlusSign.Try()
+                    from digitBeforeDot in Token.EqualTo(FilterToken.Digit).Apply(Numerics.NaturalUInt64)
+                    from _ in Token.EqualTo(FilterToken.Dot)
+                    from digitAfterDot in Token.EqualTo(FilterToken.Digit)
+                    select new ConstantValueExpression(double.Parse($"{sign}{digitBeforeDot}.{digitAfterDot.ToStringValue()}", CultureInfo.InvariantCulture))
+                )
+                .Try()
+                .Or(
+                    from sign in MinusOrPlusSign.Try()
+                    from value in Token.EqualTo(FilterToken.Digit).Apply(Numerics.NaturalUInt64)
+                    from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "d")
+                    select new ConstantValueExpression(double.Parse($"{sign}{value}", CultureInfo.InvariantCulture))
+                )
+
+
+            ;
+
+        private static TokenListParser<FilterToken, ConstantValueExpression> IntegerOrLong
+            => (from sign in MinusOrPlusSign.Try()
+                from number in Token.EqualTo(FilterToken.Digit).Apply(Numerics.IntegerInt64)
+                from hint in Token.EqualToValueIgnoreCase(FilterToken.Letter, "L")
+                select new ConstantValueExpression(long.Parse($"{sign}{number}", CultureInfo.InvariantCulture)))
+                .Try()
+                .Or(
+                    from sign in MinusOrPlusSign.Try()
+                    from number in Token.EqualTo(FilterToken.Digit).Apply(Numerics.IntegerInt32)
+                    select new ConstantValueExpression(int.Parse($"{sign}{number}", CultureInfo.InvariantCulture))
+                )
+            ;
+
 
         /// <summary>
         /// Parser for many <see cref="Criterion"/> separated by <c>&amp;</c>.
