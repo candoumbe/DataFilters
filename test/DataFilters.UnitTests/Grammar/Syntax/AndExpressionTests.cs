@@ -7,6 +7,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using FluentAssertions;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -116,20 +117,20 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new AndExpression(new ConstantValueExpression("val"), new ConstantValueExpression("val")),
-                    new ConstantValueExpression("val")
+                    new AndExpression(new StringValueExpression("val"), new StringValueExpression("val")),
+                    new StringValueExpression("val")
                 };
 
                 yield return new object[]
                 {
-                    new AndExpression(new ConstantValueExpression("val"), new OrExpression(new ConstantValueExpression("val"), new ConstantValueExpression("val"))),
-                    new ConstantValueExpression("val")
+                    new AndExpression(new StringValueExpression("val"), new OrExpression(new StringValueExpression("val"), new StringValueExpression("val"))),
+                    new StringValueExpression("val")
                 };
 
                 yield return new object[]
                 {
-                    new AndExpression(new OrExpression(new ConstantValueExpression("val"), new ConstantValueExpression("val")), new ConstantValueExpression("val")),
-                    new ConstantValueExpression("val")
+                    new AndExpression(new OrExpression(new StringValueExpression("val"), new StringValueExpression("val")), new StringValueExpression("val")),
+                    new StringValueExpression("val")
                 };
             }
         }
@@ -165,7 +166,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public Property Given_AndExpression_instance_one_oneU002EIsEquivalentTo_one_should_return_true(AndExpression and)
             => and.IsEquivalentTo(and).ToProperty();
 
-
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property An_AndExpression_instance_should_be_equivalent_to_itself(AndExpression andExpression)
             => andExpression.IsEquivalentTo(andExpression).ToProperty();
@@ -199,18 +199,75 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public Property Given_AndExpression_instance_where_instanceU002ELeft_is_equivalent_to_instanceU002ERight_Simplify_should_return_the_expression_with_the_lowest_Complexity(FilterExpression expression, PositiveInt count)
         {
             // Arrange
-            OneOfExpression oneOfExpression = new(Enumerable.Repeat(expression, count.Item)
+            OneOfExpression oneOfExpression = new(Enumerable.Repeat(expression, count.Item + 1) // if count == 1
                                                             .ToArray());
+
+            _outputHelper.WriteLine($"{nameof(oneOfExpression)} : '{oneOfExpression.EscapedParseableString}'");
+            _outputHelper.WriteLine($"{nameof(oneOfExpression.Complexity)} : {oneOfExpression.Complexity}");
 
             AndExpression and = new(oneOfExpression, expression);
 
             // Act
             FilterExpression actual = and.Simplify();
+            bool isEquivalent = actual.IsEquivalentTo(oneOfExpression);
 
             // Assert
-            return (actual.Complexity <= expression.Complexity)
-                .And(actual.Complexity < oneOfExpression.Complexity).When(count.Item > 1)
+            _outputHelper.WriteLine($"actual : {actual.EscapedParseableString} (Complexity : {actual.Complexity})");
+            _outputHelper.WriteLine($"actual is equivalent to expression : {isEquivalent})");
+
+            return (actual.Complexity < oneOfExpression.Complexity)
                 .And(actual.IsEquivalentTo(expression));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_is_AndExpression_instance_and_right_is_not_null_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<AndExpression> left, NonNull<FilterExpression> right)
+        {
+            // Act
+            AndExpression and = new (left.Item, right.Item);
+
+            // Assert
+            and.Left.Should()
+                    .BeOfType<GroupExpression>($"Left instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(left.Item).Should()
+                    .BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_is_OrExpression_instance_and_right_is_not_null_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<OrExpression> left, NonNull<FilterExpression> right)
+        {
+            // Act
+            AndExpression and = new (left.Item, right.Item);
+
+            // Assert
+            and.Left.Should()
+                    .BeOfType<GroupExpression>($"Left instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(left.Item).Should()
+                    .BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_is_not_null_and_right_is_AndExpression_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<AndExpression> right, NonNull<FilterExpression> left)
+        {
+            // Act
+            AndExpression and = new(left.Item, right.Item);
+
+            // Assert
+            and.Right.Should()
+                    .BeOfType<GroupExpression>($"Right instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(right.Item).Should().BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_right_is_not_null_and_right_is_OrExpression_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<OrExpression> right, NonNull<FilterExpression> left)
+        {
+            // Act
+            AndExpression and = new(left.Item, right.Item);
+
+            // Assert
+            and.Right.Should()
+                    .BeOfType<GroupExpression>($"Right instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(right.Item).Should()
+                    .BeTrue("Wrapping should not change the meaning of resulting expression");
         }
     }
 }

@@ -20,59 +20,75 @@
         /// The <c>_</c> character
         /// </summary>
         public const char Underscore = '_';
+
         /// <summary>
         /// The <c>*</c> character
         /// </summary>
         public const char Asterisk = '*';
+
         /// <summary>
         /// The <c>=</c> character
         /// </summary>
         public const char EqualSign = '=';
+
         /// <summary>
         /// The <c>(</c> character
         /// </summary>
         public const char LeftParenthesis = '(';
+
         /// <summary>
         /// The <c>)</c> character
         /// </summary>
         public const char RightParenthesis = ')';
+
         /// <summary>
         /// The <c>[</c> character
         /// </summary>
         public const char LeftSquareBracket = '[';
+
         /// <summary>
         /// The <c>]</c> character
         /// </summary>
         public const char RightSquareBracket = ']';
+
         /// <summary>
         /// The <c>-</c> character
         /// </summary>
         public const char Hyphen = '-';
+
         /// <summary>
         /// The <c>\</c> character
         /// </summary>
         public const char BackSlash = '\\';
+
         /// <summary>
         /// The <c>|</c> character
         /// </summary>
         public const char Pipe = '|';
+
         /// <summary>
         /// The <c>,</c> character
         /// </summary>
         public const char Comma = ',';
+
         /// <summary>
         /// The <c>!</c> character
         /// </summary>
         public const char Bang = '!';
+
         /// <summary>
         /// The <c>"</c> character
         /// </summary>
         public const char DoubleQuote = '"';
+        /// <summary>
+        /// The <c>&#38;</c> character
+        /// </summary>
+        public const char Ampersand = '&';
 
         /// <summary>
         /// List of characters that have a special meaning and should be escaped
         /// </summary>
-        public static char[] SpecialCharacters => new[]
+        public static readonly char[] SpecialCharacters =
         {
             Asterisk,
             EqualSign,
@@ -83,7 +99,13 @@
             BackSlash,
             Pipe,
             Comma,
-            Bang
+            Bang,
+            DoubleQuote,
+            Ampersand,
+            ':',
+            '-',
+            '.',
+            ' '
         };
 
         ///<inheritdoc/>
@@ -105,15 +127,8 @@
                         next = next.Remainder.ConsumeChar();
                         break;
                     case char c when char.IsDigit(c):
-                        {
-                            TextSpan numberStart = next.Location;
-                            while (next.HasValue && char.IsDigit(next.Value))
-                            {
-                                next = next.Remainder.ConsumeChar();
-                            }
-
-                            yield return Result.Value(Digit, numberStart, next.Location);
-                        }
+                        yield return Result.Value(Digit, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
                         break;
                     case Underscore:
                         yield return Result.Value(FilterToken.Underscore, next.Location, next.Remainder);
@@ -136,7 +151,7 @@
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '!':
-                        yield return Result.Value(Not, next.Location, next.Remainder);
+                        yield return Result.Value(FilterToken.Bang, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case LeftSquareBracket:
@@ -165,6 +180,10 @@
                         break;
                     case ':':
                         yield return Result.Value(Colon, next.Location, next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case '&':
+                        yield return Result.Value(FilterToken.Ampersand, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '"':

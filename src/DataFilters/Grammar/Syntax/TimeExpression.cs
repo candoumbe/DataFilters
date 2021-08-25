@@ -28,23 +28,14 @@
         public int Milliseconds { get; }
 
         /// <summary>
-        /// Offset with the UTC.
-        /// </summary>
-        public TimeOffset Offset { get; }
-
-        /// <summary>
         /// Builds a new <see cref="TimeExpression"/> instance.
         /// </summary>
-        /// <remarks>
-        /// A time expression can optionally specify an <paramref name="offset"/> with the UTC time
-        /// </remarks>
         /// <param name="hours"></param>
         /// <param name="minutes"></param>
         /// <param name="seconds"></param>
         /// <param name="milliseconds"></param>
-        /// <param name="offset"></param>
         /// <exception cref="ArgumentOutOfRangeException">either <paramref name="hours"/>, <paramref name="minutes"/>, <paramref name="seconds"/>, <paramref name="milliseconds"/> </exception>
-        public TimeExpression(int hours = 0, int minutes = 0, int seconds = 0, int milliseconds = 0, TimeOffset offset = null)
+        public TimeExpression(int hours = 0, int minutes = 0, int seconds = 0, int milliseconds = 0)
         {
             if (hours < 0)
             {
@@ -70,31 +61,44 @@
             Minutes = minutes;
             Seconds = seconds;
             Milliseconds = milliseconds;
-            Offset = offset;
         }
 
         ///<inheritdoc/>
         public bool Equals(TimeExpression other) => other is not null
-            && ((Hours, Minutes, Seconds, Milliseconds, Offset).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds, other.Offset))
-            || ((Offset == other.Offset) && (new TimeSpan(0, Hours, Minutes, Seconds, Milliseconds) == new TimeSpan(0, other.Hours, other.Minutes, other.Seconds, other.Milliseconds))));
+            && ((Hours, Minutes, Seconds, Milliseconds) == (other.Hours, other.Minutes, other.Seconds, other.Milliseconds)
+            || new TimeSpan(Hours, Minutes, Seconds).Add(TimeSpan.FromMilliseconds(Milliseconds)) == new TimeSpan(other.Hours, other.Minutes, other.Seconds).Add(TimeSpan.FromMilliseconds(other.Milliseconds)));
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as TimeExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            TimeExpression time => Equals(time),
+            DateTimeExpression { Date: null, Time: var time, Offset: null} => Equals(time),
+            _ => false
+        };
 
         ///<inheritdoc/>
-        public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds, Offset).GetHashCode();
+        public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds).GetHashCode();
 
         ///<inheritdoc/>
-        public override string ParseableString => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{(Milliseconds > 0 ? $".{Milliseconds}" : string.Empty)}{Offset}";
+        public override string EscapedParseableString => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{(Milliseconds > 0 ? $".{Milliseconds}" : string.Empty)}";
 
         ///<inheritdoc/>
-        public void Deconstruct(out int hours, out int minutes, out int seconds, out int milliseconds, out TimeOffset offset)
+        public void Deconstruct(out int hours, out int minutes, out int seconds, out int milliseconds)
         {
             hours = Hours;
             minutes = Minutes;
             seconds = Seconds;
             milliseconds = Milliseconds;
-            offset = Offset;
         }
+
+        /// <inheritdoc />
+        public static bool operator ==(TimeExpression left, TimeExpression right) => left switch
+        {
+            null => right is null,
+            _ => left.Equals(right)
+        };
+
+        /// <inheritdoc />
+        public static bool operator !=(TimeExpression left, TimeExpression right) => !(left == right);
     }
 }

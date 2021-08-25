@@ -74,9 +74,7 @@
                             JTokenType.Float => valueToken.Value<float>(),
                             JTokenType.Null => null,
                             null => null,
-                            _ => throw new ArgumentOutOfRangeException(nameof(valueToken.Type),
-                                                                       valueToken.Type,
-                                                                       $"Unexpected valueTokenType when dealing with operator {@operator}")
+                            _ => throw new NotSupportedException($"Unexpected valueTokenType {valueToken.Type} when dealing with operator {@operator}")
 
                         };
                     }

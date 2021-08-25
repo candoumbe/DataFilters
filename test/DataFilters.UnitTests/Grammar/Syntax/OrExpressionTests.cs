@@ -6,6 +6,7 @@
     using FluentAssertions;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -177,22 +178,20 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression)
+        public void Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression)
+        public void Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression)
+        public void Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(AsteriskExpression filterExpression)
+        public void Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(AsteriskExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
-
-
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_left_eq_right_eq_OrExpression_Simplify_should_returns_the_inner_OrExpression(OrExpression filterExpression)
@@ -208,14 +207,16 @@
                       .Be(filterExpression);
         }
 
-        private static Property Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(FilterExpression filterExpression)
+        private static void Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(FilterExpression expression)
         {
             // Arrange
-            OrExpression orExpression = new(filterExpression, filterExpression);
+            OrExpression filterExpression = new(expression, expression);
 
             // Act
-            return orExpression.IsEquivalentTo(filterExpression)
-                               .ToProperty();
+            bool actual = filterExpression.IsEquivalentTo(expression);
+
+            // Assert
+            actual.Should().Be(true);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -242,8 +243,8 @@
             {
                 yield return new object[]
                 {
-                    new OrExpression(new ConstantValueExpression(1), new OrExpression(new ConstantValueExpression(1), new ConstantValueExpression(1))),
-                    new ConstantValueExpression(1)
+                    new OrExpression(new NumericValueExpression("1"), new OrExpression(new NumericValueExpression("1"), new NumericValueExpression("1"))),
+                    new NumericValueExpression("1")
                 };
             }
         }
@@ -278,5 +279,56 @@
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_OrExpression_instance_one_oneU002EIsEquivalentTo_one_should_return_true(OrExpression or)
             => or.IsEquivalentTo(or).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_is_AndExpression_instance_and_right_is_not_null_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<AndExpression> left, NonNull<FilterExpression> right)
+        {
+            // Act
+            OrExpression or = new(left.Item, right.Item);
+
+            // Assert
+            or.Left.Should()
+                    .BeOfType<GroupExpression>($"Left instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(left.Item).Should()
+                    .BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_is_OrExpression_instance_and_right_is_not_null_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<OrExpression> left, NonNull<FilterExpression> right)
+        {
+            // Act
+            OrExpression or = new(left.Item, right.Item);
+
+            // Assert
+            or.Left.Should()
+                    .BeOfType<GroupExpression>($"Left instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(left.Item).Should()
+                    .BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_is_not_null_and_right_is_AndExpression_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<AndExpression> right, NonNull<FilterExpression> left)
+        {
+            // Act
+            OrExpression or = new(left.Item, right.Item);
+
+            // Assert
+            or.Right.Should()
+                    .BeOfType<GroupExpression>($"Right instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(right.Item).Should().BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_right_is_not_null_and_right_is_OrExpression_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<OrExpression> right, NonNull<FilterExpression> left)
+        {
+            // Act
+            OrExpression or = new(left.Item, right.Item);
+
+            // Assert
+            or.Right.Should()
+                    .BeOfType<GroupExpression>($"Right instance is a '{nameof(AndExpression)}'")
+                    .Which.IsEquivalentTo(right.Item).Should()
+                    .BeTrue("Wrapping should not change the meaning of resulting expression");
+        }
     }
 }

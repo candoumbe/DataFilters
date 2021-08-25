@@ -1,14 +1,11 @@
-﻿#if NETCOREAPP2_1
-using static Newtonsoft.Json.JsonConvert;
-#else
-#endif
-
-namespace DataFilters.UnitTests
+﻿namespace DataFilters.UnitTests
 {
     using FluentAssertions;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
+    using FsCheck.Experimental;
 
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Schema;
@@ -92,8 +89,7 @@ namespace DataFilters.UnitTests
                         && "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.FieldJsonPropertyName])
                         && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.OperatorJsonPropertyName])
                         && "Batman".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][0][Filter.ValueJsonPropertyName])
-                               &&
-                        "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
+                        && "Nickname".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.FieldJsonPropertyName])
                         && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
                         && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
@@ -315,15 +311,14 @@ namespace DataFilters.UnitTests
             Prop.ForAll<string, FilterOperator, object>((field, @operator, value) =>
             {
                 Lazy<Filter> filterCtor = new(() => new Filter(field, @operator, value));
-
+                Filter filter = null;
+                Action invokingCtor = () => filter = filterCtor.Value;
                 // Assertion
-                Prop.Throws<ArgumentOutOfRangeException, Filter>(filterCtor).When(field is not null && !validFieldNameRegex.IsMatch(field))
+                ((Action)(() => invokingCtor.Should().Throw<ArgumentOutOfRangeException>())).When(field is not null && !validFieldNameRegex.IsMatch(field))
                                                                                .Label($"'{field}' doesnt not match expected regex ")
                     //.Trivial(field is not null && !validFieldNameRegex.IsMatch(field))
                     .Or(() =>
                     {
-                        Filter filter = filterCtor.Value;
-
                         return filter.Field == field
                             && filter.Operator == @operator
                             && filter.Value is null;

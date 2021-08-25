@@ -5,7 +5,10 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
 
+    using FluentAssertions;
+
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using Xunit.Categories;
@@ -15,8 +18,12 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     {
         [Property]
         public Property Throws_ArgumentNullException_when_any_ctor_input_is_negative(int years, int months, int weeks, int days, int hours, int minutes, int seconds)
-            => Prop.Throws<ArgumentOutOfRangeException, DurationExpression>(new Lazy<DurationExpression>(() => new DurationExpression(years, months, weeks, days, hours, minutes, seconds)))
-                   .When(years < 0 || months < 0 || weeks < 0 || days < 0 || hours < 0 || minutes < 0 || seconds < 0);
+        {
+            Action invokingConstructor = () => new DurationExpression(years, months, weeks, days, hours, minutes, seconds);
+
+            return ((Action) (() => invokingConstructor.Should().ThrowExactly<ArgumentOutOfRangeException>()))
+                              .When(years < 0 || months < 0 || weeks < 0 || days < 0 || hours < 0 || minutes < 0 || seconds < 0);
+        }
 
         [Property]
         public Property Set_properties_accordingly(PositiveInt years, PositiveInt months, PositiveInt weeks, PositiveInt days, PositiveInt hours, PositiveInt minutes, PositiveInt seconds)

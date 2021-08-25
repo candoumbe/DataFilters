@@ -1,7 +1,10 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using System;
+    using DataFilters.Grammar.Parsing;
+using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
@@ -35,14 +38,31 @@
             }
             Value = value;
 
-            _lazyParseableString = new(() => {
-                string parseableString = Value;
-                if (parseableString.Any(chr => SpecialCharacters.Contains(chr)))
+            _lazyParseableString = new(() =>
+            {
+                // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
+                // Also we need an extra position for the final '*' that will be append in all cases
+                bool requireEscapingCharacters = Value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
+                StringBuilder parseableString;
+
+                if (requireEscapingCharacters)
                 {
-                    parseableString = $"*{string.Concat(Value.Select(chr => char.IsWhiteSpace(chr) || SpecialCharacters.Contains(chr) ? $@"\{chr}" : $"{chr}"))}";
+                    parseableString = new((Value.Length * 2) + 1);
+                    foreach (char chr in Value)
+                    {
+                        if (SpecialCharacters.Contains(chr))
+                        {
+                            parseableString = parseableString.Append('\\');
+                        }
+                        parseableString = parseableString.Append(chr);
+                    }
+                }
+                else
+                {
+                    parseableString = new(Value, Value.Length + 1);
                 }
 
-                return parseableString;
+                return parseableString.Insert(0, '*').ToString();
             });
         }
 
@@ -56,7 +76,10 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ParseableString => $"*{Value}";
+        public override string EscapedParseableString => _lazyParseableString.Value;
+
+        ///<inheritdoc/>
+        public override string OriginalString => $"*{Value}";
 
         ///<inheritdoc/>
         public override double Complexity => 1.5;

@@ -77,14 +77,14 @@
                 }
                 else if (other is OneOfExpression oneOf)
                 {
-                    equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<ConstantValueExpression>().Count())
-                        && oneOf.Values.All(x => x is ConstantValueExpression constant && constant.Value.Value is string)
+                    equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<StringValueExpression>().Count())
+                        && oneOf.Values.All(x => x is StringValueExpression constant)
                         && Values.All(value => value switch
                         {
-                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Value.Equals(chr.ToString()))),
+                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
                             RangeBracketValue range => Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                                  .Select(ascii => (char)ascii)
-                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Value.Equals(chr.ToString()))),
+                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
                             _ => throw new NotSupportedException("Unsupported value")
                         });
                 }
@@ -94,6 +94,6 @@
         }
 
         ///<inheritdoc/>
-        public override string ParseableString => $"[{string.Join(",", Values)}]";
+        public override string EscapedParseableString => $"[{string.Join(",", Values)}]";
     }
 }

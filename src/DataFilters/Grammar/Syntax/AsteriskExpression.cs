@@ -18,6 +18,6 @@
         public override int GetHashCode() => 1;
 
         ///<inheritdoc/>
-        public override string ParseableString => "*";
+        public override string EscapedParseableString => "*";
     }
 }

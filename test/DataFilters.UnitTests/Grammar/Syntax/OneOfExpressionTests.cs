@@ -14,6 +14,7 @@
 
     using Xunit;
     using Xunit.Abstractions;
+    using FsCheck.Fluent;
 
     public class OneOfExpressionTests
     {
@@ -59,24 +60,24 @@
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop2"), new ConstantValueExpression("prop1")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop2"), new StringValueExpression("prop1")),
                     false,
                     "comparing two different instances with same data but the order does not matter"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop3")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
                 };
@@ -115,48 +116,48 @@
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop2"), new ConstantValueExpression("prop1")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop2"), new StringValueExpression("prop1")),
                     true,
                     "comparing two different instances with same data but the order does not matter"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop3")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2"), new ConstantValueExpression("prop3")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2"), new StringValueExpression("prop3")),
                     false,
                     "the other instance contains all data of the first instance and one item that is not in the current instance"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds duplicates is equivalent a {nameof(OneOfExpression)} with no duplicate"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OrExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to an {nameof(OrExpression)} with the same values"
                 };
@@ -176,7 +177,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression, PositiveInt n)
+        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(StringValueExpression filterExpression, PositiveInt n)
             => Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -233,20 +234,20 @@
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val2")),
-                    new OrExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val2"))
+                    new OneOfExpression(new StringValueExpression("val1"), new StringValueExpression("val2")),
+                    new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val2"))
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val1")),
-                    new ConstantValueExpression("val1")
+                    new OneOfExpression(new StringValueExpression("val1"), new StringValueExpression("val1")),
+                    new StringValueExpression("val1")
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("val1"), new OrExpression(new ConstantValueExpression("val1"), new ConstantValueExpression("val1"))),
-                    new ConstantValueExpression("val1")
+                    new OneOfExpression(new StringValueExpression("val1"), new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val1"))),
+                    new StringValueExpression("val1")
                 };
             }
         }
@@ -263,16 +264,17 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_requivalent_to_the_inner_expression(FilterExpression expression)
+        public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_requivalent_to_the_inner_expression(NonNull<FilterExpression> expression)
         {
             // Arrange
-            OneOfExpression oneOf = new(expression);
+            _outputHelper.WriteLine($"input : {expression.Item}");
+            OneOfExpression oneOf = new(expression.Item);
 
             // Act
             FilterExpression simplified = oneOf.Simplify();
 
             // Assert
-            simplified.IsEquivalentTo(expression)
+            simplified.IsEquivalentTo(expression.Item)
                       .Should()
                       .BeTrue();
 

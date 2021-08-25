@@ -6,6 +6,7 @@
     using FluentAssertions;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -96,7 +97,7 @@
 
             OneOfExpression oneOf = new (Enumerable.Range(rangeBracketValue.Item.Start,
                                                           rangeBracketValue.Item.End - rangeBracketValue.Item.Start + 1)
-                                                   .Select(ascii => new ConstantValueExpression(((char)ascii).ToString()))
+                                                   .Select(ascii => new StringValueExpression(((char)ascii).ToString()))
                                                    .ToArray());
 
             // Act

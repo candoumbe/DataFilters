@@ -3,7 +3,10 @@
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
 
+    using FluentAssertions;
+
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -35,6 +38,14 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included) => Prop.Throws<ArgumentNullException, BoundaryExpression>(new Lazy<BoundaryExpression>(() => new BoundaryExpression(null, included)));
+        public void Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included)
+        {
+            // Act
+            Action buildInstanceWithNullExpression = () => new BoundaryExpression(null, included);
+
+            // Assert
+            buildInstanceWithNullExpression.Should()
+                                           .ThrowExactly<ArgumentNullException>();
+        }
     }
 }

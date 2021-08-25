@@ -8,12 +8,16 @@
 
     using DataFilters.Grammar.Parsing;
     using DataFilters.Grammar.Syntax;
+
     using Superpower;
     using Superpower.Model;
+
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Reflection;
+
     using static DataFilters.FilterOperator;
+
     using DataFilters.Casing;
 
 #if STRING_SEGMENT
@@ -21,10 +25,13 @@
 #endif
 
     using static DataFilters.SortDirection;
+
+    using System.Globalization;
+    using OneOf;
+
 #if NETSTANDARD2_0 || NETSTANDARD2_1
     using System.Runtime.InteropServices;
 #endif
-
     /// <summary>
     /// String extensions methods
     /// </summary>
@@ -150,25 +157,29 @@
         {
             string localQueryString = queryString;
 #endif
-            static IFilter ConvertExpressionToFilter(FilterExpression expression, string propertyName, TypeConverter tc)
+            static IFilter ConvertExpressionToFilter(PropertyInfo propInfo, FilterExpression expression, TypeConverter tc)
             {
                 IFilter filter = Filter.True;
                 switch (expression)
                 {
                     case ConstantValueExpression constant:
-                        filter = new Filter(propertyName, EqualTo, tc.ConvertFrom(constant.Value.Value));
+                        string constantValue = constant.Value;
+
+                        filter = new Filter(propInfo.Name,
+                                            EqualTo,
+                                            tc.ConvertFromInvariantString(constantValue));
                         break;
                     case StartsWithExpression startsWith:
-                        filter = new Filter(propertyName, StartsWith, startsWith.Value);
+                        filter = new Filter(propInfo.Name, StartsWith, startsWith.Value);
                         break;
                     case EndsWithExpression endsWith:
-                        filter = new Filter(propertyName, EndsWith, endsWith.Value);
+                        filter = new Filter(propInfo.Name, EndsWith, endsWith.Value);
                         break;
                     case ContainsExpression endsWith:
-                        filter = new Filter(propertyName, Contains, endsWith.Value);
+                        filter = new Filter(propInfo.Name, Contains, endsWith.Value);
                         break;
                     case NotExpression not:
-                        filter = ConvertExpressionToFilter(not.Expression, propertyName, tc).Negate();
+                        filter = ConvertExpressionToFilter(propInfo, not.Expression, tc).Negate();
                         break;
                     case OrExpression orExpression:
                         filter = new MultiFilter
@@ -176,8 +187,8 @@
                             Logic = FilterLogic.Or,
                             Filters = new IFilter[]
                             {
-                                ConvertExpressionToFilter(orExpression.Left, propertyName, tc),
-                                ConvertExpressionToFilter(orExpression.Right, propertyName, tc)
+                                ConvertExpressionToFilter(propInfo, orExpression.Left, tc),
+                                ConvertExpressionToFilter(propInfo, orExpression.Right, tc)
                             }
                         };
                         break;
@@ -187,8 +198,8 @@
                             Logic = FilterLogic.And,
                             Filters = new IFilter[]
                             {
-                                ConvertExpressionToFilter(andExpression.Left, propertyName, tc),
-                                ConvertExpressionToFilter(andExpression.Right, propertyName, tc)
+                                ConvertExpressionToFilter(propInfo, andExpression.Left, tc),
+                                ConvertExpressionToFilter(propInfo, andExpression.Right, tc)
                             }
                         };
                         break;
@@ -200,13 +211,13 @@
                         };
                         break;
                     case GroupExpression group:
-                        filter = ConvertExpressionToFilter(group.Expression, propertyName, tc);
+                        filter = ConvertExpressionToFilter(propInfo, group.Expression, tc);
                         break;
                     case OneOfExpression oneOf:
                         FilterExpression[] possibleValues = oneOf.Values.ToArray();
                         if (oneOf.Values.Exactly(1))
                         {
-                            filter = ConvertExpressionToFilter(possibleValues[0], propertyName, tc);
+                            filter = ConvertExpressionToFilter(propInfo, possibleValues[0], tc);
                         }
                         else
                         {
@@ -214,7 +225,7 @@
 
                             foreach (FilterExpression item in possibleValues)
                             {
-                                filters.Add(ConvertExpressionToFilter(item, propertyName, tc));
+                                filters.Add(ConvertExpressionToFilter(propInfo, item, tc));
                             }
                             filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
                         }
@@ -224,15 +235,16 @@
                         static (ConstantValueExpression constantExpression, bool included) ConvertBounderyExpressionToConstantExpression(BoundaryExpression input)
                             => input?.Expression switch
                             {
-                                ConstantValueExpression ce => (ce, input.Included),
-                                DateTimeExpression { Time: null } dateTime => (new ConstantValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"), input.Included),
-                                DateTimeExpression { Date: null } dateTime => (new ConstantValueExpression($"{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
-                                DateTimeExpression { Date: var date, Time: { Offset: null } } dateTime => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}"), input.Included),
-                                DateTimeExpression { Date: var date, Time: { Offset: var offset } } dateTime => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}{offset}"), input.Included),
-                                DateExpression date => (new ConstantValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
-                                TimeExpression time => (new ConstantValueExpression($"{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
+                                StringValueExpression ce => (ce, input.Included),
+                                NumericValueExpression numeric => (new(numeric.Value), input.Included),
+                                DateTimeExpression { Date: not null, Time: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"), input.Included),
+                                DateExpression date => (new StringValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
+                                DateTimeExpression { Date: null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"0001-01-01T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
+                                TimeExpression time => (new StringValueExpression($"0001-01-01T{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
+                                DateTimeExpression { Date: not null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"), input.Included),
+                                DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (new StringValueExpression(dateTime.EscapedParseableString), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
-                                _ => throw new NotSupportedException($"Unsupported boundary type {input.GetType()}")
+                                _ => throw new NotSupportedException($"Unsupported boundary type {input.Expression.GetType()}")
                             };
 
                         (ConstantValueExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);
@@ -241,25 +253,33 @@
                         FilterOperator minOperator = min.included ? GreaterThanOrEqual : GreaterThan;
                         FilterOperator maxOperator = max.included ? LessThanOrEqualTo : LessThan;
 
-                        if (min != default && max != default)
+                        if (min.constantExpression?.Value != default && max.constantExpression?.Value != default)
                         {
+                            object minValue = min.constantExpression.Value;
+                            object maxValue = max.constantExpression.Value;
                             filter = new MultiFilter
                             {
                                 Logic = FilterLogic.And,
                                 Filters = new IFilter[]
                                 {
-                                    new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value.Value)),
-                                    new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value.Value))
+                                    new Filter(propInfo.Name,
+                                               minOperator,
+                                               tc.ConvertFrom(minValue)),
+                                    new Filter(propInfo.Name,
+                                               maxOperator,
+                                               tc.ConvertFrom(maxValue))
                                 }
                             };
                         }
-                        else if (min != default)
+                        else if (min.constantExpression?.Value != default)
                         {
-                            filter = new Filter(propertyName, minOperator, tc.ConvertFrom(min.constantExpression.Value.Value));
+                            object minValue = min.constantExpression.Value;
+                            filter = new Filter(propInfo.Name, minOperator, tc.ConvertFrom(minValue));
                         }
                         else
                         {
-                            filter = new Filter(propertyName, maxOperator, tc.ConvertFrom(max.constantExpression.Value.Value));
+                            object maxValue = max.constantExpression.Value;
+                            filter = new Filter(propInfo.Name, maxOperator, tc.ConvertFrom(maxValue));
                         }
                         break;
                     default:
@@ -294,7 +314,7 @@
                     if (pi is not null)
                     {
                         TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                        filter = ConvertExpressionToFilter(expression, pi.Name, tc);
+                        filter = ConvertExpressionToFilter(pi, expression, tc);
                     }
                 }
                 else
@@ -309,7 +329,7 @@
                         if (pi is not null)
                         {
                             TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                            filters.Add(ConvertExpressionToFilter(expression, property.Name, tc));
+                            filters.Add(ConvertExpressionToFilter(pi, expression, tc));
                         }
                     }
 

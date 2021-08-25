@@ -2,19 +2,17 @@
 {
 
     using System;
-    using System.Globalization;
-
-    using OneOf;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-    public sealed class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression
+    public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IBoundaryExpression, IEqualityComparer<ConstantValueExpression>
     {
         /// <summary>
         /// Gets the "raw" value hold by the current instance.
         /// </summary>
-        public OneOf<string, DateTime, DateTimeOffset, Guid, double, float, int, long, bool, char> Value { get; }
+        public string Value { get; }
 
         private readonly Lazy<string> _lazyParseableString;
 
@@ -25,57 +23,47 @@
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported
         /// </exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
-        public ConstantValueExpression(OneOf<string, DateTime, DateTimeOffset, Guid, double, float, int, long, bool, char> value)
+        protected ConstantValueExpression(string value)
         {
-
-            if (value.Value is null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
 
-            if (value.Value is string stringInput && string.IsNullOrEmpty(stringInput))
+            if (value.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }
 
             Value = value;
-
-            _lazyParseableString = new(() => Value.Match(
-                (string stringValue) => stringValue,
-                (DateTime dateTimeValue) => dateTimeValue.ToString("s", CultureInfo.InvariantCulture),
-                (DateTimeOffset dateTimeOffsetValue) => dateTimeOffsetValue.ToString("s", CultureInfo.InvariantCulture),
-                (Guid guidValue) => guidValue.ToString("x"),
-                (double doubleValue) => $"{doubleValue.ToString("G17", CultureInfo.InvariantCulture)}D",
-                (float floatValue) => $"{floatValue.ToString("G9", CultureInfo.InvariantCulture)}F",
-                (int intValue) => intValue.ToString(CultureInfo.InvariantCulture),
-                (long longValue) => $"{longValue.ToString(CultureInfo.InvariantCulture)}L",
-                (bool boolValue) => boolValue.ToString(),
-                (char chrValue) => chrValue.ToString()
-            ));
         }
 
         ///<inheritdoc/>
-        public bool Equals(ConstantValueExpression other) => Equals(Value.Value, other?.Value.Value);
+        public bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as ConstantValueExpression);
 
         ///<inheritdoc/>
-        public override int GetHashCode() => Value.Value.GetHashCode();
+        public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => new { Type = nameof(ConstantValueExpression), Value.Value, ValueType = Value.Value.GetType().Name, Complexity, ParseableString }
-#if NETSTANDARD1_3
-        .Jsonify()
-#elif NETSTANDARD2_0_OR_GREATER || NET5_0_OR_GREATER
-        .Jsonify(new() { IgnoreNullValues = true })
-#endif
-            ;
+        public bool Equals(ConstantValueExpression x, ConstantValueExpression y)
+            => x == y;
+
+        ///<inheritdoc/>
+        public int GetHashCode(ConstantValueExpression obj)
+            => obj?.GetHashCode() ?? 0;
 
         ///<inheritdoc/>
         public override double Complexity => 1;
 
         ///<inheritdoc/>
-        public override string ParseableString => _lazyParseableString.Value;
+        public static bool operator ==(ConstantValueExpression left, ConstantValueExpression right)
+            => left?.Equals(right) ?? false;
+
+        ///<inheritdoc/>
+        public static bool operator !=(ConstantValueExpression left, ConstantValueExpression right)
+            => !(left == right);
     }
 }

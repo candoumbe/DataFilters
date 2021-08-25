@@ -25,9 +25,12 @@
         public virtual double Complexity => 1;
 
         ///<inheritdoc/>
-        public override string ToString() => ParseableString;
+        public override string ToString() => OriginalString;
 
         ///<inheritdoc/>
-        public abstract string ParseableString { get; }
+        public abstract string EscapedParseableString { get; }
+
+        ///<inheritdoc/>
+        public virtual string OriginalString => EscapedParseableString;
     }
 }
