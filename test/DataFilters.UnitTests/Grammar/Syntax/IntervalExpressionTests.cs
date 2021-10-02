@@ -8,6 +8,7 @@
     using FluentAssertions.Extensions;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -69,12 +70,12 @@
             get
             {
                 yield return new object[] {
-                    new BoundaryExpression(new DateExpression(), included: true), new BoundaryExpression(new ConstantValueExpression("10"), included: true),
+                    new BoundaryExpression(new DateExpression(), included: true), new BoundaryExpression(new NumericValueExpression("10"), included: true),
                     $"min holds {nameof(DateExpression)} and max holds {nameof(ConstantValueExpression)}"
                 };
 
                 yield return new object[] {
-                    new BoundaryExpression(new ConstantValueExpression("10"), included : true), new BoundaryExpression(new DateExpression(), included : true),
+                    new BoundaryExpression(new NumericValueExpression("10"), included : true), new BoundaryExpression(new DateExpression(), included : true),
                     $"min holds {nameof(ConstantValueExpression)} and max holds {nameof(DateExpression)}"
                 };
 
@@ -181,23 +182,23 @@
             {
                 yield return new object[]
                 {
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
+                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
                     true,
                     $"comparing two {nameof(IntervalExpression)} instances with same min and max"
                 };
 
                 yield return new object[]
                 {
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : false)),
+                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : false)),
                     false,
                     $"comparing two {nameof(IntervalExpression)} instances with same min and max but not same {nameof(BoundaryExpression.Included)}"
                 };
 
                 yield return new object[]
                 {
-                    new IntervalExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
+                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
                     null,
                     false,
                     "comparing to null"
@@ -205,8 +206,8 @@
 
                 yield return new object[]
                 {
-                    new IntervalExpression(max: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
-                    new IntervalExpression(max: new BoundaryExpression(new ConstantValueExpression("10"), included : true)),
+                    new IntervalExpression(max: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                    new IntervalExpression(max: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
                     true,
                     $"comparing two {nameof(IntervalExpression)} instances with same min and max"
                 };
@@ -220,8 +221,8 @@
                 };
 
                 {
-                    IntervalExpression interval = new(min: new BoundaryExpression(new ConstantValueExpression("2012-10-19T15:03:45Z"), included: false),
-                                                max: new BoundaryExpression(new ConstantValueExpression("2012-10-19T15:30:45+01:00"), included: false));
+                    IntervalExpression interval = new(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15,03, 45), OffsetExpression.Zero), included: false),
+                                                max: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15, 03, 45), new (hours: 1)), included: false));
                     yield return new object[]
                     {
                         interval,
@@ -260,51 +261,42 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Ctor_should_converts_Min_DateTimeExpression_to_DateExpression_when_TimeExpression_is_not_provided(DateExpression date, bool included)
+        public void Ctor_should_converts_Min_DateTimeExpression_to_DateExpression_when_TimeExpression_is_not_provided(DateExpression date, bool included)
         {
             // Arrange
-            Lazy<IntervalExpression> lazyRangeExpression = new(() =>
-            {
-                DateTimeExpression dateTimeExpression = new(date);
+            DateTimeExpression dateTimeExpression = new(date);
+            BoundaryExpression minBoundary = new(dateTimeExpression, included);
 
-                return new(min: new BoundaryExpression(dateTimeExpression, included));
-            });
+            // Act
+            IntervalExpression sut = new(minBoundary);
 
-            return Prop.Throws<ArgumentOutOfRangeException, IntervalExpression>(lazyRangeExpression).When(date.Day < 0 || date.Month < 0 || date.Year < 0)
-                .Or(Prop.Throws<ArgumentNullException, IntervalExpression>(lazyRangeExpression).When(date is null))
-                .Or(lazyRangeExpression.Value.Min.Expression is DateExpression dateExpression && dateExpression.Equals(date));
+            // Assert
+            sut.Min.Expression.Should().Be(date);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Ctor_should_converts_Min_DateTimeExpression_to_TimeExpression_when_DateExpression_is_not_provided(TimeExpression time, bool included)
+        public Property Given_Min_boundary_is_a_DateTimeExpression_with_only_time_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_TimeExpression(NonNull<TimeExpression> time, bool included)
         {
             // Arrange
-            Lazy<IntervalExpression> lazyRangeExpression = new(() =>
-            {
-                DateTimeExpression dateTimeExpression = new(time);
+            DateTimeExpression dateTimeExpression = new(time.Item);
 
-                return new(min: new BoundaryExpression(dateTimeExpression, included));
-            });
+            // Act
+            IntervalExpression interval = new(min: new BoundaryExpression(dateTimeExpression, included));
 
-            return Prop.Throws<ArgumentOutOfRangeException, IntervalExpression>(lazyRangeExpression).When(time.Hours < 0 || time.Minutes < 0 || time.Seconds < 0)
-                .Or(Prop.Throws<ArgumentNullException, IntervalExpression>(lazyRangeExpression).When(time is null))
-                .Or(lazyRangeExpression.Value.Min.Expression is TimeExpression timeExpression && timeExpression.Equals(time));
+            return (interval.Min.Expression is TimeExpression timeExpression && timeExpression.Equals(time.Item)).ToProperty();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Ctor_should_converts_Max_DateTimeExpression_to_DateExpression_when_TimeExpression_is_not_provided(DateExpression date, bool included)
+        public Property Given_Min_boundary_is_a_DateTimeExpression_with_only_date_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_DateExpression(NonNull<DateExpression> date, bool included)
         {
             // Arrange
-            Lazy<IntervalExpression> lazyRangeExpression = new(() =>
-            {
-                DateTimeExpression dateTimeExpression = new(date);
+            // Arrange
+            DateTimeExpression dateTimeExpression = new(date.Item);
 
-                return new(max: new BoundaryExpression(dateTimeExpression, included));
-            });
+            // Act
+            IntervalExpression interval = new(min: new BoundaryExpression(dateTimeExpression, included));
 
-            return Prop.Throws<ArgumentOutOfRangeException, IntervalExpression>(lazyRangeExpression).When(date.Day < 0 || date.Month < 0 || date.Year < 0)
-                    .Or(Prop.Throws<ArgumentNullException, IntervalExpression>(lazyRangeExpression).When(date is null))
-                    .Or(lazyRangeExpression.Value.Max.Expression is DateExpression dateExpression && dateExpression.Equals(date));
+            return (interval.Min.Expression is DateExpression dateExpression && dateExpression.Equals(date.Item)).ToProperty();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -369,15 +361,15 @@
             {
                 yield return new object[]
                 {
-                    new IntervalExpression(new (new ConstantValueExpression(10), true), new (new ConstantValueExpression(10), true)),
-                    new ConstantValueExpression(10),
+                    new IntervalExpression(new (new NumericValueExpression("10"), true), new (new NumericValueExpression("10"), true)),
+                    new NumericValueExpression("10"),
                     "Lower and upper bound are equal"
                 };
 
                 yield return new object[]
                 {
-                    new IntervalExpression(new (new ConstantValueExpression(10), true), new (new ConstantValueExpression(12), true)),
-                    new IntervalExpression(new (new ConstantValueExpression(10), true), new (new ConstantValueExpression(12), true)),
+                    new IntervalExpression(new (new NumericValueExpression("10"), true), new (new NumericValueExpression("12"), true)),
+                    new IntervalExpression(new (new NumericValueExpression("10"), true), new (new NumericValueExpression("12"), true)),
                     "Lower and upper bound are not equals and not equivalent"
                 };
 
@@ -416,7 +408,6 @@
             // Assert
             actual.Should()
                   .Be(expected);
-
         }
     }
 }

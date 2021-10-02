@@ -11,7 +11,7 @@
     /// </summary>
     public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>, ISimplifiable
     {
-        private static readonly ArrayEqualityComparer<FilterExpression> equalityComparer = new();
+        private static readonly ArrayEqualityComparer<FilterExpression> EqualityComparer = new();
 
         /// <summary>
         /// Collection of <see cref="FilterExpression"/> that the current instance holds.
@@ -19,6 +19,8 @@
         public IReadOnlyCollection<FilterExpression> Values => _values.ToList().AsReadOnly();
 
         private readonly FilterExpression[] _values;
+
+        private readonly Lazy<string> _lazyParseableString;
 
         /// <summary>
         /// Builds a new <see cref="OneOfExpression"/> instance.
@@ -40,6 +42,8 @@
 
             _values = values.Where(x => x is not null)
                             .ToArray();
+
+            _lazyParseableString = new (() => string.Concat(Values.Select(v => v.EscapedParseableString)));
         }
 
         /// <inheritdoc/>
@@ -52,7 +56,7 @@
             }
             else if (other is OneOfExpression oneOfExpression)
             {
-                if (equalityComparer.Equals(oneOfExpression._values.ToArray(), _values.ToArray()))
+                if (EqualityComparer.Equals(oneOfExpression._values.ToArray(), _values.ToArray()))
                 {
                     equivalent = true;
                 }
@@ -78,13 +82,13 @@
         }
 
         ///<inheritdoc/>
-        public bool Equals(OneOfExpression other) => other is not null && equalityComparer.Equals(_values, other._values);
+        public bool Equals(OneOfExpression other) => other is not null && EqualityComparer.Equals(_values, other._values);
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OneOfExpression);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => equalityComparer.GetHashCode(_values);
+        public override int GetHashCode() => EqualityComparer.GetHashCode(_values);
 
         ///<inheritdoc/>
         public static bool operator ==(OneOfExpression left, OneOfExpression right) => left?.Equals(right) ?? false;
@@ -154,6 +158,6 @@
         }
 
         ///<inheritdoc/>
-        public override string ParseableString => string.Join("", Values.Select(v => v.ParseableString));
+        public override string EscapedParseableString =>_lazyParseableString.Value;
     }
 }

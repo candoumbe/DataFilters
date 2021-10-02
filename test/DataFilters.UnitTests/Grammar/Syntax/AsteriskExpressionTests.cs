@@ -11,6 +11,7 @@
     using Xunit.Abstractions;
     using Xunit.Categories;
     using DataFilters.UnitTests.Helpers;
+    using FsCheck.Fluent;
 
     [UnitTest]
     [Feature(nameof(AsteriskExpression))]

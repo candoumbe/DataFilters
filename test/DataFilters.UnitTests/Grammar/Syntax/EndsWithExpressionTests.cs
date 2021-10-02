@@ -10,6 +10,7 @@
     using Xunit;
     using Xunit.Abstractions;
     using DataFilters.UnitTests.Helpers;
+    using FsCheck.Fluent;
 
     public class EndsWithExpressionTests
     {

@@ -13,7 +13,7 @@
     /// The <see cref="Complexity"/> value of a <see cref="GroupExpression"/> is equivalent to the complexity of its inner <see cref="Expression"/>.
     /// </para>
     /// </remarks>
-    public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>
+    public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>, ISimplifiable
     {
         /// <summary>
         /// Expression that the group is applied onto
@@ -37,15 +37,32 @@
         public override int GetHashCode() => Expression.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{GetType().Name} : Expression ({Expression.GetType().Name }) -> {Expression}";
+        public override string ToString() => $"{{GroupExpression " +
+            $"[Expression = {Expression.GetType().Name}, " +
+            $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
+            $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}'], " +
+            $"{nameof(EscapedParseableString)}='{EscapedParseableString}'}}";
 
         ///<inheritdoc/>
-        public override string ParseableString => $"({Expression.ParseableString})";
+        public override string EscapedParseableString => $"({Expression.EscapedParseableString})";
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
 
         ///<inheritdoc/>
-        public override bool IsEquivalentTo(FilterExpression other) => Expression.IsEquivalentTo(other);
+        public override bool IsEquivalentTo(FilterExpression other) => other switch
+        {
+            GroupExpression group => Expression.IsEquivalentTo(group.Expression),
+            _ => Expression.IsEquivalentTo(other)
+        };
+
+        ///<inheritdoc/>
+        public FilterExpression Simplify()
+            => Expression switch
+            {
+                ConstantValueExpression constant => constant,
+                ISimplifiable simplify => simplify.Simplify(),
+                _ => Expression
+            };
     }
 }

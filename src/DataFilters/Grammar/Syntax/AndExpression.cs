@@ -21,16 +21,31 @@
         public override double Complexity => Right.Complexity * Left.Complexity;
 
         /// <summary>
-        /// Builds a new <see cref="AndExpression"/> that combiens <paramref name="left"/> and <paramref name="right"/> using the logical
+        /// Builds a new <see cref="AndExpression"/> that combines <paramref name="left"/> and <paramref name="right"/> using the logical
         /// <c>AND</c> operator
         /// </summary>
+        /// <remarks>
+        /// <paramref name="left"/> and/or <paramref name="right"/> will be wrapped inside a <see cref="GroupExpression"/> when either is a 
+        /// <see cref="AndExpression"/> or a <see cref="OrExpression"/> instance.
+        /// </remarks>
         /// <param name="left">Left member</param>
         /// <param name="right">Right member</param>
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <c>null</c>.</exception>
         public AndExpression(FilterExpression left, FilterExpression right)
         {
-            Left = left ?? throw new ArgumentNullException(nameof(left));
-            Right = right ?? throw new ArgumentNullException(nameof(right));
+            Left = left switch
+            {
+                null => throw new ArgumentNullException(nameof(left)),
+                AndExpression or OrExpression => new GroupExpression(left),
+                _ => left
+            };
+
+            Right = right switch
+            {
+                null => throw new ArgumentNullException(nameof(right)),
+                AndExpression or OrExpression => new GroupExpression(right),
+                _ => right
+            };
         }
 
         ///<inheritdoc/>
@@ -41,9 +56,6 @@
 
         ///<inheritdoc/>
         public override int GetHashCode() => (Left, Right).GetHashCode();
-
-        ///<inheritdoc/>
-        public override string ToString() => new { Type = nameof(AndExpression), Left, Right, Complexity }.Jsonify();
 
         ///<inheritdoc/>
         public FilterExpression Simplify()
@@ -64,27 +76,16 @@
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
-        {
-            bool equivalent;
-            if (ReferenceEquals(this, other))
-            {
-                equivalent = true;
-            }
-            else
-            {
-                equivalent = other switch
+            => ReferenceEquals(this, other)
+                || other switch
                 {
                     AndExpression and => (Left.IsEquivalentTo(and.Left) && Right.IsEquivalentTo(and.Right)) || (Left.IsEquivalentTo(and.Right) && Right.IsEquivalentTo(and.Left)),
                     ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
                     ISimplifiable simplifiable => IsEquivalentTo(simplifiable.Simplify()),
                     _ => false
                 };
-            }
-
-            return equivalent;
-        }
 
         ///<inheritdoc/>
-        public override string ParseableString => $"{Left.ParseableString},{Right.ParseableString}";
+        public override string EscapedParseableString => $"{Left.EscapedParseableString},{Right.EscapedParseableString}";
     }
 }

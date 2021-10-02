@@ -1,28 +1,40 @@
 namespace DataFilters.UnitTests.Helpers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
     using DataFilters.Grammar.Syntax;
 
     using FsCheck;
+    using FsCheck.Fluent;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
 
     public static partial class ExpressionsGenerators
     {
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
         {
-            return Arb.Default.DateTime()
-                                .Filter(dateTime => dateTime.Hour >= 0 && dateTime.Minute >= 0 && dateTime.Second >= 0 && dateTime.Millisecond >= 0)
+
+            return GetArbitraryFor<DateTime>()
+                                .Filter(dateTime => dateTime.Hour >= 0
+                                                    && dateTime.Minute >= 0
+                                                    && dateTime.Second >= 0
+                                                    && dateTime.Millisecond >= 0)
                                 .Generator
-                                .Select(dateTime => new DateTimeExpression(date: new(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day),
-                                                                           time: new(hours: dateTime.Hour, minutes: dateTime.Minute, seconds: dateTime.Second, milliseconds: dateTime.Millisecond)))
+                                .Zip(TimeExpressions().Generator)
+                                .Select(val => (date: val.Item1, time: val.Item2))
+                                .Zip(OffsetExpressions().Generator)
+                                .Select(val => (val.Item1.date, val.Item1.time, offset: val.Item2))
+                                .Where(val => val.time != null || val.offset != null)
+                                .Select(dateTime => new DateTimeExpression(date: new(year: dateTime.date.Year, month: dateTime.date.Month, day: dateTime.date.Day),
+                                                                           time: new(hours: dateTime.date.Hour, minutes: dateTime.date.Minute, seconds: dateTime.date.Second, milliseconds: dateTime.date.Millisecond),
+                                                                           offset: dateTime.offset))
                                 .ToArbitrary();
         }
 
         public static Arbitrary<TimeExpression> TimeExpressions()
         {
-            return Arb.Default.TimeSpan()
+            return GetArbitraryFor<TimeSpan>()
                         .Filter(timespan => timespan.Hours >= 0 && timespan.Minutes >= 0 && timespan.Seconds >= 0 && timespan.Milliseconds >= 0)
                         .Generator
                         .Select(timespan => new TimeExpression(hours: timespan.Hours,
@@ -32,9 +44,23 @@ namespace DataFilters.UnitTests.Helpers
                         .ToArbitrary();
         }
 
+        public static Arbitrary<OffsetExpression> OffsetExpressions()
+        {
+            Gen<int> hours = Gen.Choose(0, 23);
+            Gen<int> minutes = Gen.Choose(0, 59);
+            Gen<NumericSign> sign = Gen.OneOf(Gen.Constant(NumericSign.Plus), Gen.Constant(NumericSign.Minus));
+
+            return hours.Zip(minutes, (hours, minutes) => (hours, minutes))
+                        .Zip(sign, (offset, sign) => (offset.hours, offset.minutes, sign))
+                        .Select(val => (val.hours, val.minutes, val.sign))
+                        .Select(val => new OffsetExpression(val.sign, (uint)val.hours, (uint)val.minutes))
+                                               .OrNull()
+                                               .ToArbitrary();
+        }
+
         public static Arbitrary<DateExpression> DateExpressions()
         {
-            return Arb.Default.DateTime()
+            return GetArbitraryFor<DateTime>()
                             .Filter(dateTime => dateTime.Date.Year >= 0 && dateTime.Date.Month >= 0 && dateTime.Date.Day >= 0)
                             .Generator
                             .Select(dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day))
@@ -45,46 +71,52 @@ namespace DataFilters.UnitTests.Helpers
         {
             IList<Gen<ConstantValueExpression>> generators = new List<Gen<ConstantValueExpression>>
             {
-                Arb.Default.Bool().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.NonWhiteSpaceString().Generator.Select(value => new ConstantValueExpression(value.Item)),
-                Arb.Default.Int32().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.Int64().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.DateTime().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.DateTimeOffset().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.Guid().Generator.Select(value => new ConstantValueExpression(value)),
-                Arb.Default.NormalFloat().Generator.Select(value => new ConstantValueExpression(value.Item))
+                StringValueExpressions().Generator.Select(value => (ConstantValueExpression) value),
+                GetArbitraryFor<bool>().Generator.Select(value => (ConstantValueExpression) new StringValueExpression(value.ToString())),
+                GetArbitraryFor<int>().Generator.Select(value => (ConstantValueExpression) new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
+                GetArbitraryFor<long>().Generator.Select(value => (ConstantValueExpression) new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
+                GetArbitraryFor<Guid>().Generator.Select(value => (ConstantValueExpression) new GuidValueExpression(value.ToString("d"))),
+                GetArbitraryFor<NormalFloat>().Generator.Select(value => (ConstantValueExpression) new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture)))
             };
 
             return Gen.OneOf(generators)
                       .ToArbitrary();
         }
 
+        public static Arbitrary<StringValueExpression> StringValueExpressions()
+            => GetArbitraryFor<FsCheck.NonEmptyString>().Generator
+                                                        .Select(value => new StringValueExpression(value.Item))
+                                                        .ToArbitrary();
+
+        private static Arbitrary<T> GetArbitraryFor<T>(Func<T, bool> filter = null) => ArbMap.Default.ArbFor<T>()
+                                                                                                     .Filter(item => filter is null || filter.Invoke(item));
+
         public static Arbitrary<DurationExpression> DurationExpressions()
         {
-            Arbitrary<Tuple<Tuple<Tuple<PositiveInt, PositiveInt, PositiveInt>, Tuple<PositiveInt, PositiveInt, PositiveInt>>, PositiveInt>> arb = Arb.Default.PositiveInt().Generator
+            Arbitrary<(((PositiveInt years, PositiveInt months, PositiveInt days) date, (PositiveInt hours, PositiveInt minutes, PositiveInt seconds) time) dateTime, PositiveInt milliseconds)> arb = GetArbitraryFor<PositiveInt>().Generator
                                                                                                                                                               .Three()
                                                                                                                                                               .Two()
-                                                                                                                                                              .Zip(Arb.Default.PositiveInt().Generator)
+                                                                                                                                                              .Zip(GetArbitraryFor<PositiveInt>().Generator)
                                                                                                                                                               .ToArbitrary();
 
-            return arb.Generator.Select(tuple => new DurationExpression(years: tuple.Item1.Item1.Item1.Item,
-                                           months: tuple.Item1.Item1.Item2.Item,
-                                           weeks: tuple.Item1.Item1.Item3.Item,
-                                           days: tuple.Item1.Item2.Item1.Item,
-                                           hours: tuple.Item1.Item2.Item2.Item,
-                                           minutes: tuple.Item1.Item2.Item3.Item,
-                                           seconds: tuple.Item2.Item))
+            return arb.Generator.Select(tuple => new DurationExpression(years: tuple.dateTime.date.years.Item,
+                                           months: tuple.dateTime.date.months.Item,
+                                           weeks: tuple.dateTime.date.days.Item,
+                                           days: tuple.dateTime.time.hours.Item,
+                                           hours: tuple.dateTime.time.minutes.Item,
+                                           minutes: tuple.dateTime.time.seconds.Item,
+                                           seconds: tuple.milliseconds.Item))
                     .ToArbitrary();
         }
 
         public static Arbitrary<EndsWithExpression> EndsWithExpressions()
-            => Arb.Default.NonEmptyString()
+            => GetArbitraryFor<NonEmptyString>()
                           .Generator
                           .Select(nonWhiteSpaceString => new EndsWithExpression(nonWhiteSpaceString.Item))
                           .ToArbitrary();
 
         public static Arbitrary<StartsWithExpression> StartsWithExpressions()
-            => Arb.Default.NonWhiteSpaceString()
+            => GetArbitraryFor<NonEmptyString>()
                           .Generator
                           .Select(value => new StartsWithExpression(value.Item))
                           .ToArbitrary();
@@ -98,7 +130,7 @@ namespace DataFilters.UnitTests.Helpers
         /// </summary>
         public static Arbitrary<FilterExpression> GenerateFilterExpressions()
         {
-            IList<Gen<FilterExpression>> generators = new List<Gen<FilterExpression>>
+            Gen<FilterExpression>[] generators =
             {
                 EndsWithExpressions().Generator.Select(item => (FilterExpression) item),
                 StartsWithExpressions().Generator.Select(item => (FilterExpression) item),
@@ -107,7 +139,8 @@ namespace DataFilters.UnitTests.Helpers
                 DateExpressions().Generator.Select(item => (FilterExpression) item),
                 DateTimeExpressions().Generator.Select(item => (FilterExpression) item),
                 TimeExpressions().Generator.Select(item => (FilterExpression) item),
-                DurationExpressions().Generator.Select(item => (FilterExpression) item)
+                DurationExpressions().Generator.Select(item => (FilterExpression) item),
+                ConstantValueExpressions().Generator.Select(item => (FilterExpression) item)
             };
 
             return Gen.OneOf(generators).ToArbitrary();
@@ -131,7 +164,7 @@ namespace DataFilters.UnitTests.Helpers
                         gen = Gen.OneOf(GenerateFilterExpressions().Generator.Two()
                                                          .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
                                                                                                  tuple => new OrExpression(tuple.Item1, tuple.Item2))),
-                                        Gen.Two(subtree).Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
+                                        subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
                                                                                                 tuple => new OrExpression(tuple.Item1, tuple.Item2))));
                         break;
                     }
@@ -156,8 +189,8 @@ namespace DataFilters.UnitTests.Helpers
                     {
                         Gen<AndExpression> subtree = SafeAndExpressionGenerator(size / 2);
                         gen = Gen.OneOf(GenerateFilterExpressions().Generator.Two()
-                                                         .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))),
-                                        Gen.Two(subtree).Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))));
+                                                                             .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))),
+                                        subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))));
                         break;
                     }
             }
@@ -165,12 +198,52 @@ namespace DataFilters.UnitTests.Helpers
             return gen;
         }
 
+        public static Arbitrary<NotExpression> NotExpressions()
+        {
+            return Gen.Sized(SafeNotExpressionGenerator).ToArbitrary();
+
+            static Gen<NotExpression> SafeNotExpressionGenerator(int size)
+            {
+                Gen<FilterExpression>[] generators =
+                {
+                    AndExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    OrExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    ConstantValueExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    DurationExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    DateExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    TimeExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    DateTimeExpressions().Generator.Select(expr => (FilterExpression)expr),
+                    IntervalExpressions().Generator.Select(expr => (FilterExpression)expr)
+                };
+
+                Gen<NotExpression> gen;
+                switch (size)
+                {
+                    case 0:
+                        {
+                            gen = Gen.OneOf(generators).Select(expr => new NotExpression(expr));
+                            break;
+                        }
+
+                    default:
+                        {
+                            Gen<NotExpression> subtree = SafeNotExpressionGenerator(size / 2);
+                            gen = Gen.OneOf(Gen.OneOf(generators).Select(exp => new NotExpression(exp)),
+                                            subtree.Select(expr => new NotExpression(expr)));
+                            break;
+                        }
+                }
+
+                return gen;
+            }
+        }
+
         private static TFilterExpression CreateFilterExpression<TFilterExpression>((FilterExpression, FilterExpression) input, Func<(FilterExpression, FilterExpression), TFilterExpression> func)
             => func.Invoke(input);
 
         public static Arbitrary<IntervalExpression> IntervalExpressions()
         {
-            Gen<bool> boolGenerator = Arb.Default.Bool().Generator;
+            Gen<bool> boolGenerator = GetArbitraryFor<bool>().Generator;
             (Gen<IBoundaryExpression> gen, Gen<bool> included)[] datesGen = new[]
             {
                 (DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
@@ -179,10 +252,10 @@ namespace DataFilters.UnitTests.Helpers
 
             (Gen<IBoundaryExpression> gen, Gen<bool> included)[] numericsGen = new[]
             {
-                (Arb.Default.Int16().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
-                (Arb.Default.Int32().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
-                (Arb.Default.Int64().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value)), boolGenerator),
-                (Arb.Default.NormalFloat().Generator.Select(value => (IBoundaryExpression) new ConstantValueExpression(value.Item)), boolGenerator)
+                (GetArbitraryFor<short>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.ToString())), boolGenerator),
+                (GetArbitraryFor<int>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.ToString())), boolGenerator),
+                (GetArbitraryFor<long>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.ToString())), boolGenerator),
+                (GetArbitraryFor<NormalFloat>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture))), boolGenerator)
             };
 
             (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
@@ -213,13 +286,17 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<BoundaryExpression> BoundariesExpressions()
         {
-            Gen<bool> boolGenerator = Arb.Default.Bool().Generator;
+            Gen<bool> boolGenerator = GetArbitraryFor<bool>().Generator;
+
             IList<Gen<BoundaryExpression>> generators = new List<Gen<BoundaryExpression>>
             {
                 CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
-                CreateBoundaryGenerator(ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
+                //CreateBoundaryGenerator(ConstantValueExpressions().Generator
+                //                                                  .Where(item => !item.Value.IsT1)
+                //                                                  .Select(item => (IBoundaryExpression) item),
+                //                        boolGenerator),
                 CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false)),
             };
 
@@ -244,7 +321,7 @@ namespace DataFilters.UnitTests.Helpers
         }
 
         public static Arbitrary<ContainsExpression> ContainsExpressions()
-            => Arb.Default.NonEmptyString()
+            => GetArbitraryFor<NonEmptyString>()
                           .Convert(convertTo: input => new ContainsExpression(input.Item),
                                    convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
 
@@ -260,7 +337,7 @@ namespace DataFilters.UnitTests.Helpers
             return Gen.OneOf(regexConstantGenerator, regexRangeGenerator).ToArbitrary();
         }
 
-        public static Arbitrary<ConstantBracketValue> BuildRegexConstantValueGenerator() => Arb.Default.String()
+        public static Arbitrary<ConstantBracketValue> BuildRegexConstantValueGenerator() => GetArbitraryFor<string>()
                                                                                                        .Filter(input => !string.IsNullOrWhiteSpace(input)
                                                                                                                         && input.Length > 1
                                                                                                                         && input.All(chr => char.IsLetterOrDigit(chr)))
@@ -270,7 +347,7 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<RangeBracketValue> RangeBracketValueGenerator()
         {
-            return Arb.Default.Char()
+            return GetArbitraryFor<char>()
                               .Filter(chr => char.IsLetterOrDigit(chr)).Generator
                               .Two()
                               .Select(tuple => (start: tuple.Item1, end: tuple.Item2))

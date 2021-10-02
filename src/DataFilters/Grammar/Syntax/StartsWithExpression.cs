@@ -5,6 +5,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that defines a string that starts with a specified <see cref="Value"/>.
@@ -38,14 +39,31 @@
 
             Value = value;
 
-            _lazyParseableString = new(() => {
-                string parseableString = Value;
-                if (parseableString.AtLeastOnce(chr => char.IsWhiteSpace(chr) || FilterTokenizer.SpecialCharacters.Contains(chr)))
+            _lazyParseableString = new(() =>
+            {
+                // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
+                // Also we need an extra position for the final '*' that will be append in all cases
+                bool requireEscapingCharacters = Value.AtLeastOnce(chr => FilterTokenizer.SpecialCharacters.Contains(chr));
+                StringBuilder parseableString;
+
+                if (requireEscapingCharacters)
                 {
-                    parseableString = string.Concat(Value.Select(chr => char.IsWhiteSpace(chr) || FilterTokenizer.SpecialCharacters.Contains(chr) ? $@"\{chr}" : $"{chr}"));
+                    parseableString = new((Value.Length * 2) + 1);
+                    foreach (char chr in Value)
+                    {
+                        if (FilterTokenizer.SpecialCharacters.Contains(chr))
+                        {
+                            parseableString = parseableString.Append('\\');
+                        }
+                        parseableString = parseableString.Append(chr);
+                    }
+                }
+                else
+                {
+                    parseableString = new(Value, Value.Length + 1);
                 }
 
-                return $"{parseableString}*";
+                return parseableString.Append('*').ToString();
             });
         }
 
@@ -59,6 +77,12 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ParseableString => _lazyParseableString.Value;
+        public override string ToString() => OriginalString;
+
+        ///<inheritdoc/>
+        public override string EscapedParseableString => _lazyParseableString.Value;
+
+        ///<inheritdoc/>
+        public override string OriginalString => $"{Value}*";
     }
 }

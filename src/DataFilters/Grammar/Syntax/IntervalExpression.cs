@@ -73,11 +73,11 @@
             Min = min?.Expression switch
             {
                 AsteriskExpression or null => null,
-                DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
+                DateTimeExpression { Date: var date, Time: var time, Offset: var offset } => (date, time, offset) switch
                 {
-                    (null, { }) => new BoundaryExpression(time, included: min.Included),
-                    ({ }, null) => new BoundaryExpression(date, included: min.Included),
-                    _ => new BoundaryExpression(new DateTimeExpression(date, time), included: min.Included)
+                    (null, { }, _) => new BoundaryExpression(time, included: min.Included),
+                    ({ }, null, _) => new BoundaryExpression(date, included: min.Included),
+                    _ => new BoundaryExpression(new DateTimeExpression(date, time, offset), included: min.Included)
                 },
                 _ => min
             };
@@ -85,22 +85,23 @@
             Max = max?.Expression switch
             {
                 AsteriskExpression or null => null,
-                DateTimeExpression { Date: var date, Time: var time } => (date, time) switch
+                DateTimeExpression { Date: var date, Time: var time, Offset: var offset } => (date, time, offset) switch
                 {
-                    (null, { }) => new BoundaryExpression(time, included: max.Included),
-                    ({ }, null) => new BoundaryExpression(date, included: max.Included),
-                    _ => new BoundaryExpression(new DateTimeExpression(date, time), included: max.Included)
+                    (null, { }, _) => new BoundaryExpression(time, included: max.Included),
+                    ({ }, null, _) => new BoundaryExpression(date, included: max.Included),
+                    _ => new BoundaryExpression(new DateTimeExpression(date, time, offset), included: max.Included)
                 },
-                TimeExpression time when Min?.Expression is DateTimeExpression dateTime => new(new DateTimeExpression(dateTime.Date, time), max.Included),
+                TimeExpression time when Min?.Expression is DateTimeExpression dateTime => new(new DateTimeExpression(dateTime.Date, time, dateTime.Offset), max.Included),
                 TimeExpression time => new BoundaryExpression(time, included: max.Included),
                 _ => max
             };
 
+            _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? "*"} TO {Max?.Expression?.EscapedParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
             _lazyToString = new(() => new
             {
-                Min = new { Min?.Included, Value = Min?.Expression?.ParseableString, DebugView = Min?.Expression?.ToString() },
-                Max = new { Max?.Included, Value = Max?.Expression?.ParseableString, DebugView = Max?.Expression?.ToString() },
-                ParseableString
+                Min = new { Min?.Included, Value = Min?.Expression?.EscapedParseableString, DebugView = Min?.Expression?.ToString() },
+                Max = new { Max?.Included, Value = Max?.Expression?.EscapedParseableString, DebugView = Max?.Expression?.ToString() },
+                EscapedParseableString
             }
 #if NETSTANDARD1_3
         .Jsonify(new Newtonsoft.Json.JsonSerializerSettings() { Formatting = Newtonsoft.Json.Formatting.Indented })
@@ -110,7 +111,6 @@
                 )
         ;
 
-            _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.ParseableString ?? "*"} TO {Max?.Expression?.ParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
 
             static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
             static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";
@@ -153,7 +153,7 @@
         public override string ToString() => _lazyToString.Value;
 
         ///<inheritdoc/>
-        public override string ParseableString => _lazyParseableString.Value;
+        public override string EscapedParseableString => _lazyParseableString.Value;
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)

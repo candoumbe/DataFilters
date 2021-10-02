@@ -4,6 +4,7 @@
     using DataFilters.UnitTests.Helpers;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System.Linq;
@@ -24,7 +25,8 @@
         public Property Given_ConstantBracketExpression_contains_consecutive_characters_Equals_should_returns_true()
         {
             // Arrange
-            return Prop.ForAll(Arb.Default.Char().Filter(char.IsLetter).Filter(char.IsLower) , Arb.Default.Char().Filter(char.IsLetter).Filter(char.IsLower),
+            IArbMap arbMap = ArbMap.Default;
+            return Prop.ForAll(arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower) , arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower),
                                (start, end) =>
                                 {
                                     char[] chrs = new[] { start, end }.OrderBy(x => x)

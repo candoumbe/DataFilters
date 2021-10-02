@@ -54,16 +54,30 @@
         }
 
         /// <inheritdoc />
-        public bool Equals(DateExpression other) => other != null
-            && (Year, Month, Day).Equals((other.Year, other.Month, other.Day));
+        public bool Equals(DateExpression other) => (Year, Month, Day) == (other?.Year, other?.Month, other?.Day);
 
         /// <inheritdoc />
-        public override bool Equals(object obj) => Equals(obj as DateExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            DateExpression date => Equals(date),
+            DateTimeExpression { Date : var date, Time : null, Offset: null } => Equals(date),
+            _ => false
+        };
 
         /// <inheritdoc />
         public override int GetHashCode() => (Year, Month, Day).GetHashCode();
 
         /// <inheritdoc />
-        public override string ParseableString => $"{Year:D2}-{Month:D2}-{Day:D2}";
+        public override string EscapedParseableString => $"{Year:D2}-{Month:D2}-{Day:D2}";
+
+        /// <inheritdoc />
+        public static bool operator ==(DateExpression left, DateExpression right) => left switch
+        {
+            null => right is null,
+            _ => left.Equals(right)
+        };
+
+        /// <inheritdoc />
+        public static bool operator !=(DateExpression left, DateExpression right) => ! (left == right);
     }
 }

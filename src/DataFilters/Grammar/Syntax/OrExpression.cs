@@ -21,13 +21,28 @@
         /// Builds a new <see cref="OrExpression"/> that combines <paramref name="left"/> and <paramref name="right"/> using the logical
         /// <c>OR</c> operator
         /// </summary>
-        /// <param name="left">Left member</param>
-        /// <param name="right">Right member</param>
+        /// <remarks>
+        /// The constructor will wrap <paramref name="left"/> (respectively  <paramref name="right"/>) inside a <see cref="GroupExpression"/> when <paramref name="left"/> is either
+        /// a <see cref="AndExpression"/> or a <see cref="OrExpression"/>.
+        /// </remarks>
+        /// <param name="left">Left member of the expression</param>
+        /// <param name="right">Right member of the expression</param>
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <c>null</c>.</exception>
         public OrExpression(FilterExpression left, FilterExpression right)
         {
-            Left = left ?? throw new ArgumentNullException(nameof(left));
-            Right = right ?? throw new ArgumentNullException(nameof(right));
+            Left = left switch
+            {
+                null => throw new ArgumentNullException(nameof(left)),
+                AndExpression or OrExpression => new GroupExpression(left),
+                _ => left
+            };
+
+            Right = right switch
+            {
+                null => throw new ArgumentNullException(nameof(right)),
+                AndExpression or OrExpression => new GroupExpression(right),
+                _ => right
+            };
         }
 
         ///<inheritdoc/>
@@ -47,7 +62,7 @@
         public override string ToString() => new { Type = nameof(OrExpression), Left, Right, Complexity }.Jsonify();
 
         ///<inheritdoc/>
-        public override string ParseableString => $"{Left.ParseableString}|{Right.ParseableString}";
+        public override string EscapedParseableString => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}";
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
