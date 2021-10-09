@@ -16,6 +16,8 @@
     /// </remarks>
     public class FilterTokenizer : Tokenizer<FilterToken>
     {
+        private TokenizerMode _mode;
+
         /// <summary>
         /// The <c>_</c> character
         /// </summary>
@@ -108,6 +110,11 @@
             ' '
         };
 
+        /// <summary>
+        /// Custom <see cref="Tokenizer{TKind}"/> implementation that serves as the foundation of parsing text.
+        /// </summary>
+        public FilterTokenizer() => _mode = TokenizerMode.Normal;
+
         ///<inheritdoc/>
         protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
         {
@@ -131,77 +138,137 @@
                         next = next.Remainder.ConsumeChar();
                         break;
                     case Underscore:
-                        yield return Result.Value(FilterToken.Underscore, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Underscore, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case Pipe:
-                        yield return Result.Value(Or, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Or, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case Comma:
-                        yield return Result.Value(And, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => And, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case EqualSign:
-                        yield return Result.Value(Equal, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Equal, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case Asterisk:
-                        yield return Result.Value(FilterToken.Asterisk, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Asterisk, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '!':
-                        yield return Result.Value(FilterToken.Bang, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Bang, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case LeftSquareBracket:
-                        yield return Result.Value(OpenSquaredBracket, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenSquaredBracket, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case RightSquareBracket:
-                        yield return Result.Value(CloseSquaredBracket, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseSquaredBracket, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case Hyphen:
-                        yield return Result.Value(Dash, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Dash, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case LeftParenthesis:
-                        yield return Result.Value(OpenParenthese, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenParenthese, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case RightParenthesis:
-                        yield return Result.Value(CloseParenthese, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseParenthese, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case ' ':
-                        yield return Result.Value(Whitespace, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Whitespace, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case ':':
-                        yield return Result.Value(Colon, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Colon, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '&':
-                        yield return Result.Value(FilterToken.Ampersand, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Ampersand, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '"':
-                        yield return Result.Value(FilterToken.DoubleQuote, next.Location, next.Remainder);
+                    case DoubleQuote :
+                        yield return Result.Value(FilterToken.DoubleQuote,
+                                                  next.Location,
+                                                  next.Remainder);
+                        _mode = ToggleMode(_mode);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case '.':
-                        yield return Result.Value(Dot, next.Location, next.Remainder);
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Dot, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     case BackSlash:
                         TextSpan backSlashStart = next.Location;
-                        next = next.Remainder.ConsumeChar();
-                        yield return next.HasValue && SpecialCharacters.Contains(next.Value)
-                            ? Result.Value(Escaped, next.Location, next.Remainder)
-                            : Result.Value(Letter, backSlashStart, next.Remainder);
+                        if (_mode == TokenizerMode.Normal)
+                        {
+                            next = next.Remainder.ConsumeChar();
+                            yield return next.HasValue && SpecialCharacters.Contains(next.Value)
+                                ? Result.Value(Escaped, next.Location, next.Remainder)
+                                : Result.Value(Letter, backSlashStart, next.Remainder);
 
-                        next = next.Remainder.ConsumeChar();
+                            next = next.Remainder.ConsumeChar();
+                        }
+                        else
+                        {
+                            TextSpan remainderAfterBackslah = next.Remainder;
+                            next = next.Remainder.ConsumeChar();
+                            // Only backslash and double quote need to be escaped when in Escaped mode
+                            bool shouldEscape = next.Value == BackSlash || next.Value == DoubleQuote;
+                            if (next.HasValue)
+                            {
+                                if (shouldEscape)
+                                {
+                                    yield return Result.Value(Escaped, next.Location, next.Remainder);
+                                    next = next.Remainder.ConsumeChar();
+                                }
+                                else
+                                {
+                                    yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
+                                }
+                            }
+                            else
+                            {
+                                yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
+                            }
+                        }
+
                         break;
                     default:
                         yield return Result.Value(None, next.Location, next.Remainder);
@@ -210,6 +277,12 @@
                 }
 
             } while (next.HasValue);
+
+            static TokenizerMode ToggleMode(TokenizerMode currentMode) => currentMode switch
+            {
+                TokenizerMode.Normal => TokenizerMode.Escaped,
+                _ => TokenizerMode.Normal
+            };
         }
     }
 }

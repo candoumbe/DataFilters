@@ -18,9 +18,9 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">value of the expression.</param>
         /// <remarks>
-        /// The <see cref="EscapedParseableString"/> property automatically escaped <see cref="SpecialCharacters"/> from <paramref name="value"/>.
+        /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
         /// </remarks>
         public StringValueExpression(string value) : base(value)
         {
@@ -56,21 +56,16 @@ namespace DataFilters.Grammar.Syntax
         public override string EscapedParseableString => _lazyParseableString.Value;
 
         ///<inheritdoc/>
-        public bool Equals(StringValueExpression other) => Equals(Value, other?.Value);
+        public override string OriginalString => Value;
+
+        ///<inheritdoc/>
+        public virtual bool Equals(StringValueExpression other) => Equals(Value, other?.Value);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as StringValueExpression);
 
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
-
-        ///<inheritdoc/>
-        public bool Equals(StringValueExpression x, StringValueExpression y)
-            => x == y;
-
-        ///<inheritdoc/>
-        public int GetHashCode(ConstantValueExpression obj)
-            => obj?.GetHashCode() ?? 0;
 
         ///<inheritdoc/>
         public override double Complexity => 1;

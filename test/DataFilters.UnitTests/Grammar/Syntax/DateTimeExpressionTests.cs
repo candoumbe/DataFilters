@@ -98,7 +98,6 @@
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_DateTimeExpression_GetComplexity_should_return_1(NonNull<DateTimeExpression> dateTime) => (dateTime.Item.Complexity == 1).ToProperty();
 
-
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_DateTimeExpression_where_only_date_part_is_set_IsEquivalent_should_be_true_when_comparing_to_a_non_null_DateExpression(NonNull<DateExpression> dateExpression)
         {

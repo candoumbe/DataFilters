@@ -47,7 +47,6 @@
             Lazy<TimeExpression> timeExpressionBuilder = new(() => new TimeExpression(hours.Item, minutes.Item,
                                                                                       seconds.Item, milliseconds.Item));
 
-
             Action invokingCtor = () => { var value = timeExpressionBuilder.Value; };
 
             ((Action) (() => invokingCtor.Should().ThrowExactly<ArgumentOutOfRangeException>())).When(hours.Item < 0

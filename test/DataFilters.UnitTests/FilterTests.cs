@@ -5,7 +5,6 @@
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-    using FsCheck.Experimental;
 
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Schema;

@@ -5,8 +5,6 @@
     using FluentAssertions;
     using FluentAssertions.Extensions;
 
-    using FsCheck;
-
     using NodaTime;
 
     using System;

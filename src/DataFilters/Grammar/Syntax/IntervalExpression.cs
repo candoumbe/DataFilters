@@ -42,12 +42,12 @@
         {
             if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
             {
-                throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)} instance");
+                throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)}");
             }
 
             if (min?.Expression is AsteriskExpression && max is null)
             {
-                throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)} instance");
+                throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)}");
             }
 
             if (min?.Expression is DateExpression && max is not null && !(max.Expression is AsteriskExpression || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
@@ -67,7 +67,7 @@
 
             if (min?.Expression is TimeExpression && max is not null && max.Expression is not TimeExpression && max.Expression is not AsteriskExpression)
             {
-                throw new BoundariesTypeMismatchException($"{nameof(max)} must be either {nameof(TimeExpression)} or {nameof(AsteriskExpression)}", nameof(max));
+                throw new BoundariesTypeMismatchException($"{nameof(max)} must be either {nameof(TimeExpression)} or {nameof(AsteriskExpression)} when min is {nameof(TimeExpression)}", nameof(max));
             }
 
             Min = min?.Expression switch
@@ -99,8 +99,20 @@
             _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? "*"} TO {Max?.Expression?.EscapedParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
             _lazyToString = new(() => new
             {
-                Min = new { Min?.Included, Value = Min?.Expression?.EscapedParseableString, DebugView = Min?.Expression?.ToString() },
-                Max = new { Max?.Included, Value = Max?.Expression?.EscapedParseableString, DebugView = Max?.Expression?.ToString() },
+                Min = new
+                {
+                    Min?.Included,
+                    Min?.Expression?.EscapedParseableString,
+                    Type = Min?.Expression?.GetType().Name,
+                    DebugView = Max?.Expression?.ToString()
+                },
+                Max = new
+                {
+                    Max?.Included,
+                    Max?.Expression?.EscapedParseableString,
+                    Type = Max?.Expression?.GetType().Name,
+                    DebugView = Max?.Expression?.ToString()
+                },
                 EscapedParseableString
             }
 #if NETSTANDARD1_3
@@ -110,7 +122,6 @@
 #endif
                 )
         ;
-
 
             static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
             static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";

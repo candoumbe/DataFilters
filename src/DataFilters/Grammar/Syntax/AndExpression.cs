@@ -87,5 +87,11 @@
 
         ///<inheritdoc/>
         public override string EscapedParseableString => $"{Left.EscapedParseableString},{Right.EscapedParseableString}";
+
+        ///<inheritdoc/>
+        public override string ToString()
+        {
+            return $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]";
+        }
     }
 }

@@ -78,7 +78,6 @@
         public Property Equals_should_be_symetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)
             => (group.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(group.Item)).ToProperty();
 
-
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_GroupExpression_Complexity_should_be_equal_to_inner_expression_complexity(GroupExpression group)
             => (group.Complexity == group.Expression.Complexity).ToProperty();

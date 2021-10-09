@@ -10,7 +10,6 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Parses a tree of <see cref="FilterToken"/> into <see cref="FilterExpression"/>
@@ -23,15 +22,14 @@
         public static TokenListParser<FilterToken, ConstantValueExpression> AlphaNumeric => from data in (
                                                                                                from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try()
                                                                                                                          .Or(Token.EqualTo(FilterToken.None).Try())
-                                                                                                                         .Or(Token.EqualTo(FilterToken.Dot).Try())
-                                                                                                                         .Or(Whitespace).Many()
+                                                                                                                         .Or(Token.EqualTo(FilterToken.Dot).Try()).Many()
                                                                                                from digitsBefore in Digit.Many()
                                                                                                from alpha in Alpha.Many()
                                                                                                from digitsAfter in Digit.Many()
                                                                                                from symbolAfter in Token.EqualTo(FilterToken.Escaped).Try()
                                                                                                                         .Or(Token.EqualTo(FilterToken.None).Try())
-                                                                                                                         .Or(Token.EqualTo(FilterToken.Dot).Try())
-                                                                                                                        .Or(Whitespace).Many()
+                                                                                                                        .Or(Token.EqualTo(FilterToken.Dot).Try())
+                                                                                                                        .Many()
                                                                                                where symbolBefore.AtLeastOnce()
                                                                                                      || digitsBefore.AtLeastOnce()
                                                                                                      || alpha.AtLeastOnce()
@@ -45,11 +43,11 @@
                                                                                                                          string.Concat(symbolAfter.Select(x => x.ToStringValue())))
                                                                                                select value).AtLeastOnce()
 
-                                                                                          let alphaNumericValue = string.Concat(data)
-                                                                                          let textSpan = new TextSpan(alphaNumericValue)
-                                                                                          select Numerics.Decimal.IsMatch(textSpan) || Numerics.Integer.IsMatch(textSpan)
-                                                                                                ? new NumericValueExpression(alphaNumericValue)
-                                                                                                : (ConstantValueExpression) new StringValueExpression(alphaNumericValue)
+                                                                                            let alphaNumericValue = string.Concat(data)
+                                                                                            let textSpan = new TextSpan(alphaNumericValue)
+                                                                                            select Numerics.Decimal.IsMatch(textSpan) || Numerics.Integer.IsMatch(textSpan)
+                                                                                                  ? new NumericValueExpression(alphaNumericValue)
+                                                                                                  : (ConstantValueExpression)new StringValueExpression(alphaNumericValue)
                                                                                                  ;
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Alpha => Token.EqualTo(FilterToken.Letter).Try()
@@ -177,7 +175,6 @@
             .Or(from values in token.AtLeastOnce()
                 select (BracketValue)new ConstantBracketValue(string.Concat(values.Select(value => value.ToStringValue()))))
 
-
             ;
         /// <summary>
         /// Parses Range expressions
@@ -190,24 +187,21 @@
                         (
                             from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
                             from min in Constant
-
                             from __ in RangeSeparator
-
                             from max in Constant
-
                             from ___ in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
                                 {
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: true)
@@ -218,11 +212,8 @@
                             from _ in Token.EqualTo(FilterToken.CloseSquaredBracket)
                             from min in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
                                                 .Or(Constant)
-
                             from __ in RangeSeparator
-
                             from max in Constant
-
                             from ___ in Token.EqualTo(FilterToken.CloseSquaredBracket)
 
                             where min != default || max != default
@@ -230,13 +221,13 @@
                                 min: new BoundaryExpression(min switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: false),
                                 max: new BoundaryExpression(max switch
                                 {
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: true)
@@ -256,14 +247,14 @@
                             select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: false)
@@ -285,14 +276,14 @@
                                 min: new BoundaryExpression(min switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
                                 }, included: false),
                                 max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
-                                    ConstantValueExpression constant => constant,
+                                    NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
                                 }, included: false)
@@ -303,9 +294,14 @@
 
         private static TokenListParser<FilterToken, FilterExpression> Constant => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()
                                                                                                           .Or(DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>())
+                                                                                                          .Or(Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>())
+                                                                                                          .Or(Date.Try().Cast<FilterToken, DateExpression, FilterExpression>())
+                                                                                                          .Or(Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>())
                                                                                                           .Or(Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>())
                                                                                                           .Or(Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>())
-                                                                                                          .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>());
+                                                                                                          .Or(Text.Cast<FilterToken, TextExpression, FilterExpression>())
+                                                                                                          .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+            ;
 
         private static TokenListParser<FilterToken, Token<FilterToken>> RangeSeparator => from _ in Whitespace.AtLeastOnce()
                                                                                           from rangeSeparator in Token.EqualToValue(FilterToken.Letter, "T")
@@ -344,14 +340,18 @@
         /// <summary>
         /// Parser for any text between double quotes <c>"</c>
         /// </summary>
-        public static TokenListParser<FilterToken, StringValueExpression> Text => from _ in Token.EqualTo(FilterToken.DoubleQuote)
-                                                                                  from whitespaceBefore in Whitespace.Many()
-                                                                                  from text in AlphaNumeric.AtLeastOnce()
-                                                                                  from whiteSpaceAfter in Whitespace.Many()
-                                                                                  from __ in Token.EqualTo(FilterToken.DoubleQuote)
-                                                                                  select new StringValueExpression(string.Concat(string.Concat(whitespaceBefore.Select(space => space.ToStringValue())),
-                                                                                                                                 text.Select(val => val.Value),
-                                                                                                                                 string.Concat(whiteSpaceAfter.Select(space => space.ToStringValue()))));
+        public static TokenListParser<FilterToken, TextExpression> Text => from _ in Token.EqualTo(FilterToken.DoubleQuote)
+#if NETSTANDARD1_3
+                                                                           from text in (Token.EqualTo(FilterToken.Letter)
+                                                                                             .Or(Token.EqualTo(FilterToken.Digit))
+                                                                                             .Or(Token.EqualTo(FilterToken.Escaped))
+                                                                                             .Or(Token.EqualTo(FilterToken.None))).AtLeastOnce()
+#else
+                                                                           from text in Token.Matching<FilterToken>(token => token != FilterToken.DoubleQuote, "Any character or symbol except double quote character")
+                                                                                                                                                                .AtLeastOnce()
+#endif
+                                                                           from __ in Token.EqualTo(FilterToken.DoubleQuote)
+                                                                           select new TextExpression(TokensToString(text));
 
         private static IEnumerable<char> ConvertRegexToCharArray(IEnumerable<BracketValue> values)
             => values.Select(value =>
@@ -502,7 +502,6 @@
                                                                                                   _ => NumericSign.Plus
                                                                                               });
 
-
         /// <summary>
         /// Parser for time expression.
         /// </summary>
@@ -543,6 +542,7 @@
                                                                                               .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
             ;
@@ -602,7 +602,6 @@
                     select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digits)}")
                 )
             ;
-
 
         private static string ConvertSignToChar(NumericSign? sign) => sign switch
         {
@@ -669,11 +668,6 @@
                                                                                                    from chr32 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
                                                                                                    select new GuidValueExpression($"{TokensToString(new[] { chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8 })}-{TokensToString(new[] { chr9, chr10, chr11, chr12 })}-{TokensToString(new[] { chr13, chr14, chr15, chr16 })}-{TokensToString(new[] { chr17, chr18, chr19, chr20 })}-{TokensToString(new[] { chr21, chr22, chr23, chr24, chr25, chr26, chr27, chr28, chr29, chr30, chr31, chr32 })}");
 
-
-
-
-
-
         /// <summary>
         /// Parser for duration
         /// </summary>
@@ -710,9 +704,11 @@
                                                                                                                from _ in Token.EqualToValue(FilterToken.Letter, designator).Try()
                                                                                                                select n;
 
+        private static string TokensToString(IEnumerable<Token<FilterToken>> tokens)
+        {
+            static string TokenToString(Token<FilterToken> token) => token.ToStringValue();
 
-        private static string TokenToString(Token<FilterToken> token) => token.ToStringValue();
-
-        private static string TokensToString(IEnumerable<Token<FilterToken>> tokens) => string.Concat(tokens.Select(TokenToString));
+            return string.Concat(tokens.Select(TokenToString));
+        }
     }
 }

@@ -161,6 +161,17 @@
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to an {nameof(OrExpression)} with the same values"
                 };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true)),
+                                               new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    new NumericValueExpression("-1"),
+                    true,
+                    $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to its simplified version"
+                };
             }
         }
 
@@ -249,6 +260,15 @@
                     new OneOfExpression(new StringValueExpression("val1"), new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val1"))),
                     new StringValueExpression("val1")
                 };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true)),
+                                               new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    new NumericValueExpression("-1"),
+                };
             }
         }
 
@@ -277,14 +297,16 @@
             simplified.IsEquivalentTo(expression.Item)
                       .Should()
                       .BeTrue();
-
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(NonEmptyArray<FilterExpression> expressions)
+        public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(PositiveInt count, NonNull<FilterExpression> expression)
         {
             // Arrange
-            OneOfExpression oneOfExpression = new(expressions.Item);
+            FilterExpression[] expressions = Enumerable.Repeat(expression.Item, count.Item + 2)
+                                                       .ToArray();
+
+            OneOfExpression oneOfExpression = new(expressions);
 
             double complexityBeforeFirstSimplification = oneOfExpression.Complexity;
 
@@ -293,7 +315,7 @@
 
             // Assert
             simplified.Complexity.Should()
-                                 .BeLessOrEqualTo(complexityBeforeFirstSimplification, "The first simplification may or may not simplify the expression");
+                                 .BeLessThan(complexityBeforeFirstSimplification, "The expression must be simpler");
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

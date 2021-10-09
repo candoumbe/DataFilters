@@ -311,6 +311,64 @@
                                                                                 && results.Once(result => result.Kind == None && result.Span.EqualsValue("+"))
                     )
                 };
+
+                foreach (char chr in FilterTokenizer.SpecialCharacters)
+                {
+                    switch (chr)
+                    {
+                        case FilterTokenizer.DoubleQuote:
+                            yield return new object[]
+                            {
+                                @$"""\{chr}""",
+                                (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                            && results.Once(result => result.Kind == DoubleQuote
+                                                                                                                         && result.Position.Column == 1)
+                                                                                            && results.Once(result => result.Kind == Escaped
+                                                                                                                      && result.Position.Column == 3
+                                                                                                                      && result.Span.EqualsValue(@""""))
+                                                                                            && results.Once(result => result.Kind == DoubleQuote
+                                                                                                                      && result.Position.Column == 4)
+                                )
+                            };
+                            break;
+                        case FilterTokenizer.BackSlash:
+                            yield return new object[]
+                            {
+                                @$"""\{chr}""",
+                                (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                            && results.Once(result => result.Kind == DoubleQuote && result.Position.Column == 1)
+                                                                                            && results.Once(result => result.Kind == Escaped
+                                                                                                                      && result.Position.Column == 3
+                                                                                                                      && result.Span.EqualsValue(@"\"))
+                                                                                            && results.Once(result => result.Kind == DoubleQuote
+                                                                                                                      && result.Position.Column == 4)
+                                )
+                            };
+                            break;
+                        default:
+                            yield return new object[]
+                            {
+                                @$"""\{chr}""",
+                                (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
+                                                                                            && results.Once(result => result.Kind == DoubleQuote && result.Position.Column == 1)
+                                                                                            && results.Once(result => result.Kind == Escaped && result.Position.Column == 2 && result.Span.EqualsValue("\\"))
+                                                                                            && results.Once(result => result.Kind == Escaped && result.Position.Column == 3 && result.Span.EqualsValue($"{chr}"))
+                                                                                            && results.Once(result => result.Kind == DoubleQuote && result.Position.Column == 4)
+                                )
+                            };
+                            break;
+                    }
+                }
+
+                yield return new object[]
+                {
+                    @"""\[",
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@""""))
+                                                                                && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue(@"\"))
+                                                                                && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue("["))
+                    )
+                };
             }
         }
 
@@ -322,8 +380,8 @@
             // Act
             TokenList<FilterToken> tokens = _sut.Tokenize(input);
 
-            // Assert
-            _outputHelper.WriteLine($"Tokens : {tokens.Select(token => new { Value = token.ToStringValue(), token.Kind, token.Position.Column, token.Position.Line, }).Jsonify()}");
+            // Assert 
+            _outputHelper.WriteLine($"Tokens : {tokens.Select(token => new { Value = token.ToStringValue(), Kind = token.Kind.ToString(), token.Position.Column }).Jsonify()}");
 
             tokens.Should()
                 .Match(expectation);

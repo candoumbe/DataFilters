@@ -132,6 +132,15 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     new AndExpression(new OrExpression(new StringValueExpression("val"), new StringValueExpression("val")), new StringValueExpression("val")),
                     new StringValueExpression("val")
                 };
+
+                yield return new object[]
+                {
+                    new AndExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true)),
+                                        new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                        new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    new NumericValueExpression("-1"),
+                };
             }
         }
 

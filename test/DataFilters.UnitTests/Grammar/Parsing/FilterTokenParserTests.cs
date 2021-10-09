@@ -211,9 +211,7 @@ I&_Oj
         }
 
         private static string StringifyTokens(TokenList<FilterToken> tokens)
-        {
-            return tokens.Select(token => new { token.Kind, Value = token.ToStringValue() }).Jsonify();
-        }
+            => tokens.Select(token => new { token.Kind, Value = token.ToStringValue() }).Jsonify();
 
         public static IEnumerable<object[]> ContainsCases
         {
@@ -406,11 +404,11 @@ I&_Oj
 
                 yield return new object[]
                 {
-                    "!![bf3494db-dcf0-265a-cfb5-ea4737d2c119 TO d180f61a-c2f9-352b-d2f6-294cd8655f3e]",
+                    "!![50 TO 50]",
                     new NotExpression
                         (new NotExpression(
-                                new IntervalExpression(min: new (new GuidValueExpression("bf3494db-dcf0-265a-cfb5-ea4737d2c119"), true),
-                                                                               new(new GuidValueExpression("d180f61a-c2f9-352b-d2f6-294cd8655f3e"), true))))
+                                new IntervalExpression(min: new (new NumericValueExpression("50"), true),
+                                                                               new(new NumericValueExpression("60"), true))))
                 };
             }
         }
@@ -504,7 +502,6 @@ I&_Oj
                     new OneOfExpression(GetCharacters('a', 'z').Select(chr => new StringValueExpression(chr.ToString())).ToArray())
                 };
 
-
                 yield return new object[]
                 {
                     "[a-zA-Z0-9]",
@@ -559,22 +556,7 @@ I&_Oj
             expression.IsEquivalentTo(expected).ToProperty().VerboseCheck(_outputHelper);
         }
 
-        public static IEnumerable<object[]> IntervalExpressionCases
-        {
-            get
-            {
-
-                yield return new object[]
-                {
-                    new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1.3"), false),
-                                           new BoundaryExpression(new NumericValueExpression("1"), false))
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(IntervalExpressionCases))]
-        //[Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
         public void Should_parse_Interval(IntervalExpression expected)
         {
             // Arrange
@@ -586,6 +568,49 @@ I&_Oj
 
             // Assert
             AssertThatShould_parse(expression, expected);
+        }
+
+        public static IEnumerable<object[]> IntervalCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "[5 TO 5[",
+                    new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(IntervalCases))]
+        public void Given_interval_as_string_Parser_should_parse_to_IntervalExpression(string input, IntervalExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
+
+            // Act
+            IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(expression, expected);
+        }
+
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public void Should_parse_text(TextExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+
+            // Act
+            TextExpression actual = FilterTokenParser.Text.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(actual, expected);
         }
 
         public static IEnumerable<object[]> PropertyNameCases
@@ -937,30 +962,6 @@ I&_Oj
 
             // Assert
             AssertThatShould_parse(actual, expected.Item);
-        }
-
-        public static IEnumerable<object[]> DurationCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "P3Y6M4DT12H30M5S",
-                    new DurationExpression(years: 3, months: 6, days: 4, hours: 12, minutes: 30, seconds: 5)
-                };
-
-                yield return new object[]
-                {
-                    "PT12H30M5S",
-                    new DurationExpression(hours: 12, minutes: 30, seconds: 5)
-                };
-
-                yield return new object[]
-                {
-                    "PT0H",
-                    new DurationExpression()
-                };
-            }
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

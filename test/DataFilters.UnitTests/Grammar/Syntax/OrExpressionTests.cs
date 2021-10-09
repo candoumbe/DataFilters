@@ -232,9 +232,13 @@
             // Act
             FilterExpression actual = orExpression.Simplify();
 
+            _outputHelper.WriteLine($"Simplifiied expression : {actual}");
+
+            bool isEquivalent = actual.IsEquivalentTo(expected);
+
             // Assert
-            actual.Should()
-                  .Be(expected);
+            isEquivalent.Should()
+                        .BeTrue("the meaning of the expression should remain the same even after being simplified");
         }
 
         public static IEnumerable<object[]> SimplifyCases

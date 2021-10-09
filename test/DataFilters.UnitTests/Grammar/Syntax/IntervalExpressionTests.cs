@@ -320,9 +320,18 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(ConstantValueExpression constant, bool minIsIncluded, bool maxIsIncluded)
+        public Property Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(NumericValueExpression constant, bool minIsIncluded, bool maxIsIncluded)
         {
             return CreateIsEquivalentPropeprty(constant, constant, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_non_null_interval_IntervalU0022IsEquivalentTo_itself_should_return_true(NonNull<IntervalExpression> interval)
+        {
+            IntervalExpression source = interval.Item;
+
+            // Assert
+            return source.IsEquivalentTo(source).ToProperty();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

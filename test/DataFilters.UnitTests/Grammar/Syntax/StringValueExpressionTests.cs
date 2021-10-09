@@ -8,7 +8,6 @@
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-using OneOf;
 
     using System;
 

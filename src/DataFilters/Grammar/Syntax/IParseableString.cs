@@ -11,8 +11,11 @@
         string EscapedParseableString { get; }
 
         /// <summary>
-        /// Unescaped version of the parseable string
+        /// Unescaped version of the parseable string.
         /// </summary>
+        /// <remarks>
+        /// This is the raw version which <see cref="EscapedParseableString"/> is computed from.
+        /// </remarks>
         string OriginalString { get; }
     }
 }

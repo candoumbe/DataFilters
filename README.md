@@ -408,9 +408,16 @@ a special character.
 
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
 
+
 ```csharp
 IFilter filter = new Filter("comment", EndsWith, "!");
 ```
+
+💡 For longer texts, just wrap it between quotes and you're good to go
+| Query string   | JSON                                                |
+| -------------- | --------------------------------------------------- |
+| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}`   |
+
 
 ## <a href='#' id='sorting'>Sorting</a>
 

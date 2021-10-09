@@ -1,5 +1,6 @@
 namespace DataFilters.UnitTests.Helpers
 {
+    using DataFilters.Grammar.Parsing;
     using DataFilters.Grammar.Syntax;
 
     using FsCheck;
@@ -14,7 +15,6 @@ namespace DataFilters.UnitTests.Helpers
     {
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
         {
-
             return GetArbitraryFor<DateTime>()
                                 .Filter(dateTime => dateTime.Hour >= 0
                                                     && dateTime.Minute >= 0
@@ -71,12 +71,24 @@ namespace DataFilters.UnitTests.Helpers
         {
             IList<Gen<ConstantValueExpression>> generators = new List<Gen<ConstantValueExpression>>
             {
+                TextExpressions().Generator.Select(value => (ConstantValueExpression) value),
                 StringValueExpressions().Generator.Select(value => (ConstantValueExpression) value),
                 GetArbitraryFor<bool>().Generator.Select(value => (ConstantValueExpression) new StringValueExpression(value.ToString())),
-                GetArbitraryFor<int>().Generator.Select(value => (ConstantValueExpression) new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
-                GetArbitraryFor<long>().Generator.Select(value => (ConstantValueExpression) new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
                 GetArbitraryFor<Guid>().Generator.Select(value => (ConstantValueExpression) new GuidValueExpression(value.ToString("d"))),
-                GetArbitraryFor<NormalFloat>().Generator.Select(value => (ConstantValueExpression) new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture)))
+                NumericValueExpressions().Generator.Select(value => (ConstantValueExpression) value)
+            };
+
+            return Gen.OneOf(generators)
+                      .ToArbitrary();
+        }
+
+        public static Arbitrary<NumericValueExpression> NumericValueExpressions()
+        {
+            IEnumerable<Gen<NumericValueExpression>> generators = new Gen<NumericValueExpression>[]
+            {
+                GetArbitraryFor<int>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
+                GetArbitraryFor<long>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
+                GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture)))
             };
 
             return Gen.OneOf(generators)
@@ -84,9 +96,12 @@ namespace DataFilters.UnitTests.Helpers
         }
 
         public static Arbitrary<StringValueExpression> StringValueExpressions()
-            => GetArbitraryFor<FsCheck.NonEmptyString>().Generator
-                                                        .Select(value => new StringValueExpression(value.Item))
-                                                        .ToArbitrary();
+            => GetArbitraryFor<NonEmptyString>().Generator
+                                                .Select(value => value.Item.Any(chr => FilterTokenizer.SpecialCharacters.Contains(chr))
+                                                    ? new TextExpression(value.Item)
+                                                    : new StringValueExpression(value.Item)
+                                                )
+                                                .ToArbitrary();
 
         private static Arbitrary<T> GetArbitraryFor<T>(Func<T, bool> filter = null) => ArbMap.Default.ArbFor<T>()
                                                                                                      .Filter(item => filter is null || filter.Invoke(item));
@@ -100,12 +115,12 @@ namespace DataFilters.UnitTests.Helpers
                                                                                                                                                               .ToArbitrary();
 
             return arb.Generator.Select(tuple => new DurationExpression(years: tuple.dateTime.date.years.Item,
-                                           months: tuple.dateTime.date.months.Item,
-                                           weeks: tuple.dateTime.date.days.Item,
-                                           days: tuple.dateTime.time.hours.Item,
-                                           hours: tuple.dateTime.time.minutes.Item,
-                                           minutes: tuple.dateTime.time.seconds.Item,
-                                           seconds: tuple.milliseconds.Item))
+                                                                        months: tuple.dateTime.date.months.Item,
+                                                                        weeks: tuple.dateTime.date.days.Item,
+                                                                        days: tuple.dateTime.time.hours.Item,
+                                                                        hours: tuple.dateTime.time.minutes.Item,
+                                                                        minutes: tuple.dateTime.time.seconds.Item,
+                                                                        seconds: tuple.milliseconds.Item))
                     .ToArbitrary();
         }
 
@@ -261,7 +276,7 @@ namespace DataFilters.UnitTests.Helpers
             (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
             (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false));
 
-            (Gen<IBoundaryExpression>, Gen<bool> Generator) constanteGen = (ConstantValueExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
+            (Gen<IBoundaryExpression>, Gen<bool> Generator) constanteGen = (ConstantValueExpressions().Generator.Select(item => item as IBoundaryExpression).Where(item => item is not null), boolGenerator);
             IEnumerable<Gen<IntervalExpression>> generatorsWithMinAndMax = datesGen.CrossJoin(datesGen)
                                                                                    .Concat(datesGen.CrossJoin(new[] { timeGen }))
                                                                                    .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
@@ -293,10 +308,6 @@ namespace DataFilters.UnitTests.Helpers
                 CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
-                //CreateBoundaryGenerator(ConstantValueExpressions().Generator
-                //                                                  .Where(item => !item.Value.IsT1)
-                //                                                  .Select(item => (IBoundaryExpression) item),
-                //                        boolGenerator),
                 CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false)),
             };
 
@@ -360,5 +371,11 @@ namespace DataFilters.UnitTests.Helpers
 
             static bool TupleContainsDigits((char start, char end) tuple) => char.IsDigit(tuple.start) && char.IsDigit(tuple.end);
         }
+
+        public static Arbitrary<TextExpression> TextExpressions()
+            => ArbMap.Default.ArbFor<NonEmptyString>()
+                             .Generator
+                             .Select(val => new TextExpression(val.Item))
+                             .ToArbitrary();
     }
 }
