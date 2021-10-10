@@ -1,16 +1,17 @@
-﻿using DataFilters.Grammar.Syntax;
-using FluentAssertions;
-using FsCheck.Xunit;
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
-using DataFilters.UnitTests.Helpers;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using FluentAssertions;
+    using FsCheck.Xunit;
+    using FsCheck;
+
+    using System;
+    using System.Collections.Generic;
+    using Xunit;
+    using Xunit.Abstractions;
+    using DataFilters.UnitTests.Helpers;
+    using FsCheck.Fluent;
+
     public class GroupExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -58,44 +59,51 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(GroupExpression)}'s constructor cannot be null");
         }
 
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(GroupExpression first, object other, bool expected, string reason)
-        {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<GroupExpression> group)
+            => group.Item.Equals(group.Item).ToProperty();
 
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_current_instance_is_not_null_and_other_is_null_Equals_should_return_false(NonNull<GroupExpression> group)
+        {
             // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+            bool actual = group.Item.Equals(null);
 
             // Assert
             actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                  .BeFalse();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)
+            => (group.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(group.Item)).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_GroupExpression_Complexity_should_be_equal_to_inner_expression_complexity(GroupExpression group)
             => (group.Complexity == group.Expression.Complexity).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_Group_Expression_which_contains_an_arbitrary_expression_IsEquivalent_should_be_return_true_when_compares_to_that_arbitrary_expression(FilterExpression filterExpression)
+        public Property Given_Group_Expression_which_contains_an_arbitrary_expression_IsEquivalent_should_be_return_true_when_compares_to_that_arbitrary_expression(NonNull<FilterExpression> filterExpression)
         {
             // Arrange
-            GroupExpression group = new(filterExpression);
+            GroupExpression group = new(filterExpression.Item);
 
             // Act
-            bool actual = group.IsEquivalentTo(filterExpression);
+            bool actual = group.IsEquivalentTo(filterExpression.Item);
+
+            // Assert
+            return actual.ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_two_GroupExpression_instances_that_wrap_equivalent_expressions_IsEquivalent_should_be_true(NonNull<FilterExpression> filterExpression)
+        {
+            // Arrange
+            GroupExpression first = new(filterExpression.Item);
+            GroupExpression other = new(filterExpression.Item);
+
+            // Act
+            bool actual = first.IsEquivalentTo(other);
 
             // Assert
             return actual.ToProperty();

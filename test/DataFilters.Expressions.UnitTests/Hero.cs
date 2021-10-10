@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DataFilters.Expressions.UnitTests
+﻿namespace DataFilters.Expressions.UnitTests
 {
+    using System;
+    using System.Collections.Generic;
+
     public class Hero : IEquatable<Hero>
     {
         public string Name { get; set; }

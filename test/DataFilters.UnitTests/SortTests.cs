@@ -1,13 +1,17 @@
-﻿using DataFilters.TestObjects;
-using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
-using static DataFilters.SortDirection;
-
-namespace DataFilters.UnitTests
+﻿namespace DataFilters.UnitTests
 {
+    using DataFilters.TestObjects;
+
+    using FluentAssertions;
+
+    using System;
+    using System.Collections.Generic;
+
+    using Xunit;
+    using Xunit.Abstractions;
+
+    using static DataFilters.SortDirection;
+
     public class SortTests
     {
         private readonly ITestOutputHelper _outputHelper;

@@ -1,28 +1,30 @@
-﻿using DataFilters.Grammar.Parsing;
-using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-
-using FluentAssertions;
-using FluentAssertions.Execution;
-
-using FsCheck;
-using FsCheck.Xunit;
-
-using Superpower;
-using Superpower.Model;
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-
-namespace DataFilters.UnitTests.Grammar.Parsing
+﻿namespace DataFilters.UnitTests.Grammar.Parsing
 {
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+    using FluentAssertions.Execution;
+
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
+
+    using Superpower;
+    using Superpower.Model;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Globalization;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
     /// <summary>
     /// Unit tests for  <see cref="FilterTokenParser"/>
     /// </summary>
@@ -52,7 +54,10 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                                                            .HaveProperty<TokenListParser<FilterToken, AsteriskExpression>>("Asterisk").And
                                                            .HaveProperty<TokenListParser<FilterToken, GroupExpression>>("Group").And
                                                            .HaveProperty<TokenListParser<FilterToken, AndExpression>>("And").And
-                                                           .HaveProperty<TokenListParser<FilterToken, RangeExpression>>("Range").And
+                                                           .HaveProperty<TokenListParser<FilterToken, IntervalExpression>>("Interval").And
+                                                           .HaveProperty<TokenListParser<FilterToken, NotExpression>>("Not").And
+                                                           .HaveProperty<TokenListParser<FilterToken, NumericValueExpression>>("Number").And
+                                                           .HaveProperty<TokenListParser<FilterToken, GuidValueExpression>>("GlobalUniqueIdentifier").And
                                                            .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
         public static IEnumerable<object[]> AlphaNumericCases
@@ -62,211 +67,151 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Bruce",
-                    new ConstantValueExpression("Bruce")
+                    new StringValueExpression("Bruce")
                 };
 
                 yield return new object[]
                 {
                     @"Vandal\*",
-                    new ConstantValueExpression("Vandal*")
+                    new StringValueExpression("Vandal*")
                 };
 
                 yield return new object[]
                 {
                     @"Van\*dal",
-                    new ConstantValueExpression("Van*dal")
+                    new StringValueExpression("Van*dal")
                 };
                 yield return new object[]
                 {
                     "1Bruce",
-                    new ConstantValueExpression("1Bruce")
+                    new StringValueExpression("1Bruce")
+                };
+
+                yield return new object[]
+                {
+                    @"0\ \,i#y",
+                    new StringValueExpression("0 ,i#y")
+                };
+
+                yield return new object[]
+                {
+                    @"E
+I\&_Oj
+\.",
+                    new StringValueExpression(@"E
+I&_Oj
+.")
+                };
+
+                yield return new object[]
+                {
+                    "39.95173047301258862",
+                    new NumericValueExpression("39.95173047301258862")
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(AlphaNumericCases))]
-        public void CanParseAlphaNumeric(string input, ConstantValueExpression expected)
+        public void Should_parse_AlphaNumeric(string input, ConstantValueExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
-            _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
 
             // Act
-            FilterExpression expression = FilterTokenParser.AlphaNumeric.Parse(tokens);
+            FilterExpression actual = FilterTokenParser.AlphaNumeric.Parse(tokens);
+
+            _outputHelper.WriteLine($"actual is '{actual.EscapedParseableString}'");
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(actual, expected);
         }
 
-        public static IEnumerable<object[]> StartsWithCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "ce*",
-                    new StartsWithExpression("ce")
-                };
-
-                string[] punctuations = { ".", "-", ":", "_" };
-
-                foreach (string punctuation in punctuations)
-                {
-                    yield return new object[]
-                    {
-                        $"{punctuation}ce*",
-                        new StartsWithExpression($"{punctuation}ce")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"ce{punctuation}*",
-                        new StartsWithExpression($"ce{punctuation}")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"c{punctuation}e*",
-                        new StartsWithExpression($"c{punctuation}e")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"{punctuation}*",
-                        new StartsWithExpression(punctuation)
-                    };
-
-                    yield return new object[]
-                    {
-                        $"{punctuation}{punctuation}ce*",
-                        new StartsWithExpression($"{punctuation}{punctuation}ce")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"{punctuation}{punctuation}ce{punctuation}{punctuation}*",
-                        new StartsWithExpression($"{punctuation}{punctuation}ce{punctuation}{punctuation}")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"c{punctuation}e{punctuation}*",
-                        new StartsWithExpression($"c{punctuation}e{punctuation}")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"{punctuation}c{punctuation}e*",
-                        new StartsWithExpression($"{punctuation}c{punctuation}e")
-                    };
-
-                    yield return new object[]
-                    {
-                        $@"\*{punctuation}c{punctuation}e*",
-                        new StartsWithExpression($"*{punctuation}c{punctuation}e")
-                    };
-                }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(StartsWithCases))]
-        public void CanParseStartsWith(string input, StartsWithExpression expected)
+        [Property]
+        public void Given_double_as_string_Number_should_parse_to_a_ConstantValueExpression_where_Value_property_holds_the_input(NormalFloat value)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
+            NumericValueExpression expected = new(value.Item.ToString(CultureInfo.InvariantCulture));
+            string input = expected.EscapedParseableString;
+
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
-            _outputHelper.WriteLine($"Tokens : ${tokens.Select(token => new { token.Kind, token.Position.Line, token.Position.Column }).Jsonify()}");
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
+
+            // Act
+            NumericValueExpression actual = FilterTokenParser.Number.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(actual, expected);
+        }
+
+        [Property]
+        public void Given_long_as_string_Number_should_parse_to_a_ConstantValueExpression_where_Value_property_holds_the_input(long value)
+        {
+            // Arrange
+            NumericValueExpression expected = new(value.ToString());
+            string input = expected.EscapedParseableString;
+
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
+
+            // Act
+            NumericValueExpression actual = FilterTokenParser.Number.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(actual, expected);
+        }
+
+        [Property]
+        public void Given_int_as_string_Number_should_parse_to_a_ConstantValueExpression_where_Value_property_holds_the_input(int value)
+        {
+            // Arrange
+            NumericValueExpression expected = new(value.ToString());
+            string input = expected.EscapedParseableString;
+
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
+
+            // Act
+            NumericValueExpression actual = FilterTokenParser.Number.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(actual, expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Should_parse_StartsWith(StartsWithExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
 
             // Act
             StartsWithExpression expression = FilterTokenParser.StartsWith.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
         }
 
-        public static IEnumerable<object[]> EndsWithCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "*ce",
-                    new EndsWithExpression("ce")
-                };
-
-                string[] punctuations = { ".", "-", ":", "_" };
-
-                foreach (string punctuation in punctuations)
-                {
-                    yield return new object[]
-                    {
-                        $"*{punctuation}ce",
-                        new EndsWithExpression($"{punctuation}ce")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*ce{punctuation}",
-                        new EndsWithExpression($"ce{punctuation}")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*c{punctuation}e",
-                        new EndsWithExpression($"c{punctuation}e")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*{punctuation}",
-                        new EndsWithExpression(punctuation)
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*{punctuation}{punctuation}ce",
-                        new EndsWithExpression($"{punctuation}{punctuation}ce")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*{punctuation}{punctuation}ce{punctuation}{punctuation}",
-                        new EndsWithExpression($"{punctuation}{punctuation}ce{punctuation}{punctuation}")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*c{punctuation}e{punctuation}",
-                        new EndsWithExpression($"c{punctuation}e{punctuation}")
-                    };
-
-                    yield return new object[]
-                    {
-                        $"*{punctuation}c{punctuation}e",
-                        new EndsWithExpression($"{punctuation}c{punctuation}e")
-                    };
-                }
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EndsWithCases))]
-        public void CanParseEndsWith(string input, EndsWithExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Should_parse_EndsWith(EndsWithExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
-            _outputHelper.WriteLine($"Tokens : ${tokens.Jsonify()}");
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
 
             // Act
             EndsWithExpression expression = FilterTokenParser.EndsWith.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
         }
+
+        private static string StringifyTokens(TokenList<FilterToken> tokens)
+            => tokens.Select(token => new { token.Kind, Value = token.ToStringValue() }).Jsonify();
 
         public static IEnumerable<object[]> ContainsCases
         {
@@ -305,7 +250,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
         [Theory]
         [MemberData(nameof(ContainsCases))]
-        public void CanParseContains(string input, ContainsExpression expectedContains)
+        public void Should_parse_Contains(string input, ContainsExpression expectedContains)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -315,7 +260,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             ContainsExpression expression = FilterTokenParser.Contains.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expectedContains);
+            AssertThatShould_parse(expression, expectedContains);
         }
 
         public static IEnumerable<object[]> OrExpressionCases
@@ -325,13 +270,13 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Bruce|bat*",
-                    new OrExpression(new ConstantValueExpression("Bruce"), new StartsWithExpression("bat"))
+                    new OrExpression(new StringValueExpression("Bruce"), new StartsWithExpression("bat"))
                 };
 
                 yield return new object[]
                 {
                     "Bruce|Wayne",
-                    new OrExpression(new ConstantValueExpression("Bruce"), new ConstantValueExpression("Wayne"))
+                    new OrExpression(new StringValueExpression("Bruce"), new StringValueExpression("Wayne"))
                 };
 
                 yield return new object[]
@@ -357,7 +302,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
         [Theory]
         [MemberData(nameof(OrExpressionCases))]
-        public void CanParseOrExpression(string input, OrExpression expected)
+        public void Should_parse_OrExpression(string input, OrExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -367,7 +312,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             OrExpression expression = FilterTokenParser.Or.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
         }
 
         public static IEnumerable<object[]> AndExpressionCases
@@ -403,68 +348,84 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
         [Theory]
         [MemberData(nameof(AndExpressionCases))]
-        public void CanParseAndExpression(string input, AndExpression expected)
+        public void Should_parse_AndExpression(string input, AndExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            AndExpression expression = FilterTokenParser.And.Parse(tokens);
+            FilterExpression expression = FilterTokenParser.And.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
         }
 
-        public static IEnumerable<object[]> NotExpressionCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "!Bruce",
-                    new NotExpression(new ConstantValueExpression("Bruce"))
-                };
-
-                yield return new object[]
-                {
-                    "!!Bruce",
-                    new NotExpression(new NotExpression(new ConstantValueExpression("Bruce")))
-                };
-
-                yield return new object[]
-                {
-                    "!Bru*",
-                    new NotExpression(new StartsWithExpression("Bru"))
-                };
-
-                yield return new object[]
-                {
-                    "![10 TO *[",
-                    new NotExpression(new RangeExpression(min : new BoundaryExpression(new ConstantValueExpression("10"), included: true)))
-                };
-
-                yield return new object[]
-                {
-                    "!(B*|C*)",
-                    new NotExpression(new GroupExpression(new OrExpression(new StartsWithExpression("B"), new StartsWithExpression("C"))))
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(NotExpressionCases))]
-        public void CanParseNotExpression(string input, NotExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _outputHelper.WriteLine($"Tokens : '{StringifyTokens(tokens)}'");
 
             // Act
             NotExpression expression = FilterTokenParser.Not.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
+        }
+
+        public static IEnumerable<object[]> NotParsingCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    "!!!!!(w%A*@,2088-08-10)",
+                    new NotExpression(
+                        new NotExpression(
+                            new NotExpression(
+                                new NotExpression(
+                                    new NotExpression(
+                                            new GroupExpression(
+                                                    new AndExpression(
+                                                    new AndExpression(new StartsWithExpression("w%A"),
+                                                                      new EndsWithExpression("@")),
+                                                    new DateExpression(2088, 8, 10)
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                };
+
+                yield return new object[]
+                {
+                    "!![50 TO 50]",
+                    new NotExpression
+                        (new NotExpression(
+                                new IntervalExpression(min: new (new NumericValueExpression("50"), true),
+                                                                               new(new NumericValueExpression("60"), true))))
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(NotParsingCases))]
+        public void Given_NotExpression_as_parseable_string_Not_should_parse_the_input(string input, NotExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+
+            // Act
+            NotExpression expression = FilterTokenParser.Not.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(expression, expected);
         }
 
         public static IEnumerable<object[]> OneOfExpressionCases
@@ -474,13 +435,13 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "[Bb]",
-                    new OneOfExpression(new ConstantValueExpression("B"),new ConstantValueExpression("b"))
+                    new OneOfExpression(new StringValueExpression("B"), new StringValueExpression("b"))
                 };
 
                 yield return new object[]
                 {
                     "[Bb]ruce",
-                    new OneOfExpression(new ConstantValueExpression("Bruce"), new ConstantValueExpression("bruce"))
+                    new OneOfExpression(new StringValueExpression("Bruce"), new StringValueExpression("bruce"))
                 };
 
                 yield return new object[]
@@ -501,7 +462,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "cat[Ww]oman",
-                    new OneOfExpression(new ConstantValueExpression("catWoman"), new ConstantValueExpression("catwoman"))
+                    new OneOfExpression(new StringValueExpression("catWoman"), new StringValueExpression("catwoman"))
                 };
 
                 yield return new object[]
@@ -513,7 +474,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "Bo[Bb]",
-                    new OneOfExpression(new ConstantValueExpression("BoB"), new ConstantValueExpression("Bob"))
+                    new OneOfExpression(new StringValueExpression("BoB"), new StringValueExpression("Bob"))
                 };
 
                 yield return new object[]
@@ -535,23 +496,30 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     new OneOfExpression(new EndsWithExpression("M"), new EndsWithExpression("m"))
                 };
 
+                yield return new object[]
                 {
-                    const char regexStart = 'a';
-                    const char regexEnd = 'z';
-                    IEnumerable<char> characters = Enumerable.Range((int)regexStart, regexEnd - regexStart + 1)
-                                                             .Select(ascii => (char)ascii);
-                    yield return new object[]
-                    {
-                        "[a-z]",
-                        new OneOfExpression(characters.Select(chr => new ConstantValueExpression(chr.ToString())).ToArray())
-                    };
-                }
+                    "[a-z]",
+                    new OneOfExpression(GetCharacters('a', 'z').Select(chr => new StringValueExpression(chr.ToString())).ToArray())
+                };
+
+                yield return new object[]
+                {
+                    "[a-zA-Z0-9]",
+                    new OneOfExpression(GetCharacters('a', 'z').Concat(GetCharacters('A', 'Z'))
+                                                               .Concat(GetCharacters('0', '9'))
+                                                               .Select(chr => new StringValueExpression(chr.ToString()))
+                                                               .ToArray())
+                };
             }
         }
 
+        private static IEnumerable<char> GetCharacters(char regexStart, char regexEnd)
+            => Enumerable.Range(regexStart, regexEnd - regexStart + 1)
+                         .Select(ascii => (char)ascii);
+
         [Theory]
         [MemberData(nameof(OneOfExpressionCases))]
-        public void CanParseOneOfExpression(string input, OneOfExpression expected)
+        public void Should_parse_OneOfExpression(string input, OneOfExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -561,7 +529,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             OneOfExpression expression = FilterTokenParser.OneOf.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -572,11 +540,12 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
-            OneOfExpression expected = bracketExpression.Item switch {
-                ConstantBracketValue constant => new(constant.Value.Select(chr => new ConstantValueExpression(chr)).ToArray()),
+            OneOfExpression expected = bracketExpression.Item switch
+            {
+                ConstantBracketValue constant => new(constant.Value.Select(chr => new StringValueExpression(chr.ToString())).ToArray()),
                 RangeBracketValue range => new(Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                          .Select(ascii => (char)ascii)
-                                                         .Select(chr =>  new ConstantValueExpression(chr)).ToArray()),
+                                                         .Select(chr => new StringValueExpression(chr.ToString())).ToArray()),
                 _ => throw new NotSupportedException()
             };
 
@@ -587,145 +556,61 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             expression.IsEquivalentTo(expected).ToProperty().VerboseCheck(_outputHelper);
         }
 
-        public static IEnumerable<object[]> RangeCases
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public void Should_parse_Interval(IntervalExpression expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+
+            // Act
+            IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(expression, expected);
+        }
+
+        public static IEnumerable<object[]> IntervalCases
         {
             get
             {
                 yield return new object[]
                 {
-                    "[10 TO 20]",
-                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included: true),
-                                        max: new BoundaryExpression(new ConstantValueExpression("20"), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "]* TO 20]",
-                    new RangeExpression(max: new BoundaryExpression(new ConstantValueExpression("20"), included: true))
-                };
-
-                yield return new object[]
-                {
-                    "[10 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "[2010-06-25 TO 2010-06-29]",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "]2010-06-25 TO 2010-06-29[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "]2010-06-25 TO 2010-06-29]",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: false),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: true)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "[2010-06-25 TO 2010-06-29[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included: true),
-                                        max: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:29), included: false)
-                    )
-                };
-
-                yield return new object[]
-                {
-                    "[2010-06-25 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new DateExpression(year: 2010, month: 06, day:25), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "[13:30:00 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : true))
-                };
-
-                yield return new object[]
-                {
-                    "]13:30:00 TO *[",
-                    new RangeExpression(min: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
-                };
-
-                yield return new object[]
-                {
-                    "]* TO 13:30:00[",
-                    new RangeExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included : false))
-                };
-
-                yield return new object[]
-                {
-                    "]* TO 13:30:00]",
-                    new RangeExpression(max: new BoundaryExpression(new TimeExpression(hours: 13, minutes: 30), included: true))
+                    "[5 TO 5[",
+                    new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
                 };
             }
         }
 
         [Theory]
-        [MemberData(nameof(RangeCases))]
-        public void CanParseRange(string input, RangeExpression expected)
+        [MemberData(nameof(IntervalCases))]
+        public void Given_interval_as_string_Parser_should_parse_to_IntervalExpression(string input, IntervalExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
+            _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
+
             // Act
-            RangeExpression expression = FilterTokenParser.Range.Parse(tokens);
+            IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(expression, expected);
         }
 
-        public static IEnumerable<object[]> GroupCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "(Bruce*)",
-                    new GroupExpression(new StartsWithExpression("Bruce"))
-                };
-
-                yield return new object[]
-                {
-                    "(Bru*|Di*)",
-                    new GroupExpression(new OrExpression(new StartsWithExpression("Bru"), new StartsWithExpression("Di")))
-                };
-
-                yield return new object[]
-                {
-                    "(B*,*man)",
-                    new GroupExpression(new AndExpression(new StartsWithExpression("B"), new EndsWithExpression("man")))
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(GroupCases))]
-        public void CanParseGroup(string input, GroupExpression expected)
+        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        public void Should_parse_text(TextExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
             // Act
-            GroupExpression expression = FilterTokenParser.Group.Parse(tokens);
+            TextExpression actual = FilterTokenParser.Text.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(expression, expected);
+            AssertThatShould_parse(actual, expected);
         }
 
         public static IEnumerable<object[]> PropertyNameCases
@@ -766,7 +651,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
 
         [Theory]
         [MemberData(nameof(PropertyNameCases))]
-        public void CanParsePropertyNameExpression(string input, PropertyName expected)
+        public void Should_parse_PropertyNameExpression(string input, PropertyName expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -790,7 +675,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=Vandal",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new ConstantValueExpression("Vandal")
+                        (FilterExpression) new StringValueExpression("Vandal")
                     )
                 };
 
@@ -799,7 +684,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "first_name=Vandal",
                     (
                         new PropertyName("first_name"),
-                        (FilterExpression) new ConstantValueExpression("Vandal")
+                        (FilterExpression) new StringValueExpression("Vandal")
                     )
                 };
 
@@ -808,7 +693,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=Vandal|Banner",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
+                        (FilterExpression) new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
                     )
                 };
 
@@ -817,7 +702,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=Vandal|Banner",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
+                        (FilterExpression) new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
                     )
                 };
 
@@ -826,9 +711,9 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Size=[10 TO 20]",
                     (
                         new PropertyName("Size"),
-                        (FilterExpression) new RangeExpression(min: new BoundaryExpression(new ConstantValueExpression("10"),
+                        (FilterExpression) new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"),
                                                                                            included: true),
-                                                               max: new BoundaryExpression(new ConstantValueExpression("20"),
+                                                               max: new BoundaryExpression(new NumericValueExpression("20"),
                                                                                            included: true))
                     )
                 };
@@ -838,7 +723,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     @"Acolytes[""Name""][""Superior""]=Vandal|Banner",
                     (
                         new PropertyName(@"Acolytes[""Name""][""Superior""]"),
-                        (FilterExpression) new OrExpression(new ConstantValueExpression("Vandal"), new ConstantValueExpression("Banner"))
+                        (FilterExpression) new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
                     )
                 };
 
@@ -847,12 +732,14 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     @"Appointment[""Date""]=]2012-10-19T15:03:45Z TO 2012-10-19T15:30:45+01:00[",
                     (
                         new PropertyName(@"Appointment[""Date""]"),
-                        (FilterExpression) new RangeExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
-                                                                                                                  new TimeExpression(hours : 15, minutes: 03, seconds: 45, offset: new TimeOffset())),
-                                                                                           included: false),
-                                                               max: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
-                                                                                                                  new TimeExpression(hours : 15, minutes: 30, seconds: 45, offset: new TimeOffset(hours: 1))),
-                                                                                           included: false)
+                        (FilterExpression) new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                                                                                                                               new TimeExpression(hours : 15, minutes: 03, seconds: 45),
+                                                                                                                               OffsetExpression.Zero),
+                                                                                              included: false),
+                                                                  max: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                                                                                                                              new TimeExpression(hours : 15, minutes: 30, seconds: 45),
+                                                                                                                              new OffsetExpression(hours: 1)),
+                                                                                              included: false)
                         )
                     )
                 };
@@ -872,10 +759,34 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Name=[Bb]o[Bb]",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression)new OneOfExpression(new ConstantValueExpression("BoB"),
-                                                              new ConstantValueExpression("Bob"),
-                                                              new ConstantValueExpression("boB"),
-                                                              new ConstantValueExpression("bob"))
+                        (FilterExpression)new OneOfExpression(new StringValueExpression("BoB"),
+                                                              new StringValueExpression("Bob"),
+                                                              new StringValueExpression("boB"),
+                                                              new StringValueExpression("bob"))
+                    )
+                };
+
+                yield return new object[]
+                {
+                    "prop=!(((1908-09-30T00:31:33.127+05:13|2000-06-19)|(00:01:40.443|*))|((2003-05-27|89ae5244-2a98-16cc-6f99-d17658594604)|(s*|*0$)))",
+                    (
+                        new PropertyName("prop"),
+                        (FilterExpression) new NotExpression(
+                                new OrExpression(
+                                new OrExpression(
+
+                                        new OrExpression(new DateTimeExpression(new DateExpression(1908, 9, 30),
+                                                                                          new TimeExpression(0, 31, 33, 127),
+                                                                                          new OffsetExpression(hours: 5, minutes: 13)),
+                                                              new DateExpression(2000, 6, 19)),
+                                        new OrExpression(new TimeExpression(minutes: 1, seconds: 40, milliseconds: 443),
+                                                              new EndsWithExpression(""))
+                                    ),
+                                        new OrExpression(new OrExpression(new DateExpression(2003, 5, 27),
+                                                                                    new GuidValueExpression("89ae5244-2a98-16cc-6f99-d17658594604")),
+                                                              new OrExpression(new StartsWithExpression("s"), new EndsWithExpression("0$"))
+                                        )
+                                ))
                     )
                 };
             }
@@ -888,7 +799,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         /// <param name="expected"></param>
         [Theory]
         [MemberData(nameof(CriterionCases))]
-        public void CanParseCriterion(string input, (PropertyName prop, FilterExpression expression) expected)
+        public void Should_parse_Criterion(string input, (PropertyName prop, FilterExpression expression) expected)
         {
             _outputHelper.WriteLine($"{nameof(input)} : '{input}'");
 
@@ -920,8 +831,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     "Firstname=Vandal&Lastname=Savage",
                     (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(2)
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new ConstantValueExpression("Vandal")))
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new StringValueExpression("Vandal")))
+                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new StringValueExpression("Savage")))
                     )
                 };
 
@@ -931,8 +842,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                     (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                         expressions => expressions.Exactly(1)
                         && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname"))
-                            && expr.expression.Equals(new OneOfExpression(new ConstantValueExpression("Vandal"),
-                                                                          new ConstantValueExpression("vandal"))))
+                            && expr.expression.Equals(new OneOfExpression(new StringValueExpression("Vandal"),
+                                                                              new StringValueExpression("vandal"))))
                     )
                 };
 
@@ -943,8 +854,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         $@"Firstname=Vand\{c}al&Lastname=Savage",
                         (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                             expressions => expressions.Exactly(2)
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new StringValueExpression($"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new StringValueExpression("Savage")))
                         )
                     };
                 }
@@ -956,8 +867,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                         $@"first_name=Vand\{c}al&last_name=Savage",
                         (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
                             expressions => expressions.Exactly(2)
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("first_name")) && expr.expression.Equals(new ConstantValueExpression($"Vand{c}al")))
-                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("last_name")) && expr.expression.Equals(new ConstantValueExpression("Savage")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("first_name")) && expr.expression.Equals(new StringValueExpression($"Vand{c}al")))
+                               && expressions.Once(expr => expr.prop.Equals(new PropertyName("last_name")) && expr.expression.Equals(new StringValueExpression("Savage")))
                         )
                     };
                 }
@@ -971,7 +882,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
         /// <param name="expectation"></param>
         [Theory]
         [MemberData(nameof(CriteriaCases))]
-        public void CanParseCriteria(string input, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
+        public void Should_parse_Criteria(string input, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -985,67 +896,18 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 .Match(expectation);
         }
 
-        public static IEnumerable<object[]> DateAndTimeCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "2019-01-12T14:33:00",
-                    new DateTimeExpression(
-                        new DateExpression(year : 2019, month: 01, day: 12),
-                        new TimeExpression(hours: 14, minutes:33)
-                    ),
-                    DateTimeExpressionKind.Unspecified
-                };
-
-                yield return new object[]
-                {
-                    "2019-01-12 14:33:00",
-                    new DateTimeExpression(
-                        new DateExpression(year : 2019, month: 01, day: 12),
-                        new TimeExpression(hours: 14, minutes:33)
-                    ),
-                    DateTimeExpressionKind.Unspecified
-                };
-
-                yield return new object[]
-                {
-                    "2019-01-12T14:33:00+01:25",
-                    new DateTimeExpression(
-                        new DateExpression(year : 2019, month: 01, day: 12),
-                        new TimeExpression(hours: 14, minutes:33, offset: new(hours : 1, minutes: 25))
-                    ),
-                    DateTimeExpressionKind.Utc
-                };
-
-                yield return new object[]
-                {
-                    "2019-01-12T14:33:00Z",
-                    new DateTimeExpression(
-                        new DateExpression(year : 2019, month: 01, day: 12),
-                        new TimeExpression(hours: 14, minutes:33, offset: new(hours : 0, minutes: 0))
-                    ),
-                    DateTimeExpressionKind.Utc
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(DateAndTimeCases))]
-        public void CanParseDateAndTime(string input, DateTimeExpression expected, DateTimeExpressionKind expectedKind)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }, StartSize = 40, Replay = "7980241211251216112,443038953718297435")]
+        public void Should_parse_DateAndTime(DateTimeExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
             // Act
             DateTimeExpression actual = FilterTokenParser.DateAndTime.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(actual, expected);
-            actual.Kind.Should()
-                       .Be(expectedKind);
+            AssertThatShould_parse(actual, expected);
         }
 
         public static IEnumerable<object[]> DateCases
@@ -1060,96 +922,65 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             }
         }
 
-        [Theory]
-        [MemberData(nameof(DateCases))]
-        public void CanParseDateCases(string input, DateExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Should_parse_DateCases(DateExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
             // Act
             DateExpression actual = FilterTokenParser.Date.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(actual, expected);
+            AssertThatShould_parse(actual, expected);
         }
 
-        public static IEnumerable<object[]> TimeCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "18:35:00",
-                    new TimeExpression(hours : 18, minutes: 35)
-                };
-
-                yield return new object[]
-                {
-                    "23:59:60",
-                    new TimeExpression(hours : 23, minutes: 59, seconds : 60)
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(TimeCases))]
-        public void CanParseTimeExpression(string input, TimeExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+
+            // Act
+            GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(actual, expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Should_parse_TimeExpression(NonNull<TimeExpression> expected)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{expected.Item.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.Item.EscapedParseableString);
 
             // Act
             TimeExpression actual = FilterTokenParser.Time.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(actual, expected);
+            AssertThatShould_parse(actual, expected.Item);
         }
 
-        public static IEnumerable<object[]> DurationCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "P3Y6M4DT12H30M5S",
-                    new DurationExpression(years: 3, months: 6, days: 4, hours: 12, minutes: 30, seconds: 5)
-                };
-
-                yield return new object[]
-                {
-                    "PT12H30M5S",
-                    new DurationExpression(hours: 12, minutes: 30, seconds: 5)
-                };
-
-                yield return new object[]
-                {
-                    "PT0H",
-                    new DurationExpression()
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(DurationCases))]
-        private void CanParseDurationExpression(string input, DurationExpression expected)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        private void Should_parse_DurationExpression(DurationExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
             // Act
             DurationExpression actual = FilterTokenParser.Duration.Parse(tokens);
 
             // Assert
-            AssertThatCanParse(actual, expected);
+            AssertThatShould_parse(actual, expected);
         }
 
-        private static void AssertThatCanParse(FilterExpression expression, FilterExpression expected)
-            => expression.Should()
-                         .NotBeSameAs(expected).And
-                         .Be(expected);
+        private static void AssertThatShould_parse(FilterExpression actual, FilterExpression expected, string reason = "")
+            => actual.Should()
+                     .NotBeSameAs(expected).And
+                     .Be(expected, reason);
     }
 }

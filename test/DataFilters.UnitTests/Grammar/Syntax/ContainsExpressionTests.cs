@@ -1,16 +1,17 @@
-﻿using DataFilters.Grammar.Syntax;
-using FluentAssertions;
-using FsCheck.Xunit;
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
-using DataFilters.UnitTests.Helpers;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using FluentAssertions;
+    using FsCheck.Xunit;
+    using FsCheck;
+
+    using System;
+    using System.Collections.Generic;
+    using Xunit;
+    using Xunit.Abstractions;
+    using DataFilters.UnitTests.Helpers;
+    using FsCheck.Fluent;
+
     public class ContainsExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -22,22 +23,32 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                                                                       .BeAssignableTo<FilterExpression>().And
                                                                       .Implement<IEquatable<ContainsExpression>>().And
                                                                       .Implement<IHaveComplexity>().And
-                                                                      .HaveConstructor(new[] { typeof(string) }).And
-                                                                      .HaveProperty<string>("Value");
+                                                                      .Implement<IParseableString>();
 
         [Fact]
-        public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
+        public void Given_string_argument_is_null_Constructor_should_thros_ArgumentNullException()
         {
             // Act
-            Action action = () => new ContainsExpression(null);
+            Action action = () => new ContainsExpression((string)null);
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentNullException>("The parameter of the constructor was null");
+                .ThrowExactly<ArgumentNullException>();
         }
 
         [Fact]
-        public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
+        public void Given_TextExpression_is_null_Constructor_should_thros_ArgumentNullException()
+        {
+            // Act
+            Action action = () => new ContainsExpression((TextExpression)null);
+
+            // Assert
+            action.Should()
+                .ThrowExactly<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Given_TextExpression_argument_is_null_Constructor_should_thros_ArgumentNullException()
         {
             // Act
             Action action = () => new ContainsExpression(string.Empty);
@@ -109,7 +120,42 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ContainsExpression_GetComplexity_should_return_1_and_0_dot_5(ContainsExpression contains)
+        public Property Given_ContainsExpression_Complexity_eq_1U002E5(ContainsExpression contains)
             => (contains.Complexity == 1.5).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_ConstainsExpression_calling_IsEquivalentTo_with_itself_should_return_true(ContainsExpression contains)
+            => (contains.IsEquivalentTo(contains)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+        {
+            // Arrange
+            ContainsExpression expression = new(text.Item);
+            string expected = $"*{text.Item.EscapedParseableString}*";
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+        [Property]
+        public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
+        {
+            // Arrange
+            ContainsExpression expression = new(text.Item);
+            StringValueExpression stringValueExpression = new(text.Item);
+            string expected = $"*{stringValueExpression.EscapedParseableString}*";
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

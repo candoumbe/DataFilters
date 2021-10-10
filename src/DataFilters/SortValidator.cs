@@ -1,10 +1,11 @@
-﻿using FluentValidation;
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using FluentValidation;
+
+    using System;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+
     /// <summary>
     /// Validates sort expression
     /// </summary>

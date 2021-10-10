@@ -1,42 +1,42 @@
-using Nuke.Common;
-using Nuke.Common.CI;
-using Nuke.Common.CI.AzurePipelines;
-using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.Execution;
-using Nuke.Common.Git;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Coverlet;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Tools.ReportGenerator;
-using Nuke.Common.Utilities;
-using Nuke.Common.Tools.GitReleaseManager;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using static Nuke.Common.ChangeLog.ChangelogTasks;
-using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
-using static Nuke.Common.Logger;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.Git.GitTasks;
-using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
-using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
-
 namespace DataFilters.ContinuousIntegration
 {
+    using Nuke.Common;
+    using Nuke.Common.CI;
+    using Nuke.Common.CI.AzurePipelines;
+    using Nuke.Common.CI.GitHubActions;
+    using Nuke.Common.Execution;
+    using Nuke.Common.Git;
+    using Nuke.Common.IO;
+    using Nuke.Common.ProjectModel;
+    using Nuke.Common.Tooling;
+    using Nuke.Common.Tools.Coverlet;
+    using Nuke.Common.Tools.DotNet;
+    using Nuke.Common.Tools.GitVersion;
+    using Nuke.Common.Tools.ReportGenerator;
+    using Nuke.Common.Utilities;
+    using Nuke.Common.Tools.GitReleaseManager;
+
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    using static Nuke.Common.ChangeLog.ChangelogTasks;
+    using static Nuke.Common.IO.FileSystemTasks;
+    using static Nuke.Common.IO.PathConstruction;
+    using static Nuke.Common.Logger;
+    using static Nuke.Common.Tools.DotNet.DotNetTasks;
+    using static Nuke.Common.Tools.Git.GitTasks;
+    using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
+    using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+
     [GitHubActions(
-        "continuous",
-        GitHubActionsImage.WindowsLatest,
-        OnPushBranchesIgnore = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
+        "integration",
+        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
+        OnPushBranchesIgnore = new[] { MainBranchName },
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(Tests), nameof(Pack), nameof(AddGithubRelease) },
+        InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
         OnPullRequestExcludePaths = new[] {
         "docs/*",
         "README.md",
@@ -45,8 +45,8 @@ namespace DataFilters.ContinuousIntegration
         }
     )]
     [GitHubActions(
-        "deployment",
-        GitHubActionsImage.WindowsLatest,
+        "delivery",
+        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
@@ -151,6 +151,8 @@ namespace DataFilters.ContinuousIntegration
 
         public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "coverage-history";
 
+        public AbsolutePath BenchmarkDirectory => OutputDirectory / "benchmarks";
+
         public const string MainBranchName = "main";
 
         public const string DevelopBranch = "develop";
@@ -194,7 +196,7 @@ namespace DataFilters.ContinuousIntegration
             .Executes(() =>
             {
                 DotNetBuild(s => s
-                    .SetNoRestore(InvokedTargets.Contains(Restore))
+                    .SetNoRestore(InvokedTargets.Contains(Restore) || SkippedTargets.Contains(Restore))
                     .SetConfiguration(Configuration)
                     .SetProjectFile(Solution)
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)
@@ -209,6 +211,9 @@ namespace DataFilters.ContinuousIntegration
             .Produces(TestResultDirectory / "*.trx")
             .Produces(TestResultDirectory / "*.xml")
             .Produces(CoverageReportHistoryDirectory / "*.xml")
+            .OnlyWhenDynamic(() => IsServerBuild || (IsLocalBuild && (GitRepository.IsOnHotfixBranch()
+                                                                       || GitRepository.IsOnReleaseBranch()
+                                                                       || GitRepository.IsOnFeatureBranch())))
             .Executes(() =>
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
@@ -451,6 +456,7 @@ namespace DataFilters.ContinuousIntegration
         public Target Publish => _ => _
             .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
             .DependsOn(Tests, Pack)
+            .Triggers(AddGithubRelease)
             .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
             .Requires(() => !(NugetApiKey.IsNullOrEmpty() || GitHubToken.IsNullOrEmpty()))
             .Requires(() => GitHasCleanWorkingCopy())
@@ -510,10 +516,36 @@ namespace DataFilters.ContinuousIntegration
                     Name = MajorMinorPatchVersion
                 };
 
-                Octokit.Release release = await gitHubClient.Repository.Release.Create(long.Parse(GitRepository.Identifier), newRelease)
+                string repositoryName = GitHubActions.GitHubRepository.Replace(GitHubActions.GitHubRepositoryOwner + "/", string.Empty);
+
+                Octokit.Release release = await gitHubClient.Repository.Release.Create(GitHubActions.GitHubRepositoryOwner, repositoryName, newRelease)
                                                                                .ConfigureAwait(false);
 
                 Info($"Github release {release.TagName} created successfully");
+            });
+
+        public Target Benchmarks => _ => _
+            .Description("Run all performance tests.")
+            .DependsOn(Compile)
+            .Produces(BenchmarkDirectory / "*")
+            .OnlyWhenStatic(() => IsLocalBuild)
+            .Executes(() =>
+            {
+                IEnumerable<Project> benchmarkProjects = Solution.GetProjects("*.PerformanceTests");
+
+                benchmarkProjects.ForEach(csproj =>
+                {
+                    DotNetRun(s =>
+                    {
+                        IReadOnlyCollection<string> frameworks = csproj.GetTargetFrameworks();
+                        return s.SetConfiguration(Configuration.Release)
+                                                            .SetProjectFile(csproj)
+                                                            .SetProcessArgumentConfigurator(args => args.Add("-- --filter {0}", "*", customValue: true)
+                                                                                                        .Add("--artifacts {0}", BenchmarkDirectory)
+                                                                                                        .Add("--join"))
+                                                            .CombineWith(frameworks, (setting, framework) => setting.SetFramework(framework));
+                    });
+                });
             });
     }
 }

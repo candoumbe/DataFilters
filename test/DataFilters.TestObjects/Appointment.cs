@@ -1,7 +1,7 @@
-using System;
-
 namespace DataFilters.TestObjects
 {
+    using System;
+
     public class Appointment
     {
         public string Name { get; set; }

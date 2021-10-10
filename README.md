@@ -13,7 +13,7 @@ Highly inspired by the elastic query syntax, it offers a powerful way to build a
   - [<a href='#' id='ends-with-expression'>Ends with</a>](#ends-with)
   - [<a href='#' id='contains-expression'>Contains</a>](#contains)
   - [<a href='#' id='isempty-expression'>Is empty</a>](#is-empty)
-  - [<a href='#' id='range-expressions'>Range expressions</a>](#range-expressions)
+  - [<a href='#' id='interval-expressions'>Interval expressions</a>](#interval-expressions)
     - [<a href='#' id='gte-expression'>Greater than or equal</a>](#greater-than-or-equal)
     - [<a href='#' id='lte-expression'>Less than or equal</a>](#less-than-or-equal)
     - [<a href='#' id='btw-expression'>Between</a>](#between)
@@ -174,6 +174,10 @@ will result in a [IFilter][class-ifilter] instance equivalent to
 IFilter filter = new Filter("nickname", Contains, "bat");
 ```
 
+💡 `contains` also work on arrays. `powers=*strength*` will search for `vigilante`s who have `strength` related powers.
+
+
+
 ## <a href='#' id='isempty-expression'>Is empty</a>
 
 Search for `vigilante` resources that have no powers.
@@ -182,16 +186,15 @@ Search for `vigilante` resources that have no powers.
 | ------------ | -------------------------------------- |
 | `powers=!*`  | `{ "field":"powers", "op":"isempty" }` |
 
+## <a href='#' id='interval-expressions'>Interval expressions</a>
 
-## <a href='#' id='range-expressions'>Range expressions</a>
-
-Range expressions are delimited by upper and a lower bound. The generic syntax is
+Interval expressions are delimited by upper and a lower bound. The generic syntax is
 
 `<field>=<min> TO <max>`
 
 where
 
-- `field` is the name of the property current range expression will be apply to
+- `field` is the name of the property current interval expression will be apply to
 - `min` is the lowest bound of the interval
 - `max` is the highest bound of the interval
 
@@ -258,7 +261,7 @@ Examples :
 - `my/beautiful/api/search?date=]1998-10-26 10:00 TO 1998-10-26 10:00[`
 - `]1998-10-12T12:20:00 TO 13:30[` is equivalent to `]1998-10-12T12:20:00 TO 1998-10-12T13:30:00[`
 
-💡 You can apply filters to any sub-property or a given collection
+💡 You can apply filters to any sub-property of a given collection
 
 Example : 
 `acolytes["name"]='robin'` will filter any `vigilante` resource where at least one item in `acolytes` array with `name` equals to `robin`.
@@ -273,7 +276,7 @@ are equivalent
 ## <a href="regex-expression">Regular expression</a>
 The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported. 
 A bracket expression. Matches a single character that is contained within the brackets. 
-For example, `[abc]` matches "a", "b", or "c". `[a-z]` specifies a range which matches any lowercase letter from "a" to "z".
+For example, `[abc]` matches `a`, `b`, or `c`. `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
 
 `BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
 
@@ -288,7 +291,7 @@ Use the coma character `,` to combine multiple expressions using logical AND ope
 
 | Query string          | JSON                                                                                                                                    |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------|
-| `"nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| `nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 
 will result in a [IFilter][class-ifilter] instance equivalent to
@@ -312,7 +315,7 @@ ends with `"man"`
 
 | Query string          | JSON                                                                                                                                    |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `"nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| `nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
 
@@ -336,7 +339,7 @@ Search for `vigilante` resources where the value of `nickname` property does not
 
 | Query string   | JSON                                                    |
 | -------------- | ------------------------------------------------------- |
-| `"nickname=!B` | `{"field":"nickname", "op":"nstartswith", "value":"B"}` |
+| `nickname=!B*` | `{"field":"nickname", "op":"nstartswith", "value":"B"}` |
 
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
 
@@ -401,13 +404,20 @@ a special character.
 
 | Query string   | JSON                                                |
 | -------------- | --------------------------------------------------- |
-| `"comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` |
+| `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` |
 
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
+
 
 ```csharp
 IFilter filter = new Filter("comment", EndsWith, "!");
 ```
+
+💡 For longer texts, just wrap it between quotes and you're good to go
+| Query string   | JSON                                                |
+| -------------- | --------------------------------------------------- |
+| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}`   |
+
 
 ## <a href='#' id='sorting'>Sorting</a>
 

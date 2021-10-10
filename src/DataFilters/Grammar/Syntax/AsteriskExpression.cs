@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// <see cref="AsteriskExpression"/> represent a <c>*</c> that can be used as a building block for more
     /// complex <see cref="FilterExpression"/>s.
@@ -11,10 +11,13 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public bool Equals(AsteriskExpression other) => other is not null;
 
-        ///<inheritdoc/> 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as AsteriskExpression);
 
-        ///<inheritdoc/> 
+        ///<inheritdoc/>
         public override int GetHashCode() => 1;
+
+        ///<inheritdoc/>
+        public override string EscapedParseableString => "*";
     }
 }

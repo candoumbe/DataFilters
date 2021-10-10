@@ -6,6 +6,7 @@
     using FluentAssertions;
 
     using FsCheck;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -29,8 +30,8 @@
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<BracketExpression>>().And
             .Implement<IHaveComplexity>().And
-            .HaveConstructor(new[] { typeof(BracketValue) }).And
-            .HaveProperty<BracketValue>("Value")
+            .HaveConstructor(new[] { typeof(BracketValue[]) }).And
+            .HaveProperty<IEnumerable<BracketValue>>("Values")
             ;
 
         [Fact]
@@ -41,11 +42,11 @@
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentNullException>($"{nameof(BracketExpression)}.{nameof(BracketExpression.Value)} cannot be null");
+                .ThrowExactly<ArgumentNullException>($"{nameof(BracketExpression)}.{nameof(BracketExpression.Values)} cannot be null");
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Two_BracketExpression_instances_built_with_same_input_should_be_equals(NonNull<BracketValue> inputs)
+        public Property Two_BracketExpression_instances_built_with_same_input_should_be_equals(NonEmptyArray<BracketValue> inputs)
         {
             // Arrange
             BracketExpression first = new(inputs.Item);
@@ -59,7 +60,8 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonNull<BracketValue> one, NonNull<BracketValue> two)
+        public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<BracketValue> one,
+                                                                                                    NonEmptyArray<BracketValue> two)
         {
             // Arrange
             BracketExpression first = new(one.Item);
@@ -69,16 +71,16 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Complexity_should_depends_on_input(NonNull<BracketValue> value)
+        public void Complexity_should_depends_on_input(NonEmptyArray<BracketValue> values)
         {
             // Arrange
-            BracketExpression bracketExpression = new(value.Item);
-            double expected = value.Item switch
+            BracketExpression bracketExpression = new(values.Item);
+            double expected = values.Item.Sum( value => value switch
             {
                 ConstantBracketValue constant => 1.5 * constant.Value.Length,
                 RangeBracketValue range => 1.5 * (range.End - range.Start + 1),
                 _ => throw new NotSupportedException()
-            };
+            });
 
             // Act
             double complexity = bracketExpression.Complexity;
@@ -95,7 +97,7 @@
 
             OneOfExpression oneOf = new (Enumerable.Range(rangeBracketValue.Item.Start,
                                                           rangeBracketValue.Item.End - rangeBracketValue.Item.Start + 1)
-                                                   .Select(ascii => new ConstantValueExpression(((char)ascii).ToString()))
+                                                   .Select(ascii => new StringValueExpression(((char)ascii).ToString()))
                                                    .ToArray());
 
             // Act

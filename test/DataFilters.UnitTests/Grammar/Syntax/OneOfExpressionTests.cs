@@ -1,20 +1,21 @@
-﻿using DataFilters.Grammar.Syntax;
-using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-
-using FsCheck.Xunit;
-
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Xunit;
-using Xunit.Abstractions;
-
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+
+    using FsCheck.Xunit;
+
+    using FsCheck;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using FsCheck.Fluent;
+
     public class OneOfExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -29,7 +30,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<OneOfExpression>>().And
             .HaveConstructor(new[] { typeof(FilterExpression[]) }).And
-            .HaveProperty<IEnumerable<FilterExpression>>("Values");
+            .HaveProperty<IReadOnlyCollection<FilterExpression>>("Values");
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -42,30 +43,41 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 .ThrowExactly<ArgumentNullException>($"The parameter {nameof(OneOfExpression)}'s constructor cannot be null");
         }
 
+        [Fact]
+        public void Constructor_throws_InvalidOperationException_when_values_is_empty()
+        {
+            // Act
+            Action ctorWithEmptyArray = () => new OneOfExpression(Array.Empty<FilterExpression>());
+
+            // Assert
+            ctorWithEmptyArray.Should()
+                              .ThrowExactly<InvalidOperationException>($"The parameter {nameof(OneOfExpression)}'s constructor cannot be a empty array");
+        }
+
         public static IEnumerable<object[]> EqualsCases
         {
             get
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop2"), new ConstantValueExpression("prop1")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop2"), new StringValueExpression("prop1")),
                     false,
                     "comparing two different instances with same data but the order does not matter"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop3")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
                 };
@@ -104,42 +116,61 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             {
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop2"), new ConstantValueExpression("prop1")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop2"), new StringValueExpression("prop1")),
                     true,
                     "comparing two different instances with same data but the order does not matter"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop3")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2"), new ConstantValueExpression("prop3")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2"), new StringValueExpression("prop3")),
                     false,
                     "the other instance contains all data of the first instance and one item that is not in the current instance"
                 };
 
                 yield return new object[]
                 {
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
-                    new OneOfExpression(new ConstantValueExpression("prop1"), new ConstantValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds duplicates is equivalent a {nameof(OneOfExpression)} with no duplicate"
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
+                    true,
+                    $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to an {nameof(OrExpression)} with the same values"
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true)),
+                                               new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    new NumericValueExpression("-1"),
+                    true,
+                    $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to its simplified version"
                 };
             }
         }
@@ -157,7 +188,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression, PositiveInt n)
+        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(StringValueExpression filterExpression, PositiveInt n)
             => Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -185,7 +216,126 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(OneOfExpression oneOfExpression)
-            => (oneOfExpression.Complexity == oneOfExpression.Values.Sum(expr => expr.Complexity)).ToProperty();
+        public Property Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(NonEmptyArray<FilterExpression> expressions)
+        {
+            // Arrange
+            OneOfExpression oneOfExpression = new(expressions.Item);
+
+            return (oneOfExpression.Complexity == oneOfExpression.Values.Sum(expr => expr.Complexity)).ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_OneOfExpression_with_same_values_repetead_more_than_once_Simplify_should_filter_out_duplicated_values(NonEmptyArray<FilterExpression> expressions)
+        {
+            // Arrange
+            OneOfExpression oneOf = new(expressions.Item);
+
+            double complexityBeforeCallingSimplify = oneOf.Complexity;
+
+            // Act
+            oneOf.Simplify();
+
+            // Assert
+            return (oneOf.Complexity <= complexityBeforeCallingSimplify).ToProperty();
+        }
+
+        public static IEnumerable<object[]> SimplifyCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new OneOfExpression(new StringValueExpression("val1"), new StringValueExpression("val2")),
+                    new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val2"))
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new StringValueExpression("val1"), new StringValueExpression("val1")),
+                    new StringValueExpression("val1")
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new StringValueExpression("val1"), new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val1"))),
+                    new StringValueExpression("val1")
+                };
+
+                yield return new object[]
+                {
+                    new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true)),
+                                               new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                                new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    new NumericValueExpression("-1"),
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_OneOfExpression_Simplify_should_output_expected_expression(OneOfExpression input, FilterExpression expected)
+        {
+            // Act
+            FilterExpression actual = input.Simplify();
+
+            // Assert
+            actual.Should().Be(expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_requivalent_to_the_inner_expression(NonNull<FilterExpression> expression)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : {expression.Item}");
+            OneOfExpression oneOf = new(expression.Item);
+
+            // Act
+            FilterExpression simplified = oneOf.Simplify();
+
+            // Assert
+            simplified.IsEquivalentTo(expression.Item)
+                      .Should()
+                      .BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(PositiveInt count, NonNull<FilterExpression> expression)
+        {
+            // Arrange
+            FilterExpression[] expressions = Enumerable.Repeat(expression.Item, count.Item + 2)
+                                                       .ToArray();
+
+            OneOfExpression oneOfExpression = new(expressions);
+
+            double complexityBeforeFirstSimplification = oneOfExpression.Complexity;
+
+            // Act
+            FilterExpression simplified = oneOfExpression.Simplify();
+
+            // Assert
+            simplified.Complexity.Should()
+                                 .BeLessThan(complexityBeforeFirstSimplification, "The expression must be simpler");
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_OneOxpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
+        {
+            // Arrange
+            FilterExpression expected = new OneOfExpression(first.Item.Concat(second.Item)
+                                                                      .Concat(third.Item)
+                                                                      .ToArray()).Simplify();
+
+            OneOfExpression initial = new(new OneOfExpression(first.Item),
+                                          new OneOfExpression(second.Item),
+                                          new OneOfExpression(third.Item));
+
+            // Act
+            FilterExpression actual = initial.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

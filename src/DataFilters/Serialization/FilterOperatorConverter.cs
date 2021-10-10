@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿namespace DataFilters.Converters
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
 #if NETSTANDARD1_3
-using Newtonsoft.Json;
+    using Newtonsoft.Json;
 #else
-using System.Text.Json;
-using System.Text.Json.Serialization;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 #endif
 
-namespace DataFilters.Converters
-{
     /// <summary>
     /// <see cref="JsonConverter"/> implementation that can handle (de)serialization of <see cref="FilterOperator"/>
     /// from/to JSon .

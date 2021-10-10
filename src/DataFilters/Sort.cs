@@ -1,12 +1,12 @@
-﻿#if STRING_SEGMENT
-using Microsoft.Extensions.Primitives;
-# endif
-using System;
-
-using static DataFilters.SortDirection;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+#if STRING_SEGMENT
+    using Microsoft.Extensions.Primitives;
+#endif
+    using System;
+
+    using static DataFilters.SortDirection;
+
     /// <summary>
     /// An expression to order <typeparamref name="T"/> elements.
     /// </summary>

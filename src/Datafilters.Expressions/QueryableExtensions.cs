@@ -1,10 +1,11 @@
-﻿using DataFilters;
-using DataFilters.Expressions;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-
-namespace System.Linq
+﻿namespace System.Linq
 {
+    using DataFilters;
+    using DataFilters.Expressions;
+
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
+
     /// <summary>
     /// Contains utility methods for Queryable
     /// </summary>

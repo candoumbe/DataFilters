@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Utilities;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Utilities;
+
     /// <summary>
     /// Allow to sort by multiple <see cref="Sort{T}"/> expression
     /// </summary>

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] / 2021-10-10
+- Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
+`FilterExpression` to a less complex form.
+- Renamed `RangeExpression` to `IntervalExpression` [BREAKING]
+- Added `IParseableString` interface which defines :
+  - `EscapedParseableString` property that holds a string representation of a `FilterExpression` instance ([#26](https://github.com/candoumbe/datafilters/issues/26)).
+  - `OriginalString` property that holds the string representation of a filter BEFORE being escaped.
+- Added `Deconstruct` method for `TimeExpression` class.
+- Added `BoolValueExpression`
+- Added [`NumericValueExpression`](/src/DataFilters/Grammar/Syntax/NumericValueExpression.cs) to improve parsing of numeric values ([#29](https://github.com/candoumbe/datafilters/issues/29))
+- Added [`TextExpression`](/src/DataFilters/Grammar/Syntax/TextExpression.cs)
+- Made `ConstantValueExpression` abstract [BREAKING]
+
 ## [0.7.0] / 2021-06-29
 - Fixed missing documentation ([#17](https://github.com/candoumbe/datafilters/issues/17))
 - Fixed parsing `*<regex>`, `<regex>*` expressions ([#18](https://github.com/candoumbe/datafilters/issues/18))
@@ -34,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.5.0] / 2021-05-02
-- Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) as extension point to configure the way to lookup 
+- Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) base class as extension point to configure the way to lookup 
 for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issues/8))
 - Added `ToFilter<T>(string, PropertyNameResolutionStrategy)` overload
 - Added `ToSort<T>(string, PropertyNameResolutionStrategy)` overload
@@ -62,7 +75,7 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Moved `FilterExtensions.ToFilter<T>(this string)` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
 - Changed `ConstantExpression` to `ConstantValueExpression` [BREAKING]
 - Changed subproperty syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
-- Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/RangeExpression.cs) with datetime values
+- Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/IntervalExpression.cs) with datetime values
 - Enabled Source Link
 
 ## [0.2.2] / 2020-12-05
@@ -73,15 +86,16 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters.git/compare/0.7.0...HEAD
-[0.7.0]: https://github.com/candoumbe/DataFilters.git/compare/0.6.0...0.7.0
-[0.6.0]: https://github.com/candoumbe/DataFilters.git/compare/0.5.0...0.6.0
-[0.5.0]: https://github.com/candoumbe/DataFilters.git/compare/0.4.1...0.5.0
-[0.4.1]: https://github.com/candoumbe/DataFilters.git/compare/0.4.0...0.4.1
-[0.4.0]: https://github.com/candoumbe/DataFilters.git/compare/0.3.2...0.4.0
-[0.3.2]: https://github.com/candoumbe/DataFilters.git/compare/0.3.1...0.3.2
-[0.3.1]: https://github.com/candoumbe/DataFilters.git/compare/0.3.0...0.3.1
-[0.3.0]: https://github.com/candoumbe/DataFilters.git/compare/0.2.2...0.3.0
-[0.2.2]: https://github.com/candoumbe/DataFilters.git/compare/0.2.0...0.2.2
-[0.2.0]: https://github.com/candoumbe/DataFilters.git/tree/0.2.0
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/candoumbe/DataFilters/compare/0.7.0...0.8.0
+[0.7.0]: https://github.com/candoumbe/DataFilters/compare/0.6.0...0.7.0
+[0.6.0]: https://github.com/candoumbe/DataFilters/compare/0.5.0...0.6.0
+[0.5.0]: https://github.com/candoumbe/DataFilters/compare/0.4.1...0.5.0
+[0.4.1]: https://github.com/candoumbe/DataFilters/compare/0.4.0...0.4.1
+[0.4.0]: https://github.com/candoumbe/DataFilters/compare/0.3.2...0.4.0
+[0.3.2]: https://github.com/candoumbe/DataFilters/compare/0.3.1...0.3.2
+[0.3.1]: https://github.com/candoumbe/DataFilters/compare/0.3.0...0.3.1
+[0.3.0]: https://github.com/candoumbe/DataFilters/compare/0.2.2...0.3.0
+[0.2.2]: https://github.com/candoumbe/DataFilters/compare/0.2.0...0.2.2
+[0.2.0]: https://github.com/candoumbe/DataFilters/tree/0.2.0
 

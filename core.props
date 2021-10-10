@@ -41,20 +41,24 @@
     <When Condition="'$(TargetFramework)' == 'net5.0'">
       <ItemGroup>
         <PackageReference Include="FluentValidation" Version="9.*" />
+        <PackageReference Include="Ultimately" Version="2.1.1" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="FluentValidation" Version="8.*" />
+        <PackageReference Include="Optional" Version="4.0.0"/>
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
     <PackageReference Include="Candoumbe.MiscUtilities" Version="0.5.3"/>
-    <PackageReference Include="Optional" Version="4.0.0" />
     <PackageReference Include="Roslynator.Analyzers" Version="3.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
+    <PackageReference Include="Ardalis.GuardClauses" Version="3.2.0" />
   </ItemGroup>
 </Project>

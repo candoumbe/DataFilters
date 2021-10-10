@@ -1,11 +1,11 @@
-﻿using FluentAssertions;
-
-using FluentValidation.Results;
-
-using Xunit;
-
-namespace DataFilters.UnitTests.Validators
+﻿namespace DataFilters.UnitTests.Validators
 {
+    using FluentAssertions;
+
+    using FluentValidation.Results;
+
+    using Xunit;
+
     public class SortValidatorTests
     {
         private readonly SortValidator _sut;

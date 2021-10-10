@@ -1,10 +1,10 @@
-using System;
-
 namespace DataFilters.Grammar.Syntax
 {
+    using System;
+
     /// <summary>
     /// A <see cref="FilterExpression"/> implementation that contains values associated to a duration (see "https://en.wikipedia.org/wiki/ISO_8601#Durations")
-    /// </summary>   
+    /// </summary>
     public sealed class DurationExpression : FilterExpression, IEquatable<DurationExpression>
     {
         /// <summary>
@@ -136,5 +136,12 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
+
+        ///<inheritdoc/>
+        public override string EscapedParseableString => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) switch
+        {
+            (0, 0, 0, 0, 0, 0, 0) => "PT0S",
+            _ => $"P{(Years > 0 ? $"{Years}Y" : string.Empty)}{(Months > 0 ? $"{Months}M" : string.Empty)}{(Weeks > 0 ? $"{Weeks}W" : string.Empty)}{(Days > 0 ? $"{Days}D" : string.Empty)}T{(Hours > 0 ? $"{Hours}H" : string.Empty)}{(Minutes > 0 ? $"{Minutes}M" : string.Empty)}{(Seconds > 0 ? $"{Seconds}S" : string.Empty)}"
+        };
     }
 }

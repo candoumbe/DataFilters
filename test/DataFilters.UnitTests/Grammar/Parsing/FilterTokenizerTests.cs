@@ -1,18 +1,23 @@
-﻿using DataFilters.Grammar.Parsing;
-using FluentAssertions;
-using Superpower;
-using Superpower.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
-using static DataFilters.Grammar.Parsing.FilterToken;
-
-namespace DataFilters.UnitTests.Grammar.Parsing
+﻿namespace DataFilters.UnitTests.Grammar.Parsing
 {
+    using DataFilters.Grammar.Parsing;
+
+    using FluentAssertions;
+
+    using Superpower;
+    using Superpower.Model;
+
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
+
+    using Xunit;
+    using Xunit.Abstractions;
+    using Xunit.Categories;
+
+    using static DataFilters.Grammar.Parsing.FilterToken;
+
     [UnitTest]
     [Feature(nameof(DataFilters.Grammar.Parsing))]
     [Feature(nameof(FilterTokenizer))]
@@ -156,7 +161,7 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "!Bruce",
                     (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(6)
-                                                                                && results.Once(result => result.Kind == Not && result.Span.EqualsValue("!") && result.Span.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Bang && result.Span.EqualsValue("!") && result.Span.Position.Column == 1)
                                                                                && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("B") && result.Span.Position.Column == 2)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("r") && result.Span.Position.Column == 3)
                                                                                 && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("u") && result.Span.Position.Column == 4)
@@ -184,10 +189,12 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 yield return new object[]
                 {
                     "10-20",
-                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
-                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("10"))
-                                                                                && results.Once(result => result.Kind == Dash && result.Span.EqualsValue("-"))
-                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("20"))
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(5)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("1") && result.Position.Column == 1)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("0") && result.Position.Column == 2)
+                                                                                && results.Once(result => result.Kind == Dash  && result.Span.EqualsValue("-"))
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2")  && result.Position.Column == 4)
+                                                                                && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("0") && result.Position.Column == 5)
                     )
                 };
 
@@ -212,11 +219,17 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                 {
                     "2019-10-22",
                      (Expression<Func<TokenList<FilterToken>, bool>>)(results =>
-                        results.Exactly(5)
-                        && results.Exactly(result => result.Kind == Dash && result.Span.EqualsValue("-"), 2)
-                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2019"))
-                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("10"))
-                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("22"))
+                        results.Exactly(10)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Position.Column == 1)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("0") && result.Position.Column == 2)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("1") && result.Position.Column == 3)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("9") && result.Position.Column == 4)
+                        && results.Once(result => result.Kind == Dash  && result.Span.EqualsValue("-") && result.Position.Column == 5)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("1") && result.Position.Column == 6)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("0") && result.Position.Column == 7)
+                        && results.Once(result => result.Kind == Dash  && result.Span.EqualsValue("-") && result.Position.Column == 8)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Position.Column == 9)
+                        && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Position.Column == 10)
                     )
                 };
 
@@ -298,6 +311,64 @@ namespace DataFilters.UnitTests.Grammar.Parsing
                                                                                 && results.Once(result => result.Kind == None && result.Span.EqualsValue("+"))
                     )
                 };
+
+                foreach (char chr in FilterTokenizer.SpecialCharacters)
+                {
+                    switch (chr)
+                    {
+                        case FilterTokenizer.DoubleQuote:
+                            yield return new object[]
+                            {
+                                @$"""\{chr}""",
+                                (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                            && results.Once(result => result.Kind == DoubleQuote
+                                                                                                                         && result.Position.Column == 1)
+                                                                                            && results.Once(result => result.Kind == Escaped
+                                                                                                                      && result.Position.Column == 3
+                                                                                                                      && result.Span.EqualsValue(@""""))
+                                                                                            && results.Once(result => result.Kind == DoubleQuote
+                                                                                                                      && result.Position.Column == 4)
+                                )
+                            };
+                            break;
+                        case FilterTokenizer.BackSlash:
+                            yield return new object[]
+                            {
+                                @$"""\{chr}""",
+                                (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                            && results.Once(result => result.Kind == DoubleQuote && result.Position.Column == 1)
+                                                                                            && results.Once(result => result.Kind == Escaped
+                                                                                                                      && result.Position.Column == 3
+                                                                                                                      && result.Span.EqualsValue(@"\"))
+                                                                                            && results.Once(result => result.Kind == DoubleQuote
+                                                                                                                      && result.Position.Column == 4)
+                                )
+                            };
+                            break;
+                        default:
+                            yield return new object[]
+                            {
+                                @$"""\{chr}""",
+                                (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(4)
+                                                                                            && results.Once(result => result.Kind == DoubleQuote && result.Position.Column == 1)
+                                                                                            && results.Once(result => result.Kind == Escaped && result.Position.Column == 2 && result.Span.EqualsValue("\\"))
+                                                                                            && results.Once(result => result.Kind == Escaped && result.Position.Column == 3 && result.Span.EqualsValue($"{chr}"))
+                                                                                            && results.Once(result => result.Kind == DoubleQuote && result.Position.Column == 4)
+                                )
+                            };
+                            break;
+                    }
+                }
+
+                yield return new object[]
+                {
+                    @"""\[",
+                    (Expression<Func<TokenList<FilterToken>, bool>>)(results => results.Exactly(3)
+                                                                                && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@""""))
+                                                                                && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue(@"\"))
+                                                                                && results.Once(result => result.Kind == Escaped && result.Span.EqualsValue("["))
+                    )
+                };
             }
         }
 
@@ -309,8 +380,8 @@ namespace DataFilters.UnitTests.Grammar.Parsing
             // Act
             TokenList<FilterToken> tokens = _sut.Tokenize(input);
 
-            // Assert
-            _outputHelper.WriteLine($"Tokens : {tokens.Select(token => new { Value = token.ToStringValue(), token.Kind, token.Position.Column, token.Position.Line, }).Jsonify()}");
+            // Assert 
+            _outputHelper.WriteLine($"Tokens : {tokens.Select(token => new { Value = token.ToStringValue(), Kind = token.Kind.ToString(), token.Position.Column }).Jsonify()}");
 
             tokens.Should()
                 .Match(expectation);

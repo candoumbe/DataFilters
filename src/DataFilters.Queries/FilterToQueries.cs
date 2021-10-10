@@ -1,10 +1,10 @@
-﻿using Queries.Core.Parts.Clauses;
-
-using System;
-using System.Linq;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using Queries.Core.Parts.Clauses;
+
+    using System;
+    using System.Linq;
+
     /// <summary>
     /// Extensions method <see cref="IFilter"/> type.
     /// </summary>

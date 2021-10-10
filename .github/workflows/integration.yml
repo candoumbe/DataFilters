@@ -9,18 +9,17 @@
 #
 #     - To trigger manual generation invoke:
 #
-#         nuke --generate-configuration GitHubActions_continuous --host GitHubActions
+#         nuke --generate-configuration GitHubActions_integration --host GitHubActions
 #
 # </auto-generated>
 # ------------------------------------------------------------------------------
 
-name: continuous
+name: integration
 
 on:
   push:
     branches-ignore:
       - main
-      - 'release/*'
   pull_request:
     branches:
       - develop
@@ -43,8 +42,34 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Tests Pack AddGithubRelease'
-        run: ./build.cmd Tests Pack AddGithubRelease
+      - name: Run './build.cmd Tests Pack'
+        run: ./build.cmd Tests Pack
+      - uses: actions/upload-artifact@v1
+        with:
+          name: tests-results
+          path: output/tests-results
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-history
+          path: output/coverage-history
+      - uses: actions/upload-artifact@v1
+        with:
+          name: artifacts
+          path: output/artifacts
+  macOS-latest:
+    name: macOS-latest
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache .nuke/temp, ~/.nuget/packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            .nuke/temp
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+      - name: Run './build.cmd Tests Pack'
+        run: ./build.cmd Tests Pack
       - uses: actions/upload-artifact@v1
         with:
           name: tests-results

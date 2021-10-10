@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-
-using static DataFilters.FilterOperator;
-using static System.Linq.Expressions.Expression;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using System.Reflection;
+
+    using static DataFilters.FilterOperator;
+    using static System.Linq.Expressions.Expression;
+
     /// <summary>
     /// Extension methods for <see cref="IFilter"/> type.
     /// </summary>
@@ -150,11 +150,13 @@ namespace DataFilters
                 return contains;
             }
 
+            // Tests if membertype is a "DateTime" type
             static bool IsDatetimeMember(Type memberType) => memberType == typeof(DateTime)
                                                              || memberType == typeof(DateTime?)
                                                              || memberType == typeof(DateTimeOffset)
                                                              || memberType == typeof(DateTimeOffset?);
 
+            // Builds a ConstantExpression that will hold a value that has a specific type
             static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
             {
                 ConstantExpression ce;
@@ -176,6 +178,7 @@ namespace DataFilters
                 return ce;
             }
 
+            // local function that compute the body of a C# expression by applying the specified operator and value onto a property
             static Expression ComputeBodyExpression(MemberExpression property, FilterOperator @operator, object value)
             {
                 ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(((PropertyInfo)property.Member).PropertyType, value);
@@ -214,13 +217,9 @@ namespace DataFilters
                         Type enumerableGenericType = targetType.GenericTypeArguments[0];
                         TypeInfo typeInfo = enumerableGenericType.GetTypeInfo();
                         ParameterExpression localParameter = Parameter(enumerableGenericType);
-                        Expression localBody = null;
+                        Expression localBody;
 
-                        if (typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType))
-                        {
-                            localBody = ComputeBodyExpression(property, @operator, value);
-                        }
-                        else
+                        if (!(typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType)))
                         {
                             MemberExpression localProperty = Property(localParameter, fields.Single());
                             localBody = ComputeBodyExpression(localProperty, @operator, value);
@@ -291,6 +290,15 @@ namespace DataFilters
                 return body;
             }
 
+            // local function that can combine two expressions using either AND or OR operators
+            static Expression<Func<T, bool>> MergeExpressions(Expression<Func<T, bool>> first, Expression<Func<T, bool>> second, FilterLogic logic)
+                => logic switch
+                {
+                    FilterLogic.And => first.AndAlso(second),
+                    FilterLogic.Or => first.OrElse(second),
+                    _ => throw new NotSupportedException("Unsupported filter logic"),
+                };
+
             if (filter == null)
             {
                 throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
@@ -327,15 +335,11 @@ namespace DataFilters
                 case MultiFilter dcf:
                     {
                         Expression<Func<T, bool>> expression = null;
-                        // local function that can combine two expressions using either AND or OR operators
-                        Func<Expression<Func<T, bool>>, Expression<Func<T, bool>>, Expression<Func<T, bool>>> expressionMerger = dcf.Logic == FilterLogic.And
-                            ? ((first, second) => first.AndAlso(second))
-                            : ((first, second) => first.OrElse(second));
                         foreach (IFilter item in dcf.Filters)
                         {
                             expression = expression == null
                                 ? item.ToExpression<T>()
-                                : expressionMerger(expression, item.ToExpression<T>());
+                                : MergeExpressions(expression, item.ToExpression<T>(), dcf.Logic);
                         }
 
                         filterExpression = expression;

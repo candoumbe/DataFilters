@@ -1,56 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Utilities;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Utilities;
+
     /// <summary>
-    /// A <see cref="FilterExpression"/> that holds a regex pattern as its <see cref="Value"/>.
+    /// A <see cref="FilterExpression"/> that holds a regex pattern as its <see cref="Values"/>.
     /// </summary>
     /// <remarks>
     /// As a regular expression can have many form, the constructor gives a way to define if it has :
     /// <list type="bullet">
     ///  <item>a range : <c>[a-f]</c> would be built like <c>new RegularExpression(new RegularRangeValue('a', 'f'))</c></item>
     ///  <item>a set of values : <c>[aMn]</c> would be built by using <see cref="ConstantBracketValue"/> as constructor parameters</item>
-    ///  <item>a combination of both : <c>[a-fMn]</c> by using<c>{ ('a', 'f', true), ('M', 'M', false), ('n', 'n', false),  }</c> to <see cref="Value"/></item>
+    ///  <item>a combination of both : <c>[a-fMn]</c> by using<c>{ ('a', 'f', true), ('M', 'M', false), ('n', 'n', false),  }</c> to <see cref="Values"/></item>
     /// </list>
     /// </remarks>
-    public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>, IHaveComplexity
+    public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>
     {
+        private static readonly IEqualityComparer<BracketValue[]> equalityComparer = new ArrayEqualityComparer<BracketValue>();
+
         /// <summary>
         /// Builds a new <see cref="BracketExpression"/> instance.
         /// </summary>
-        /// <param name="value"></param>
-        public BracketExpression(BracketValue value)
+        /// <param name="values"></param>
+        public BracketExpression(params BracketValue[] values)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            if (values is null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            Values = values.Where(value => value is not null)
+                           .ToArray();
         }
 
         /// <summary>
         /// Values of the original regex
         /// </summary>
-        public BracketValue Value { get; }
+        public IEnumerable<BracketValue> Values { get; }
 
         ///<inheritdoc/>
-        public bool Equals(BracketExpression other) => Value.Equals(other?.Value);
+        public bool Equals(BracketExpression other) => other is not null  && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as BracketExpression);
 
         ///<inheritdoc/>
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => equalityComparer.GetHashCode(Values.ToArray());
 
         ///<inheritdoc/>
-        public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Value)}]";
+        public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Values)}]";
 
         ///<inheritdoc/>
-        public override double Complexity => Value switch {
+        public override double Complexity => Values.Sum(value => value switch
+        {
             ConstantBracketValue constant => 1.5 * constant.Value.Length,
-            RangeBracketValue  range  => 1.5 * (range.End - range.Start + 1),
+            RangeBracketValue range => 1.5 * (range.End - range.Start + 1),
             _ => throw new NotSupportedException("Unsupported value")
-        };
+        });
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
@@ -68,20 +77,23 @@ namespace DataFilters.Grammar.Syntax
                 }
                 else if (other is OneOfExpression oneOf)
                 {
-                    equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<ConstantValueExpression>().Count())
-                        && oneOf.Values.All(x => x is ConstantValueExpression constant && constant.Value is string)
-                        && Value switch
+                    equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<StringValueExpression>().Count())
+                        && oneOf.Values.All(x => x is StringValueExpression constant)
+                        && Values.All(value => value switch
                         {
-                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString()))),
+                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
                             RangeBracketValue range => Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                                  .Select(ascii => (char)ascii)
-                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<ConstantValueExpression>().Value.Equals(chr.ToString()))),
+                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
                             _ => throw new NotSupportedException("Unsupported value")
-                        };
+                        });
                 }
             }
 
             return equivalent;
         }
+
+        ///<inheritdoc/>
+        public override string EscapedParseableString => $"[{string.Join(",", Values)}]";
     }
 }

@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace DataFilters.Converters
+{
+    using System;
+    using System.Collections.Generic;
 
 #if NETSTANDARD1_3
-using System.Collections.Immutable;
-using System.Linq;
+    using System.Collections.Immutable;
+    using System.Linq;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 #else
-using System.Text.Json;
-using System.Text.Json.Serialization;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 #endif
 
-namespace DataFilters.Converters
-{
     /// <summary>
     /// <see cref="JsonConverter"/> implementation that allow to convert json string from/to <see cref="MultiFilter"/>
     /// </summary>
@@ -137,7 +137,7 @@ namespace DataFilters.Converters
                     // and try to get a MultFilter instead
 
                     // 1. The copyReader position is moved to where the original parser were before failing
-                    while(readerCopy.TokenStartIndex < position)
+                    while (readerCopy.TokenStartIndex < position)
                     {
                         readerCopy.Read();
                     }

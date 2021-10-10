@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace DataFilters
+﻿namespace DataFilters
 {
+    using System;
+
     /// <summary>
     /// Exception thrown for an invalid sort expression.
     /// </summary>

@@ -1,7 +1,7 @@
-﻿using Superpower.Display;
-
-namespace DataFilters.Grammar.Parsing
+﻿namespace DataFilters.Grammar.Parsing
 {
+    using Superpower.Display;
+
     /// <summary>
     /// Enumeration of token used throughout the parsing process.
     /// </summary>
@@ -31,45 +31,49 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Letter
         /// </summary>
+        [Token(Example = "c", Description = "a letter")]
         Letter,
 
         /// <summary>
         /// Numeric value of some sort
         /// </summary>
+        [Token(Example = "2", Description = "a digit")]
         Digit,
 
         /// <summary>
         /// <c>[</c> character
         /// </summary>
+        [Token(Example = "(", Description = "right parenthesis")]
         OpenSquaredBracket,
 
         /// <summary>
         /// <c>]</c> character
         /// </summary>
+        [Token(Example = ")", Description = "left parenthesis")]
         CloseSquaredBracket,
 
         /// <summary>
         /// Asterisk operator used in like expression
         /// </summary>
-        [Token(Example = "*")]
+        [Token(Example = "*", Description = "asterisk")]
         Asterisk,
 
         /// <summary>
         /// Logical AND operator
         /// </summary>
-        [Token(Example = ",")]
+        [Token(Example = ",", Description = "comma")]
         And,
 
         /// <summary>
         /// Logical OR operator
         /// </summary>
-        [Token(Example = "|")]
+        [Token(Example = "|", Description = "pipe")]
         Or,
 
         /// <summary>
         /// Hyphen
         /// </summary>
-        [Token(Example = "-")]
+        [Token(Example = "-", Description = "hyphen")]
         Dash,
 
         /// <summary>
@@ -87,8 +91,8 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// Bang sign
         /// </summary>
-        [Token(Example = "!")]
-        Not,
+        [Token(Example = "!", Description ="exclamation point")]
+        Bang,
 
         /// <summary>
         /// The whitespace
@@ -123,7 +127,13 @@ namespace DataFilters.Grammar.Parsing
         /// <summary>
         /// The <c>"</c> charater
         /// </summary>
-        [Token(Example = @"""")]
-        DoubleQuote
+        [Token(Example = @"""", Description = "double quote")]
+        DoubleQuote,
+
+        /// <summary>
+        /// The <c>&#38;</c> character.
+        /// </summary>
+        [Token(Example = "&", Description ="ampersand")]
+        Ampersand
     }
 }
