@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `RangeExpression` to `IntervalExpression` [BREAKING]
 - Added `IParseableString` interface which defines :
   - `EscapedParseableString` property that holds a string representation of a `FilterExpression` instance ([#26](https://github.com/candoumbe/datafilters/issues/26)).
-  - `OriginalString` property that holds the string representation of a filter BEFORE 
+  - `OriginalString` property that holds the string representation of a filter BEFORE being escaped.
 - Added `Deconstruct` method for `TimeExpression` class.
 - Added `BoolValueExpression`
 - Added [`NumericValueExpression`](/src/DataFilters/Grammar/Syntax/NumericValueExpression.cs) to improve parsing of numeric values ([#29](https://github.com/candoumbe/datafilters/issues/29))
