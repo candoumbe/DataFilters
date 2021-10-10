@@ -261,7 +261,7 @@ Examples :
 - `my/beautiful/api/search?date=]1998-10-26 10:00 TO 1998-10-26 10:00[`
 - `]1998-10-12T12:20:00 TO 13:30[` is equivalent to `]1998-10-12T12:20:00 TO 1998-10-12T13:30:00[`
 
-💡 You can apply filters to any sub-property or a given collection
+💡 You can apply filters to any sub-property of a given collection
 
 Example : 
 `acolytes["name"]='robin'` will filter any `vigilante` resource where at least one item in `acolytes` array with `name` equals to `robin`.
