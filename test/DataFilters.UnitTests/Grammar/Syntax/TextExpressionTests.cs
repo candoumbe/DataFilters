@@ -77,5 +77,21 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             actual.Should()
                   .BeTrue();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_non_null_TextExpression_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+        {
+            // Arrange
+            TextExpression textExpression = text.Item;
+            string expected = $@"""{textExpression.OriginalString.Replace("\\", @"\\").Replace(@"""", @"\""")}""";
+            // Act
+            string escapedParseableString = textExpression.EscapedParseableString;
+
+            // Assert
+            escapedParseableString.Should()
+                                  .StartWith(@"""").And
+                                  .EndWith(@"""").And
+                                  .Be(expected);
+        }
     }
 }

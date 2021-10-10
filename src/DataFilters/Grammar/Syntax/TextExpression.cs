@@ -9,7 +9,7 @@
     /// </summary>
     public class TextExpression : StringValueExpression, IEquatable<TextExpression>
     {
-        private readonly Lazy<string> _lazyParseableString;
+        private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="TextExpression"/> instance.
@@ -17,7 +17,7 @@
         /// <param name="value">Value of the expression</param>
         public TextExpression(string value) : base(value)
         {
-            _lazyParseableString = new(() =>
+            _lazyEscapedParseableString = new(() =>
             {
                 StringBuilder escapedParseableString;
                 if (value.AtLeastOnce(chr => chr == '"' || chr == '\\'))
@@ -43,7 +43,7 @@
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyParseableString.Value;
+        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override string OriginalString => Value;

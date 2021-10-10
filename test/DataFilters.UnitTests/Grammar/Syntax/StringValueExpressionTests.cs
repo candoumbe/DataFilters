@@ -88,5 +88,20 @@
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_ConstantExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
+
+        [Property]
+        public void Given_StringValueExpression_and_TextExpression_are_based_on_same_value_IsEquivalentTo_should_be_true(NonWhiteSpaceString input)
+        {
+            // Arrange
+            StringValueExpression stringValue = new(input.Item);
+            TextExpression textExpression = new(input.Item);
+
+            // Act
+            bool isEquivalent = stringValue.IsEquivalentTo(textExpression);
+
+            // Assert
+            isEquivalent.Should()
+                        .BeTrue($"{nameof(TextExpression)} was created from the same value");
+        }
     }
 }

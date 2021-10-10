@@ -4,6 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+#if !NETSTANDARD1_3
+    using Ardalis.GuardClauses;
+#endif
 
     using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
@@ -17,7 +20,7 @@
         /// </summary>
         public string Value { get; }
 
-        private readonly Lazy<string> _lazyParseableString;
+        private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="ContainsExpression"/> that holds the specified <paramref name="value"/>.
@@ -39,7 +42,7 @@
 
             Value = value;
 
-            _lazyParseableString = new(() =>
+            _lazyEscapedParseableString = new(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
                 // Also we need an extra position for the final '*' that will be append in all cases
@@ -67,6 +70,28 @@
             });
         }
 
+        /// <summary>
+        /// Builds a new <see cref="StartsWithExpression"/> that holds the specified <paramref name="text"/>.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
+        public ContainsExpression(TextExpression text)
+#if !NETSTANDARD1_3
+            : this (Guard.Against.Null(text, nameof(text)).OriginalString)
+        {
+            _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}*");
+        }
+#else
+        {
+            if (text is null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+            _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}*");
+        }
+#endif
+
+
         ///<inheritdoc/>
         public override double Complexity => 1.5;
 
@@ -80,9 +105,6 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyParseableString.Value;
-
-        ///<inheritdoc/>
-        public override string OriginalString => $"*{Value}*";
+        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
     }
 }

@@ -1,8 +1,12 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
 
     using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
 
     using System;
     using System.Collections.Generic;
@@ -21,16 +25,28 @@
 
         [Fact]
         public void IsFilterExpression() => typeof(StartsWithExpression).Should()
+                                                                        .NotBeAbstract().And
                                                                         .BeAssignableTo<FilterExpression>().And
                                                                         .Implement<IEquatable<StartsWithExpression>>().And
-                                                                        .HaveConstructor(new[] { typeof(string) }).And
-                                                                        .HaveProperty<string>("Value");
+                                                                        .Implement<IParseableString>().And
+                                                                        .NotImplement<IBoundaryExpression>();
 
         [Fact]
-        public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
+        public void Given_string_argument_is_null_Constructor_should_throw_ArgumentNullException()
         {
             // Act
-            Action action = () => new StartsWithExpression(null);
+            Action action = () => new StartsWithExpression((string)null);
+
+            // Assert
+            action.Should()
+                .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
+        }
+
+        [Fact]
+        public void Given_TextExpression_argument_is_null_Constructor_should_throw_ArgumentNullException()
+        {
+            // Act
+            Action action = () => new StartsWithExpression((TextExpression)null);
 
             // Assert
             action.Should()
@@ -107,6 +123,37 @@
                 actualHashCode.Should()
                     .NotBe(other?.GetHashCode(), reason);
             }
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+        {
+            // Arrange
+            StartsWithExpression expression = new(text.Item);
+            string expected = $"{text.Item.EscapedParseableString}*";
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+        [Property]
+        public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
+        {
+            // Arrange
+            StartsWithExpression expression = new(text.Item);
+            StringValueExpression stringValueExpression = new(text.Item);
+            string expected = $"{stringValueExpression.EscapedParseableString}*";
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
         }
     }
 }

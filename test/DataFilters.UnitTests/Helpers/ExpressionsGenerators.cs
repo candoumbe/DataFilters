@@ -125,16 +125,18 @@ namespace DataFilters.UnitTests.Helpers
         }
 
         public static Arbitrary<EndsWithExpression> EndsWithExpressions()
-            => GetArbitraryFor<NonEmptyString>()
-                          .Generator
-                          .Select(nonWhiteSpaceString => new EndsWithExpression(nonWhiteSpaceString.Item))
-                          .ToArbitrary();
+            => Gen.OneOf(GetArbitraryFor<NonEmptyString>().Generator
+                                                          .Select(nonWhiteSpaceString => new EndsWithExpression(nonWhiteSpaceString.Item)),
+                         TextExpressions().Generator.Select(text => new EndsWithExpression(text))
+                        )
+                        .ToArbitrary();
 
         public static Arbitrary<StartsWithExpression> StartsWithExpressions()
-            => GetArbitraryFor<NonEmptyString>()
-                          .Generator
-                          .Select(value => new StartsWithExpression(value.Item))
-                          .ToArbitrary();
+            => Gen.OneOf(GetArbitraryFor<NonEmptyString>().Generator
+                                                          .Select(nonWhiteSpaceString => new StartsWithExpression(nonWhiteSpaceString.Item)),
+                         TextExpressions().Generator.Select(text => new StartsWithExpression(text))
+                        )
+                        .ToArbitrary();
 
         public static Arbitrary<OrExpression> OrExpressions() => Gen.Sized(SafeOrExpressionGenerator).ToArbitrary();
 
@@ -332,9 +334,11 @@ namespace DataFilters.UnitTests.Helpers
         }
 
         public static Arbitrary<ContainsExpression> ContainsExpressions()
-            => GetArbitraryFor<NonEmptyString>()
-                          .Convert(convertTo: input => new ContainsExpression(input.Item),
-                                   convertFrom: expression => NonEmptyString.NewNonEmptyString(expression.Value));
+            => Gen.OneOf(GetArbitraryFor<NonEmptyString>().Generator
+                                                          .Select(nonWhiteSpaceString => new ContainsExpression(nonWhiteSpaceString.Item)),
+                         TextExpressions().Generator.Select(text => new ContainsExpression(text))
+                        )
+                        .ToArbitrary();
 
         public static Arbitrary<BracketValue> GenerateRegexValues()
         {

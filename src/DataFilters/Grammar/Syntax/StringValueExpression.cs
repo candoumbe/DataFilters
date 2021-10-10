@@ -72,7 +72,7 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public static bool operator ==(StringValueExpression left, StringValueExpression right)
-            => (left is null && right is null) || ( left?.Equals(right) ?? false);
+            => (left is null && right is null) || (left?.Equals(right) ?? false);
 
         ///<inheritdoc/>
         public static bool operator !=(StringValueExpression left, StringValueExpression right)
