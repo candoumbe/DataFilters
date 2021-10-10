@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.8.0] / 2021-10-10
 - Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
 `FilterExpression` to a less complex form.
 - Renamed `RangeExpression` to `IntervalExpression` [BREAKING]
@@ -84,7 +86,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/candoumbe/DataFilters/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/candoumbe/DataFilters/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/candoumbe/DataFilters/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/candoumbe/DataFilters/compare/0.4.1...0.5.0
