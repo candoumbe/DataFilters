@@ -261,7 +261,7 @@ namespace DataFilters.ContinuousIntegration
                     .AddProperty("ExcludeByAttribute", "Obsolete")
                     .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
                                                                    .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting.SetFramework(framework)
-                                                                                                                                              .SetLogger($"trx;LogFileName={project.Name}.trx")
+                                                                                                                                              .AddLoggers($"trx;LogFileName={project.Name}.trx")
                                                                                                                                               .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml")))
                     );
 
@@ -441,8 +441,8 @@ namespace DataFilters.ContinuousIntegration
             });
 
         public Target Coldfix => _ => _
-            .DependsOn(Changelog)
             .Description($"Starts a new coldfix development by creating the associated '{ColdfixBranchPrefix}/{{name}}' from {DevelopBranch}")
+            .Requires(() => IsLocalBuild)
             .Requires(() => !GitRepository.Branch.Like($"{ColdfixBranchPrefix}/*", true) || GitHasCleanWorkingCopy())
             .Executes(() =>
             {
