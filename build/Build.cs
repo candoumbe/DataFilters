@@ -137,20 +137,44 @@ namespace DataFilters.ContinuousIntegration
 
         [Partition(3)] public readonly Partition TestPartition;
 
+        /// <summary>
+        /// Directory of source code projects
+        /// </summary>
         public AbsolutePath SourceDirectory => RootDirectory / "src";
 
+        /// <summary>
+        /// Directory of test projects
+        /// </summary>
         public AbsolutePath TestDirectory => RootDirectory / "test";
 
+        /// <summary>
+        /// Directory where to store all output builds output
+        /// </summary>
         public AbsolutePath OutputDirectory => RootDirectory / "output";
 
+        /// <summary>
+        /// Directory where to pu
+        /// </summary>
         public AbsolutePath CoverageReportDirectory => OutputDirectory / "coverage-report";
 
+        /// <summary>
+        /// Directory where to publish all test results
+        /// </summary>
         public AbsolutePath TestResultDirectory => OutputDirectory / "tests-results";
 
+        /// <summary>
+        /// Directory where to publish all artifacts
+        /// </summary>
         public AbsolutePath ArtifactsDirectory => OutputDirectory / "artifacts";
 
+        /// <summary>
+        /// Directory where to publish converage history report
+        /// </summary>
         public AbsolutePath CoverageReportHistoryDirectory => OutputDirectory / "coverage-history";
 
+        /// <summary>
+        /// Directory where to publish benchmark results.
+        /// </summary>
         public AbsolutePath BenchmarkDirectory => OutputDirectory / "benchmarks";
 
         public const string MainBranchName = "main";
@@ -492,8 +516,8 @@ namespace DataFilters.ContinuousIntegration
                         completeOnFailure: true);
                 }
 
-                PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg"));
-                PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg"));
+                PushPackages(ArtifactsDirectory.GlobFiles(SourceDirectory / "*.nupkg", "!*TestObjects.*nupkg"));
+                PushPackages(ArtifactsDirectory.GlobFiles(SourceDirectory / "*.snupkg", "!*TestObjects.*nupkg"));
             });
 
         public Target AddGithubRelease => _ => _
@@ -509,19 +533,28 @@ namespace DataFilters.ContinuousIntegration
                     Credentials = new Octokit.Credentials(GitHubToken)
                 };
 
-                Octokit.NewRelease newRelease = new(MajorMinorPatchVersion)
-                {
-                    TargetCommitish = GitRepository.Commit,
-                    Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
-                    Name = MajorMinorPatchVersion
-                };
-
                 string repositoryName = GitHubActions.GitHubRepository.Replace(GitHubActions.GitHubRepositoryOwner + "/", string.Empty);
+                IReadOnlyList<Octokit.Release> releases = await gitHubClient.Repository.Release.GetAll(GitHubActions.GitHubRepositoryOwner, repositoryName)
+                                                                                               .ConfigureAwait(false);
 
-                Octokit.Release release = await gitHubClient.Repository.Release.Create(GitHubActions.GitHubRepositoryOwner, repositoryName, newRelease)
-                                                                               .ConfigureAwait(false);
+                if (!releases.AtLeastOnce(release => release.Name == MajorMinorPatchVersion))
+                {
+                    Octokit.NewRelease newRelease = new(MajorMinorPatchVersion)
+                    {
+                        TargetCommitish = GitRepository.Commit,
+                        Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
+                        Name = MajorMinorPatchVersion,
+                    };
 
-                Info($"Github release {release.TagName} created successfully");
+                    Octokit.Release release = await gitHubClient.Repository.Release.Create(GitHubActions.GitHubRepositoryOwner, repositoryName, newRelease)
+                                                                                   .ConfigureAwait(false);
+
+                    Info($"Github release {release.TagName} created successfully");
+                }
+                else
+                {
+                    Info($"Release '{MajorMinorPatchVersion}' already exists - skipping ");
+                }
             });
 
         public Target Benchmarks => _ => _
