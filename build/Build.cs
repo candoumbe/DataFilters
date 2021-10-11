@@ -37,11 +37,12 @@ namespace DataFilters.ContinuousIntegration
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
-        OnPullRequestExcludePaths = new[] {
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md",
-        "LICENSE"
+        OnPullRequestExcludePaths = new[]
+        {
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE"
         }
     )]
     [GitHubActions(
@@ -52,11 +53,12 @@ namespace DataFilters.ContinuousIntegration
         ImportGitHubTokenAs = nameof(GitHubToken),
         PublishArtifacts = true,
         ImportSecrets = new[] { nameof(NugetApiKey) },
-        OnPullRequestExcludePaths = new[] {
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md",
-        "LICENSE"
+        OnPullRequestExcludePaths = new[]
+        {
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE"
         }
     )]
     [AzurePipelines(
@@ -69,10 +71,10 @@ namespace DataFilters.ContinuousIntegration
         TriggerBranchesInclude = new[] { ReleaseBranchPrefix + "/*" },
         TriggerPathsExclude = new[]
         {
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md",
-        "LICENCE"
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENCE"
         }
     )]
     [AzurePipelines(
@@ -83,15 +85,17 @@ namespace DataFilters.ContinuousIntegration
         ExcludedTargets = new[] { nameof(Clean) },
         PullRequestsAutoCancel = true,
         PullRequestsBranchesInclude = new[] { MainBranchName },
-        TriggerBranchesInclude = new[] {
-        FeatureBranchPrefix + "/*",
-        HotfixBranchPrefix + "/*"
+        TriggerBranchesInclude = new[]
+        {
+            FeatureBranchPrefix + "/*",
+            HotfixBranchPrefix + "/*",
+            ColdfixBranchPrefix + "/*"
         },
         TriggerPathsExclude = new[]
         {
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md"
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md"
         }
     )]
     [AzurePipelines(
@@ -184,6 +188,8 @@ namespace DataFilters.ContinuousIntegration
         public const string FeatureBranchPrefix = "feature";
 
         public const string HotfixBranchPrefix = "hotfix";
+
+        public const string ColdfixBranchPrefix = "coldfix";
 
         public const string ReleaseBranchPrefix = "release";
 
@@ -335,44 +341,7 @@ namespace DataFilters.ContinuousIntegration
                 if (!GitRepository.IsOnFeatureBranch())
                 {
                     Info("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
-                    string featureName;
-                    bool exitCreatingFeature = false;
-                    do
-                    {
-                        featureName = (Name ?? Console.ReadLine() ?? string.Empty).Trim()
-                                                                        .Trim('/');
-
-                        switch (featureName)
-                        {
-                            case string name when !string.IsNullOrWhiteSpace(name):
-                                {
-                                    string branchName = $"{FeatureBranchPrefix}/{featureName.Slugify()}";
-                                    Info($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
-
-                                    switch (Console.ReadKey().Key)
-                                    {
-                                        case ConsoleKey.Y:
-                                            Info($"{Environment.NewLine}Checking out branch '{branchName}' from '{DevelopBranch}'");
-                                            Checkout(branchName, start: DevelopBranch);
-                                            Info($"{Environment.NewLine}'{branchName}' created successfully");
-                                            exitCreatingFeature = true;
-                                            break;
-
-                                        default:
-                                            Info($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
-                                            exitCreatingFeature = true;
-                                            break;
-                                    }
-                                }
-                                break;
-                            default:
-                                Info($"Exiting {nameof(Feature)} task.");
-                                exitCreatingFeature = true;
-                                break;
-                        }
-
-#pragma warning disable S2583 // Conditionally executed code should be reachable
-                    } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
+                    AskBranchNameAndSwitchToIt(FeatureBranchPrefix, DevelopBranch);
 #pragma warning restore S2583 // Conditionally executed code should be reachable
 
                     Info($"{EnvironmentInfo.NewLine}Good bye !");
@@ -382,6 +351,55 @@ namespace DataFilters.ContinuousIntegration
                     FinishFeature();
                 }
             });
+
+        /// <summary>
+        /// Asks the user for a branch name
+        /// </summary>
+        /// <param name="branchNamePrefix">A prefix to preprend in front of the user branch name</param>
+        /// <param name="sourceBranch">Branch from which a new branch will be created</param>
+        private void AskBranchNameAndSwitchToIt(string branchNamePrefix, string sourceBranch)
+        {
+            string featureName;
+            bool exitCreatingFeature = false;
+            do
+            {
+                featureName = (Name ?? Console.ReadLine() ?? string.Empty).Trim()
+                                                                .Trim('/');
+
+                switch (featureName)
+                {
+                    case string name when !string.IsNullOrWhiteSpace(name):
+                        {
+                            string branchName = $"{branchNamePrefix}/{featureName.Slugify()}";
+                            Info($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
+
+                            switch (Console.ReadKey().Key)
+                            {
+                                case ConsoleKey.Y:
+                                    Info($"{Environment.NewLine}Checking out branch '{branchName}' from '{sourceBranch}'");
+
+                                    Checkout(branchName, start: sourceBranch);
+
+                                    Info($"{Environment.NewLine}'{branchName}' created successfully");
+                                    exitCreatingFeature = true;
+                                    break;
+
+                                default:
+                                    Info($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
+                                    exitCreatingFeature = true;
+                                    break;
+                            }
+                        }
+                        break;
+                    default:
+                        Info($"Exiting task.");
+                        exitCreatingFeature = true;
+                        break;
+                }
+
+#pragma warning disable S2583 // Conditionally executed code should be reachable
+            } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
+        }
 
         public Target Release => _ => _
             .DependsOn(Changelog)
@@ -421,6 +439,30 @@ namespace DataFilters.ContinuousIntegration
                     FinishReleaseOrHotfix();
                 }
             });
+
+        public Target Coldfix => _ => _
+            .DependsOn(Changelog)
+            .Description($"Starts a new coldfix development by creating the associated '{ColdfixBranchPrefix}/{{name}}' from {DevelopBranch}")
+            .Requires(() => !GitRepository.Branch.Like($"{ColdfixBranchPrefix}/*", true) || GitHasCleanWorkingCopy())
+            .Executes(() =>
+            {
+                if (!GitRepository.Branch.Like($"{ColdfixBranchPrefix}/*"))
+                {
+                    Info("Enter the name of the coldfix. It will be used as the name of the coldfix/branch (leave empty to exit) :");
+                    AskBranchNameAndSwitchToIt(ColdfixBranchPrefix, DevelopBranch);
+#pragma warning restore S2583 // Conditionally executed code should be reachable
+                    Info($"{EnvironmentInfo.NewLine}Good bye !");
+                }
+                else
+                {
+                    FinishColdfix();
+                }
+            });
+
+        /// <summary>
+        /// Merge a coldfix/* branch back to dev
+        /// </summary>
+        private void FinishColdfix() => FinishFeature();
 
         private void Checkout(string branch, string start)
         {
@@ -463,6 +505,7 @@ namespace DataFilters.ContinuousIntegration
             Git($"branch -D {GitRepository.Branch}");
             Git($"push origin {DevelopBranch}");
         }
+
 
         #endregion
 
