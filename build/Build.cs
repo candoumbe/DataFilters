@@ -43,6 +43,13 @@ namespace DataFilters.ContinuousIntegration
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
+        },
+        OnPushExcludePaths = new[]
+        {
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE"
         }
     )]
     [GitHubActions(
@@ -54,6 +61,13 @@ namespace DataFilters.ContinuousIntegration
         PublishArtifacts = true,
         ImportSecrets = new[] { nameof(NugetApiKey) },
         OnPullRequestExcludePaths = new[]
+        {
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE"
+        },
+        OnPushExcludePaths = new[]
         {
             "docs/*",
             "README.md",
@@ -460,7 +474,7 @@ namespace DataFilters.ContinuousIntegration
             });
 
         /// <summary>
-        /// Merge a coldfix/* branch back to dev
+        /// Merge a coldfix/* branch back to the develop branch
         /// </summary>
         private void FinishColdfix() => FinishFeature();
 
@@ -585,7 +599,7 @@ namespace DataFilters.ContinuousIntegration
                     Octokit.NewRelease newRelease = new(MajorMinorPatchVersion)
                     {
                         TargetCommitish = GitRepository.Commit,
-                        Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
+                        Body = string.Concat("- ", ExtractChangelogSectionNotes(ChangeLogFile, MajorMinorPatchVersion).Select(line => $"{line}\n")),
                         Name = MajorMinorPatchVersion,
                     };
 
