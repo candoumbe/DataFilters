@@ -20,6 +20,11 @@ on:
   push:
     branches-ignore:
       - main
+    paths:
+      - '!docs/*'
+      - '!README.md'
+      - '!CHANGELOG.md'
+      - '!LICENSE'
   pull_request:
     branches:
       - develop
