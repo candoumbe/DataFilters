@@ -599,7 +599,7 @@ namespace DataFilters.ContinuousIntegration
                     Octokit.NewRelease newRelease = new(MajorMinorPatchVersion)
                     {
                         TargetCommitish = GitRepository.Commit,
-                        Body = GetNuGetReleaseNotes(ChangeLogFile, GitRepository),
+                        Body = string.Concat("- ", ExtractChangelogSectionNotes(ChangeLogFile, MajorMinorPatchVersion).Select(line => $"{line}\n")),
                         Name = MajorMinorPatchVersion,
                     };
 
