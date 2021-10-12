@@ -573,8 +573,8 @@ namespace DataFilters.ContinuousIntegration
                         completeOnFailure: true);
                 }
 
-                PushPackages(ArtifactsDirectory.GlobFiles(SourceDirectory / "*.nupkg", "!*TestObjects.*nupkg"));
-                PushPackages(ArtifactsDirectory.GlobFiles(SourceDirectory / "*.snupkg", "!*TestObjects.*nupkg"));
+                PushPackages(ArtifactsDirectory.GlobFiles("*.nupkg", "!*TestObjects.*nupkg", "!*PerformanceTests.*nupkg"));
+                PushPackages(ArtifactsDirectory.GlobFiles("*.snupkg", "!*TestObjects.*nupkg", "!*PerformanceTests.*nupkg"));
             });
 
         public Target AddGithubRelease => _ => _
