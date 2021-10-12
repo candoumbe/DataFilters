@@ -2,38 +2,38 @@
 
 [![Azure DevOps builds](https://img.shields.io/azure-devops/build/candoumbe/7684067c-f6c9-4e35-83ee-944ab5e7505b/29?style=for-the-badge)](https://dev.azure.com/candoumbe/DataFilters/_build/latest?definitionId=29&branchName=main) ![Coverage](https://img.shields.io/azure-devops/coverage/candoumbe/DataFilters/29?style=for-the-badge) ![Tests](https://img.shields.io/azure-devops/tests/candoumbe/DataFilters/29?style=for-the-badge&compact_message) [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Nuget&style=for-the-badge)](https://www.nuget.org/packages/DataFilters)
 
-A small library that allow to convert a string to a generic `IFilter`object.
+A small library that allow to convert a string to a generic `IFilter` object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
 **Table of contents**
-- [<a href='#' id='parsing'>Parsing</a>](#parsing)
-- [<a href='#' id='filtering'>Filters syntax</a>](#filtering)
-  - [<a href='#' id='equals-expression'>Equals</a>](#equals)
-  - [<a href='#' id='starts-with-expression'>Starts with</a>](#starts-with)
-  - [<a href='#' id='ends-with-expression'>Ends with</a>](#ends-with)
-  - [<a href='#' id='contains-expression'>Contains</a>](#contains)
-  - [<a href='#' id='isempty-expression'>Is empty</a>](#is-empty)
-  - [<a href='#' id='interval-expressions'>Interval expressions</a>](#interval-expressions)
-    - [<a href='#' id='gte-expression'>Greater than or equal</a>](#greater-than-or-equal)
-    - [<a href='#' id='lte-expression'>Less than or equal</a>](#less-than-or-equal)
-    - [<a href='#' id='btw-expression'>Between</a>](#between)
-  - [<a href='#' id='regular-expression'>Regular expression support</a>](#regex-expression)
+- [<a href='#parsing'>Parsing</a>](#parsing)
+- [<a href='#filtering'>Filters syntax</a>](#filtering)
+  - [<a href='#equals-expression'>Equals</a>](#equals)
+  - [<a href='#starts-with-expression'>Starts with</a>](#starts-with)
+  - [<a href='#ends-with-expression'>Ends with</a>](#ends-with)
+  - [<a href='#contains-expression'>Contains</a>](#contains)
+  - [<a href='#isempty-expression'>Is empty</a>](#is-empty)
+  - [<a href='#interval-expressions'>Interval expressions</a>](#interval-expressions)
+    - [<a href='#gte-expression'>Greater than or equal</a>](#greater-than-or-equal)
+    - [<a href='#lte-expression'>Less than or equal</a>](#less-than-or-equal)
+    - [<a href='#btw-expression'>Between</a>](#between)
+  - [<a href='#regular-expression'>Regular expression support</a>](#regex-expression)
   - [<a href="logic-operators">Logical operators</a>](#logical-operators)
-    - [<a href='#' id='and-expression'>And</a>](#and)
-    - [<a href='#' id='or-expression'>Or</a>](#or)
-    - [<a href='#' id='not-expression'>Not</a>](#not)
-  - [<a href='#' id='special-character-handling'>Special character handling</a>](#special-character-handling)
-  - [<a href='#' id='sorting'>Sorting</a>](#sorting)
-- [<a href='#' id='how-to-install'>How to install</a>](#how-to-install)
-- [<a href='#' id='how-to-use'>How to use</a>](#how-to-use)
-  - [<a href='#' id='how-to-use-client'>On the client</a>](#on-the-client)
-  - [<a href='#' id='how-to-use-backend'>On the backend</a>](#on-the-backend)
+    - [<a href='#and-expression'>And</a>](#and)
+    - [<a href='#or-expression'>Or</a>](#or)
+    - [<a href='#not-expression'>Not</a>](#not)
+  - [<a href='#special-character-handling'>Special character handling</a>](#special-character-handling)
+  - [<a href='#sorting'>Sorting</a>](#sorting)
+- [<a href='#how-to-install'>How to install</a>](#how-to-install)
+- [<a href='#how-to-use'>How to use</a>](#how-to-use)
+  - [<a href='#how-to-use-client'>On the client</a>](#on-the-client)
+  - [<a href='#how-to-use-backend'>On the backend</a>](#on-the-backend)
 
 
-The idea came to me when working on a set of REST apis and trying to build `/search` endpoints.
+The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
 
-Let's say your api manage `vigilante` resources :
+Let's say your API handles `vigilante` resources :
 
 ```csharp
 public class Vigilante
@@ -92,7 +92,7 @@ JSON Schema
 }
 ```
 
-and the base url of your api is `https://my-beautiful/api`.
+and the base URL of your API is `https://my-beautiful/api`.
 
 `vigilante` resources could then be located at `https://my-beautiful/api/vigilantes/`
 
@@ -309,7 +309,7 @@ IFilter filter = new MultiFilter
 ```
 ### <a href='#' id='or-expression'>Or</a>
 
-Use the pipe character `|`  to combine multiple expressions using logical AND operator 
+Use the pipe character `|`  to combine several expressions using logical OR operator 
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
 
@@ -414,9 +414,10 @@ IFilter filter = new Filter("comment", EndsWith, "!");
 ```
 
 💡 For longer texts, just wrap it between quotes and you're good to go
+
 | Query string   | JSON                                                |
 | -------------- | --------------------------------------------------- |
-| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}`   |
+| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}`  |
 
 
 ## <a href='#' id='sorting'>Sorting</a>
@@ -433,7 +434,7 @@ For example `sort=+nickname,-age` allows to sort by `nickname` ascending, then b
 
 # <a href='#' id='how-to-install'>How to install</a>
 
-1. run `dotnet install DataFilters` : you can already start to build [IFilter][class-ifilter] instances 😉 !
+1. run `dotnet install DataFilters` : you can already start building [IFilter][class-ifilter] instances 😉 !
 2. install one or more `DataFilters.XXXX`  extension packages to convert [IFilter][class-ifilter] instances to various target.
 
 # <a href='#' id='how-to-use'>How to use</a>
@@ -506,7 +507,7 @@ public class VigilantesController
             ? filters.Single()
             : new MultiFilter{ Logic = And, Filters = filters };
 
-        // filter now contains how search criteria and is ready to be used 😊
+        // filter now contains our search criteria and is ready to be used 😊
 
     }
 }
