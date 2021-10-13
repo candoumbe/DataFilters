@@ -83,13 +83,26 @@
             => (group.Complexity == group.Expression.Complexity).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_Group_Expression_which_contains_an_arbitrary_expression_IsEquivalent_should_be_return_true_when_compares_to_that_arbitrary_expression(NonNull<FilterExpression> filterExpression)
+        public Property Given_GroupExpression_which_contains_an_arbitrary_expression_When_comparing_to_that_arbitrary_expression_IsEquivalent_should_return_true(NonNull<FilterExpression> filterExpression)
         {
             // Arrange
             GroupExpression group = new(filterExpression.Item);
 
             // Act
             bool actual = group.IsEquivalentTo(filterExpression.Item);
+
+            // Assert
+            return actual.ToProperty();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Given_GroupExpression_which_contains_an_arbitrary_expression_When_comparing_to_that_arbitrary_expression_Equals_should_return_true(NonNull<FilterExpression> filterExpression)
+        {
+            // Arrange
+            GroupExpression group = new(filterExpression.Item);
+
+            // Act
+            bool actual = group.Equals(filterExpression.Item);
 
             // Assert
             return actual.ToProperty();

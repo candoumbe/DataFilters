@@ -31,7 +31,7 @@
         public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as GroupExpression);
+        public override bool Equals(object obj) => Equals(obj as GroupExpression) || IsEquivalentTo(obj as FilterExpression);
 
         ///<inheritdoc/>
         public override int GetHashCode() => Expression.GetHashCode();

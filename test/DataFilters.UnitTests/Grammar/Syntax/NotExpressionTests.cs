@@ -10,6 +10,7 @@
     using FsCheck.Xunit;
 
     using System;
+    using System.Collections.Generic;
 
     using Xunit;
     using Xunit.Abstractions;
@@ -83,5 +84,84 @@
                           .BeOfType<GroupExpression>().Which
                           .IsEquivalentTo(expression).Should().BeTrue();
         }
+
+        public static IEnumerable<object[]> EscapedParseableStringCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new NotExpression(
+                        new OrExpression(new DateTimeExpression(new TimeExpression(2, 53, 39, 827)),
+                                                  new DateTimeExpression(new DateExpression(1901,06,17),
+                                                                         new TimeExpression(09, 13,44, 17),
+                                                                         OffsetExpression.Zero))
+                        ),
+
+                    "!(T02:53:39.827|1901-06-17T09:13:44.17Z)"
+                };
+
+                yield return new object[]
+                {
+                    new NotExpression(
+                       new OrExpression(new TimeExpression(2, 53, 39, 827),
+                                                  new DateTimeExpression(new DateExpression(1901,06,17),
+                                                                         new TimeExpression(09, 13,44, 17),
+                                                                         OffsetExpression.Zero))
+                        ),
+
+                    "!(02:53:39.827|1901-06-17T09:13:44.17Z)"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EscapedParseableStringCases))]
+        public void Given_NotExpression_EscapedParseableString_should_match_expected(NotExpression expression, string expected)
+        {
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+                public static IEnumerable<object[]> EqualsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                     new NotExpression(
+                        new OrExpression(new DateTimeExpression(new TimeExpression(2, 53, 39, 827)),
+                                                  new DateTimeExpression(new DateExpression(1901,06,17),
+                                                                         new TimeExpression(09, 13,44, 17),
+                                                                         OffsetExpression.Zero))
+                        ),
+                      new NotExpression(
+                        new OrExpression(new TimeExpression(2, 53, 39, 827),
+                                                  new DateTimeExpression(new DateExpression(1901,06,17),
+                                                                         new TimeExpression(09, 13,44, 17),
+                                                                         OffsetExpression.Zero))
+                        ),
+                    true,
+                    $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_work_as_expected(NotExpression expression, object obj, bool expected, string reason)
+        {
+            // Act
+            bool actual = expression.Equals(obj);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
+        }
+
     }
 }
