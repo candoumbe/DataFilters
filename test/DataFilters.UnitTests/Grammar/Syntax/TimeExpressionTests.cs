@@ -10,6 +10,7 @@
     using FsCheck.Xunit;
 
     using System;
+using System.Collections.Generic;
 
     using Xunit;
     using Xunit.Abstractions;
@@ -69,7 +70,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_TimeExpression_instance_should_be_equal_to_itself(TimeExpression instance)
+        public void Equals_should_be_reflexive(TimeExpression instance)
         {
             // Act
             bool actual = instance.Equals(instance);
@@ -106,5 +107,53 @@
             first.GetHashCode().Should()
                                .Be(other.GetHashCode());
         }
+
+        [Bug(32)]
+        [Theory]
+        [InlineData(00, 00, 00, 00, "00:00:00")]
+        [InlineData(02, 53, 39, 987, "02:53:39.987")]
+        public void Given_TimeExpression_instance_EscapedParseableString_should_be_in_expected_form(int hours,
+                                                                                                    int minutes,
+                                                                                                    int seconds,
+                                                                                                    int milliseconds,
+                                                                                                    string expected)
+        {
+            // Arrange
+            TimeExpression timeExpression = new(hours, minutes, seconds, milliseconds);
+
+            // Act
+            string actual = timeExpression.EscapedParseableString;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+        public static IEnumerable<object[]> EqualsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new TimeExpression(),
+                    new DateTimeExpression(new TimeExpression()),
+                    true,
+                    $"The other object is a ${nameof(DateTimeExpression)} with {nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_work_as_expected(TimeExpression dateTime, object obj, bool expected, string reason)
+        {
+            // Act
+            bool actual = dateTime.Equals(obj);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
+        }
+
     }
 }

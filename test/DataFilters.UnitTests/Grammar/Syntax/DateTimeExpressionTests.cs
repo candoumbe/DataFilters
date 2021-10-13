@@ -11,6 +11,7 @@
     using Xunit.Categories;
     using DataFilters.UnitTests.Helpers;
     using FsCheck.Fluent;
+    using System.Collections.Generic;
 
     [Feature(nameof(DataFilters.Grammar.Syntax))]
     public class DateTimeExpressionTests
@@ -122,6 +123,32 @@
 
             // Assert
             return actual.ToProperty();
+        }
+
+        public static IEnumerable<object[]> EqualsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new DateTimeExpression(new TimeExpression()),
+                    new TimeExpression(),
+                    true,
+                    $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_work_as_expected(DateTimeExpression dateTime, object obj, bool expected, string reason)
+        {
+            // Act
+            bool actual = dateTime.Equals(obj);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
         }
     }
 }
