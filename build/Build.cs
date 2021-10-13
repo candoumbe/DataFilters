@@ -43,13 +43,6 @@ namespace DataFilters.ContinuousIntegration
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
-        },
-        OnPushExcludePaths = new[]
-        {
-            "docs/*",
-            "README.md",
-            "CHANGELOG.md",
-            "LICENSE"
         }
     )]
     [GitHubActions(
@@ -61,13 +54,6 @@ namespace DataFilters.ContinuousIntegration
         PublishArtifacts = true,
         ImportSecrets = new[] { nameof(NugetApiKey) },
         OnPullRequestExcludePaths = new[]
-        {
-            "docs/*",
-            "README.md",
-            "CHANGELOG.md",
-            "LICENSE"
-        },
-        OnPushExcludePaths = new[]
         {
             "docs/*",
             "README.md",
