@@ -19,7 +19,7 @@
     public class BoundaryExpressionTests
     {
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property A_BoundaryExpression_instance_should_be_equals_to_itself(BoundaryExpression input)
+        public Property Given_a_BoundaryExpression_instance_should_be_equals_to_itself(BoundaryExpression input)
             => input.Equals(input).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

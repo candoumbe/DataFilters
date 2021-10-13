@@ -25,9 +25,7 @@
         [Fact]
         public void IsFilterExpression() => typeof(StringValueExpression).Should()
                                                                            .BeAssignableTo<FilterExpression>().And
-                                                                           .Implement<IEquatable<StringValueExpression>>().And
-                                                                           .HaveConstructor(new[] { typeof(string) }).And
-                                                                           .HaveProperty<string>("Value");
+                                                                           .Implement<IEquatable<StringValueExpression>>();
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -63,7 +61,7 @@
         }
 
         [Property]
-        public Property Two_instances_are_equals_when_holding_same_values(NonEmptyString value)
+        public Property Given_two_instances_that_hold_values_that_are_equals_Equals_shoud_return_true(NonEmptyString value)
         {
             StringValueExpression first = new(value.Item);
             StringValueExpression other = new(value.Item);
@@ -72,9 +70,17 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_is_commutative(StringValueExpression first, StringValueExpression second) => (first.Equals(second) == second.Equals(first)).ToProperty();
+        public Property Equals_should_be_commutative(StringValueExpression first, FilterExpression second)
+            => (first.Equals(second) == second.Equals(first)).ToProperty();
 
-        
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<StringValueExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<StringValueExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
         [Property]
         public Property Given_two_ConstantExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
         {
@@ -103,5 +109,21 @@
             isEquivalent.Should()
                         .BeTrue($"{nameof(TextExpression)} was created from the same value");
         }
+
+        [Property]
+        public void Given_StringValueExpression_when_GroupExpression_holds_an_expression_that_is_equals_to_that_StringValueExpression_Equals_should_return_true(NonWhiteSpaceString input)
+        {
+            // Arrange
+            StringValueExpression stringValue = new(input.Item);
+            GroupExpression group = new (new StringValueExpression(input.Item));
+
+            // Act
+            bool actual = stringValue.Equals(group);
+
+            // Assert
+            actual.Should()
+                  .BeTrue();
+        }
+
     }
 }

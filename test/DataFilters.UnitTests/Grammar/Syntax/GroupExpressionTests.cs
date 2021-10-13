@@ -23,8 +23,7 @@
                                                                    .BeAssignableTo<FilterExpression>().And
                                                                    .Implement<IEquatable<GroupExpression>>().And
                                                                    .Implement<IHaveComplexity>().And
-                                                                   .HaveConstructor(new[] { typeof(FilterExpression) }).And
-                                                                   .HaveProperty<FilterExpression>("Expression");
+                                                                   .Implement<IParseableString>();
 
         public static IEnumerable<object[]> EqualsCases
         {
@@ -60,10 +59,6 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<GroupExpression> group)
-            => group.Item.Equals(group.Item).ToProperty();
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_current_instance_is_not_null_and_other_is_null_Equals_should_return_false(NonNull<GroupExpression> group)
         {
             // Act
@@ -73,6 +68,10 @@
             actual.Should()
                   .BeFalse();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<GroupExpression> group)
+            => group.Item.Equals(group.Item).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Equals_should_be_symetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)

@@ -30,11 +30,7 @@
         public void IsFilterExpression() => typeof(IntervalExpression).Should()
                                                                    .BeAssignableTo<FilterExpression>().And
                                                                    .Implement<IEquatable<IntervalExpression>>().And
-                                                                   .Implement<ISimplifiable>().And
-                                                                   .HaveConstructor(new[] { typeof(BoundaryExpression), typeof(BoundaryExpression) }).And
-                                                                   .HaveProperty<BoundaryExpression>("Min").And
-                                                                   .HaveProperty<BoundaryExpression>("Max")
-            ;
+                                                                   .Implement<ISimplifiable>();
 
         [Fact]
         public void Given_min_and_max_are_null_Ctor_should_throws_IncorrectBoundaryException()
@@ -164,9 +160,9 @@
             }
         }
 
-        [Theory(DisplayName = "Constructor Logic")]
+        [Theory]
         [MemberData(nameof(CtorLogicCases))]
-        public void CtorLogic(BoundaryExpression min, BoundaryExpression max, IntervalExpression expected, string reason)
+        public void Given_min_and_max_bounds_Constructor_logic_shoud_work_as_expected(BoundaryExpression min, BoundaryExpression max, IntervalExpression expected, string reason)
         {
             // Act
             IntervalExpression actual = new(min, max);
@@ -236,32 +232,22 @@
 
         [Theory]
         [MemberData(nameof(EqualCases))]
-        public void TestEquals(IntervalExpression first, object other, bool expected, string reason)
+        public void Equals_should_work_as_expected(IntervalExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
             _outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
         }
 
+
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Ctor_should_converts_Min_DateTimeExpression_to_DateExpression_when_TimeExpression_is_not_provided(DateExpression date, bool included)
+        public void Given_min_bound_is_DateTimeExpression_When_min_does_not_hold_TimeExpression_Constructor_should_converts_Min_to_DateExpression(DateExpression date, bool included)
         {
             // Arrange
             DateTimeExpression dateTimeExpression = new(date);
@@ -393,7 +379,7 @@
 
         [Theory]
         [MemberData(nameof(SimplifyCases))]
-        public void Given_RangeExpression_Simplify_should_return_expected_expression(IntervalExpression rangeExpression, FilterExpression expected, string reason)
+        public void Given_IntervalExpression_Simplify_should_return_expected_expression(IntervalExpression rangeExpression, FilterExpression expected, string reason)
         {
             _outputHelper.WriteLine($"Range expression : {rangeExpression}");
 
@@ -418,5 +404,18 @@
             actual.Should()
                   .Be(expected);
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<IntervalExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<IntervalExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<IntervalExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
     }
 }

@@ -8,6 +8,7 @@ namespace DataFilters.Grammar.Syntax
     {
         /// <summary>
         /// Builds a new <see cref="GuidValueExpression"/> instance that can wrap a <see cref="System.Guid"/>
+        /// </summary>
         /// <param name="value"></param>
         public GuidValueExpression(string value) : base(value)
         { }
