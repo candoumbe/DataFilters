@@ -6,6 +6,7 @@
     using FluentAssertions;
 
     using FsCheck;
+using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -99,31 +100,18 @@
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(StartsWithExpression first, object other, bool expected, string reason)
-        {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<StartsWithExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
-            // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<StartsWithExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
 
-            // Assert
-            actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
-        }
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)

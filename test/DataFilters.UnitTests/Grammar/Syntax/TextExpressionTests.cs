@@ -4,6 +4,7 @@ using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
 
 using FsCheck;
+using FsCheck.Fluent;
 using FsCheck.Xunit;
 
 using Xunit;
@@ -65,18 +66,16 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_reflexive(NonNull<TextExpression> input)
-        {
-            // Arrange
-            TextExpression current = input.Item;
+        public Property Equals_should_be_commutative(NonNull<TextExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
-            // Act
-            bool actual = current.Equals(current);
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<TextExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
 
-            // Assert
-            actual.Should()
-                  .BeTrue();
-        }
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<TextExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_non_null_TextExpression_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)

@@ -55,17 +55,6 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_reflexive(DateTimeExpression instance)
-        {
-            // Act
-            bool actual = instance.Equals(instance);
-
-            // Assert
-            actual.Should()
-                  .BeTrue();
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Two_DateTimeExpression_instances_which_have_same_data_should_be_equal(DateExpression date, TimeExpression time, OffsetExpression offset)
         {
             // Arrange
@@ -150,5 +139,18 @@
             actual.Should()
                   .Be(expected, reason);
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<DateTimeExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<DateTimeExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
     }
 }

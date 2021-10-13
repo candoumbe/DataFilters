@@ -102,21 +102,10 @@
 
             // Act
             bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -157,5 +146,18 @@
             actual.Should()
                   .Be(expected);
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<ContainsExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<ContainsExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
     }
 }

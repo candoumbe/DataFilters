@@ -70,15 +70,17 @@ using System.Collections.Generic;
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_reflexive(TimeExpression instance)
-        {
-            // Act
-            bool actual = instance.Equals(instance);
+        public Property Equals_should_be_commutative(NonNull<TimeExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
-            // Assert
-            actual.Should()
-                  .BeTrue();
-        }
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<TimeExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_non_null_TimeExpression_instance_should_never_be_equal_to_null(TimeExpression instance)

@@ -241,9 +241,6 @@ namespace DataFilters.ContinuousIntegration
             .Produces(TestResultDirectory / "*.trx")
             .Produces(TestResultDirectory / "*.xml")
             .Produces(CoverageReportHistoryDirectory / "*.xml")
-            .OnlyWhenDynamic(() => IsServerBuild || (IsLocalBuild && (GitRepository.IsOnHotfixBranch()
-                                                                       || GitRepository.IsOnReleaseBranch()
-                                                                       || GitRepository.IsOnFeatureBranch())))
             .Executes(() =>
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");

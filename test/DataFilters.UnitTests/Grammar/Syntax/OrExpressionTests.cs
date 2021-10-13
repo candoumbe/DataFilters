@@ -201,10 +201,10 @@
 
             // Act
             FilterExpression simplified = orExpression.Simplify();
-
+            bool isEquivalent = simplified.IsEquivalentTo(filterExpression);
             // Assert
-            simplified.Should()
-                      .Be(filterExpression);
+            isEquivalent.Should()
+                        .BeTrue();
         }
 
         private static void Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(FilterExpression expression)
@@ -334,5 +334,18 @@
                     .Which.IsEquivalentTo(right.Item).Should()
                     .BeTrue("Wrapping should not change the meaning of resulting expression");
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<OrExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<OrExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<OrExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
     }
 }
