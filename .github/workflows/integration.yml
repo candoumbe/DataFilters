@@ -53,6 +53,14 @@ jobs:
           path: output/tests-results
       - uses: actions/upload-artifact@v1
         with:
+          name: coverage-report
+          path: output/coverage-report
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-history
+          path: output/coverage-history
+      - uses: actions/upload-artifact@v1
+        with:
           name: artifacts
           path: output/artifacts
   macOS-latest:
@@ -76,6 +84,14 @@ jobs:
         with:
           name: tests-results
           path: output/tests-results
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-report
+          path: output/coverage-report
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-history
+          path: output/coverage-history
       - uses: actions/upload-artifact@v1
         with:
           name: artifacts

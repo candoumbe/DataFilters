@@ -55,6 +55,14 @@ jobs:
         with:
           name: artifacts
           path: output/artifacts
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-report
+          path: output/coverage-report
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-history
+          path: output/coverage-history
   macOS-latest:
     name: macOS-latest
     runs-on: macOS-latest
@@ -81,3 +89,11 @@ jobs:
         with:
           name: artifacts
           path: output/artifacts
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-report
+          path: output/coverage-report
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-history
+          path: output/coverage-history
