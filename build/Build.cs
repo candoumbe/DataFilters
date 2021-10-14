@@ -257,7 +257,7 @@ namespace DataFilters.ContinuousIntegration
                     );
 
                 Codecov(s => s
-                    .SetFiles(CoverageReportDirectory / "*.xml")
+                    .SetFiles(TestResultDirectory / "*.xml")
                     .SetToken(CodecovToken)
                     .SetBranch(GitRepository.Branch)
                     .SetSha(GitRepository.Commit)
