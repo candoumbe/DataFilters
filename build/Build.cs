@@ -200,38 +200,12 @@ namespace DataFilters.ContinuousIntegration
                 );
             });
 
-        public Target ReportCoverage => _ => _
-            .DependsOn(Tests)
-            .Requires(() => IsServerBuild || CodecovToken != null)
-            .Consumes(Tests, TestResultDirectory / "*.xml")
-            .Produces(CoverageReportDirectory / "*.xml")
-            .Produces(CoverageReportHistoryDirectory / "*.xml")
-            .Executes(() =>
-            {
-                ReportGenerator(_ => _
-                        .SetFramework("net5.0")
-                        .SetReports(TestResultDirectory / "*.xml")
-                        .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
-                        .SetTargetDirectory(CoverageReportDirectory)
-                        .SetHistoryDirectory(CoverageReportHistoryDirectory)
-                        .SetTag(GitRepository.Commit)
-                    );
-
-                Codecov(s => s
-                    .SetFiles(CoverageReportDirectory / "*.xml")
-                    .SetToken(CodecovToken)
-                    .SetBranch(GitRepository.Branch)
-                    .SetSha(GitRepository.Commit)
-                    .SetBuild(GitVersion.FullSemVer)
-                    .SetFramework("net5.0")
-                );
-            });
-
         public Target Tests => _ => _
             .DependsOn(Compile)
             .Description("Run unit tests and collect code coverage")
             .Produces(TestResultDirectory / "*.trx")
             .Produces(TestResultDirectory / "*.xml")
+            .Triggers(ReportCoverage)
             .Executes(() =>
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
@@ -263,6 +237,33 @@ namespace DataFilters.ContinuousIntegration
                                 .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
                                                                                         summaryFile: file,
                                                                                         reportDirectory: CoverageReportDirectory));
+            });
+
+        public Target ReportCoverage => _ => _
+            .DependsOn(Tests)
+            .Requires(() => IsServerBuild || CodecovToken != null)
+            .Consumes(Tests, TestResultDirectory / "*.xml")
+            .Produces(CoverageReportDirectory / "*.xml")
+            .Produces(CoverageReportHistoryDirectory / "*.xml")
+            .Executes(() =>
+            {
+                ReportGenerator(_ => _
+                        .SetFramework("net5.0")
+                        .SetReports(TestResultDirectory / "*.xml")
+                        .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
+                        .SetTargetDirectory(CoverageReportDirectory)
+                        .SetHistoryDirectory(CoverageReportHistoryDirectory)
+                        .SetTag(GitRepository.Commit)
+                    );
+
+                Codecov(s => s
+                    .SetFiles(CoverageReportDirectory / "*.xml")
+                    .SetToken(CodecovToken)
+                    .SetBranch(GitRepository.Branch)
+                    .SetSha(GitRepository.Commit)
+                    .SetBuild(GitVersion.FullSemVer)
+                    .SetFramework("net5.0")
+                );
             });
 
         public Target Pack => _ => _
