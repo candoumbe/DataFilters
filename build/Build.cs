@@ -38,7 +38,7 @@ namespace DataFilters.ContinuousIntegration
         OnPushBranchesIgnore = new[] { MainBranchName },
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
+        InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage), nameof(Pack) },
         ImportSecrets = new[]
         {
             nameof(NugetApiKey),
@@ -56,7 +56,7 @@ namespace DataFilters.ContinuousIntegration
         "delivery",
         GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
-        InvokedTargets = new[] { nameof(Publish), nameof(AddGithubRelease) },
+        InvokedTargets = new[] { nameof(ReportCoverage), nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
         PublishArtifacts = true,
         ImportSecrets = new[]

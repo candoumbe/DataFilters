@@ -34,7 +34,9 @@
         /// <param name="minutes"></param>
         /// <param name="seconds"></param>
         /// <param name="milliseconds"></param>
-        /// <exception cref="ArgumentOutOfRangeException">either <paramref name="hours"/>, <paramref name="minutes"/>, <paramref name="seconds"/>, <paramref name="milliseconds"/> </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// either <paramref name="hours"/>, <paramref name="minutes"/>, <paramref name="seconds"/>, <paramref name="milliseconds"/> is &lt; 0.
+        /// </exception>
         public TimeExpression(int hours = 0, int minutes = 0, int seconds = 0, int milliseconds = 0)
         {
             if (hours < 0)

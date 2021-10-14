@@ -108,7 +108,10 @@
         }
 
         /// <inheritdoc/>
-        public bool Equals(DateTimeExpression other) => (Date, Time, Offset) == (other?.Date, other?.Time, other?.Offset);
+        public bool Equals(DateTimeExpression other) => Equals(Date, other?.Date)
+                                                        && Equals(Time, other?.Time)
+                                                        && Equals(Offset, other?.Offset)
+            ;
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj switch

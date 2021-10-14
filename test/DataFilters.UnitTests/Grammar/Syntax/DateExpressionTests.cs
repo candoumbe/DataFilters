@@ -69,16 +69,22 @@
         public Property Given_DateExpression_GetComplexity_should_return_1(DateExpression date) => (date.Complexity == 1).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<TextExpression> first, FilterExpression second)
+        public Property Equals_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
             => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<TextExpression> expression)
+        public Property Equals_should_be_reflexive(NonNull<DateExpression> expression)
             => expression.Item.Equals(expression.Item).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<TextExpression> expression, NonNull<FilterExpression> otherExpression)
+        public Property Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
+
+        public void Equals_should_work_as_expected(DateExpression date, object obj, bool expected, string reason)
+        {
+
+        }
 
     }
 }
