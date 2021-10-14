@@ -12,6 +12,7 @@ namespace DataFilters.ContinuousIntegration
     using Nuke.Common.Tools.Coverlet;
     using Nuke.Common.Tools.DotNet;
     using Nuke.Common.Tools.GitVersion;
+    using Nuke.Common.Tools.Codecov;
     using Nuke.Common.Tools.ReportGenerator;
     using Nuke.Common.Utilities;
     using Nuke.Common.Tools.GitReleaseManager;
@@ -29,6 +30,7 @@ namespace DataFilters.ContinuousIntegration
     using static Nuke.Common.Tools.Git.GitTasks;
     using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
     using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+    using static Nuke.Common.Tools.Codecov.CodecovTasks;
 
     [GitHubActions(
         "integration",
@@ -37,6 +39,11 @@ namespace DataFilters.ContinuousIntegration
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(Pack) },
+        ImportSecrets = new[]
+        {
+            nameof(NugetApiKey),
+            nameof(CodecovToken)
+        },
         OnPullRequestExcludePaths = new[]
         {
             "docs/*",
@@ -52,64 +59,17 @@ namespace DataFilters.ContinuousIntegration
         InvokedTargets = new[] { nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
         PublishArtifacts = true,
-        ImportSecrets = new[] { nameof(NugetApiKey) },
+        ImportSecrets = new[]
+        {
+            nameof(NugetApiKey),
+            nameof(CodecovToken)
+        },
         OnPullRequestExcludePaths = new[]
         {
             "docs/*",
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
-        }
-    )]
-    [AzurePipelines(
-        suffix: "release",
-        AzurePipelinesImage.WindowsLatest,
-        InvokedTargets = new[] { nameof(Pack) },
-        NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
-        ExcludedTargets = new[] { nameof(Clean) },
-        PullRequestsAutoCancel = true,
-        TriggerBranchesInclude = new[] { ReleaseBranchPrefix + "/*" },
-        TriggerPathsExclude = new[]
-        {
-            "docs/*",
-            "README.md",
-            "CHANGELOG.md",
-            "LICENCE"
-        }
-    )]
-    [AzurePipelines(
-        suffix: "pull-request",
-        AzurePipelinesImage.WindowsLatest,
-        InvokedTargets = new[] { nameof(Tests) },
-        NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
-        ExcludedTargets = new[] { nameof(Clean) },
-        PullRequestsAutoCancel = true,
-        PullRequestsBranchesInclude = new[] { MainBranchName },
-        TriggerBranchesInclude = new[]
-        {
-            FeatureBranchPrefix + "/*",
-            HotfixBranchPrefix + "/*",
-            ColdfixBranchPrefix + "/*"
-        },
-        TriggerPathsExclude = new[]
-        {
-            "docs/*",
-            "README.md",
-            "CHANGELOG.md"
-        }
-    )]
-    [AzurePipelines(
-        AzurePipelinesImage.WindowsLatest,
-        InvokedTargets = new[] { nameof(Pack) },
-        NonEntryTargets = new[] { nameof(Restore), nameof(Changelog) },
-        ExcludedTargets = new[] { nameof(Clean) },
-        PullRequestsAutoCancel = true,
-        TriggerBranchesInclude = new[] { MainBranchName },
-        TriggerPathsExclude = new[]
-        {
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md"
         }
     )]
     [CheckBuildProjectConfigurations]
@@ -132,6 +92,10 @@ namespace DataFilters.ContinuousIntegration
         [Parameter]
         [Secret]
         public readonly string GitHubToken;
+
+        [Parameter]
+        [Secret]
+        public readonly string CodecovToken;
 
         [Required] [Solution] public readonly Solution Solution;
         [Required] [GitRepository] public readonly GitRepository GitRepository;
@@ -236,12 +200,38 @@ namespace DataFilters.ContinuousIntegration
                 );
             });
 
+        public Target ReportCoverage => _ => _
+            .DependsOn(Tests)
+            .Requires(() => IsServerBuild || CodecovToken != null)
+            .Consumes(Tests, TestResultDirectory / "*.xml")
+            .Produces(CoverageReportDirectory / "*.xml")
+            .Produces(CoverageReportHistoryDirectory / "*.xml")
+            .Executes(() =>
+            {
+                ReportGenerator(_ => _
+                        .SetFramework("net5.0")
+                        .SetReports(TestResultDirectory / "*.xml")
+                        .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
+                        .SetTargetDirectory(CoverageReportDirectory)
+                        .SetHistoryDirectory(CoverageReportHistoryDirectory)
+                        .SetTag(GitRepository.Commit)
+                    );
+
+                Codecov(s => s
+                    .SetFiles(CoverageReportDirectory / "*.xml")
+                    .SetToken(CodecovToken)
+                    .SetBranch(GitRepository.Branch)
+                    .SetSha(GitRepository.Commit)
+                    .SetBuild(GitVersion.FullSemVer)
+                    .SetFramework("net5.0")
+                );
+            });
+
         public Target Tests => _ => _
             .DependsOn(Compile)
             .Description("Run unit tests and collect code coverage")
             .Produces(TestResultDirectory / "*.trx")
             .Produces(TestResultDirectory / "*.xml")
-            .Produces(CoverageReportHistoryDirectory / "*.xml")
             .Executes(() =>
             {
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
@@ -268,16 +258,6 @@ namespace DataFilters.ContinuousIntegration
                                                                                                         title: $"{Path.GetFileNameWithoutExtension(testFileResult)} ({AzurePipelines.StageDisplayName})",
                                                                                                         files: new string[] { testFileResult })
                         );
-
-                // TODO Move this to a separate "coverage" target once https://github.com/nuke-build/nuke/issues/562 is solved !
-                ReportGenerator(_ => _
-                        .SetFramework("net5.0")
-                        .SetReports(TestResultDirectory / "*.xml")
-                        .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
-                        .SetTargetDirectory(CoverageReportDirectory)
-                        .SetHistoryDirectory(CoverageReportHistoryDirectory)
-                        .SetTag(GitRepository.Commit)
-                    );
 
                 TestResultDirectory.GlobFiles("*.xml")
                                 .ForEach(file => AzurePipelines?.PublishCodeCoverage(coverageTool: AzurePipelinesCodeCoverageToolType.Cobertura,
