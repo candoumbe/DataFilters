@@ -579,6 +579,13 @@ I&_Oj
                     "[5 TO 5[",
                     new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
                 };
+
+                yield return new object[]
+                {
+                    "[1993-08-04T00:25:05.155Z TO 1908-06-08T03:18:46.745-09:50[",
+                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1993, 8, 4), new(0, 25, 5, 155), OffsetExpression.Zero), true),
+                                           new BoundaryExpression(new DateTimeExpression(new (1908, 6, 8), new(3, 18, 46,745), new(NumericSign.Minus, 9, 50)), false))
+                };
             }
         }
 

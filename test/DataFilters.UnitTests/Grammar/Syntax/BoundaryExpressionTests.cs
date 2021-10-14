@@ -10,7 +10,9 @@
     using FsCheck.Xunit;
 
     using System;
+    using System.Collections.Generic;
 
+    using Xunit;
     using Xunit.Categories;
 
     [UnitTest]
@@ -47,5 +49,48 @@
             buildInstanceWithNullExpression.Should()
                                            .ThrowExactly<ArgumentNullException>();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<BoundaryExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
+            => (group.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(group.Item)).ToProperty();
+
+        public static IEnumerable<object[]> EqualsBehaviourCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new BoundaryExpression(new DateExpression(), true),
+                    new BoundaryExpression(new DateExpression(), true),
+                    true,
+                    $"Two instances with {nameof(DateExpression)} that are equal"
+                };
+
+                yield return new object[]
+                {
+                    new BoundaryExpression(new DateTimeExpression(new (), new (), new()), true),
+                    new BoundaryExpression(new DateTimeExpression(new (), new (), new()), true),
+                    true,
+                    $"Two instances with {nameof(DateExpression)} that are equal"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsBehaviourCases))]
+        public void Equals_should_behave_as_expected(BoundaryExpression expression, object other, bool expected, string reason)
+        {
+            // Act
+            bool actual = expression.Equals(other);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
+        }
+
     }
 }

@@ -125,6 +125,14 @@
                     true,
                     $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
                 };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new (), new (), new()),
+                    new DateTimeExpression(new (), new (), new()),
+                    true,
+                    $"Two instances with {nameof(DateTimeExpression)} that are equal"
+                };
             }
         }
 
