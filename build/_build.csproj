@@ -15,5 +15,6 @@
     <PackageReference Include="Nuke.Common" Version="5.3.0" />
     <PackageReference Include="ReportGenerator" Version="4.8.*" />
     <PackageDownload Include="GitVersion.Tool" Version="[5.6.10]" />
+    <PackageDownload Include="Codecov.Tool" Version="[1.12.3]" />
   </ItemGroup>
 </Project>
