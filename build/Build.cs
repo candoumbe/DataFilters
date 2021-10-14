@@ -257,7 +257,7 @@ namespace DataFilters.ContinuousIntegration
                     );
 
                 Codecov(s => s
-                    .SetFiles(TestResultDirectory / "*.xml")
+                    .SetFiles(TestResultDirectory.GlobFiles("*.xml").Select(x => x.ToString()))
                     .SetToken(CodecovToken)
                     .SetBranch(GitRepository.Branch)
                     .SetSha(GitRepository.Commit)
