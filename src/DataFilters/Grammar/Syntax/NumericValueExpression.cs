@@ -24,9 +24,6 @@ namespace DataFilters.Grammar.Syntax
         public virtual bool Equals(NumericValueExpression other) => Value.Equals(other?.Value);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as NumericValueExpression);
-
-        ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
