@@ -248,7 +248,7 @@ namespace DataFilters.ContinuousIntegration
             .Executes(() =>
             {
                 ReportGenerator(_ => _
-                        .SetFramework("net5.0")
+                        .SetFramework("netcoreapp3.0")
                         .SetReports(TestResultDirectory / "*.xml")
                         .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlChart, ReportTypes.HtmlInline_AzurePipelines_Dark)
                         .SetTargetDirectory(CoverageReportDirectory)
