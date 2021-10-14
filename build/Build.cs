@@ -115,6 +115,7 @@ namespace DataFilters.ContinuousIntegration
     [CheckBuildProjectConfigurations]
     [UnsetVisualStudioEnvironmentVariables]
     [DotNetVerbosityMapping]
+    [HandleVisualStudioDebugging]
     public class Build : NukeBuild
     {
         public static int Main() => Execute<Build>(x => x.Compile);
