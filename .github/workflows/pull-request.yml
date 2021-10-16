@@ -9,18 +9,17 @@
 #
 #     - To trigger manual generation invoke:
 #
-#         nuke --generate-configuration GitHubActions_integration --host GitHubActions
+#         nuke --generate-configuration GitHubActions_pull-request --host GitHubActions
 #
 # </auto-generated>
 # ------------------------------------------------------------------------------
 
-name: integration
+name: pull-request
 
 on:
-  push:
-    branches-ignore:
-      - main
   pull_request:
+    branches:
+      - develop
     paths:
       - '!docs/*'
       - '!README.md'
@@ -40,10 +39,9 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Tests ReportCoverage Pack'
-        run: ./build.cmd Tests ReportCoverage Pack
+      - name: Run './build.cmd Tests ReportCoverage'
+        run: ./build.cmd Tests ReportCoverage
         env:
-          NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/upload-artifact@v1
         with:
@@ -57,10 +55,6 @@ jobs:
         with:
           name: coverage-history
           path: output/coverage-history
-      - uses: actions/upload-artifact@v1
-        with:
-          name: artifacts
-          path: output/artifacts
   macOS-latest:
     name: macOS-latest
     runs-on: macOS-latest
@@ -73,10 +67,9 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Tests ReportCoverage Pack'
-        run: ./build.cmd Tests ReportCoverage Pack
+      - name: Run './build.cmd Tests ReportCoverage'
+        run: ./build.cmd Tests ReportCoverage
         env:
-          NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/upload-artifact@v1
         with:
@@ -90,7 +83,3 @@ jobs:
         with:
           name: coverage-history
           path: output/coverage-history
-      - uses: actions/upload-artifact@v1
-        with:
-          name: artifacts
-          path: output/artifacts

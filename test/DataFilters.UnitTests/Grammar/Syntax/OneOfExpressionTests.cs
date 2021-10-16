@@ -189,21 +189,21 @@
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(StringValueExpression filterExpression, PositiveInt n)
-            => Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression, PositiveInt n)
-            => Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression, PositiveInt n)
-            => Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(AsteriskExpression filterExpression, PositiveInt n)
-            => Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
-        private static Property Given_AllExpressions_are_equal_and_filterExpression_equal_to_one_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
+        private static Property Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
         {
             // Arrange
             IEnumerable<FilterExpression> filterExpressions = Enumerable.Repeat(filterExpression, n);

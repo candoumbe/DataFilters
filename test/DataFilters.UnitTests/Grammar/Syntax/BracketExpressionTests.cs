@@ -45,19 +45,40 @@
                 .ThrowExactly<ArgumentNullException>($"{nameof(BracketExpression)}.{nameof(BracketExpression.Values)} cannot be null");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Two_BracketExpression_instances_built_with_same_input_should_be_equals(NonEmptyArray<BracketValue> inputs)
+        public static IEnumerable<object[]> EqualsCases
         {
-            // Arrange
-            BracketExpression first = new(inputs.Item);
-            BracketExpression second = new(inputs.Item);
+            get
+            {
+                yield return new object[]
+                {
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    true,
+                    $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
+                };
 
+                yield return new object[]
+                {
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    true,
+                    $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_behave_as_expected(BracketExpression expression, object obj, bool expected, string reason)
+        {
             // Act
-            bool actual = first.Equals(second);
+            bool actual = expression.Equals(obj);
 
             // Assert
-            return actual.ToProperty();
+            actual.Should()
+                  .Be(expected, reason);
         }
+
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<BracketValue> one,

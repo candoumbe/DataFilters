@@ -104,7 +104,7 @@
                     Min?.Included,
                     Min?.Expression?.EscapedParseableString,
                     Type = Min?.Expression?.GetType().Name,
-                    DebugView = Max?.Expression?.ToString()
+                    DebugView = Min?.Expression?.ToString()
                 },
                 Max = new
                 {

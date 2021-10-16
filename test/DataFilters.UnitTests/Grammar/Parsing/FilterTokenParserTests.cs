@@ -536,7 +536,7 @@ I&_Oj
         public void Given_bracket_expression_OneOf_can_parse_input(NonNull<BracketValue> bracketExpression)
         {
             // Arrange
-            string input = bracketExpression.Item.ToString();
+            string input = bracketExpression.Item.EscapedParseableString;
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
@@ -553,7 +553,7 @@ I&_Oj
             OneOfExpression expression = FilterTokenParser.OneOf.Parse(tokens);
 
             // Assert
-            expression.IsEquivalentTo(expected).ToProperty().VerboseCheck(_outputHelper);
+            expression.IsEquivalentTo(expected).ToProperty();
         }
 
         [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]

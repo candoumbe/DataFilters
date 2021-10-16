@@ -227,6 +227,16 @@
                         "Comparing two ranges"
                     };
                 }
+
+                yield return new object[]
+                {
+                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1973, 09, 02), new (18, 50, 17, 403), OffsetExpression.Zero), true),
+                                           new BoundaryExpression(new DateExpression(1944, 09, 06), true)),
+                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1973, 09, 02), new (18, 50, 17, 403), OffsetExpression.Zero), true),
+                                           new BoundaryExpression(new DateExpression(1944, 09, 06), true)),
+                    true,
+                    "Two intervals with same data"
+                };
             }
         }
 

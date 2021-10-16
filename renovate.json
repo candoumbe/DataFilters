@@ -1,5 +1,7 @@
 {
   "extends": [
     "config:base"
-  ]
+  ],
+  "assignees": [ "candoumbe" ],
+  "addLabels": ["package-update"]
 }

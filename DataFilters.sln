@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		Nuget.config = Nuget.config
 		README.md = README.md
+		renovate.json = renovate.json
 		tests.props = tests.props
 	EndProjectSection
 EndProject
@@ -44,7 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEM
 		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataFilters.PerformanceTests", "test\DataFilters.PerformanceTests\DataFilters.PerformanceTests.csproj", "{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.PerformanceTests", "test\DataFilters.PerformanceTests\DataFilters.PerformanceTests.csproj", "{9E61A2B7-D9F2-4CDD-8E9D-866369ABA03A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

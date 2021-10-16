@@ -342,17 +342,17 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<BracketValue> GenerateRegexValues()
         {
-            Gen<BracketValue> regexRangeGenerator = RangeBracketValueGenerator().Convert(range => (BracketValue)range,
+            Gen<BracketValue> regexRangeGenerator = RangeBracketValues().Convert(range => (BracketValue)range,
                                                                                          bracket => (RangeBracketValue)bracket)
                                                                                                           .Generator;
-            Gen<BracketValue> regexConstantGenerator = BuildRegexConstantValueGenerator().Convert(range => (BracketValue)range,
+            Gen<BracketValue> regexConstantGenerator = ConstantBracketValues().Convert(range => (BracketValue)range,
                                                                                                   bracket => (ConstantBracketValue)bracket)
                                                                                          .Generator;
 
             return Gen.OneOf(regexConstantGenerator, regexRangeGenerator).ToArbitrary();
         }
 
-        public static Arbitrary<ConstantBracketValue> BuildRegexConstantValueGenerator() => GetArbitraryFor<string>()
+        private static Arbitrary<ConstantBracketValue> ConstantBracketValues() => GetArbitraryFor<string>()
                                                                                                        .Filter(input => !string.IsNullOrWhiteSpace(input)
                                                                                                                         && input.Length > 1
                                                                                                                         && input.All(chr => char.IsLetterOrDigit(chr)))
@@ -360,7 +360,7 @@ namespace DataFilters.UnitTests.Helpers
                                                                                                        .Select(item => new ConstantBracketValue(item))
                                                                                                        .ToArbitrary();
 
-        public static Arbitrary<RangeBracketValue> RangeBracketValueGenerator()
+        private static Arbitrary<RangeBracketValue> RangeBracketValues()
         {
             return GetArbitraryFor<char>()
                               .Filter(chr => char.IsLetterOrDigit(chr)).Generator
@@ -375,6 +375,17 @@ namespace DataFilters.UnitTests.Helpers
 
             static bool TupleContainsDigits((char start, char end) tuple) => char.IsDigit(tuple.start) && char.IsDigit(tuple.end);
         }
+
+        /// <summary>
+        /// <see cref="BracketExpression"/> generator
+        /// </summary>
+        /// <returns><see cref="Arbitrary{BracketExpression}"/></returns>
+        public static Arbitrary<BracketExpression> BracketExpressions()
+            => Gen.OneOf(RangeBracketValues().Generator.Select(x => (BracketValue)x),
+                         ConstantBracketValues().Generator.Select(x => (BracketValue)x))
+                .ArrayOf()
+                .Select(brackets => new BracketExpression(brackets))
+                .ToArbitrary();
 
         public static Arbitrary<TextExpression> TextExpressions()
             => ArbMap.Default.ArbFor<NonEmptyString>()

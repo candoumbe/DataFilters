@@ -33,10 +33,27 @@ namespace DataFilters.ContinuousIntegration
     using static Nuke.Common.Tools.Codecov.CodecovTasks;
 
     [GitHubActions(
+        "pull-request",
+        GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
+        OnPullRequestBranches = new[] { DevelopBranch },
+        PublishArtifacts = true,
+        InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage) },
+        ImportSecrets = new[]
+        {
+            nameof(CodecovToken)
+        },
+        OnPullRequestExcludePaths = new[]
+        {
+            "docs/*",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE"
+        }
+    )]
+    [GitHubActions(
         "integration",
         GitHubActionsImage.WindowsLatest, GitHubActionsImage.MacOsLatest,
         OnPushBranchesIgnore = new[] { MainBranchName },
-        OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage), nameof(Pack) },
         ImportSecrets = new[]
