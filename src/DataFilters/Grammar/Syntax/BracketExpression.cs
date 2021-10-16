@@ -55,12 +55,8 @@
         public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Values)}]";
 
         ///<inheritdoc/>
-        public override double Complexity => Values.Sum(value => value switch
-        {
-            ConstantBracketValue constant => 1.5 * constant.Value.Length,
-            RangeBracketValue range => 1.5 * (range.End - range.Start + 1),
-            _ => throw new NotSupportedException("Unsupported value")
-        });
+        public override double Complexity => Values.Select(x => x.Complexity)
+                                                   .Aggregate((initial, current) => initial * current);
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
