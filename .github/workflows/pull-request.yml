@@ -43,15 +43,15 @@ jobs:
         run: ./build.cmd Tests ReportCoverage
         env:
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: tests-results
           path: output/tests-results
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-report
           path: output/coverage-report
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-history
           path: output/coverage-history
@@ -71,15 +71,15 @@ jobs:
         run: ./build.cmd Tests ReportCoverage
         env:
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: tests-results
           path: output/tests-results
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-report
           path: output/coverage-report
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-history
           path: output/coverage-history

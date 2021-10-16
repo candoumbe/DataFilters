@@ -47,19 +47,19 @@ jobs:
           GitHubToken: ${{ secrets.GITHUB_TOKEN }}
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: tests-results
           path: output/tests-results
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-report
           path: output/coverage-report
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-history
           path: output/coverage-history
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: artifacts
           path: output/artifacts
@@ -81,19 +81,19 @@ jobs:
           GitHubToken: ${{ secrets.GITHUB_TOKEN }}
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: tests-results
           path: output/tests-results
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-report
           path: output/coverage-report
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: coverage-history
           path: output/coverage-history
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: artifacts
           path: output/artifacts
