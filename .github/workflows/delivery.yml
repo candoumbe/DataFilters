@@ -40,7 +40,7 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+          key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
       - name: Run './build.cmd ReportCoverage Publish AddGithubRelease'
         run: ./build.cmd ReportCoverage Publish AddGithubRelease
         env:
@@ -74,7 +74,7 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+          key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
       - name: Run './build.cmd ReportCoverage Publish AddGithubRelease'
         run: ./build.cmd ReportCoverage Publish AddGithubRelease
         env:
