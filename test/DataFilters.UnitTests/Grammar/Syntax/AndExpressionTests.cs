@@ -153,7 +153,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Assert
             actual.Should()
-                  .Be(expected);
+                  .BeEquivalentTo(expected);
         }
 
         [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]

@@ -25,27 +25,7 @@
                                                                    .Implement<IHaveComplexity>().And
                                                                    .Implement<IParseableString>();
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new GroupExpression(new StartsWithExpression("prop1")),
-                    new GroupExpression(new StartsWithExpression("prop1")),
-                    true,
-                    "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
-                {
-                    new GroupExpression(new StartsWithExpression("prop1")),
-                    new GroupExpression(new StartsWithExpression("prop2")),
-                    false,
-                    "comparing two different instances with different inner expressions"
-                };
-            }
-        }
+        
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -119,6 +99,48 @@
 
             // Assert
             return actual.ToProperty();
+        }
+
+        public static IEnumerable<object[]> EqualsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new GroupExpression(new StartsWithExpression("prop1")),
+                    new GroupExpression(new StartsWithExpression("prop1")),
+                    true,
+                    "comparing two different instances with same property name"
+                };
+
+                yield return new object[]
+                {
+                    new GroupExpression(new StartsWithExpression("prop1")),
+                    new GroupExpression(new StartsWithExpression("prop2")),
+                    false,
+                    "comparing two different instances with different inner expressions"
+                };
+
+                yield return new object[]
+                {
+                    new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero)),
+                    new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero)),
+                    true,
+                    "Two instances with inner expressions that are equal"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_behave_as_expected(GroupExpression expression, object obj, bool expected, string reason)
+        {
+            // Act
+            bool actual = expression.Equals(obj);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
         }
     }
 }

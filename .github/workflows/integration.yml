@@ -39,7 +39,7 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+          key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
       - name: Run './build.cmd Tests ReportCoverage Pack'
         run: ./build.cmd Tests ReportCoverage Pack
         env:
@@ -72,7 +72,7 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+          key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
       - name: Run './build.cmd Tests ReportCoverage Pack'
         run: ./build.cmd Tests ReportCoverage Pack
         env:

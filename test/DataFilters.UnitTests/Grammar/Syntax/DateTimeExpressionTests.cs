@@ -133,6 +133,14 @@
                     true,
                     $"Two instances with {nameof(DateTimeExpression)} that are equal"
                 };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero),
+                    new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero),
+                    true,
+                    $"Two instances with {nameof(DateTimeExpression.Date)}, {nameof(DateTimeExpression.Time)}, {nameof(DateTimeExpression.Offset)} are equal and not null"
+                };
             }
         }
 
