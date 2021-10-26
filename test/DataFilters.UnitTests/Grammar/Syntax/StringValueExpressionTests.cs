@@ -10,6 +10,7 @@
     using FsCheck.Xunit;
 
     using System;
+    using System.Collections.Generic;
 
     using Xunit;
     using Xunit.Abstractions;
@@ -61,12 +62,43 @@
         }
 
         [Property]
-        public Property Given_two_instances_that_hold_values_that_are_equals_Equals_shoud_return_true(NonEmptyString value)
+        public void Given_two_instances_that_hold_values_that_are_equals_Equals_shoud_return_true(NonEmptyString value)
         {
+            // Arrange
             StringValueExpression first = new(value.Item);
             StringValueExpression other = new(value.Item);
 
-            return first.Equals(other).ToProperty();
+            // Act
+            bool actual = first.Equals(other);
+
+            // Assert
+            actual.Should()
+                  .BeTrue();
+        }
+
+        public static IEnumerable<object[]> EqualsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new StringValueExpression("True"),
+                    new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
+                    true
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_behave_as_expected(StringValueExpression stringValue, object obj, bool expected)
+        {
+            // Act
+            bool actual = stringValue.Equals(obj);
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -82,7 +114,7 @@
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
         [Property]
-        public Property Given_two_ConstantExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
+        public Property Given_two_StringValueExpresssions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
         {
             // Arrange
             StringValueExpression first = new(input.Get);
@@ -93,7 +125,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ConstantExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
+        public Property Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
 
         [Property]
         public void Given_StringValueExpression_and_TextExpression_are_based_on_same_value_IsEquivalentTo_should_be_true(NonWhiteSpaceString input)
@@ -124,6 +156,5 @@
             actual.Should()
                   .BeTrue();
         }
-
     }
 }

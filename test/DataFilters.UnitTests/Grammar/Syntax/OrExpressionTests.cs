@@ -29,12 +29,11 @@
 
         [Fact]
         public void IsFilterExpression() => typeof(OrExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<OrExpression>>().And
-            .Implement<ISimplifiable>().And
-            .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
-            .HaveProperty<FilterExpression>("Left").And
-            .HaveProperty<FilterExpression>("Right");
+                                                                .BeAssignableTo<FilterExpression>().And
+                                                                .Implement<IEquatable<OrExpression>>().And
+                                                                .Implement<ISimplifiable>().And
+                                                                .HaveProperty<FilterExpression>("Left").And
+                                                                .HaveProperty<FilterExpression>("Right");
 
         public static IEnumerable<object[]> ArgumentNullExceptionCases
         {
@@ -79,33 +78,30 @@
                     false,
                     "comparing two different instances with different property name"
                 };
+
+                yield return new object[]
+                {
+                    new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")),
+                    new StringValueExpression("prop1"),
+                    true,
+                    "comparing to a filter expression that is semantically equivalent"
+                };
             }
         }
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(OrExpression first, object other, bool expected, string reason)
+        public void Equals_should_behave_has_expected(OrExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
             _outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
         }
 
         public static IEnumerable<object[]> IsEquivalentToCases

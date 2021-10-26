@@ -21,17 +21,12 @@
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         protected ConstantValueExpression(string value)
         {
-            if (value is null)
+            Value = value switch
             {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (value.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
-            }
-
-            Value = value;
+                null => throw new ArgumentNullException(nameof(value)),
+                { Length : 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+                _ => value
+            };
         }
 
         ///<inheritdoc/>

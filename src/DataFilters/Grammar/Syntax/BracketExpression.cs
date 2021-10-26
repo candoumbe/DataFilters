@@ -46,7 +46,12 @@
                                                        && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as BracketExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            BracketExpression bracket => Equals(bracket),
+            FilterExpression expression => IsEquivalentTo(expression),
+            _ => false
+        };
 
         ///<inheritdoc/>
         public override int GetHashCode() => equalityComparer.GetHashCode(Values.ToArray());
