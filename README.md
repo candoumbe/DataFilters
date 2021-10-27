@@ -1,8 +1,12 @@
 #  Datafilters <!-- omit in toc -->
 
-[![Azure DevOps builds](https://img.shields.io/azure-devops/build/candoumbe/7684067c-f6c9-4e35-83ee-944ab5e7505b/29?style=for-the-badge)](https://dev.azure.com/candoumbe/DataFilters/_build/latest?definitionId=29&branchName=main) ![Coverage](https://img.shields.io/azure-devops/coverage/candoumbe/DataFilters/29?style=for-the-badge) ![Tests](https://img.shields.io/azure-devops/tests/candoumbe/DataFilters/29?style=for-the-badge&compact_message) [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Nuget&style=for-the-badge)](https://www.nuget.org/packages/DataFilters)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/delivery/main?label=main)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/integration/develop?label=develop)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
+[![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/DataFilters)
+[![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
+[![Nuget](https://img.shields.io/nuget/vpre/datafilters)](https://nuget.org/packages/datafilters)
 
-A small library that allow to convert a string to a generic `IFilter` object.
+A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
 **Table of contents**
@@ -203,7 +207,7 @@ where
 Search for `vigilante` resources where the value of `age` property is greater than or equal to `18`
 
 | Query string    | JSON                                      |
-| --------------- | ----------------------------------------- |
+|-----------------|-------------------------------------------|
 | `age=[18 TO *[` | `{"field":"age", "op":"gte", "value":18}` |
 
 will result in a [IFilter][class-ifilter] instance equivalent to
