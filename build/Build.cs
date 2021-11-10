@@ -622,5 +622,15 @@ namespace DataFilters.ContinuousIntegration
                     });
                 });
             });
+
+        ///<inheritdoc/>
+        protected override void OnBuildCreated()
+        {
+            // Small hack until GitVersion 5.8.0 is released (see https://github.com/GitTools/GitVersion/issues/2906#issuecomment-964629657)
+            if (IsServerBuild)
+            {
+                EnvironmentInfo.SetVariable("DOTNET_ROLL_FORWARD", "Major");
+            }
+        }
     }
 }
