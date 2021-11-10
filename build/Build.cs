@@ -34,7 +34,7 @@ namespace DataFilters.ContinuousIntegration
 
     [GitHubActions(
         "pull-request",
-        GitHubActionsImage.UbuntuLatest, GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.MacOsLatest,
         OnPullRequestBranches = new[] { DevelopBranch },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage) },
@@ -53,7 +53,7 @@ namespace DataFilters.ContinuousIntegration
     )]
     [GitHubActions(
         "integration",
-        GitHubActionsImage.UbuntuLatest, GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.MacOsLatest,
         OnPushBranchesIgnore = new[] { MainBranchName },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage), nameof(Pack) },
@@ -73,7 +73,7 @@ namespace DataFilters.ContinuousIntegration
     )]
     [GitHubActions(
         "delivery",
-        GitHubActionsImage.UbuntuLatest, GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.MacOsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(ReportCoverage), nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
