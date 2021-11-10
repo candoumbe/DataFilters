@@ -26,7 +26,7 @@
 
     using static DataFilters.SortDirection;
 
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
     using System.Runtime.InteropServices;
 #endif
     /// <summary>
@@ -68,7 +68,7 @@
                 throw new InvalidSortExpressionException(sortString);
             }
 
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
             ReadOnlyMemory<string> sorts = sortString.Split(new []{ Separator }, StringSplitOptions.RemoveEmptyEntries)
                                                      .AsMemory();
 
@@ -80,7 +80,7 @@
 
             if (sorts.Length > 1)
             {
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
                 sort = new MultiSort<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
 #else
                 sort = new MultiSort<T>(sorts.Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());

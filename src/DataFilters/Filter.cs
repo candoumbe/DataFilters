@@ -32,7 +32,7 @@
         /// <summary>
         /// Pattern that field name should respect.
         /// </summary>
-        /// <returns></returns>
+        /// #lang : regex
         public const string ValidFieldNamePattern = @"[a-zA-Z_]+((\[""[a-zA-Z0-9_]+""]|(\.[a-zA-Z0-9_]+))*)";
 
         /// <summary>

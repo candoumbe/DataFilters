@@ -2,13 +2,13 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1'  or '$(TargetFramework)' == 'net5.0'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
     <DefineConstants>STRING_SEGMENT</DefineConstants>
   </PropertyGroup>
 
@@ -19,7 +19,11 @@
         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
       </ItemGroup>
     </When>
-
+    <When Condition="'$(TargetFramework)' == 'net6.0'">
+      <ItemGroup>
+        <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+      </ItemGroup>
+    </When>
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
