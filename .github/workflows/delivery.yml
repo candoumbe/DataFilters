@@ -29,40 +29,6 @@ on:
       - '!LICENSE'
 
 jobs:
-  ubuntu-latest:
-    name: ubuntu-latest
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Cache .nuke/temp, ~/.nuget/packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            .nuke/temp
-            ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
-      - name: Run './build.cmd ReportCoverage Publish AddGithubRelease'
-        run: ./build.cmd ReportCoverage Publish AddGithubRelease
-        env:
-          GitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          NugetApiKey: ${{ secrets.NUGET_API_KEY }}
-          CodecovToken: ${{ secrets.CODECOV_TOKEN }}
-      - uses: actions/upload-artifact@v1
-        with:
-          name: tests-results
-          path: output/tests-results
-      - uses: actions/upload-artifact@v1
-        with:
-          name: coverage-report
-          path: output/coverage-report
-      - uses: actions/upload-artifact@v1
-        with:
-          name: coverage-history
-          path: output/coverage-history
-      - uses: actions/upload-artifact@v1
-        with:
-          name: artifacts
-          path: output/artifacts
   macOS-latest:
     name: macOS-latest
     runs-on: macOS-latest
