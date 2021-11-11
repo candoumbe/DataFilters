@@ -52,7 +52,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.6.1"/>
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.6.3"/>
     <PackageReference Include="Roslynator.Analyzers" Version="3.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
