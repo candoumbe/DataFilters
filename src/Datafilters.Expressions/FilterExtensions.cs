@@ -1,7 +1,13 @@
 ﻿namespace DataFilters
 {
+#if NET6_0_OR_GREATER
+    using DateOnlyTimeOnly.AspNet.Converters;
+    using System.Collections.Concurrent;
+#endif
+
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -14,6 +20,10 @@
     /// </summary>
     public static class FilterExtensions
     {
+#if NET6_0_OR_GREATER
+        private readonly static ISet<bool> HackZone = new HashSet<bool>();
+#endif
+
         /// <summary>
         /// List of all primitives types
         /// </summary>
@@ -31,6 +41,9 @@
             typeof(ulong?), typeof(ulong?),
             typeof(DateTime), typeof(DateTime?),
             typeof(DateTimeOffset), typeof(DateTimeOffset?),
+#if NET6_0_OR_GREATER
+            typeof(DateOnly), typeof(DateOnly?),
+#endif
             typeof(bool), typeof(bool?),
             typeof(char), typeof(char?)
         };
@@ -44,7 +57,7 @@
         /// <exception cref="ArgumentNullException">if <paramref name="filter"/> is <c>null</c>.</exception>
         public static Expression<Func<T, bool>> ToExpression<T>(this IFilter filter)
         {
-            static object ConvertObjectToDateTime(object source, Type targetType)
+            object ConvertObjectToDateTime(object source, Type targetType)
             {
                 object dateTime = null;
 
@@ -70,25 +83,34 @@
                         dateTime = null;
                     }
                 }
+#if NET6_0_OR_GREATER
+                else if (targetType == typeof(DateOnly) || targetType == typeof(DateOnly))
+                {
+                    if (DateOnly.TryParse(source?.ToString(), out DateOnly result))
+                    {
+                        dateTime = result;
+                    }
+                }
+#endif
 
                 return dateTime;
             }
 
-            static Expression ComputeIsNotEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
+            Expression ComputeIsNotEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
                     ? Not(ComputeIsEmpty(property))
                     : NotEqual(property, Constant(string.Empty));
 
-            static bool IsNotAStringAndIsEnumerable(Type propertyType) => propertyType != typeof(string)
+            bool IsNotAStringAndIsEnumerable(Type propertyType) => propertyType != typeof(string)
                                                                           && propertyType.IsAssignableToGenericType(typeof(IEnumerable<>));
 
-            static Expression ComputeIsEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
+            Expression ComputeIsEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
                     ? Not(Call(typeof(Enumerable),
                           nameof(Enumerable.Any),
                           new Type[] { property.Type.GenericTypeArguments[0] },
                           property))
                     : Equal(property, Constant(string.Empty));
 
-            static Expression ComputeEquals(MemberExpression property, object value)
+            Expression ComputeEquals(MemberExpression property, object value)
             {
                 Expression equals = null;
                 ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(property.Type, value);
@@ -110,7 +132,7 @@
                 return equals;
             }
 
-            static Expression ComputeContains(MemberExpression property, object value)
+            Expression ComputeContains(MemberExpression property, object value)
             {
                 Expression contains = null;
                 ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(property.Type, value);
@@ -151,13 +173,17 @@
             }
 
             // Tests if membertype is a "DateTime" type
-            static bool IsDatetimeMember(Type memberType) => memberType == typeof(DateTime)
+            bool IsDatetimeMember(Type memberType) => memberType == typeof(DateTime)
                                                              || memberType == typeof(DateTime?)
                                                              || memberType == typeof(DateTimeOffset)
                                                              || memberType == typeof(DateTimeOffset?);
 
+#if NET6_0_OR_GREATER
+            bool IsDateOnly(Type memberType) => memberType == typeof(DateOnly);
+#endif
+
             // Builds a ConstantExpression that will hold a value that has a specific type
-            static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
+            ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
             {
                 ConstantExpression ce;
 
@@ -165,6 +191,12 @@
                 {
                     ce = Constant(ConvertObjectToDateTime(value, memberType), memberType);
                 }
+#if NET6_0_OR_GREATER
+                else if(IsDateOnly(memberType))
+                {
+                    ce = Constant(ConvertObjectToDateTime(value, memberType), memberType);
+                }
+#endif
                 else if (IsNotAStringAndIsEnumerable(memberType))
                 {
                     Type parameterType = memberType.GenericTypeArguments?.SingleOrDefault() ?? typeof(object);
@@ -179,7 +211,7 @@
             }
 
             // local function that compute the body of a C# expression by applying the specified operator and value onto a property
-            static Expression ComputeBodyExpression(MemberExpression property, FilterOperator @operator, object value)
+            Expression ComputeBodyExpression(MemberExpression property, FilterOperator @operator, object value)
             {
                 ConstantExpression constantExpression = ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(((PropertyInfo)property.Member).PropertyType, value);
 
@@ -205,7 +237,7 @@
                 };
             }
 
-            static Expression ComputeExpression(ParameterExpression pe, IEnumerable<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
+            Expression ComputeExpression(ParameterExpression pe, IEnumerable<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
             {
                 Expression body = null;
                 int i = 0;
@@ -291,7 +323,7 @@
             }
 
             // local function that can combine two expressions using either AND or OR operators
-            static Expression<Func<T, bool>> MergeExpressions(Expression<Func<T, bool>> first, Expression<Func<T, bool>> second, FilterLogic logic)
+            Expression<Func<T, bool>> MergeExpressions(Expression<Func<T, bool>> first, Expression<Func<T, bool>> second, FilterLogic logic)
                 => logic switch
                 {
                     FilterLogic.And => first.AndAlso(second),
@@ -303,6 +335,13 @@
             {
                 throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
             }
+
+#if NET6_0_OR_GREATER
+            if (HackZone.Add(true))
+            {
+                TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
+            }
+#endif
 
             Expression<Func<T, bool>> filterExpression = null;
 

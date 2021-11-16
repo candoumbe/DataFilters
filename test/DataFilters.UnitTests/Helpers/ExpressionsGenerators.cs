@@ -60,11 +60,24 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<DateExpression> DateExpressions()
         {
-            return GetArbitraryFor<DateTime>()
-                            .Filter(dateTime => dateTime.Date.Year >= 0 && dateTime.Date.Month >= 0 && dateTime.Date.Day >= 0)
-                            .Generator
-                            .Select(dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day))
-                            .ToArbitrary();
+            Gen<DateExpression> dateTimeGenerator = GetArbitraryFor<DateTime>()
+                                        .Generator
+                                        .Select(dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day));
+
+#if NET6_0_OR_GREATER
+            Gen<DateExpression> dateOnlyGenerator = GetArbitraryFor<DateTime>()
+                .Generator
+                .Select(dateTime => DateOnly.FromDateTime(dateTime))
+                .Select(date => new DateExpression(year: date.Year, month: date.Month, day: date.Day));
+#endif
+
+#if !NET6_0_OR_GREATER
+            return dateTimeGenerator
+                                .ToArbitrary();
+#else
+            return Gen.OneOf(dateTimeGenerator, dateOnlyGenerator)
+                .ToArbitrary();
+#endif
         }
 
         public static Arbitrary<ConstantValueExpression> ConstantValueExpressions()
@@ -104,7 +117,9 @@ namespace DataFilters.UnitTests.Helpers
                                                 .ToArbitrary();
 
         private static Arbitrary<T> GetArbitraryFor<T>(Func<T, bool> filter = null) => ArbMap.Default.ArbFor<T>()
-                                                                                                     .Filter(item => filter is null || filter.Invoke(item));
+                                                                                                     .Filter(item => filter?.Invoke(item) != false);
+
+
 
         public static Arbitrary<DurationExpression> DurationExpressions()
         {

@@ -91,7 +91,6 @@
         }
 #endif
 
-
         ///<inheritdoc/>
         public bool Equals(StartsWithExpression other) => Value == other?.Value;
 

@@ -10,7 +10,6 @@
     {
         private readonly Lazy<string> _lazyEscapedParseableString;
 
-
         /// <summary>
         /// Builds a new <see cref="ConstantBracketValue"/> instance.
         /// </summary>

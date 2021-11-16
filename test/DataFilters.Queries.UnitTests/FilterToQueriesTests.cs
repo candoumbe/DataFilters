@@ -1,6 +1,7 @@
 namespace DataFilters.Queries.UnitTests
 {
     using FluentAssertions;
+    using FluentAssertions.Extensions;
 
     using global::Queries.Core.Parts.Clauses;
 
@@ -130,6 +131,20 @@ namespace DataFilters.Queries.UnitTests
                     new Filter(field : "Height", GreaterThanOrEqual, 6),
                     new WhereClause("Height".Field(), ClauseOperator.GreaterThanOrEqualTo, 6)
                 };
+
+                yield return new object[]
+                {
+                    new Filter("BirthDate", GreaterThan, 18.January(1983)),
+                    new WhereClause("BirthDate".Field(), ClauseOperator.GreaterThan, 18.January(1983))
+                };
+
+#if NET6_0_OR_GREATER
+                yield return new object[]
+                {
+                    new Filter("BirthDate", GreaterThan, DateOnly.FromDateTime(18.January(1983))),
+                    new WhereClause("BirthDate".Field(), ClauseOperator.GreaterThan, DateOnly.FromDateTime(18.January(1983)))
+                };
+#endif
             }
         }
 

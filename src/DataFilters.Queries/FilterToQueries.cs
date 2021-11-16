@@ -101,7 +101,10 @@
                             decimal decimalValue => decimalValue.Literal(),
                             double doubleValue => doubleValue.Literal(),
                             int intValue => intValue.Literal(),
-                            _ => throw new NotSupportedException("Unexpected value type when building WhereClause")
+#if NET6_0_OR_GREATER
+                            DateOnly date => date.Literal(),
+#endif
+                            _ => throw new NotSupportedException($"Unexpected '{value?.GetType().Name}' type when building WhereClause")
                         }
                         );
                         break;

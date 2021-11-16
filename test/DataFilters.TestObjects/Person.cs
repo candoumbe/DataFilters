@@ -12,7 +12,11 @@ namespace DataFilters.TestObjects
 
         public string Nickname { get; set; }
 
+#if NET6_0_OR_GREATER
+        public DateOnly BirthDate { get; init; }
+#else
         public DateTime BirthDate { get; set; }
+#endif
 
         public string BattleCry { get; set; }
 
