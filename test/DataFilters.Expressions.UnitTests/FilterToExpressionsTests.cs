@@ -1,5 +1,6 @@
 ﻿namespace DataFilters.UnitTests
 {
+    using DataFilters.Expressions.UnitTests;
     using DataFilters.TestObjects;
 
     using FluentAssertions;
@@ -63,7 +64,11 @@
                 yield return new object[]
                 {
                     new[] {
-                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },
+#if NET6_0_OR_GREATER
+		                new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = DateOnly.FromDateTime(1.April(1938)) },
+#else
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },  
+#endif
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }
                     },
                     new MultiFilter {
@@ -103,9 +108,15 @@
                 yield return new object[]
                 {
                     new[] {
+#if NET6_0_OR_GREATER
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = DateOnly.FromDateTime(13.January(2007))},
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = DateOnly.FromDateTime(18.April(2014)) }
+#else
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
-                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }  
+	#endif
                     },
                     new MultiFilter {
                         Logic = And,
@@ -115,13 +126,71 @@
                             {
                                 Logic = And,
                                 Filters = new [] {
-                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
+#if NET6_0_OR_GREATER
+		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : DateOnly.FromDateTime(1.January(2007))),
+                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : DateOnly.FromDateTime(31.December(2012)))
+#else
+		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
+#endif
                                 }
                             }
                         }
                     },
-                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (1.January(2007) < item.LastBattleDate) && item.LastBattleDate < 31.December(2012))
+#if NET6_0_OR_GREATER
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                                                                && (DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate)
+                                                                && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012)))
+#else
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                                                                && (1.January(2007) < item.LastBattleDate)
+                                                                && item.LastBattleDate < 31.December(2012))
+
+#endif
+                };
+
+                yield return new object[]
+                {
+                    new[]
+                    {
+#if NET6_0_OR_GREATER
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = DateOnly.FromDateTime(13.January(2007))},
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = DateOnly.FromDateTime(18.April(2014)) }
+#else
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }  
+#endif
+                    },
+                    new MultiFilter {
+                        Logic = And,
+                        Filters = new IFilter [] {
+                            new Filter(field : nameof(SuperHero.Firstname), @operator : Contains, value : "a"),
+                            new MultiFilter
+                            {
+                                Logic = And,
+                                Filters = new [] {
+#if NET6_0_OR_GREATER
+		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : DateOnly.FromDateTime(1.January(2007))),
+                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : DateOnly.FromDateTime(31.December(2012)))
+#else
+		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
+                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
+#endif           
+                                }
+                            }
+                        }
+                    },
+#if NET6_0_OR_GREATER
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                                                                && (DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate)
+                                                                && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012)))
+#else
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                                                                && (1.January(2007) < item.LastBattleDate)
+                                                                && item.LastBattleDate < 31.December(2012))  
+#endif
                 };
 
                 yield return new object[]
@@ -620,13 +689,27 @@
             {
                 yield return new object[]
                 {
-                    new[] {
-                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
+#if NET6_0_OR_GREATER
+                    new[]
+                    {
+		                new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
+                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = DateOnly.FromDateTime(13.January(2007))},
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = DateOnly.FromDateTime(18.April(2014)) }
+                    },
+                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : LessThanOrEqualTo, value : DateOnly.FromDateTime(1.January(2007))),
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                                                                && item.LastBattleDate <= DateOnly.FromDateTime(1.January(2007)))
+#else
+                    new[]
+                    {
+		                new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
                         new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }
                     },
                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : LessThanOrEqualTo, value : 1.January(2007)),
-                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && item.LastBattleDate <= 1.January(2007))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                                                                && item.LastBattleDate <= 1.January(2007))
+#endif
                 };
             }
         }
@@ -789,15 +872,5 @@
         [MemberData(nameof(LocalDateFilterCases))]
         public void Filter_LocalDate(IEnumerable<NodaTimeClass> elements, IFilter filter, Expression<Func<NodaTimeClass, bool>> expression)
             => Build(elements, filter, expression);
-
-        [ExcludeFromCodeCoverage]
-        public class NodaTimeClass
-        {
-            public LocalDate LocalDate { get; set; }
-
-            public LocalDateTime LocalDateTime { get; set; }
-
-            public Instant Instant { get; set; }
-        }
     }
 }

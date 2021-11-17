@@ -95,9 +95,6 @@
                                                                                    .Or(Asterisk.IgnoreThen(Text)
                                                                                        .Select(text => new EndsWithExpression(text)));
 
-
-
-
         /// <summary>
         /// Parser for "contains" expression
         /// </summary>

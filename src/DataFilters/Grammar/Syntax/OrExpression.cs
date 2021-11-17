@@ -7,7 +7,6 @@
     /// </summary>
     public sealed class OrExpression : FilterExpression, IEquatable<OrExpression>, ISimplifiable
     {
-
         private readonly Lazy<string> _lazyToString;
 
         /// <summary>

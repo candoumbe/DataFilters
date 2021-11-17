@@ -96,7 +96,6 @@
         ///<inheritdoc />
         public override double Complexity => 1 + Math.Pow(2, End - Start);
 
-
         ///<inheritdoc />
         public int CompareTo(RangeBracketValue other) => (Start, End).CompareTo((other.Start, other.End));
     }

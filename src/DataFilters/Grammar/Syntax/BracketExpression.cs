@@ -42,7 +42,7 @@
         public IEnumerable<BracketValue> Values { get; }
 
         ///<inheritdoc/>
-        public bool Equals(BracketExpression other) => other is not null 
+        public bool Equals(BracketExpression other) => other is not null
                                                        && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
         ///<inheritdoc/>

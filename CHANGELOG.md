@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Made `BracketValue` implement `IParseable`, `IHaveComplexity`
-
+- Bumped `Candoumbe.MiscUtilities` to `0.6.3`
+- Bumped `Queries.Core` to `0.4.0`
+- Added `DateOnly` support ([#63](https://github.com/candoumbe/datafilters/issues/63))
 
 ## [0.8.0] / 2021-10-10
 - Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
