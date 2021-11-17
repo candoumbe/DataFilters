@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped `Candoumbe.MiscUtilities` to `0.6.3`
 - Bumped `Queries.Core` to `0.4.0`
 - Added `DateOnly` support ([#63](https://github.com/candoumbe/datafilters/issues/63))
+- Added `TimeOnly` support ([#64](https://github.com/candoumbe/datafilters/issues/64))
 - Added `NullableValueBehavior` ([#68](https://github.com/candoumbe/datafilters/issues/68))
 
 ## [0.8.0] / 2021-10-10

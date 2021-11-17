@@ -103,6 +103,7 @@
                             int intValue => intValue.Literal(),
 #if NET6_0_OR_GREATER
                             DateOnly date => date.Literal(),
+                            TimeOnly time => time.Literal(),
 #endif
                             _ => throw new NotSupportedException($"Unexpected '{value?.GetType().Name}' type when building WhereClause")
                         }

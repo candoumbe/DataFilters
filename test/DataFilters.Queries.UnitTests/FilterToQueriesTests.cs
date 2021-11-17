@@ -144,6 +144,12 @@ namespace DataFilters.Queries.UnitTests
                     new Filter("BirthDate", GreaterThan, DateOnly.FromDateTime(18.January(1983))),
                     new WhereClause("BirthDate".Field(), ClauseOperator.GreaterThan, DateOnly.FromDateTime(18.January(1983)))
                 };
+
+                yield return new object[]
+                {
+                    new Filter("Time", GreaterThan, TimeOnly.FromDateTime(18.January(1983).Add(15.Hours().And(47.Minutes())))),
+                    new WhereClause("Time".Field(), ClauseOperator.GreaterThan, TimeOnly.FromDateTime(18.January(1983).Add(15.Hours().And(47.Minutes()))))
+                };
 #endif
             }
         }
