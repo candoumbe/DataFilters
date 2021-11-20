@@ -27,7 +27,7 @@
         /// <c>AND</c> operator
         /// </summary>
         /// <remarks>
-        /// <paramref name="left"/> and/or <paramref name="right"/> will be wrapped inside a <see cref="GroupExpression"/> when either is a 
+        /// <paramref name="left"/> and/or <paramref name="right"/> will be wrapped inside a <see cref="GroupExpression"/> when either is a
         /// <see cref="AndExpression"/> or a <see cref="OrExpression"/> instance.
         /// </remarks>
         /// <param name="left">Left member</param>

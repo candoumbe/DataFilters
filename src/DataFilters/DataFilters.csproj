@@ -6,6 +6,7 @@
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
@@ -26,7 +27,7 @@
       </ItemGroup>
     </Otherwise>
   </Choose>
-
+  
   <ItemGroup>
     <PackageReference Include="OneOf.Extended" Version="3.0.190" />
   </ItemGroup>
