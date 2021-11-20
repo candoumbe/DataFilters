@@ -261,7 +261,7 @@ namespace DataFilters.ContinuousIntegration
 
         public Target ReportCoverage => _ => _
             .DependsOn(Tests)
-            .Requires(() => IsServerBuild || CodecovToken != null)
+            .OnlyWhenDynamic(() => IsServerBuild || CodecovToken != null)
             .Consumes(Tests, TestResultDirectory / "*.xml")
             .Produces(CoverageReportDirectory / "*.xml")
             .Produces(CoverageReportHistoryDirectory / "*.xml")
@@ -286,6 +286,8 @@ namespace DataFilters.ContinuousIntegration
                 );
             });
 
+        private AbsolutePath ReadmeFile => RootDirectory / "README.md";
+
         public Target Pack => _ => _
             .DependsOn(Tests, Compile)
             .Consumes(Compile)
@@ -293,21 +295,25 @@ namespace DataFilters.ContinuousIntegration
             .Produces(ArtifactsDirectory / "*.snupkg")
             .Executes(() =>
             {
+                IEnumerable<Project> csprojs = Partition.GetCurrent(Solution.GetProjects("*.csproj")
+                                                                            .Where(csproj => SourceDirectory.Contains(csproj)));
+
                 DotNetPack(s => s
                     .EnableIncludeSource()
                     .EnableIncludeSymbols()
                     .SetOutputDirectory(ArtifactsDirectory)
-                    .SetProject(Solution)
-                    .SetConfiguration(Configuration)
-                    .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                    .SetFileVersion(GitVersion.AssemblySemFileVer)
-                    .SetInformationalVersion(GitVersion.InformationalVersion)
-                    .SetVersion(GitVersion.NuGetVersion)
-                    .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
-                    .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
-                    .SetRepositoryType("git")
-                    .SetRepositoryUrl(GitRepository.HttpsUrl)
-                );
+                    .CombineWith(csprojs, (setting, csproj) => setting.SetProject(csproj)
+                        .SetNoBuild(InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
+                        .SetNoRestore(InvokedTargets.Contains(Restore) || InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
+                        .SetConfiguration(Configuration)
+                        .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                        .SetFileVersion(GitVersion.AssemblySemFileVer)
+                        .SetInformationalVersion(GitVersion.InformationalVersion)
+                        .SetVersion(GitVersion.NuGetVersion)
+                        .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                        .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
+                        .SetRepositoryType("git")
+                        .SetRepositoryUrl(GitRepository.HttpsUrl)));
             });
 
         private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";

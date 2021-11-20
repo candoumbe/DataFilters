@@ -281,7 +281,6 @@
                                     ? new Type[] { genericType }
                                     : null,
                                 property));
-                
 
                 isEmpty = AndAlso(left, right);
             }
@@ -291,13 +290,6 @@
             }
 
             return isEmpty;
-
-            static bool IsNullableType(Type type) => Nullable.GetUnderlyingType(type) != null
-                                                     || type == typeof(string)
-#if !NETSTANDARD1_3
-                                                     || !type.IsValueType
-#endif
-                ;
         }
 
         private static Expression ComputeContains(MemberExpression property, object value)
