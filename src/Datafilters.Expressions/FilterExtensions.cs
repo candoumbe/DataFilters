@@ -46,6 +46,7 @@
             typeof(DateTimeOffset), typeof(DateTimeOffset?),
 #if NET6_0_OR_GREATER
             typeof(DateOnly), typeof(DateOnly?),
+            typeof(TimeOnly), typeof(TimeOnly?),
 #endif
             typeof(bool), typeof(bool?),
             typeof(char), typeof(char?)
@@ -74,6 +75,7 @@
             if (HackZone.Add(true))
             {
                 TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
+                TypeDescriptor.AddAttributes(typeof(TimeOnly), new TypeConverterAttribute(typeof(TimeOnlyTypeConverter)));
             }
 #endif
 

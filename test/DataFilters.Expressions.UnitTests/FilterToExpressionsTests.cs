@@ -80,7 +80,15 @@ public class FilterToExpressionTests
             {
                 new[] {
 #if NET6_0_OR_GREATER
-		            new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = DateOnly.FromDateTime(1.April(1938)) },
+		                new SuperHero
+                        {
+                            Firstname = "Bruce",
+                            Lastname = "Wayne",
+                            Height = 190,
+                            Nickname = "Batman",
+                            BirthDate = DateOnly.FromDateTime(1.April(1938)),
+                            PeakShape = TimeOnly.FromTimeSpan(13.Hours())
+                        },
 #else
                     new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },  
 #endif
@@ -122,18 +130,21 @@ public class FilterToExpressionTests
                 (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (item.Nickname == "Batman" || item.Nickname == "Superman"))
             };
 
-            yield return new object[]
-            {
-                    new[] {
+                yield return new object[]
+                {
+                    new[] 
+                    {
 #if NET6_0_OR_GREATER
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = DateOnly.FromDateTime(13.January(2007))},
-                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = DateOnly.FromDateTime(18.April(2014)) }
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = DateOnly.FromDateTime(18.April(2014)) },
+                        new SuperHero { Firstname = "Freak", Lastname = "Hazoid",  Height = 190, Nickname = "Zoom", LastBattleDate = DateOnly.FromDateTime(25.April(2014)), PeakShape = TimeOnly.FromTimeSpan(12.Hours()) },
+
 #else
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
                         new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }  
-	#endif
+#endif
                     },
                     new MultiFilter {
                         Logic = And,
@@ -145,7 +156,8 @@ public class FilterToExpressionTests
                                 Filters = new [] {
 #if NET6_0_OR_GREATER
 		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : DateOnly.FromDateTime(1.January(2007))),
-                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : DateOnly.FromDateTime(31.December(2012)))
+                                    new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : DateOnly.FromDateTime(31.December(2012))),
+                                    //new Filter(field : nameof(SuperHero.PeakShape), @operator : FilterOperator.LessThan, value : TimeOnly.FromTimeSpan(12.Hours()))
 #else
 		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
