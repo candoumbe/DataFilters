@@ -276,8 +276,7 @@ namespace DataFilters.ContinuousIntegration
             .Produces(ArtifactsDirectory / "*.snupkg")
             .Executes(() =>
             {
-                IEnumerable<Project> csprojs = Solution.GetProjects("*.csproj")
-                                                       .Where(csproj => SourceDirectory.Contains(csproj));
+                IEnumerable<AbsolutePath> csprojs = SourceDirectory.GlobFiles("**/*.csproj");
 
                 int packageCount = csprojs.Count();
                 Info($"Packaging {packageCount} package{packageCount switch { <= 1 => string.Empty, _ => 's' }}");
