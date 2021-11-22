@@ -31,7 +31,7 @@
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
       </PropertyGroup>
       <ItemGroup Condition="'$(IsTestProject)' == 'false'">
-        <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All" Condition="'$(TF_BUILD)' == 'true'"/>
+        <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.1.1" PrivateAssets="All" Condition="'$(TF_BUILD)' == 'true'"/>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
       </ItemGroup>
     </When>
