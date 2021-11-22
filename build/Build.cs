@@ -298,7 +298,6 @@ namespace DataFilters.ContinuousIntegration
                     .SetRepositoryType("git")
                     .SetRepositoryUrl(GitRepository.HttpsUrl)
                     .CombineWith(csprojs, (setting, csproj) => setting.SetProject(csproj)),
-                    degreeOfParallelism: packageCount,
                     completeOnFailure: true);
             });
 
