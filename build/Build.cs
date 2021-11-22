@@ -275,8 +275,11 @@ namespace DataFilters.ContinuousIntegration
             .Produces(ArtifactsDirectory / "*.snupkg")
             .Executes(() =>
             {
-                IEnumerable<Project> csprojs = Partition.GetCurrent(Solution.GetProjects("*.csproj")
-                                                                            .Where(csproj => SourceDirectory.Contains(csproj)));
+                IEnumerable<Project> csprojs = Solution.GetProjects("*.csproj")
+                                                       .Where(csproj => SourceDirectory.Contains(csproj));
+
+                int packageCount = csprojs.Count();
+                Info($"Packaging {packageCount} package{packageCount switch { <= 1 => string.Empty, _ => 's' }}");
 
                 DotNetPack(s => s
                     .EnableIncludeSource()
@@ -293,7 +296,9 @@ namespace DataFilters.ContinuousIntegration
                     .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
                     .SetRepositoryType("git")
                     .SetRepositoryUrl(GitRepository.HttpsUrl)
-                    .CombineWith(csprojs, (setting, csproj) => setting.SetProject(csproj)));
+                    .CombineWith(csprojs, (setting, csproj) => setting.SetProject(csproj)),
+                    degreeOfParallelism: packageCount,
+                    completeOnFailure: true);
             });
 
         private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
