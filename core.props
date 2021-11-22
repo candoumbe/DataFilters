@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <Choose>
-    <When Condition="'$(TF_BUILD)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">
+    <When Condition="'$(GITHUB_ACTIONS)' == 'true'">
       <PropertyGroup>
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
       </PropertyGroup>
@@ -41,20 +41,20 @@
   <Choose>
     <When Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="9.*" />
+        <PackageReference Include="FluentValidation" Version="9.5.4" />
         <PackageReference Include="Ultimately" Version="2.1.1" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="8.*" />
+        <PackageReference Include="FluentValidation" Version="8.6.3" />
         <PackageReference Include="Optional" Version="4.0.0"/>
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
     <PackageReference Include="Candoumbe.MiscUtilities" Version="0.6.3"/>
-    <PackageReference Include="Roslynator.Analyzers" Version="3.*">
+    <PackageReference Include="Roslynator.Analyzers" Version="3.2.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

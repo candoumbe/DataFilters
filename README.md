@@ -1,7 +1,7 @@
 #  Datafilters <!-- omit in toc -->
 
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/delivery/main?label=main)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/integration/develop?label=develop)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
+[![GitHub Workflow Status (main)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/delivery/main?label=main)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
+[![GitHub Workflow Status (develop)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/integration/develop?label=develop)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
 [![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/DataFilters)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
 [![Nuget](https://img.shields.io/nuget/vpre/datafilters)](https://nuget.org/packages/datafilters)
@@ -10,28 +10,28 @@ A small library that allow to convert a string to a generic [`IFilter`][class-if
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
 **Table of contents**
-- [<a href='#parsing'>Parsing</a>](#parsing)
-- [<a href='#filtering'>Filters syntax</a>](#filtering)
-  - [<a href='#equals-expression'>Equals</a>](#equals)
-  - [<a href='#starts-with-expression'>Starts with</a>](#starts-with)
-  - [<a href='#ends-with-expression'>Ends with</a>](#ends-with)
-  - [<a href='#contains-expression'>Contains</a>](#contains)
-  - [<a href='#isempty-expression'>Is empty</a>](#is-empty)
-  - [<a href='#interval-expressions'>Interval expressions</a>](#interval-expressions)
-    - [<a href='#gte-expression'>Greater than or equal</a>](#greater-than-or-equal)
-    - [<a href='#lte-expression'>Less than or equal</a>](#less-than-or-equal)
-    - [<a href='#btw-expression'>Between</a>](#between)
-  - [<a href='#regular-expression'>Regular expression support</a>](#regex-expression)
-  - [<a href="logic-operators">Logical operators</a>](#logical-operators)
-    - [<a href='#and-expression'>And</a>](#and)
-    - [<a href='#or-expression'>Or</a>](#or)
-    - [<a href='#not-expression'>Not</a>](#not)
-  - [<a href='#special-character-handling'>Special character handling</a>](#special-character-handling)
-  - [<a href='#sorting'>Sorting</a>](#sorting)
-- [<a href='#how-to-install'>How to install</a>](#how-to-install)
-- [<a href='#how-to-use'>How to use</a>](#how-to-use)
-  - [<a href='#how-to-use-client'>On the client</a>](#on-the-client)
-  - [<a href='#how-to-use-backend'>On the backend</a>](#on-the-backend)
+- <a href='#parsing'>Parsing</a>
+- <a href='#filtering'>Filters syntax</a>
+  - <a href='#equals-expression'>Equals</a>
+  - <a href='#starts-with-expression'>Starts with</a>
+  - <a href='#ends-with-expression'>Ends with</a>
+  - <a href='#contains-expression'>Contains</a>
+  - <a href='#isempty-expression'>Is empty</a>
+  - <a href='#interval-expressions'>Interval expressions</a>
+    - <a href='#gte-expression'>Greater than or equal</a>
+    - <a href='#lte-expression'>Less than or equal</a>
+    - <a href='#btw-expression'>Between</a>
+  - <a href='#regular-expression'>Regular expression support</a>
+  - <a href="logic-operators">Logical operators</a>
+    - <a href='#and-expression'>And</a>
+    - <a href='#or-expression'>Or</a>
+    - <a href='#not-expression'>Not</a>
+  - <a href='#special-character-handling'>Special character handling</a>
+  - <a href='#sorting'>Sorting</a>
+- <a href='#how-to-install'>How to install</a>
+- <a href='#how-to-use'>How to use</a>
+  - <a href='#how-to-use-client'>On the client</a>
+  - <a href='#how-to-use-backend'>On the backend</a>
 
 
 The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
