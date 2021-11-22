@@ -33,25 +33,6 @@ namespace DataFilters.ContinuousIntegration
     using static Nuke.Common.Tools.Codecov.CodecovTasks;
 
     [GitHubActions(
-        "pull-request",
-        GitHubActionsImage.MacOsLatest,
-        OnPullRequestBranches = new[] { DevelopBranch },
-        PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage) },
-        CacheKeyFiles = new[] {"global.json", "src/**/*.csproj" },
-        ImportSecrets = new[]
-        {
-            nameof(CodecovToken)
-        },
-        OnPullRequestExcludePaths = new[]
-        {
-            "docs/*",
-            "README.md",
-            "CHANGELOG.md",
-            "LICENSE"
-        }
-    )]
-    [GitHubActions(
         "integration",
         GitHubActionsImage.MacOsLatest,
         OnPushBranchesIgnore = new[] { MainBranchName },
@@ -75,7 +56,7 @@ namespace DataFilters.ContinuousIntegration
         "delivery",
         GitHubActionsImage.MacOsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
-        InvokedTargets = new[] { nameof(ReportCoverage), nameof(Publish), nameof(AddGithubRelease) },
+        InvokedTargets = new[] { nameof(Tests), nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
         CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
         PublishArtifacts = true,
@@ -193,6 +174,7 @@ namespace DataFilters.ContinuousIntegration
             });
 
         public Target Restore => _ => _
+            .DependsOn(Clean)
             .Executes(() =>
             {
                 DotNetRestore(s => s
@@ -235,6 +217,7 @@ namespace DataFilters.ContinuousIntegration
 
                 DotNetTest(s => s
                     .SetConfiguration(Configuration)
+                    .ResetVerbosity()
                     .EnableCollectCoverage()
                     .EnableUseSourceLink()
                     .SetNoBuild(InvokedTargets.Contains(Compile))
@@ -286,8 +269,6 @@ namespace DataFilters.ContinuousIntegration
                 );
             });
 
-        private AbsolutePath ReadmeFile => RootDirectory / "README.md";
-
         public Target Pack => _ => _
             .DependsOn(Tests, Compile)
             .Consumes(Compile)
@@ -295,25 +276,28 @@ namespace DataFilters.ContinuousIntegration
             .Produces(ArtifactsDirectory / "*.snupkg")
             .Executes(() =>
             {
-                IEnumerable<Project> csprojs = Partition.GetCurrent(Solution.GetProjects("*.csproj")
-                                                                            .Where(csproj => SourceDirectory.Contains(csproj)));
+                IEnumerable<AbsolutePath> csprojs = SourceDirectory.GlobFiles("**/*.csproj");
+
+                int packageCount = csprojs.Count();
+                Info($"Packaging {packageCount} package{packageCount switch { <= 1 => string.Empty, _ => 's' }}");
 
                 DotNetPack(s => s
                     .EnableIncludeSource()
                     .EnableIncludeSymbols()
                     .SetOutputDirectory(ArtifactsDirectory)
-                    .CombineWith(csprojs, (setting, csproj) => setting.SetProject(csproj)
-                        .SetNoBuild(InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
-                        .SetNoRestore(InvokedTargets.Contains(Restore) || InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
-                        .SetConfiguration(Configuration)
-                        .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                        .SetFileVersion(GitVersion.AssemblySemFileVer)
-                        .SetInformationalVersion(GitVersion.InformationalVersion)
-                        .SetVersion(GitVersion.NuGetVersion)
-                        .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
-                        .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
-                        .SetRepositoryType("git")
-                        .SetRepositoryUrl(GitRepository.HttpsUrl)));
+                    .SetNoBuild(InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
+                    .SetNoRestore(InvokedTargets.Contains(Restore) || InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
+                    .SetConfiguration(Configuration)
+                    .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                    .SetFileVersion(GitVersion.AssemblySemFileVer)
+                    .SetInformationalVersion(GitVersion.InformationalVersion)
+                    .SetVersion(GitVersion.NuGetVersion)
+                    .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                    .SetPackageReleaseNotes(GetNuGetReleaseNotes(ChangeLogFile, GitRepository))
+                    .SetRepositoryType("git")
+                    .SetRepositoryUrl(GitRepository.HttpsUrl)
+                    .CombineWith(csprojs, (setting, csproj) => setting.SetProject(csproj)),
+                    completeOnFailure: true);
             });
 
         private AbsolutePath ChangeLogFile => RootDirectory / "CHANGELOG.md";
@@ -572,7 +556,7 @@ namespace DataFilters.ContinuousIntegration
             .After(Publish)
             .Unlisted()
             .Description("Creates a new GitHub release after *.nupkgs/*.snupkg were successfully published.")
-            .OnlyWhenStatic(() => IsServerBuild && GitRepository.IsOnMainBranch())
+            .OnlyWhenDynamic(() => IsServerBuild && GitRepository.IsOnMainBranch())
             .Executes(async () =>
             {
                 Info("Creating a new release");
