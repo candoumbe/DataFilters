@@ -217,6 +217,7 @@ namespace DataFilters.ContinuousIntegration
 
                 DotNetTest(s => s
                     .SetConfiguration(Configuration)
+                    .ResetVerbosity()
                     .EnableCollectCoverage()
                     .EnableUseSourceLink()
                     .SetNoBuild(InvokedTargets.Contains(Compile))
