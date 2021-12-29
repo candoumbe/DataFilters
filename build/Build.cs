@@ -193,7 +193,7 @@ namespace DataFilters.ContinuousIntegration
             .Executes(() =>
             {
                 DotNetBuild(s => s
-                    .SetNoRestore(InvokedTargets.Contains(Restore) || SkippedTargets.Contains(Restore))
+                    .SetNoRestore(SucceededTargets.Contains(Restore) || SkippedTargets.Contains(Restore))
                     .SetConfiguration(Configuration)
                     .SetProjectFile(Solution)
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)
@@ -220,14 +220,15 @@ namespace DataFilters.ContinuousIntegration
                     .ResetVerbosity()
                     .EnableCollectCoverage()
                     .EnableUseSourceLink()
-                    .SetNoBuild(InvokedTargets.Contains(Compile))
+                    .SetNoBuild(SucceededTargets.Contains(Compile))
                     .SetResultsDirectory(TestResultDirectory)
                     .SetCoverletOutputFormat(CoverletOutputFormat.lcov)
                     .AddProperty("ExcludeByAttribute", "Obsolete")
                     .CombineWith(testsProjects, (cs, project) => cs.SetProjectFile(project)
                                                                    .CombineWith(project.GetTargetFrameworks(), (setting, framework) => setting.SetFramework(framework)
                                                                                                                                               .AddLoggers($"trx;LogFileName={project.Name}.trx")
-                                                                                                                                              .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml")))
+                                                                                                                                              .SetCoverletOutput(TestResultDirectory / $"{project.Name}.{framework}.xml"))),
+                    completeOnFailure: true
                     );
 
                 TestResultDirectory.GlobFiles("*.trx")
@@ -285,8 +286,8 @@ namespace DataFilters.ContinuousIntegration
                     .EnableIncludeSource()
                     .EnableIncludeSymbols()
                     .SetOutputDirectory(ArtifactsDirectory)
-                    .SetNoBuild(InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
-                    .SetNoRestore(InvokedTargets.Contains(Restore) || InvokedTargets.Contains(Compile) || InvokedTargets.Contains(Tests))
+                    .SetNoBuild(SucceededTargets.Contains(Compile) || SucceededTargets.Contains(Tests))
+                    .SetNoRestore(SucceededTargets.Contains(Restore) || SucceededTargets.Contains(Compile) || SucceededTargets.Contains(Tests))
                     .SetConfiguration(Configuration)
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)
                     .SetFileVersion(GitVersion.AssemblySemFileVer)
