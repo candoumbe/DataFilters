@@ -1,5 +1,9 @@
 mode: ContinuousDelivery
-branches: {}
+branches: 
+  feature:
+    mode: ContinousDeployment
+  release:
+    mode: ContinuousDeployment
 ignore:
   sha: []
 merge-message-formats: {}

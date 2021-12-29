@@ -190,8 +190,8 @@
         /// <summary>
         /// Deconstruction method
         /// </summary>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
+        /// <param name="min">lower bound of the interval</param>
+        /// <param name="max">Upper bound of the interval</param>
         public void Deconstruct(out BoundaryExpression min, out BoundaryExpression max)
         {
             min = Min;
