@@ -100,7 +100,7 @@ namespace DataFilters.ContinuousIntegration
 
         [Required] [Solution] public readonly Solution Solution;
         [Required] [GitRepository] public readonly GitRepository GitRepository;
-        [Required] [GitVersion(Framework = "net6.0")] public readonly GitVersion GitVersion;
+        [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
 
         [CI] public readonly AzurePipelines AzurePipelines;
         [CI] public readonly GitHubActions GitHubActions;
