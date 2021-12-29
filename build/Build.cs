@@ -34,7 +34,7 @@ namespace DataFilters.ContinuousIntegration
 
     [GitHubActions(
         "integration",
-        GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.UbuntuLatest,
         OnPushBranchesIgnore = new[] { MainBranchName },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage), nameof(Pack) },
@@ -54,7 +54,7 @@ namespace DataFilters.ContinuousIntegration
     )]
     [GitHubActions(
         "delivery",
-        GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.UbuntuLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(Tests), nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
@@ -614,15 +614,5 @@ namespace DataFilters.ContinuousIntegration
                     });
                 });
             });
-
-        ///<inheritdoc/>
-        protected override void OnBuildCreated()
-        {
-            // Small hack until GitVersion 5.8.0 is released (see https://github.com/GitTools/GitVersion/issues/2906#issuecomment-964629657)
-            if (IsServerBuild)
-            {
-                EnvironmentInfo.SetVariable("DOTNET_ROLL_FORWARD", "Major");
-            }
-        }
     }
 }
