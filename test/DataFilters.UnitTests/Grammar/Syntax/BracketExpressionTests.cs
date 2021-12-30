@@ -29,10 +29,7 @@
         public void IsFilterExpression() => typeof(BracketExpression).Should()
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<BracketExpression>>().And
-            .Implement<IHaveComplexity>().And
-            .HaveConstructor(new[] { typeof(BracketValue[]) }).And
-            .HaveProperty<IEnumerable<BracketValue>>("Values")
-            ;
+            .Implement<IHaveComplexity>();
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_If_Value_Is_Null()
@@ -45,19 +42,40 @@
                 .ThrowExactly<ArgumentNullException>($"{nameof(BracketExpression)}.{nameof(BracketExpression.Values)} cannot be null");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Two_BracketExpression_instances_built_with_same_input_should_be_equals(NonEmptyArray<BracketValue> inputs)
+        public static IEnumerable<object[]> EqualsCases
         {
-            // Arrange
-            BracketExpression first = new(inputs.Item);
-            BracketExpression second = new(inputs.Item);
+            get
+            {
+                yield return new object[]
+                {
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    true,
+                    $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
+                };
 
+                yield return new object[]
+                {
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    new BracketExpression(new ConstantBracketValue("aBc")),
+                    true,
+                    $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_behave_as_expected(BracketExpression expression, object obj, bool expected, string reason)
+        {
             // Act
-            bool actual = first.Equals(second);
+            bool actual = expression.Equals(obj);
 
             // Assert
-            return actual.ToProperty();
+            actual.Should()
+                  .Be(expected, reason);
         }
+
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<BracketValue> one,
@@ -75,18 +93,42 @@
         {
             // Arrange
             BracketExpression bracketExpression = new(values.Item);
-            double expected = values.Item.Sum( value => value switch
-            {
-                ConstantBracketValue constant => 1.5 * constant.Value.Length,
-                RangeBracketValue range => 1.5 * (range.End - range.Start + 1),
-                _ => throw new NotSupportedException()
-            });
+            double expected = values.Item.Select(value => value.Complexity)
+                                         .Aggregate((initial, next) => initial * next);
 
             // Act
             double complexity = bracketExpression.Complexity;
 
             // Assert
             complexity.Should().Be(expected);
+        }
+
+        public static IEnumerable<object[]> ComplexityCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new BracketExpression
+                    (
+                        new ConstantBracketValue("aa"),
+                        new RangeBracketValue('a', 'c')
+                    ),
+                    new ConstantBracketValue("aa").Complexity * new RangeBracketValue('a', 'c').Complexity
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ComplexityCases))]
+        public void Complexity_should_behave_as_expected(BracketExpression expression, double expected)
+        {
+            // Act
+            double actual = expression.Complexity;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
         }
 
         [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]

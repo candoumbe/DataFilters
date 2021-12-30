@@ -11,6 +11,7 @@
     using Xunit.Categories;
     using DataFilters.UnitTests.Helpers;
     using FsCheck.Fluent;
+    using System.Collections.Generic;
 
     [Feature(nameof(DataFilters.Grammar.Syntax))]
     public class DateTimeExpressionTests
@@ -51,17 +52,6 @@
             // Assert
             actual.Should()
                   .BeFalse();
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_reflexive(DateTimeExpression instance)
-        {
-            // Act
-            bool actual = instance.Equals(instance);
-
-            // Assert
-            actual.Should()
-                  .BeTrue();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -123,5 +113,60 @@
             // Assert
             return actual.ToProperty();
         }
+
+        public static IEnumerable<object[]> EqualsCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new DateTimeExpression(new TimeExpression()),
+                    new TimeExpression(),
+                    true,
+                    $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
+                };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new (), new (), new()),
+                    new DateTimeExpression(new (), new (), new()),
+                    true,
+                    $"Two instances with {nameof(DateTimeExpression)} that are equal"
+                };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero),
+                    new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero),
+                    true,
+                    $"Two instances with {nameof(DateTimeExpression.Date)}, {nameof(DateTimeExpression.Time)}, {nameof(DateTimeExpression.Offset)} are equal and not null"
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_work_as_expected(DateTimeExpression dateTime, object obj, bool expected, string reason)
+        {
+            // Act
+            bool actual = dateTime.Equals(obj);
+
+            // Assert
+            actual.Should()
+                  .Be(expected, reason);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<DateTimeExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<DateTimeExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
     }
 }

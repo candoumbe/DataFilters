@@ -26,8 +26,14 @@
 
     using static DataFilters.SortDirection;
 
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
     using System.Runtime.InteropServices;
+
+#if NET6_0_OR_GREATER
+    using DateOnlyTimeOnly.AspNet.Converters;
+
+    using System.Collections.Concurrent;
+#endif
 #endif
     /// <summary>
     /// String extensions methods
@@ -35,6 +41,9 @@
     public static class StringExtensions
     {
         private static char Separator => ',';
+#if NET6_0_OR_GREATER
+        private readonly static ConcurrentDictionary<bool, byte> HackZone = new ();
+#endif
 
         /// <summary>
         /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance.
@@ -68,8 +77,8 @@
                 throw new InvalidSortExpressionException(sortString);
             }
 
-#if NETSTANDARD2_0 || NETSTANDARD2_1
-            ReadOnlyMemory<string> sorts = sortString.Split(new []{ Separator }, StringSplitOptions.RemoveEmptyEntries)
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
+            ReadOnlyMemory<string> sorts = sortString.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries)
                                                      .AsMemory();
 
 #else
@@ -80,7 +89,7 @@
 
             if (sorts.Length > 1)
             {
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
                 sort = new MultiSort<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
 #else
                 sort = new MultiSort<T>(sorts.Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
@@ -300,7 +309,12 @@
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
                 (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
-
+#if NET6_0_OR_GREATER
+                if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
+                {
+                    TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
+                }
+#endif
                 if (expressions.Once())
                 {
                     (PropertyName property, FilterExpression expression) = expressions[0];

@@ -42,10 +42,16 @@
         public IEnumerable<BracketValue> Values { get; }
 
         ///<inheritdoc/>
-        public bool Equals(BracketExpression other) => other is not null  && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
+        public bool Equals(BracketExpression other) => other is not null
+                                                       && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as BracketExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            BracketExpression bracket => Equals(bracket),
+            FilterExpression expression => IsEquivalentTo(expression),
+            _ => false
+        };
 
         ///<inheritdoc/>
         public override int GetHashCode() => equalityComparer.GetHashCode(Values.ToArray());
@@ -54,12 +60,8 @@
         public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Values)}]";
 
         ///<inheritdoc/>
-        public override double Complexity => Values.Sum(value => value switch
-        {
-            ConstantBracketValue constant => 1.5 * constant.Value.Length,
-            RangeBracketValue range => 1.5 * (range.End - range.Start + 1),
-            _ => throw new NotSupportedException("Unsupported value")
-        });
+        public override double Complexity => Values.Select(x => x.Complexity)
+                                                   .Aggregate((initial, current) => initial * current);
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)

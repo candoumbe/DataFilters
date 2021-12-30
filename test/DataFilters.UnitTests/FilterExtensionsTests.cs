@@ -375,22 +375,32 @@
                         Logic = And,
                         Filters = new IFilter[]
                         {
-                            new Filter("BirthDate", GreaterThan, 18.October(2016)),
-                            new Filter("BirthDate", FilterOperator.LessThan, 25.October(2016))
+#if NET6_0_OR_GREATER
+		                    new Filter(nameof(SuperHero.BirthDate), GreaterThan, DateOnly.FromDateTime(18.October(2016))),
+                            new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, DateOnly.FromDateTime(25.October(2016)))
+#else
+                            new Filter(nameof(SuperHero.BirthDate), GreaterThan, 18.October(2016)),
+                            new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, 25.October(2016))
+#endif
                         }
                     }
                 };
 
                 yield return new object[]
                 {
-                    "BirthDate=]2016-10-18T18:00:00 TO 2016-10-18T19:00:00[",
+                    "BirthDate=]2016-10-18T18:00:00 TO 2016-10-25T19:00:00[",
                     new MultiFilter
                     {
                         Logic = And,
                         Filters = new IFilter[]
                         {
-                            new Filter("BirthDate", GreaterThan, 18.October(2016).Add(18.Hours())),
-                            new Filter("BirthDate", FilterOperator.LessThan, 18.October(2016).Add(19.Hours()))
+#if NET6_0_OR_GREATER
+                            new Filter(nameof(SuperHero.BirthDate), GreaterThan, DateOnly.FromDateTime(18.October(2016))),
+                            new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, DateOnly.FromDateTime(25.October(2016)))
+#else
+                            new Filter(nameof(SuperHero.BirthDate), GreaterThan, 18.October(2016).Add(18.Hours())),
+                            new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, 25.October(2016).Add(19.Hours()))
+#endif
                         }
                     }
                 };

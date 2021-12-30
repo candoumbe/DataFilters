@@ -11,11 +11,16 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using FsCheck.Fluent;
     using FsCheck.Xunit;
 
+    using Xunit;
     using Xunit.Categories;
 
     [UnitTest]
     public class DurationExpressionTests
     {
+        [Fact]
+        public void IsFilterExpression() => typeof(DurationExpression).Should()
+                                                                      .BeDerivedFrom<FilterExpression>();
+
         [Property]
         public Property Throws_ArgumentNullException_when_any_ctor_input_is_negative(int years, int months, int weeks, int days, int hours, int minutes, int seconds)
         {
@@ -75,6 +80,19 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             return (!duration.Equals(null)).ToProperty();
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<DurationExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<DurationExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<DurationExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_DurationExpression_GetComplexity_should_return_1(DurationExpression duration) => (duration.Complexity == 1).ToProperty();

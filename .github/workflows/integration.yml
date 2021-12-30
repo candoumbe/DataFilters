@@ -21,8 +21,6 @@ on:
     branches-ignore:
       - main
   pull_request:
-    branches:
-      - develop
     paths:
       - '!docs/*'
       - '!README.md'
@@ -30,32 +28,6 @@ on:
       - '!LICENSE'
 
 jobs:
-  windows-latest:
-    name: windows-latest
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Cache .nuke/temp, ~/.nuget/packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            .nuke/temp
-            ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Tests Pack'
-        run: ./build.cmd Tests Pack
-      - uses: actions/upload-artifact@v1
-        with:
-          name: tests-results
-          path: output/tests-results
-      - uses: actions/upload-artifact@v1
-        with:
-          name: coverage-history
-          path: output/coverage-history
-      - uses: actions/upload-artifact@v1
-        with:
-          name: artifacts
-          path: output/artifacts
   macOS-latest:
     name: macOS-latest
     runs-on: macOS-latest
@@ -67,13 +39,20 @@ jobs:
           path: |
             .nuke/temp
             ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd Tests Pack'
-        run: ./build.cmd Tests Pack
+          key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
+      - name: Run './build.cmd Tests ReportCoverage Pack'
+        run: ./build.cmd Tests ReportCoverage Pack
+        env:
+          NugetApiKey: ${{ secrets.NUGET_API_KEY }}
+          CodecovToken: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/upload-artifact@v1
         with:
           name: tests-results
           path: output/tests-results
+      - uses: actions/upload-artifact@v1
+        with:
+          name: coverage-report
+          path: output/coverage-report
       - uses: actions/upload-artifact@v1
         with:
           name: coverage-history

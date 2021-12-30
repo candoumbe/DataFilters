@@ -31,13 +31,13 @@
         public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as GroupExpression);
+        public override bool Equals(object obj) => Equals(obj as GroupExpression) || IsEquivalentTo(obj as FilterExpression);
 
         ///<inheritdoc/>
         public override int GetHashCode() => Expression.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{{GroupExpression " +
+        public override string ToString() => $"{{{nameof(GroupExpression)} " +
             $"[Expression = {Expression.GetType().Name}, " +
             $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
             $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}'], " +

@@ -122,5 +122,8 @@
             && Filters.Count() == other?.Filters?.Count()
             && Filters.All(filter => other?.Filters?.Contains(filter) ?? false)
             && (other?.Filters.All(filter => Filters.Contains(filter)) ?? false);
+
+        ///<inheritdoc/>
+        public override string ToString() => this.Jsonify();
     }
 }

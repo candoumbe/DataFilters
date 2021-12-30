@@ -4,11 +4,11 @@
 
     using System;
     
-    public class OneOfVsOr
+    public class BracketVsOr
     {   
         [Benchmark]
         [Arguments("Nickname=Br[a-f]")]
-        public IFilter OneOf(string input) => input.ToFilter<SuperHero>();
+        public IFilter Bracket(string input) => input.ToFilter<SuperHero>();
 
         [Benchmark]
         [Arguments("Nickname=Bra|Brb|Brc|Brd|Bre|Brf")]

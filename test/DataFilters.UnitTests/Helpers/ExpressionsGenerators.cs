@@ -60,11 +60,24 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<DateExpression> DateExpressions()
         {
-            return GetArbitraryFor<DateTime>()
-                            .Filter(dateTime => dateTime.Date.Year >= 0 && dateTime.Date.Month >= 0 && dateTime.Date.Day >= 0)
-                            .Generator
-                            .Select(dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day))
-                            .ToArbitrary();
+            Gen<DateExpression> dateTimeGenerator = GetArbitraryFor<DateTime>()
+                                        .Generator
+                                        .Select(dateTime => new DateExpression(year: dateTime.Year, month: dateTime.Month, day: dateTime.Day));
+
+#if NET6_0_OR_GREATER
+            Gen<DateExpression> dateOnlyGenerator = GetArbitraryFor<DateTime>()
+                .Generator
+                .Select(dateTime => DateOnly.FromDateTime(dateTime))
+                .Select(date => new DateExpression(year: date.Year, month: date.Month, day: date.Day));
+#endif
+
+#if !NET6_0_OR_GREATER
+            return dateTimeGenerator
+                                .ToArbitrary();
+#else
+            return Gen.OneOf(dateTimeGenerator, dateOnlyGenerator)
+                .ToArbitrary();
+#endif
         }
 
         public static Arbitrary<ConstantValueExpression> ConstantValueExpressions()
@@ -104,7 +117,9 @@ namespace DataFilters.UnitTests.Helpers
                                                 .ToArbitrary();
 
         private static Arbitrary<T> GetArbitraryFor<T>(Func<T, bool> filter = null) => ArbMap.Default.ArbFor<T>()
-                                                                                                     .Filter(item => filter is null || filter.Invoke(item));
+                                                                                                     .Filter(item => filter?.Invoke(item) != false);
+
+
 
         public static Arbitrary<DurationExpression> DurationExpressions()
         {
@@ -342,17 +357,17 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<BracketValue> GenerateRegexValues()
         {
-            Gen<BracketValue> regexRangeGenerator = RangeBracketValueGenerator().Convert(range => (BracketValue)range,
+            Gen<BracketValue> regexRangeGenerator = RangeBracketValues().Convert(range => (BracketValue)range,
                                                                                          bracket => (RangeBracketValue)bracket)
                                                                                                           .Generator;
-            Gen<BracketValue> regexConstantGenerator = BuildRegexConstantValueGenerator().Convert(range => (BracketValue)range,
+            Gen<BracketValue> regexConstantGenerator = ConstantBracketValues().Convert(range => (BracketValue)range,
                                                                                                   bracket => (ConstantBracketValue)bracket)
                                                                                          .Generator;
 
             return Gen.OneOf(regexConstantGenerator, regexRangeGenerator).ToArbitrary();
         }
 
-        public static Arbitrary<ConstantBracketValue> BuildRegexConstantValueGenerator() => GetArbitraryFor<string>()
+        private static Arbitrary<ConstantBracketValue> ConstantBracketValues() => GetArbitraryFor<string>()
                                                                                                        .Filter(input => !string.IsNullOrWhiteSpace(input)
                                                                                                                         && input.Length > 1
                                                                                                                         && input.All(chr => char.IsLetterOrDigit(chr)))
@@ -360,7 +375,7 @@ namespace DataFilters.UnitTests.Helpers
                                                                                                        .Select(item => new ConstantBracketValue(item))
                                                                                                        .ToArbitrary();
 
-        public static Arbitrary<RangeBracketValue> RangeBracketValueGenerator()
+        private static Arbitrary<RangeBracketValue> RangeBracketValues()
         {
             return GetArbitraryFor<char>()
                               .Filter(chr => char.IsLetterOrDigit(chr)).Generator
@@ -375,6 +390,17 @@ namespace DataFilters.UnitTests.Helpers
 
             static bool TupleContainsDigits((char start, char end) tuple) => char.IsDigit(tuple.start) && char.IsDigit(tuple.end);
         }
+
+        /// <summary>
+        /// <see cref="BracketExpression"/> generator
+        /// </summary>
+        /// <returns><see cref="Arbitrary{BracketExpression}"/></returns>
+        public static Arbitrary<BracketExpression> BracketExpressions()
+            => Gen.OneOf(RangeBracketValues().Generator.Select(x => (BracketValue)x),
+                         ConstantBracketValues().Generator.Select(x => (BracketValue)x))
+                .ArrayOf()
+                .Select(brackets => new BracketExpression(brackets))
+                .ToArbitrary();
 
         public static Arbitrary<TextExpression> TextExpressions()
             => ArbMap.Default.ArbFor<NonEmptyString>()

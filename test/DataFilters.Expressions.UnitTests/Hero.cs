@@ -11,12 +11,19 @@
 
         public DateTimeOffset FirstAppearance { get; set; }
 
+#if NET6_0_OR_GREATER
+        public DateOnly LastAppearance { get; set; } 
+#endif
+
         public Hero Acolyte {get; set; }
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as Hero);
 
+        ///<inheritdoc/>
         public bool Equals(Hero other) => other != null && Name == other.Name && Age == other.Age;
 
+        ///<inheritdoc/>
 #if NETCOREAPP1_0 || NETCOREAPP2_0
         public override int GetHashCode() => (Name, Age).GetHashCode();
 #else

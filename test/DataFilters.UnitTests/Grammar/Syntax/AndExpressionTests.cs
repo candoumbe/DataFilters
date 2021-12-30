@@ -83,7 +83,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(AndExpression first, object other, bool expected, string reason)
+        public void Equals_should_work_as_expected(AndExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
             _outputHelper.WriteLine($"Second instance : {other}");
@@ -153,7 +153,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Assert
             actual.Should()
-                  .Be(expected);
+                  .BeEquivalentTo(expected);
         }
 
         [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
@@ -278,5 +278,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     .Which.IsEquivalentTo(right.Item).Should()
                     .BeTrue("Wrapping should not change the meaning of resulting expression");
         }
+
+
     }
 }

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] / 2021-12-30
+- Made `BracketValue` implement `IParseable`, `IHaveComplexity`
+- Bumped `Candoumbe.MiscUtilities` to `0.6.3`
+- Bumped `Queries.Core` to `0.4.0`
+- Added `DateOnly` support ([#63](https://github.com/candoumbe/datafilters/issues/63))
+- Added `TimeOnly` support ([#64](https://github.com/candoumbe/datafilters/issues/64))
+- Added [`NullableValueBehavior`](/src/Datafilters.Expressions/NullableValueBehavior.cs) ([#68](https://github.com/candoumbe/datafilters/issues/68))
+
 ## [0.8.0] / 2021-10-10
 - Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
 `FilterExpression` to a less complex form.
@@ -86,7 +94,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/candoumbe/DataFilters/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/candoumbe/DataFilters/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/candoumbe/DataFilters/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/candoumbe/DataFilters/compare/0.5.0...0.6.0

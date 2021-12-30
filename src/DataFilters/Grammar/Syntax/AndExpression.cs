@@ -7,6 +7,8 @@
     /// </summary>
     public sealed class AndExpression : FilterExpression, IEquatable<AndExpression>, ISimplifiable
     {
+        private readonly Lazy<string> _lazyToString;
+
         /// <summary>
         /// Left part of the expression
         /// </summary>
@@ -25,7 +27,7 @@
         /// <c>AND</c> operator
         /// </summary>
         /// <remarks>
-        /// <paramref name="left"/> and/or <paramref name="right"/> will be wrapped inside a <see cref="GroupExpression"/> when either is a 
+        /// <paramref name="left"/> and/or <paramref name="right"/> will be wrapped inside a <see cref="GroupExpression"/> when either is a
         /// <see cref="AndExpression"/> or a <see cref="OrExpression"/> instance.
         /// </remarks>
         /// <param name="left">Left member</param>
@@ -46,13 +48,20 @@
                 AndExpression or OrExpression => new GroupExpression(right),
                 _ => right
             };
+
+            _lazyToString = new(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
         }
 
         ///<inheritdoc/>
         public bool Equals(AndExpression other) => Left.Equals(other?.Left) && Right.Equals(other?.Right);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as AndExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            AndExpression and => Equals(and),
+            FilterExpression expression => IsEquivalentTo(expression),
+            _ => false
+        };
 
         ///<inheritdoc/>
         public override int GetHashCode() => (Left, Right).GetHashCode();
@@ -89,9 +98,6 @@
         public override string EscapedParseableString => $"{Left.EscapedParseableString},{Right.EscapedParseableString}";
 
         ///<inheritdoc/>
-        public override string ToString()
-        {
-            return $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]";
-        }
+        public override string ToString() => _lazyToString.Value;
     }
 }

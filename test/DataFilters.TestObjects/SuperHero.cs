@@ -2,12 +2,19 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
+    [ExcludeFromCodeCoverage]
     public class SuperHero : Person
     {
-        public DateTimeOffset? LastBattleDate { get; set; }
+#if NET6_0_OR_GREATER
+        public DateOnly? LastBattleDate { get; init; }
 
+        public TimeOnly? PeakShape {get; init;} 
+#else
+        public DateTimeOffset? LastBattleDate { get; set; }
+#endif
         public Henchman Henchman { get; set; }
 
         public IEnumerable<string> Powers { get; set; } = Enumerable.Empty<string>();

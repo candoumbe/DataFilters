@@ -26,9 +26,7 @@
         public void IsFilterExpression() => typeof(NumericValueExpression).Should()
                                                                            .BeAssignableTo<FilterExpression>().And
                                                                            .Implement<IEquatable<NumericValueExpression>>().And
-                                                                           .Implement<IBoundaryExpression>().And
-                                                                           .HaveConstructor(new[] { typeof(string) }).And
-                                                                           .HaveProperty<string>("Value");
+                                                                           .Implement<IBoundaryExpression>();
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -76,7 +74,6 @@
         public Property Equals_is_commutative(NumericValueExpression first, NumericValueExpression second)
             => (first.Equals(second) == second.Equals(first)).ToProperty();
 
-        
         [Property]
         public Property Given_two_NumericValueExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
         {
@@ -105,6 +102,20 @@
             // Assert
             actual.Should()
                   .BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<NumericValueExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<NumericValueExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
+        {
+            return (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
         }
     }
 }

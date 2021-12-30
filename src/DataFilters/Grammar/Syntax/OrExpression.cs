@@ -7,6 +7,8 @@
     /// </summary>
     public sealed class OrExpression : FilterExpression, IEquatable<OrExpression>, ISimplifiable
     {
+        private readonly Lazy<string> _lazyToString;
+
         /// <summary>
         /// Left member of the expression
         /// </summary>
@@ -43,13 +45,20 @@
                 AndExpression or OrExpression => new GroupExpression(right),
                 _ => right
             };
+
+            _lazyToString = new(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
         }
 
         ///<inheritdoc/>
         public bool Equals(OrExpression other) => Left.Equals(other?.Left) && Right.Equals(other?.Right);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as OrExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            OrExpression or => Equals(or),
+            FilterExpression expression => IsEquivalentTo(expression),
+            _ => false
+        };
 
         ///<inheritdoc/>
 #if NETSTANDARD1_3 || NETSTANDARD2_0
@@ -59,10 +68,7 @@
 #endif
 
         ///<inheritdoc/>
-        public override string ToString()
-        {
-            return $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]";
-        }
+        public override string ToString() => _lazyToString.Value;
 
         ///<inheritdoc/>
         public override string EscapedParseableString => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}";

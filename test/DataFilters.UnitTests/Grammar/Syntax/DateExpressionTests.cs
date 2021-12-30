@@ -21,10 +21,7 @@
         public void IsFilterExpression() => typeof(DateExpression).Should()
                                             .BeAssignableTo<FilterExpression>().And
                                             .Implement<IEquatable<DateExpression>>().And
-                                            .HaveConstructor(new[] { typeof(int), typeof(int), typeof(int) }).And
-                                            .HaveProperty<int>("Year").And
-                                            .HaveProperty<int>("Month").And
-                                            .HaveProperty<int>("Day");
+                                            .Implement<IBoundaryExpression>();
 
         [Property]
         public void Given_DateExpression_instance_instance_eq_instance_should_be_true(PositiveInt year, PositiveInt month, PositiveInt day)
@@ -69,6 +66,18 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateExpression_GetComplexity_should_return_1(DateExpression date) => (date.Complexity == 1).ToProperty();
+        public Property Given_DateExpression_GetComplexity_should_return_1(NonNull<DateExpression> date) => (date.Item.Complexity == 1).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<DateExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
     }
 }

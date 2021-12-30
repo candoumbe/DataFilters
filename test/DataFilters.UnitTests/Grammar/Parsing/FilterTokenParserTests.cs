@@ -31,16 +31,24 @@
     [UnitTest]
     [Feature(nameof(DataFilters.Grammar.Parsing))]
     [Feature(nameof(FilterTokenParser))]
-    public class FilterTokenParserTests
+    public class FilterTokenParserTests : IClassFixture<CultureSwitcher>, IDisposable
     {
         private readonly FilterTokenizer _tokenizer;
         private readonly ITestOutputHelper _outputHelper;
+        private readonly CultureSwitcher _cultureSwitcher;
 
-        public FilterTokenParserTests(ITestOutputHelper outputHelper)
+        public FilterTokenParserTests(ITestOutputHelper outputHelper, CultureSwitcher cultureSwitcher)
         {
             _tokenizer = new FilterTokenizer();
             _outputHelper = outputHelper;
+            _cultureSwitcher = cultureSwitcher;
+            _cultureSwitcher.DefaultCulture = CultureInfo.GetCultureInfo("fr-FR");
+
+            _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
         }
+
+        public void Dispose() => _cultureSwitcher?.Dispose();
+
 
         [Fact]
         public void IsParser() => typeof(FilterTokenParser).Should()
@@ -536,7 +544,7 @@ I&_Oj
         public void Given_bracket_expression_OneOf_can_parse_input(NonNull<BracketValue> bracketExpression)
         {
             // Arrange
-            string input = bracketExpression.Item.ToString();
+            string input = bracketExpression.Item.EscapedParseableString;
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
@@ -553,10 +561,10 @@ I&_Oj
             OneOfExpression expression = FilterTokenParser.OneOf.Parse(tokens);
 
             // Assert
-            expression.IsEquivalentTo(expected).ToProperty().VerboseCheck(_outputHelper);
+            expression.IsEquivalentTo(expected).ToProperty();
         }
 
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Should_parse_Interval(IntervalExpression expected)
         {
             // Arrange
@@ -579,6 +587,13 @@ I&_Oj
                     "[5 TO 5[",
                     new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
                 };
+
+                yield return new object[]
+                {
+                    "[1993-08-04T00:25:05.155Z TO 1908-06-08T03:18:46.745-09:50[",
+                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1993, 8, 4), new(0, 25, 5, 155), OffsetExpression.Zero), true),
+                                           new BoundaryExpression(new DateTimeExpression(new (1908, 6, 8), new(3, 18, 46,745), new(NumericSign.Minus, 9, 50)), false))
+                };
             }
         }
 
@@ -599,7 +614,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Should_parse_text(TextExpression expected)
         {
             // Arrange
@@ -948,6 +963,42 @@ I&_Oj
 
             // Assert
             AssertThatShould_parse(actual, expected);
+        }
+
+        public static IEnumerable<object[]> ParseGroupCases
+        {
+            get
+            {
+                string[] cultures = { "fr-FR", "en-GB", "en-US" };
+                foreach (string culture in cultures)
+                {
+
+                    yield return new object[]
+                    {
+                        new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new(3, 0, 40, 583), OffsetExpression.Zero)),
+                        culture
+                    };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseGroupCases))]
+        public void Given_GroupExpression_EscapedParseableString_as_input_Parser_should_return_GroupExpression_that_is_equivalent_to_input(GroupExpression expected, string culture)
+        {
+            _cultureSwitcher.Run(culture, () =>
+            {
+                _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
+                _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+                TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+
+                // Act
+                GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
+
+                // Assert
+                AssertThatShould_parse(actual, expected);
+            });
+
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

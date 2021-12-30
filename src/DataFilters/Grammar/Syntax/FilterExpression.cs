@@ -25,7 +25,7 @@
         public virtual double Complexity => 1;
 
         ///<inheritdoc/>
-        public override string ToString() => OriginalString;
+        public override string ToString() => $"{GetType().Name}: '{OriginalString}'";
 
         ///<inheritdoc/>
         public abstract string EscapedParseableString { get; }

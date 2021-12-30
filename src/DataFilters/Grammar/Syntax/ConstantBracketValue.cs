@@ -8,11 +8,17 @@
     /// </summary>
     public sealed class ConstantBracketValue : BracketValue, IEquatable<ConstantBracketValue>
     {
+        private readonly Lazy<string> _lazyEscapedParseableString;
+
         /// <summary>
         /// Builds a new <see cref="ConstantBracketValue"/> instance.
         /// </summary>
         /// <param name="value"></param>
-        public ConstantBracketValue(string value) => Value = value;
+        public ConstantBracketValue(string value)
+        {
+            Value = value;
+            _lazyEscapedParseableString = new(() => $"[{Value}]");
+        }
 
         /// <summary>
         /// Constant value of the regex
@@ -42,6 +48,12 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc />
-        public override string ToString() => $"[{Value}]";
+        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+
+        ///<inheritdoc/>
+        public override string OriginalString => $"[{Value}]";
+
+        ///<inheritdoc/>
+        public override double Complexity => 1 + Math.Pow(2, Value.Length);
     }
 }

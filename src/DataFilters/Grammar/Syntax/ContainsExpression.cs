@@ -91,7 +91,6 @@
         }
 #endif
 
-
         ///<inheritdoc/>
         public override double Complexity => 1.5;
 

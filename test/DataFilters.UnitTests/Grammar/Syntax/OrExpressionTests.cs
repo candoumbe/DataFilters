@@ -29,12 +29,11 @@
 
         [Fact]
         public void IsFilterExpression() => typeof(OrExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<OrExpression>>().And
-            .Implement<ISimplifiable>().And
-            .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
-            .HaveProperty<FilterExpression>("Left").And
-            .HaveProperty<FilterExpression>("Right");
+                                                                .BeAssignableTo<FilterExpression>().And
+                                                                .Implement<IEquatable<OrExpression>>().And
+                                                                .Implement<ISimplifiable>().And
+                                                                .HaveProperty<FilterExpression>("Left").And
+                                                                .HaveProperty<FilterExpression>("Right");
 
         public static IEnumerable<object[]> ArgumentNullExceptionCases
         {
@@ -79,33 +78,30 @@
                     false,
                     "comparing two different instances with different property name"
                 };
+
+                yield return new object[]
+                {
+                    new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")),
+                    new StringValueExpression("prop1"),
+                    true,
+                    "comparing to a filter expression that is semantically equivalent"
+                };
             }
         }
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(OrExpression first, object other, bool expected, string reason)
+        public void Equals_should_behave_has_expected(OrExpression first, object other, bool expected, string reason)
         {
             _outputHelper.WriteLine($"First instance : {first}");
             _outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
         }
 
         public static IEnumerable<object[]> IsEquivalentToCases
@@ -201,10 +197,10 @@
 
             // Act
             FilterExpression simplified = orExpression.Simplify();
-
+            bool isEquivalent = simplified.IsEquivalentTo(filterExpression);
             // Assert
-            simplified.Should()
-                      .Be(filterExpression);
+            isEquivalent.Should()
+                        .BeTrue();
         }
 
         private static void Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(FilterExpression expression)
@@ -334,5 +330,18 @@
                     .Which.IsEquivalentTo(right.Item).Should()
                     .BeTrue("Wrapping should not change the meaning of resulting expression");
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_commutative(NonNull<OrExpression> first, FilterExpression second)
+            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_reflexive(NonNull<OrExpression> expression)
+            => expression.Item.Equals(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property Equals_should_be_symetric(NonNull<OrExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+
     }
 }

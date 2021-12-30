@@ -10,6 +10,10 @@
           "type": "boolean",
           "description": "Indicates if any changes should be stashed automatically prior to switching branch (Default : true)"
         },
+        "CodecovToken": {
+          "type": "string",
+          "default": "Secrets must be entered via 'nuke :secret [profile]'"
+        },
         "Configuration": {
           "type": "string",
           "description": "Configuration to build - Default is 'Debug' (local) or 'Release' (server)",
@@ -100,12 +104,14 @@
               "Benchmarks",
               "Changelog",
               "Clean",
+              "Coldfix",
               "Compile",
               "Feature",
               "Hotfix",
               "Pack",
               "Publish",
               "Release",
+              "ReportCoverage",
               "Restore",
               "Tests"
             ]
@@ -125,12 +131,14 @@
               "Benchmarks",
               "Changelog",
               "Clean",
+              "Coldfix",
               "Compile",
               "Feature",
               "Hotfix",
               "Pack",
               "Publish",
               "Release",
+              "ReportCoverage",
               "Restore",
               "Tests"
             ]

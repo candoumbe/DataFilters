@@ -56,19 +56,18 @@
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Digit => Token.EqualTo(FilterToken.Digit);
 
-        private static TokenListParser<FilterToken, StringValueExpression> Bool => (from _ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "t")
-                                                                                 .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "r"))
-                                                                                 .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "u"))
-                                                                                 .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "e"))
-
-                                                                                    select new StringValueExpression(bool.TrueString)).Try()
+        private static TokenListParser<FilterToken, StringValueExpression> Bool => Token.EqualToValueIgnoreCase(FilterToken.Letter, "t")
+                                                                                         .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "r"))
+                                                                                         .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "u"))
+                                                                                         .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "e"))
+                                                                                         .Select(_ => new StringValueExpression(bool.TrueString)).Try()
                                                                    .Or(
-                                                                        from _ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "f")
-                                                                                       .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "a"))
-                                                                                       .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "l"))
-                                                                                       .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "s"))
-                                                                                       .Then(_ => Token.EqualToValueIgnoreCase(FilterToken.Letter, "e"))
-                                                                        select new StringValueExpression(bool.FalseString));
+                                                                        Token.EqualToValueIgnoreCase(FilterToken.Letter, "f")
+                                                                             .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "a"))
+                                                                             .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "l"))
+                                                                             .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "s"))
+                                                                             .IgnoreThen(Token.EqualToValueIgnoreCase(FilterToken.Letter, "e"))
+                                                                             .Select(_ => new StringValueExpression(bool.FalseString)));
 
         /// <summary>
         /// Parser for '*' character
@@ -95,9 +94,6 @@
                                                                                            .Select(data => new EndsWithExpression(string.Concat(data.Select(item => item.Value)))).Try()
                                                                                    .Or(Asterisk.IgnoreThen(Text)
                                                                                        .Select(text => new EndsWithExpression(text)));
-
-
-
 
         /// <summary>
         /// Parser for "contains" expression
