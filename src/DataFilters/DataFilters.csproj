@@ -21,13 +21,18 @@
         <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="1.0.2" />
       </ItemGroup>
     </When>
+    <When Condition="'$(TargetFramework)' == 'net5.0'">
+      <ItemGroup>
+        <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+      </ItemGroup>
+    </When>
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
       </ItemGroup>
     </Otherwise>
   </Choose>
-  
+
   <ItemGroup>
     <PackageReference Include="OneOf.Extended" Version="3.0.205" />
   </ItemGroup>

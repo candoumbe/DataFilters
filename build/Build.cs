@@ -595,7 +595,6 @@ namespace DataFilters.ContinuousIntegration
             .Description("Run all performance tests.")
             .DependsOn(Compile)
             .Produces(BenchmarkDirectory / "*")
-            .OnlyWhenStatic(() => IsLocalBuild)
             .Executes(() =>
             {
                 IEnumerable<Project> benchmarkProjects = Solution.GetProjects("*.PerformanceTests");

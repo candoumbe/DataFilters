@@ -11,7 +11,7 @@ namespace DataFilters.UnitTests.Helpers
     using System.Globalization;
     using System.Linq;
 
-    public static partial class ExpressionsGenerators
+    public static class ExpressionsGenerators
     {
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
         {

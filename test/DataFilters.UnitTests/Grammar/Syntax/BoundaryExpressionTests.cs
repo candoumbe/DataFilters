@@ -25,11 +25,11 @@
             => input.Equals(input).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property A_BoudnaryExpression_instance_should_not_be_equal_to_null(BoundaryExpression input)
+        public Property A_BoundaryExpression_instance_should_not_be_equal_to_null(BoundaryExpression input)
             => (!input.Equals(null)).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Two_BoundaryExpression_instances_with_same_expression_and_included_should_be_equal(BoundaryExpression source)
+        public Property Two_BoundaryExpressions_instances_with_same_expression_and_included_should_be_equal(BoundaryExpression source)
         {
             // Arrange
             BoundaryExpression first = new(source.Expression, source.Included);
