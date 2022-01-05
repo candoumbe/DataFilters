@@ -4,6 +4,10 @@
 
     using System;
     
+    [SimpleJob(BenchmarkDotNet.Jobs.RuntimeMoniker.Net60)]
+    [SimpleJob(BenchmarkDotNet.Jobs.RuntimeMoniker.Net50)]
+    [SimpleJob(BenchmarkDotNet.Jobs.RuntimeMoniker.NetCoreApp31)]
+    [MemoryDiagnoser]
     public class BracketVsOr
     {   
         [Benchmark]

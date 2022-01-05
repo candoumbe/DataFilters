@@ -1,10 +1,12 @@
-﻿#if NET5_0_OR_GREATER
-namespace DataFilters.PerfomanceTests;
+﻿namespace DataFilters.PerfomanceTests;
 
 using BenchmarkDotNet.Attributes;
 
 using System;
 
+[SimpleJob(BenchmarkDotNet.Jobs.RuntimeMoniker.Net60)]
+[SimpleJob(BenchmarkDotNet.Jobs.RuntimeMoniker.Net50)]
+[SimpleJob(BenchmarkDotNet.Jobs.RuntimeMoniker.NetCoreApp31)]
 [MemoryDiagnoser]
 public class RawFilterVsFilterService
 {
@@ -25,4 +27,3 @@ public class RawFilterVsFilterService
     [Benchmark]
     public IFilter WithCache() => _service.Compute<SuperHero>(Input);
 }
-#endif

@@ -594,11 +594,12 @@ namespace DataFilters.ContinuousIntegration
         public Target Benchmarks => _ => _
             .Description("Run all performance tests.")
             .DependsOn(Compile)
+            .TriggeredBy(Tests)
+            .OnlyWhenDynamic(() => IsServerBuild)
             .Produces(BenchmarkDirectory / "*")
             .Executes(() =>
             {
                 IEnumerable<Project> benchmarkProjects = Solution.GetProjects("*.PerformanceTests");
-
                 benchmarkProjects.ForEach(csproj =>
                 {
                     DotNetRun(s =>
