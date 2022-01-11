@@ -11,6 +11,8 @@ namespace DataFilters.UnitTests.Helpers
     using System.Globalization;
     using System.Linq;
 
+    using static GeneratorHelper;
+
     public static class ExpressionsGenerators
     {
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
@@ -115,10 +117,6 @@ namespace DataFilters.UnitTests.Helpers
                                                     : new StringValueExpression(value.Item)
                                                 )
                                                 .ToArbitrary();
-
-        private static Arbitrary<T> GetArbitraryFor<T>(Func<T, bool> filter = null) => ArbMap.Default.ArbFor<T>()
-                                                                                                     .Filter(item => filter?.Invoke(item) != false);
-
 
 
         public static Arbitrary<DurationExpression> DurationExpressions()
