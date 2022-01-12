@@ -5,7 +5,12 @@ using static Newtonsoft.Json.JsonConvert;
 
 namespace DataFilters.UnitTests
 {
-    using FluentAssertions;
+    using DataFilters.UnitTests.Helpers;
+using FluentAssertions;
+
+    using FsCheck.Xunit;
+
+    using FsCheck;
 
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Schema;
@@ -315,6 +320,34 @@ namespace DataFilters.UnitTests
 
             // Assert
             isValid.Should().Be(expectedValidity);
+        }
+
+        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
+        public void Given_filter_instance_Negate_should_work_as_expected(FilterLogic logic, NonEmptyArray<IFilter> source)
+        {
+            // Arrange
+            MultiFilter original = new() { Logic = logic, Filters = source.Item };
+
+            // Act
+            IFilter oppositeFilter = original.Negate();
+
+            // Assert
+            MultiFilter result = oppositeFilter.Should()
+                          .BeOfType<MultiFilter>()
+                          .Which;
+
+            result.Logic.Should()
+                        .Be(original.Logic switch
+                        {
+                            And => Or,
+                            Or => And,
+                            _ => throw new NotSupportedException($"The original {original.Logic} logic is not supported"),
+                        }, "the logic of the resulting filter should be the opposite of the original filter's logic");
+
+            IEnumerable<IFilter> expected = source.Item.Select(filter => filter.Negate());
+            result.Filters.Should()
+                    .HaveSameCount(original.Filters).And
+                    .ContainInOrder(expected);
         }
     }
 }

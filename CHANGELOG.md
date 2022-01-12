@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
  - Added `IFilterService` which caches `IFilter` results. This partially addresses [issue #15](https://github.com/candoumbe/datafilters/issues/15)
+ - Fixed `NotSupportedException` thrown when calling `Negate()` on a `IFilter` that contains the `FilterOperator.NotContain` operator
 
 ## [0.9.0] / 2021-12-30
 - Made `BracketValue` implement `IParseable`, `IHaveComplexity`

@@ -61,9 +61,9 @@
         /// <returns><see cref="Expression{TDelegate}"/></returns>
         /// <exception cref="ArgumentNullException">if <paramref name="filter"/> is <c>null</c>.</exception>
         /// <remarks>
-        /// Setting <paramref name="nullableValueBehavior"/> to <see cref="NullableValueBehavior.AddNullCheck"/> can result in a little overhead
+        /// Setting <paramref name="nullableValueBehavior"/> to <see cref="AddNullCheck"/> can result in a little overhead
         /// </remarks>
-        public static Expression<Func<T, bool>> ToExpression<T>(this IFilter filter, NullableValueBehavior nullableValueBehavior = NullableValueBehavior.NoAction)
+        public static Expression<Func<T, bool>> ToExpression<T>(this IFilter filter, NullableValueBehavior nullableValueBehavior = NoAction)
         {
             if (filter == null)
             {
