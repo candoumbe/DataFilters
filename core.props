@@ -52,8 +52,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.6.3"/>
-    <PackageReference Include="Roslynator.Analyzers" Version="3.2.2">
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.7.0"/>
+    <PackageReference Include="Roslynator.Analyzers" Version="3.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
@@ -61,7 +61,7 @@
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
     <PackageReference Include="Ardalis.GuardClauses" Version="3.3.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsTestProject)' == 'false'">
+  <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(MSBuildProjectName)' != '_build'">
       <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

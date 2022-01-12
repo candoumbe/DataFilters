@@ -4,6 +4,7 @@
 
     using System;
     
+    [MemoryDiagnoser]
     public class BracketVsOr
     {   
         [Benchmark]

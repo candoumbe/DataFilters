@@ -594,23 +594,24 @@ namespace DataFilters.ContinuousIntegration
         public Target Benchmarks => _ => _
             .Description("Run all performance tests.")
             .DependsOn(Compile)
+            .TriggeredBy(Tests)
+            .OnlyWhenDynamic(() => IsServerBuild)
             .Produces(BenchmarkDirectory / "*")
-            .OnlyWhenStatic(() => IsLocalBuild)
             .Executes(() =>
             {
                 IEnumerable<Project> benchmarkProjects = Solution.GetProjects("*.PerformanceTests");
-
                 benchmarkProjects.ForEach(csproj =>
                 {
                     DotNetRun(s =>
                     {
                         IReadOnlyCollection<string> frameworks = csproj.GetTargetFrameworks();
                         return s.SetConfiguration(Configuration.Release)
-                                                            .SetProjectFile(csproj)
-                                                            .SetProcessArgumentConfigurator(args => args.Add("-- --filter {0}", "*", customValue: true)
-                                                                                                        .Add("--artifacts {0}", BenchmarkDirectory)
-                                                                                                        .Add("--join"))
-                                                            .CombineWith(frameworks, (setting, framework) => setting.SetFramework(framework));
+                                .SetProjectFile(csproj)
+                                .SetProcessWorkingDirectory(ArtifactsDirectory)
+                                .SetProcessArgumentConfigurator(args => args.Add("-- --filter {0}", "*", customValue: true)
+                                                                            .Add("--artifacts {0}", BenchmarkDirectory)
+                                                                            .Add("--join"))
+                                .CombineWith(frameworks, (setting, framework) => setting.SetFramework(framework));
                     });
                 });
             });

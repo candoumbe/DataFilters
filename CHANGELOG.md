@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] / 2022-01-12
+ - Added `IFilterService` which caches `IFilter` results. This partially addresses [issue #15](https://github.com/candoumbe/datafilters/issues/15)
+ - Fixed `NotSupportedException` thrown when calling `Negate()` on a `IFilter` that contains the `FilterOperator.NotContain` operator
+
 ## [0.9.0] / 2021-12-30
 - Made `BracketValue` implement `IParseable`, `IHaveComplexity`
 - Bumped `Candoumbe.MiscUtilities` to `0.6.3`
@@ -94,7 +98,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/candoumbe/DataFilters/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/candoumbe/DataFilters/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/candoumbe/DataFilters/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/candoumbe/DataFilters/compare/0.6.0...0.7.0

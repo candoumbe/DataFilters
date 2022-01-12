@@ -1,5 +1,7 @@
 ﻿namespace DataFilters.UnitTests
 {
+    using DataFilters.UnitTests.Helpers;
+
     using FluentAssertions;
 
     using FsCheck;
@@ -333,6 +335,42 @@
                     .VerboseCheck(_output);
             })
             .VerboseCheck(_output);
+        }
+
+        [Property(Arbitrary = new[] {typeof(FilterGenerators)})]
+        public void Given_filter_instance_Negate_should_work_as_expected(NonNull<Filter> source)
+        {
+            // Arrange
+            Filter original = source.Item;
+
+            // Act
+            IFilter oppositeFilter = original.Negate();
+
+            // Assert
+            oppositeFilter.Should()
+                          .BeOfType<Filter>()
+                          .Which
+                          .Operator.Should()
+                                   .Be(original.Operator switch
+                                   {
+                                       EqualTo => NotEqualTo,
+                                       NotEqualTo => EqualTo,
+                                       IsNull => IsNotNull,
+                                       IsNotNull => IsNull,
+                                       FilterOperator.LessThan => GreaterThan,
+                                       GreaterThan => FilterOperator.LessThan,
+                                       GreaterThanOrEqual => LessThanOrEqualTo,
+                                       StartsWith => NotStartsWith,
+                                       NotStartsWith => StartsWith,
+                                       EndsWith => NotEndsWith,
+                                       NotEndsWith => EndsWith,
+                                       Contains => NotContains,
+                                       NotContains => Contains,
+                                       IsEmpty => IsNotEmpty,
+                                       IsNotEmpty => IsEmpty,
+                                       LessThanOrEqualTo => GreaterThanOrEqual,
+                                       _ => throw new NotSupportedException($"The original {original.Operator} operator is not supported"),
+                                   }, "the resulting filter should have the opposite operator");
         }
     }
 }

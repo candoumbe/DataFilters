@@ -53,6 +53,10 @@ jobs:
           path: output/tests-results
       - uses: actions/upload-artifact@v1
         with:
+          name: benchmarks
+          path: output/benchmarks
+      - uses: actions/upload-artifact@v1
+        with:
           name: coverage-report
           path: output/coverage-report
       - uses: actions/upload-artifact@v1

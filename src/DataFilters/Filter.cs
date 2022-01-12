@@ -240,6 +240,7 @@
                 FilterOperator.EndsWith => FilterOperator.NotEndsWith,
                 FilterOperator.NotEndsWith => FilterOperator.EndsWith,
                 FilterOperator.Contains => FilterOperator.NotContains,
+                FilterOperator.NotContains => FilterOperator.Contains,
                 FilterOperator.IsEmpty => FilterOperator.IsNotEmpty,
                 FilterOperator.IsNotEmpty => FilterOperator.IsEmpty,
                 FilterOperator.LessThanOrEqualTo => FilterOperator.GreaterThanOrEqual,
