@@ -47,8 +47,8 @@
             _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
         }
 
+        ///<inheritdoc/>
         public void Dispose() => _cultureSwitcher?.Dispose();
-
 
         [Fact]
         public void IsParser() => typeof(FilterTokenParser).Should()
@@ -565,67 +565,91 @@ I&_Oj
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Should_parse_Interval(IntervalExpression expected)
+        public void Should_parse_Interval(CultureInfo culture, IntervalExpression expected)
         {
-            // Arrange
-            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _cultureSwitcher.Run(culture, () =>
+            {
+                // Arrange
+                _outputHelper.WriteLine($"Culture : '{culture.Name}'");
+                _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+                TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
-            // Act
-            IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
+                // Act
+                IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
 
-            // Assert
-            AssertThatShould_parse(expression, expected);
+                // Assert
+                AssertThatShould_parse(expression, expected);
+            });
         }
 
         public static IEnumerable<object[]> IntervalCases
         {
             get
             {
-                yield return new object[]
+                string[] cultures = { "fr-FR", "en-GB", "en-US" };
+                foreach (string culture in cultures)
                 {
-                    "[5 TO 5[",
-                    new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
-                };
+                    yield return new object[]
+                    {
+                        culture,
+                        "[5 TO 5[",
+                        new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
+                    };
 
-                yield return new object[]
-                {
-                    "[1993-08-04T00:25:05.155Z TO 1908-06-08T03:18:46.745-09:50[",
-                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1993, 8, 4), new(0, 25, 5, 155), OffsetExpression.Zero), true),
-                                           new BoundaryExpression(new DateTimeExpression(new (1908, 6, 8), new(3, 18, 46,745), new(NumericSign.Minus, 9, 50)), false))
-                };
+                    yield return new object[]
+                    {
+                        culture,
+                        "[1993-08-04T00:25:05.155Z TO 1908-06-08T03:18:46.745-09:50[",
+                        new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1993, 8, 4), new(0, 25, 5, 155), OffsetExpression.Zero), true),
+                                               new BoundaryExpression(new DateTimeExpression(new (1908, 6, 8), new(3, 18, 46,745), new(NumericSign.Minus, 9, 50)), false))
+                    };
+
+                    yield return new object[]
+                    {
+                        culture,
+                        "]* TO 1963-06-03T15:53:44.609Z]",
+                        new IntervalExpression(max:new BoundaryExpression(new DateTimeExpression(new (1963, 6, 3), new (15, 53, 44, 609), OffsetExpression.Zero), true))
+                    };
+                }
             }
         }
 
         [Theory]
         [MemberData(nameof(IntervalCases))]
-        public void Given_interval_as_string_Parser_should_parse_to_IntervalExpression(string input, IntervalExpression expected)
+        public void Given_interval_as_string_Parser_should_parse_to_IntervalExpression(string culture, string input, IntervalExpression expected)
         {
-            // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _cultureSwitcher.Run(culture, () =>
+            {
+                // Arrange
+                _outputHelper.WriteLine($"input : '{input}'");
+                TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
-            _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
+                _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
 
-            // Act
-            IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
+                // Act
+                IntervalExpression expression = FilterTokenParser.Interval.Parse(tokens);
 
-            // Assert
-            AssertThatShould_parse(expression, expected);
+                // Assert
+                AssertThatShould_parse(expression, expected);
+            });
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Should_parse_text(TextExpression expected)
+        public void Should_parse_text(CultureInfo culture, TextExpression expected)
         {
-            // Arrange
-            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _cultureSwitcher.Run(culture, () =>
+            {
+                // Arrange
+                _outputHelper.WriteLine($"Culture : '{culture.Name}'");
+                _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+                TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
-            // Act
-            TextExpression actual = FilterTokenParser.Text.Parse(tokens);
+                // Act
+                TextExpression actual = FilterTokenParser.Text.Parse(tokens);
 
-            // Assert
-            AssertThatShould_parse(actual, expected);
+                // Assert
+                AssertThatShould_parse(actual, expected);
+            });
         }
 
         public static IEnumerable<object[]> PropertyNameCases
