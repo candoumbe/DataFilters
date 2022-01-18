@@ -38,7 +38,7 @@
 
   <!-- Set package references based on target framework -->
   <Choose>
-    <When Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
+    <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
       <ItemGroup>
         <PackageReference Include="FluentValidation" Version="10.3.6" />
         <PackageReference Include="Ultimately" Version="2.1.1" />
@@ -46,7 +46,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="10.3.6" />
+        <PackageReference Include="FluentValidation" Version="8.6.3" />
         <PackageReference Include="Optional" Version="4.0.0"/>
       </ItemGroup>
     </Otherwise>
