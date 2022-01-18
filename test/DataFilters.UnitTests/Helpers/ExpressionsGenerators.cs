@@ -291,13 +291,11 @@ namespace DataFilters.UnitTests.Helpers
             (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
             (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false));
 
-            (Gen<IBoundaryExpression>, Gen<bool> Generator) constanteGen = (ConstantValueExpressions().Generator.Select(item => item as IBoundaryExpression).Where(item => item is not null), boolGenerator);
             IEnumerable<Gen<IntervalExpression>> generatorsWithMinAndMax = datesGen.CrossJoin(datesGen)
                                                                                    .Concat(datesGen.CrossJoin(new[] { timeGen }))
                                                                                    .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
                                                                                    .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
                                                                                                                                       (tuple.max.gen, tuple.max.included)))
-                                                                                   .Concat(new[] { CreateIntervalExpressionGenerator(constanteGen, constanteGen) })
                                                                                    .Concat(numericsGen.CrossJoin(numericsGen)
                                                                                            .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
                                                                                            .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
