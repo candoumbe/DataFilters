@@ -53,7 +53,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="Candoumbe.MiscUtilities" Version="0.7.0"/>
-    <PackageReference Include="Roslynator.Analyzers" Version="3.3.0">
+    <PackageReference Include="Roslynator.Analyzers" Version="4.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
