@@ -475,10 +475,12 @@ namespace DataFilters.ContinuousIntegration
         private void FinishReleaseOrHotfix()
         {
             Git($"checkout {MainBranchName}");
+            Git("pull");
             Git($"merge --no-ff --no-edit {GitRepository.Branch}");
             Git($"tag {MajorMinorPatchVersion}");
 
             Git($"checkout {DevelopBranch}");
+            Git("pull");
             Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
             Git($"branch -D {GitRepository.Branch}");
@@ -490,6 +492,7 @@ namespace DataFilters.ContinuousIntegration
         {
             Git($"rebase {DevelopBranch}");
             Git($"checkout {DevelopBranch}");
+            Git("pull");
             Git($"merge --no-ff --no-edit {GitRepository.Branch}");
 
             Git($"branch -D {GitRepository.Branch}");
