@@ -45,6 +45,7 @@ jobs:
         env:
           NugetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
+          StrykerDashboardApiKey: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
       - uses: actions/upload-artifact@v3
         with:
           name: tests-results
@@ -54,6 +55,10 @@ jobs:
           name: benchmarks
           path: output/benchmarks
       - uses: actions/upload-artifact@v3
+        with:
+          name: test
+          path: test
+      - uses: actions/upload-artifact@v1
         with:
           name: coverage-report
           path: output/coverage-report

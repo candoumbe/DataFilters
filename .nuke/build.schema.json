@@ -108,18 +108,25 @@
               "Compile",
               "Feature",
               "Hotfix",
+              "MutationTests",
               "Pack",
               "Publish",
               "Release",
               "ReportCoverage",
               "Restore",
-              "Tests"
+              "Tests",
+              "UnitTests"
             ]
           }
         },
         "Solution": {
           "type": "string",
           "description": "Path to a solution file that is automatically loaded"
+        },
+        "StrykerDashboardApiKey": {
+          "type": "string",
+          "description": "Api Key used to upload stryker result",
+          "default": "Secrets must be entered via 'nuke :secret [profile]'"
         },
         "Target": {
           "type": "array",
@@ -135,12 +142,14 @@
               "Compile",
               "Feature",
               "Hotfix",
+              "MutationTests",
               "Pack",
               "Publish",
               "Release",
               "ReportCoverage",
               "Restore",
-              "Tests"
+              "Tests",
+              "UnitTests"
             ]
           }
         },

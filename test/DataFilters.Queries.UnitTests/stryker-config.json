@@ -1,0 +1,10 @@
+{
+  "stryker-config": {
+    "reporters": [
+      "progress",
+      "html"
+    ],
+    "target-framework": "net6.0",
+    "project": "DataFilters.Queries.csproj"
+  }
+}

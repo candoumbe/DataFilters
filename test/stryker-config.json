@@ -1,0 +1,9 @@
+{
+  "stryker-config": {
+    "reporters": [
+      "progress",
+      "html"
+    ],
+    "target-framework": "net6.0"
+  }
+}

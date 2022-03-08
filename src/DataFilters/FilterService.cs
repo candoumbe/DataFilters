@@ -12,15 +12,17 @@ using System.Threading.Tasks;
 namespace DataFilters;
 
 /// <summary>
+/// <para>
 /// <see cref="IFilterService"/> implementation with a local L.R.U cache.
 /// This service can be used wherever you need to build an <see cref="IFilter"/> instance for a given input.
-/// 
+/// </para>
+/// <para>
 /// <example> Replace the manual mapping of an input to <see cref="IFilter"/>
 /// string input = "Nickname=*man&amp;Town=Gotham"
 /// (PropertyName propName, FilterExpression)[] parseResults = FilterTokenParser.Parse(input)
 /// IList&lt;IFilter&gt; filters = new List&lt;IFilter&gt;(parseResults.Length);
 /// </example>
-/// 
+/// </para>
 /// </summary>
 public class FilterService : IFilterService
 {
