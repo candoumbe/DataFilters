@@ -42,7 +42,8 @@ namespace DataFilters.ContinuousIntegration
         ImportSecrets = new[]
         {
             nameof(NugetApiKey),
-            nameof(CodecovToken)
+            nameof(CodecovToken),
+            nameof(StrykerDashboardApiKey)
         },
         OnPullRequestExcludePaths = new[]
         {
@@ -63,7 +64,8 @@ namespace DataFilters.ContinuousIntegration
         ImportSecrets = new[]
         {
             nameof(NugetApiKey),
-            nameof(CodecovToken)
+            nameof(CodecovToken),
+            nameof(StrykerDashboardApiKey)
         },
         OnPullRequestExcludePaths = new[]
         {
@@ -73,7 +75,6 @@ namespace DataFilters.ContinuousIntegration
             "LICENSE"
         }
     )]
-    [CheckBuildProjectConfigurations]
     [UnsetVisualStudioEnvironmentVariables]
     [DotNetVerbosityMapping]
     [HandleVisualStudioDebugging]
@@ -93,6 +94,10 @@ namespace DataFilters.ContinuousIntegration
         [Parameter]
         [Secret]
         public readonly string GitHubToken;
+
+        [Parameter("Api Key used to upload stryker result")]
+        [Secret]
+        public readonly string StrykerDashboardApiKey;
 
         [Parameter]
         [Secret]
@@ -202,7 +207,28 @@ namespace DataFilters.ContinuousIntegration
                 );
             });
 
-        public Target Tests => _ => _
+        public Target MutationTests => _ => _
+        .Description("Runs mutational tests using Stryker tool")
+        .DependsOn(Restore, Compile)
+        .Produces(TestDirectory / "*.html")
+        .Executes(() =>
+        {
+            IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
+
+            Info($"Running mutation tests for {projects.Count()} project(s)");
+
+            Arguments args = new();
+            args.Add("--open-report:html", IsLocalBuild);
+            args.Add($"--dashboard-api-key {StrykerDashboardApiKey}", IsServerBuild || StrykerDashboardApiKey is not null);
+
+            projects.ForEach(csproj =>
+            {
+                Info($"Running tests for '{csproj.Name}' (directory : '{csproj.Path.Parent}') ");
+                DotNet($"stryker {args.RenderForExecution()}", workingDirectory: csproj.Path.Parent);
+            });
+        });
+
+        public Target UnitTests => _ => _
             .DependsOn(Compile)
             .Description("Run unit tests and collect code coverage")
             .Produces(TestResultDirectory / "*.trx")
@@ -243,10 +269,16 @@ namespace DataFilters.ContinuousIntegration
                                                                                         reportDirectory: CoverageReportDirectory));
             });
 
+        public Target Tests => _ => _
+            .Description("Run unit and mutation tests")
+            .DependsOn(UnitTests, MutationTests)
+            .Before(Feature, Hotfix)
+        ;
+
         public Target ReportCoverage => _ => _
-            .DependsOn(Tests)
+            .DependsOn(UnitTests)
             .OnlyWhenDynamic(() => IsServerBuild || CodecovToken != null)
-            .Consumes(Tests, TestResultDirectory / "*.xml")
+            .Consumes(UnitTests, TestResultDirectory / "*.xml")
             .Produces(CoverageReportDirectory / "*.xml")
             .Produces(CoverageReportHistoryDirectory / "*.xml")
             .Executes(() =>
@@ -271,7 +303,7 @@ namespace DataFilters.ContinuousIntegration
             });
 
         public Target Pack => _ => _
-            .DependsOn(Tests, Compile)
+            .DependsOn(UnitTests, Compile)
             .Consumes(Compile)
             .Produces(ArtifactsDirectory / "*.nupkg")
             .Produces(ArtifactsDirectory / "*.snupkg")
@@ -286,8 +318,8 @@ namespace DataFilters.ContinuousIntegration
                     .EnableIncludeSource()
                     .EnableIncludeSymbols()
                     .SetOutputDirectory(ArtifactsDirectory)
-                    .SetNoBuild(SucceededTargets.Contains(Compile) || SucceededTargets.Contains(Tests))
-                    .SetNoRestore(SucceededTargets.Contains(Restore) || SucceededTargets.Contains(Compile) || SucceededTargets.Contains(Tests))
+                    .SetNoBuild(SucceededTargets.Contains(Compile) || SucceededTargets.Contains(UnitTests))
+                    .SetNoRestore(SucceededTargets.Contains(Restore) || SucceededTargets.Contains(Compile) || SucceededTargets.Contains(UnitTests))
                     .SetConfiguration(Configuration)
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)
                     .SetFileVersion(GitVersion.AssemblySemFileVer)
@@ -515,7 +547,7 @@ namespace DataFilters.ContinuousIntegration
 
         public Target Publish => _ => _
             .Description($"Published packages (*.nupkg and *.snupkg) to the destination server set with {nameof(NugetPackageSource)} settings ")
-            .DependsOn(Tests, Pack)
+            .DependsOn(UnitTests, Pack)
             .Triggers(AddGithubRelease)
             .Consumes(Pack, ArtifactsDirectory / "*.nupkg", ArtifactsDirectory / "*.snupkg")
             .Requires(() => !(NugetApiKey.IsNullOrEmpty() || GitHubToken.IsNullOrEmpty()))
@@ -597,7 +629,7 @@ namespace DataFilters.ContinuousIntegration
         public Target Benchmarks => _ => _
             .Description("Run all performance tests.")
             .DependsOn(Compile)
-            .TriggeredBy(Tests)
+            .TriggeredBy(UnitTests)
             .OnlyWhenDynamic(() => IsServerBuild)
             .Produces(BenchmarkDirectory / "*")
             .Executes(() =>
