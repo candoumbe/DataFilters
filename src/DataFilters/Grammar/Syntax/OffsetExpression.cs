@@ -68,7 +68,7 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public bool Equals(OffsetExpression other) => (Hours, Minutes, Sign) switch
         {
-            (0, 0, _) => other.Hours == 0 && other.Minutes == 0,
+            (0, 0, _) => other?.Hours == 0 && other?.Minutes == 0,
             _ => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign)
         };
 

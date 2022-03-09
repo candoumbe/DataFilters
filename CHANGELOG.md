@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2] / 2022-03-09
+- Fixed `NullReferenceException` thrown when calling `OffsetExpression.Equals(null)` ([#98](https://github.com/candoumbe/DataFilters/issues/98))
+
 ## [0.10.1] / 2022-03-09
 - Fixed equality implementation of `OffsetExpression` when comparing two `OffsetExpression.Zero` 
 when the only difference is the numeric sign
@@ -102,7 +105,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.10.1...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.10.2...HEAD
+[0.10.2]: https://github.com/candoumbe/DataFilters/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/candoumbe/DataFilters/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/candoumbe/DataFilters/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/candoumbe/DataFilters/compare/0.8.0...0.9.0
