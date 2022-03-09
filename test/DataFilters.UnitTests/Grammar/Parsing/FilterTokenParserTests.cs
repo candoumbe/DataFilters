@@ -935,7 +935,7 @@ I&_Oj
                 .Match(expectation);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }, StartSize = 40, Replay = "7980241211251216112,443038953718297435")]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Should_parse_DateAndTime(DateTimeExpression expected)
         {
             // Arrange

@@ -449,7 +449,6 @@ namespace DataFilters.ContinuousIntegration
                     .SetFramework("net5.0")
                     .SetUrl(RootDirectory)
                     .SetBranch(MainBranchName)
-                    .EnableNoFetch()
                     .DisableProcessLogOutput());
 
                 if (!GitRepository.IsOnHotfixBranch())
