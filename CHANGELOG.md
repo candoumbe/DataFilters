@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] / 2022-03-09
+- Fixed equality implementation of `OffsetExpression` when comparing two `OffsetExpression.Zero` 
+when the only difference is the numeric sign
+
 ## [0.10.0] / 2022-01-12
  - Added `IFilterService` which caches `IFilter` results. This partially addresses [issue #15](https://github.com/candoumbe/datafilters/issues/15)
  - Fixed `NotSupportedException` thrown when calling `Negate()` on a `IFilter` that contains the `FilterOperator.NotContain` operator
@@ -98,7 +102,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.10.1...HEAD
+[0.10.1]: https://github.com/candoumbe/DataFilters/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/candoumbe/DataFilters/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/candoumbe/DataFilters/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/candoumbe/DataFilters/compare/0.7.0...0.8.0
