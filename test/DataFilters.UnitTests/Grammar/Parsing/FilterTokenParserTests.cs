@@ -951,7 +951,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }, Replay = "(5791404327053908222,2813664014226873281)", StartSize = 2)]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
@@ -978,6 +978,13 @@ I&_Oj
                         new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new(3, 0, 40, 583), OffsetExpression.Zero)),
                         culture
                     };
+
+                    yield return new object[]
+                    {
+                        new GroupExpression(new DateTimeExpression(new(2010, 06, 02), new(23, 45, 54, 331), OffsetExpression.Zero)),
+                        culture
+                    };
+
                 }
             }
         }

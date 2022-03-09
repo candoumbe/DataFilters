@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Fixed equality implementation of `OffsetExpression` when comparing two `OffsetExpression.Zero` 
+when the only difference is the numeric sign
 
 ## [0.10.0] / 2022-01-12
  - Added `IFilterService` which caches `IFilter` results. This partially addresses [issue #15](https://github.com/candoumbe/datafilters/issues/15)
