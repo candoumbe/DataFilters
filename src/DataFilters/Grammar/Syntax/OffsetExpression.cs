@@ -66,7 +66,11 @@ namespace DataFilters.Grammar.Syntax
         public override bool Equals(object obj) => Equals(obj as OffsetExpression);
 
         ///<inheritdoc/>
-        public bool Equals(OffsetExpression other) => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign);
+        public bool Equals(OffsetExpression other) => (Hours, Minutes, Sign) switch
+        {
+            (0, 0, _) => other.Hours == 0 && other.Minutes == 0,
+            _ => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign)
+        };
 
         ///<inheritdoc/>
 #if NETSTANDARD2_1_OR_GREATER || NET5_0
