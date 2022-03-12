@@ -8,9 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A3AD4940-4FD5-4DA8-B207-36A5DE22EC8E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D0CE23E3-5516-4A96-B70B-AA26C60E823F}"
-	ProjectSection(SolutionItems) = preProject
-		test\stryker-config.json = test\stryker-config.json
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFilters.UnitTests", "test\DataFilters.UnitTests\DataFilters.UnitTests.csproj", "{31CB50DD-2699-4117-B2A4-2806BD624D61}"
 EndProject

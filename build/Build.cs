@@ -37,7 +37,7 @@ namespace DataFilters.ContinuousIntegration
         GitHubActionsImage.MacOsLatest,
         OnPushBranchesIgnore = new[] { MainBranchName },
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(Tests), nameof(ReportCoverage), nameof(Pack) },
+        InvokedTargets = new[] { nameof(UnitTests), nameof(ReportCoverage), nameof(Pack) },
         CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
         ImportSecrets = new[]
         {
@@ -57,7 +57,7 @@ namespace DataFilters.ContinuousIntegration
         "delivery",
         GitHubActionsImage.MacOsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
-        InvokedTargets = new[] { nameof(Tests), nameof(Publish), nameof(AddGithubRelease) },
+        InvokedTargets = new[] { nameof(UnitTests), nameof(Publish), nameof(AddGithubRelease) },
         ImportGitHubTokenAs = nameof(GitHubToken),
         CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
         PublishArtifacts = true,
