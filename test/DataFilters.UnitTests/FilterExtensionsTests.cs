@@ -14,6 +14,7 @@
     using Xunit.Abstractions;
     using Xunit.Categories;
 
+    using DataFilters;
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
@@ -475,6 +476,59 @@
         {
             // Act
             IFilter actual = filter.ToFilter<Model>(propertyNameResolutionStrategy);
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
+
+        public static IEnumerable<object[]> ToFilterWithFilterOptionsCases
+        {
+            get
+            {
+                FilterLogic[] logics = { And, Or };
+
+                foreach (FilterLogic logic in logics)
+                {
+                    yield return new object[]
+                    {
+                        "snake_case_property=10&PascalCaseProperty=value",
+                        new FilterOptions{ Logic = logic },
+                        new MultiFilter
+                        {
+                            Logic = logic,
+                            Filters = new IFilter[]
+                            {
+                                new Filter("snake_case_property", EqualTo, "10"),
+                                new Filter("PascalCaseProperty", EqualTo, "value"),
+                            }
+                        }
+                    };
+
+                    yield return new object[]
+                    {
+                        "snake_case_property=10&PascalCaseProperty=value",
+                        new FilterOptions{ Logic = logic },
+                        new MultiFilter
+                        {
+                            Logic = logic,
+                            Filters = new IFilter[]
+                            {
+                                new Filter("snake_case_property", EqualTo, "10"),
+                                new Filter("PascalCaseProperty", EqualTo, "value")
+                            }
+                        }
+                    }; 
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ToFilterWithFilterOptionsCases))]
+        public void Given_input_and_FilterOptions_ToFilter_should_create_corresponding_filter(string filter, FilterOptions options, IFilter expected)
+        {
+            // Act
+            IFilter actual = filter.ToFilter<Model>(options);
 
             // Assert
             actual.Should()

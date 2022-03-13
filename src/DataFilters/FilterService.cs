@@ -24,6 +24,7 @@ namespace DataFilters;
 /// </example>
 /// </para>
 /// </summary>
+[Obsolete("This class will be removed in 0.12.0. Use the nuget package DataFilters.AspNetCore instead")]
 public class FilterService : IFilterService
 {
     private readonly FilterServiceOptions _options;
