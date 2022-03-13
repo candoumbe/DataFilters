@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.11.0] / 2022-03-13
 - Added [`FilterOptions`](/src/DataFilters/FilterOptions.cs)
 - Marked `FilterService` as obsolete.
 
@@ -108,7 +110,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.10.2...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/candoumbe/DataFilters/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/candoumbe/DataFilters/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/candoumbe/DataFilters/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/candoumbe/DataFilters/compare/0.9.0...0.10.0
