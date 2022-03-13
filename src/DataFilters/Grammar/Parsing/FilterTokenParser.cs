@@ -303,8 +303,8 @@
                                                                                                           .Or(Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>())
                                                                                                           .Or(Date.Try().Cast<FilterToken, DateExpression, FilterExpression>())
                                                                                                           .Or(Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>())
-                                                                                                          .Or(Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>())
                                                                                                           .Or(Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>())
+                                                                                                          .Or(Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>())
                                                                                                           .Or(Text.Cast<FilterToken, TextExpression, FilterExpression>())
                                                                                                           .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
             ;

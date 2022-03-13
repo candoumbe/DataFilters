@@ -38,9 +38,9 @@
 
   <!-- Set package references based on target framework -->
   <Choose>
-    <When Condition="'$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
+    <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="9.5.4" />
+        <PackageReference Include="FluentValidation" Version="10.3.6" />
         <PackageReference Include="Ultimately" Version="2.1.1" />
       </ItemGroup>
     </When>
@@ -52,14 +52,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.7.0"/>
-    <PackageReference Include="Roslynator.Analyzers" Version="3.3.0">
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.8.0"/>
+    <PackageReference Include="Roslynator.Analyzers" Version="4.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
-    <PackageReference Include="Ardalis.GuardClauses" Version="3.3.0" />
+    <PackageReference Include="Ardalis.GuardClauses" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(MSBuildProjectName)' != '_build'">
       <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

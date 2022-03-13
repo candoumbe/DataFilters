@@ -275,7 +275,6 @@
                         next = next.Remainder.ConsumeChar();
                         break;
                 }
-
             } while (next.HasValue);
 
             static TokenizerMode ToggleMode(TokenizerMode currentMode) => currentMode switch
