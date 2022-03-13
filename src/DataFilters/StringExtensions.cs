@@ -143,8 +143,8 @@
         /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
         public static IFilter ToFilter<T>(this string queryString) => ToFilter<T>(queryString, PropertyNameResolutionStrategy.Default);
-
 #endif
+
         /// <summary>
         /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/> with the specified <paramref name="propertyNameResolutionStrategy"/>.
         /// </summary>
@@ -156,13 +156,25 @@
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
 #if STRING_SEGMENT
         public static IFilter ToFilter<T>(this StringSegment queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
-        {
-            string localQueryString = queryString.Value;
+            => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
 #else
         public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
+           => ToFilter<T>(queryString, new FilterOptions () { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
+#endif
+
+        /// <summary>
+        /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/> with the specified <paramref name="options"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of element to filter</typeparam>
+        /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
+        /// <param name="options"></param>
+        /// <returns>The corresponding <see cref="IFilter"/></returns>
+        /// <exception cref="ArgumentNullException">either <paramref name="queryString"/> or <paramref name="options"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
+        public static IFilter ToFilter<T>(this string queryString, FilterOptions options)
         {
             string localQueryString = queryString;
-#endif
+
             static IFilter ConvertExpressionToFilter(PropertyInfo propInfo, FilterExpression expression, TypeConverter tc)
             {
                 IFilter filter = Filter.True;
@@ -320,7 +332,7 @@
                     (PropertyName property, FilterExpression expression) = expressions[0];
 
                     PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                               .SingleOrDefault(x => x.CanRead && x.Name == propertyNameResolutionStrategy.Handle(property.Name));
+                                               .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
 
                     if (pi is not null)
                     {
@@ -335,7 +347,7 @@
                     foreach ((PropertyName property, FilterExpression expression) in expressions)
                     {
                         PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                                   .SingleOrDefault(x => x.CanRead && x.Name == property.Name);
+                                                   .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
 
                         if (pi is not null)
                         {
@@ -344,7 +356,7 @@
                         }
                     }
 
-                    filter = new MultiFilter { Logic = FilterLogic.And, Filters = filters };
+                    filter = new MultiFilter { Logic = options.Logic, Filters = filters };
                 }
             }
 
