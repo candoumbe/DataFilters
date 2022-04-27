@@ -17,11 +17,12 @@ Highly inspired by the elastic query syntax, it offers a powerful way to build a
   - <a href='#ends-with-expression'>Ends with</a>
   - <a href='#contains-expression'>Contains</a>
   - <a href='#isempty-expression'>Is empty</a>
+  - <a href='#isnull-expression'>Is null</a>
   - <a href='#interval-expressions'>Interval expressions</a>
     - <a href='#gte-expression'>Greater than or equal</a>
     - <a href='#lte-expression'>Less than or equal</a>
     - <a href='#btw-expression'>Between</a>
-  - <a href='#regular-expression'>Regular expression support</a>
+  - <a href='#regular-expression'>Regular expression</a>
   - <a href="logic-operators">Logical operators</a>
     - <a href='#and-expression'>And</a>
     - <a href='#or-expression'>Or</a>
@@ -126,69 +127,56 @@ Several expressions are supported and here's how you can start using them in you
 
 Search for any vigilante resource where `nickname` value is `manbat`
 
-| Query string      | JSON                                                  |
-| ----------------- | ----------------------------------------------------- |
-| `nickname=manbat` | `{ "field":"nickname", "op":"eq", "value":"manbat" }` |
-
-will result in a [IFilter][class-ifilter] instance equivalent to
-
-```csharp
-IFilter filter = new Filter("nickname", EqualsTo, "bat");
-```
+| Query string      | JSON                                                  | C#                                                                                     |
+| ----------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `nickname=manbat` | `{ "field":"nickname", "op":"eq", "value":"manbat" }` | `new Filter(field: "nickname", @operator : FilterOperator.EqualsTo, value : "manbat")` |
 
 ## <a href='#' id='starts-with-expression'>Starts with</a>
 
 Search for any vigilante resource that starts with `"bat"` in the `nickname` property
 
-| Query string    | JSON                                                       |
-| --------------- | ---------------------------------------------------------- |
-| `nickname=bat*` | `{ "field":"nickname", "op":"startswith", "value":"bat" }` |
-
-will result in a [IFilter][class-ifilter] instance equivalent to
-
-```csharp
-IFilter filter = new Filter("nickname", StartsWith, "bat");
-```
+| Query string    | JSON                                                       | C#                                                                                    |
+| --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `nickname=bat*` | `{ "field":"nickname", "op":"startswith", "value":"bat" }` | `new Filter(field: "nickname", @operator : FilterOperator.StartsWith, value : "bat")` |
 
 ## <a href='#' id='ends-with-expression'>Ends with</a>
 
 Search for `vigilante` resource that ends with `man` in the `nickname` property.
 
-| Query string    | JSON                                                     |
-| --------------- | -------------------------------------------------------- |
-| `nickname=*man` | `{ "field":"nickname", "op":"endswith", "value":"man" }` |
+| Query string    | JSON                                                     | C#                                                                                  |
+| --------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `nickname=*man` | `{ "field":"nickname", "op":"endswith", "value":"man" }` | `new Filter(field: "nickname", @operator : FilterOperator.EndsWith, value : "man")` |
 
-will result in a [IFilter][class-ifilter] instance equivalent to
-
-```csharp
-IFilter filter = new Filter("nickname", Contains, "bat");
-```
 
 ## <a href='#' id='contains-expression'>Contains</a>
 
 Search for `vigilante` resources that contains `bat` in the `nickname` property.
 
-| Query string     | JSON                                                     |
-| ---------------- | -------------------------------------------------------- |
-| `nickname=*bat*` | `{ "field":"nickname", "op":"contains", "value":"bat" }` |
+| Query string     | JSON                                                     | C#                                                                                  |
+| ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `nickname=*bat*` | `{ "field":"nickname", "op":"contains", "value":"bat" }` | `new Filter(field: "nickname", @operator : FilterOperator.Contains, value : "bat")` |
 
-will result in a [IFilter][class-ifilter] instance equivalent to 
-
-```csharp
-IFilter filter = new Filter("nickname", Contains, "bat");
-```
 
 💡 `contains` also work on arrays. `powers=*strength*` will search for `vigilante`s who have `strength` related powers.
-
 
 
 ## <a href='#' id='isempty-expression'>Is empty</a>
 
 Search for `vigilante` resources that have no powers.
 
-| Query string | JSON                                   |
-| ------------ | -------------------------------------- |
-| `powers=!*`  | `{ "field":"powers", "op":"isempty" }` |
+| Query string | JSON                                   | C#                                                                |
+| ------------ | -------------------------------------- | ----------------------------------------------------------------- |
+| `powers=!*`  | `{ "field":"powers", "op":"isempty" }` | `new Filter(field: "powers", @operator : FilterOperator.IsEmpty)` |
+
+## <a href='#' id='isnull-expression'>Is null</a>
+
+Search for `vigilante` resources that have no powers.
+
+| Query string | JSON                                  | C#                                                                                                                                                  |
+| ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `N/A`        | `{ "field":"powers", "op":"isnull" }` | `new Filter(field: "powers", @operator : FilterOperator.IsNull)` or `new Filter(field: "powers", @operator : FilterOperator.EqualsTo, value: null)` |
+
+
 
 ## <a href='#' id='interval-expressions'>Interval expressions</a>
 
@@ -206,51 +194,28 @@ where
 
 Search for `vigilante` resources where the value of `age` property is greater than or equal to `18`
 
-| Query string    | JSON                                      |
-|-----------------|-------------------------------------------|
-| `age=[18 TO *[` | `{"field":"age", "op":"gte", "value":18}` |
+| Query string    | JSON                                      | C#                                                                                      |
+| --------------- | ----------------------------------------- | --------------------------------------------------------------------------------------- |
+| `age=[18 TO *[` | `{"field":"age", "op":"gte", "value":18}` | `new Filter(field: "age", @operator : FilterOperator.GreaterThanOrEqualTo, value : 18)` |
 
-will result in a [IFilter][class-ifilter] instance equivalent to
-
-```csharp
-IFilter filter = new Filter("age", GreaterThanOrEqualTo, 18);
-```
 
 ### <a href='#' id='lte-expression'>Less than or equal</a>
 
 Search for `vigilante` resource where the value of `age` property is lower than `30`
 
-| Query string    | JSON                                      |
-| --------------- | ----------------------------------------- |
-| `age=]* TO 30]` | `{"field":"age", "op":"lte", "value":30}` |
+| Query string    | JSON                                      | C#                                                                                   |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| `age=]* TO 30]` | `{"field":"age", "op":"lte", "value":30}` | `new Filter(field: "age", @operator : FilterOperator.LessThanOrEqualTo, value : 30)` |
 
-will be parsed into a [IFilter][class-filter] equivalent to
-
-```csharp
-IFilter filter = new Filter("age", LessThanOrEqualTo, 30);
-```
 
 ### <a href='#' id='btw-expression'>Between</a>
 
 Search for vigilante resources where `age` property is between `20` and `35`
 
-| Query string     | JSON                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| `age=[20 TO 35]` | `{"logic": "and", filters[{"field":"age", "op":"gte", "value":20}, {"field":"age", "op":"lte", "value":35}]}` |
+| Query string     | JSON                                                                                                          | C#                                                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `age=[20 TO 35]` | `{"logic": "and", filters[{"field":"age", "op":"gte", "value":20}, {"field":"age", "op":"lte", "value":35}]}` | `new MultiFilter { Logic = And, Filters = new IFilter[] { new Filter ("age", GreaterThanOrEqualTo, 20), new Filter("age", LessThanOrEqualTo, 35) } }` |
 
-will result in a [IFilter][class-ifilter] instance equivalent to
-
-```csharp
-IFilter filter = new MultiFilter
-{
-    Logic = And,
-    Filters = new IFilter[]
-    {
-        new Filter("age", GreaterThanOrEqualTo, 20),
-        new Filter("age", LessThanOrEqualTo, 35)
-    }
-}
-```
 
 ---
 💡 You can exclude the lower (resp. upper) bound by using `]` (resp. `[`). 
@@ -293,8 +258,8 @@ Logicial operators can be used combine several instances of [IFilter][class-ifil
 
 Use the coma character `,` to combine multiple expressions using logical AND operator 
 
-| Query string          | JSON                                                                                                                                    |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------|
+| Query string         | JSON                                                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 
@@ -317,9 +282,9 @@ Use the pipe character `|`  to combine several expressions using logical OR oper
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
 
-| Query string          | JSON                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| Query string            | JSON                                                                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `nickname=Bat* \| *man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
 
@@ -405,24 +370,16 @@ Sometimes, you'll be looking for a filter that match exactly a text that contain
 The backslash character (`\`) can be used to escape characters that will be otherwise interpreted as
 a special character.
 
+| Query string  | JSON                                                | C#                                                                              |
+| ------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
 
-| Query string   | JSON                                                |
-| -------------- | --------------------------------------------------- |
-| `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` |
-
-will be parsed into a [IFilter][class-ifilter] instance equivalent to
-
-
-```csharp
-IFilter filter = new Filter("comment", EndsWith, "!");
-```
 
 💡 For longer texts, just wrap it between quotes and you're good to go
 
-| Query string   | JSON                                                |
-| -------------- | --------------------------------------------------- |
-| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}`  |
-
+| Query string   | JSON                                                | C#                                                                              |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
 
 ## <a href='#' id='sorting'>Sorting</a>
 
@@ -532,7 +489,7 @@ Some explanation on the controller's code above  :
 You may have noticed that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` property is not.
 This is to distinguish if the `Age` criterion was provided or not when calling the `vigilantes/search` endpoint.
 
-|   Name                    | Package                                                                                                                                         | Description                                                                                                                                                                         |
+| Name                      | Package                                                                                                                                         | Description                                                                                                                                                                         |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DataFilters`             | [![Nuget](https://img.shields.io/nuget/v/Datafilters?style=for-the-badge)](https://www.nuget.org/packages/DataFilters)                          | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
 | `DataFilters.Expressions` | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
