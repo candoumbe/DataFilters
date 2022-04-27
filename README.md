@@ -209,6 +209,16 @@ IFilter filter = new MultiFilter
      }
 };
 ```
+## <a href='#' id='isnull-expression'>Is null</a>
+
+Search for `vigilante` resources that have no powers.
+
+| Query string | JSON                                  | C#                                                                                                                                                  |
+| ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `N/A`        | `{ "field":"powers", "op":"isnull" }` | `new Filter(field: "powers", @operator : FilterOperator.IsNull)` or `new Filter(field: "powers", @operator : FilterOperator.EqualsTo, value: null)` |
+
+
+
 ## <a href='#' id='interval-expressions'>Interval expressions</a>
 
 Interval expressions are delimited by upper and a lower bound. The generic syntax is
@@ -229,7 +239,6 @@ Search for `vigilante` resources where the value of `age` property is greater th
 | --------------- | ----------------------------------------- | --------------------------------------------------------------------------------------- |
 | `age=[18 TO *[` | `{"field":"age", "op":"gte", "value":18}` | `new Filter(field: "age", @operator : FilterOperator.GreaterThanOrEqualTo, value : 18)` |
 
-
 ### <a href='#' id='lte-expression'>Less than or equal</a>
 
 Search for `vigilante` resource where the value of `age` property is lower than `30`
@@ -238,6 +247,8 @@ Search for `vigilante` resource where the value of `age` property is lower than 
 | --------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ |
 | `age=]* TO 30]` | `{"field":"age", "op":"lte", "value":30}` | `new Filter(field: "age", @operator : FilterOperator.LessThanOrEqualTo, value : 30)` |
 
+IFilter filter = new Filter("age", LessThanOrEqualTo, 30);
+```
 
 ### <a href='#' id='btw-expression'>Between</a>
 
@@ -313,9 +324,9 @@ Use the pipe character `|`  to combine several expressions using logical OR oper
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
 
-| Query string          | JSON                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `nickname=Bat*\|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| Query string            | JSON                                                                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `nickname=Bat* \| *man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
 
