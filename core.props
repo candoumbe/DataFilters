@@ -40,7 +40,7 @@
   <Choose>
     <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="10.3.6" />
+        <PackageReference Include="FluentValidation" Version="10.4.0" />
         <PackageReference Include="Ultimately" Version="2.1.1" />
       </ItemGroup>
     </When>
