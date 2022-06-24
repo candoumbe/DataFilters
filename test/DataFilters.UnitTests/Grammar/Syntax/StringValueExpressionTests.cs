@@ -84,7 +84,7 @@
                 {
                     new StringValueExpression("True"),
                     new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
-                    true
+                    false
                 };
             }
         }
@@ -143,14 +143,14 @@
         }
 
         [Property]
-        public void Given_StringValueExpression_when_GroupExpression_holds_an_expression_that_is_equals_to_that_StringValueExpression_Equals_should_return_true(NonWhiteSpaceString input)
+        public void Given_StringValueExpression_when_GroupExpression_holds_an_expression_that_is_equals_to_that_StringValueExpression_IsEquivalentTo_should_return_true(NonWhiteSpaceString input)
         {
             // Arrange
             StringValueExpression stringValue = new(input.Item);
             GroupExpression group = new (new StringValueExpression(input.Item));
 
             // Act
-            bool actual = stringValue.Equals(group);
+            bool actual = stringValue.IsEquivalentTo(group);
 
             // Assert
             actual.Should()

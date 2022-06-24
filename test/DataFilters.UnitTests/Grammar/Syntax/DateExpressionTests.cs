@@ -77,7 +77,19 @@
             => expression.Item.Equals(expression.Item).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        public void Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property IsEquivalent_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
+            => (first.Item.IsEquivalentTo(second) == second.IsEquivalentTo(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property IsEquivalentTo_should_be_reflexive(NonNull<DateExpression> expression)
+            => expression.Item.IsEquivalentTo(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void IsEquivalentTo_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.IsEquivalentTo(otherExpression.Item).Should().Be(otherExpression.Item.IsEquivalentTo(expression.Item));
     }
 }

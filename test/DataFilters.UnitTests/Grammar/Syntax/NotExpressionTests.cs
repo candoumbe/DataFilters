@@ -67,22 +67,14 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_argument_is_AndExpression_Constructor_should_wrap_it_inside_a_GroupExpression(NonNull<AndExpression> expression)
-            => Given_argument_needs_wrapping_Constructor_should_wrap_it_inside_a_GroupExpression(expression.Item);
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_argument_is_OrExpression_Constructor_should_wrap_it_inside_a_GroupExpression(NonNull<OrExpression> expression)
-            => Given_argument_needs_wrapping_Constructor_should_wrap_it_inside_a_GroupExpression(expression.Item);
-
-        private static void Given_argument_needs_wrapping_Constructor_should_wrap_it_inside_a_GroupExpression(FilterExpression expression)
+        public void Given_argument_is_AndExpression_Constructor_should_wrap_it_inside_a_GroupExpression(NonNull<BinaryFilterExpression> expression)
         {
             // Act
-            NotExpression not = new(expression);
+            NotExpression not = new(expression.Item);
 
             // Assert
             not.Expression.Should()
-                          .BeOfType<GroupExpression>().Which
-                          .IsEquivalentTo(expression).Should().BeTrue();
+                          .BeOfType<GroupExpression>("the parameter is a BinaryFilterExpression");
         }
 
         public static IEnumerable<object[]> EscapedParseableStringCases

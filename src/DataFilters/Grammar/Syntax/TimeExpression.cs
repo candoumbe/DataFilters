@@ -71,11 +71,14 @@
             || new TimeSpan(Hours, Minutes, Seconds).Add(TimeSpan.FromMilliseconds(Milliseconds)) == new TimeSpan(other.Hours, other.Minutes, other.Seconds).Add(TimeSpan.FromMilliseconds(other.Milliseconds)));
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => obj switch
+        public override bool Equals(object obj) => Equals(obj as TimeExpression);
+
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
             TimeExpression time => Equals(time),
             DateTimeExpression { Date: null, Time: var time, Offset: null} => Equals(time),
-            _ => false
+            _ => Equals((other as ISimplifiable)?.Simplify() ?? other)
         };
 
         ///<inheritdoc/>

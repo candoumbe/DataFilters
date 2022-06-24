@@ -134,6 +134,18 @@
         /// The <c>&#38;</c> character.
         /// </summary>
         [Token(Example = "&", Description ="ampersand")]
-        Ampersand
+        Ampersand,
+
+        /// <summary>
+        /// The <c>{</c> character.
+        /// </summary>
+        [Token(Example = "{", Description = "left curly brace")]
+        LeftBrace,
+
+        /// <summary>
+        /// The <c>}</c> character.
+        /// </summary>
+        [Token(Example = "}", Description = "right curly brace")]
+        RightBrace
     }
 }

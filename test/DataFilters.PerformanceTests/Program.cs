@@ -1,6 +1,6 @@
-﻿namespace DataFilters.PerfomanceTests
+﻿    using BenchmarkDotNet.Running;
+namespace DataFilters.PerfomanceTests
 {
-    using BenchmarkDotNet.Running;
 
     public class Program
     {

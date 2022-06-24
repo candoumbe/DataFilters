@@ -19,7 +19,9 @@
         /// <returns>
         /// <c>true</c> if <paramref name="other"/> is "equivalent" to the current instance.
         /// </returns>
-        public virtual bool IsEquivalentTo(FilterExpression other) => Equals(other);
+        /// <inheritdoc/>
+        public virtual bool IsEquivalentTo(FilterExpression other)
+            => Equals(other) || Equals((other as ISimplifiable)?.Simplify());
 
         ///<inheritdoc/>
         public virtual double Complexity => 1;
