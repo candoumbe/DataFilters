@@ -629,7 +629,7 @@ namespace DataFilters.ContinuousIntegration
             .Description("Run all performance tests.")
             .DependsOn(Compile)
             .TriggeredBy(UnitTests)
-            .OnlyWhenDynamic(() => IsServerBuild)
+            //.OnlyWhenDynamic(() => IsServerBuild)
             .Produces(BenchmarkDirectory / "*")
             .Executes(() =>
             {

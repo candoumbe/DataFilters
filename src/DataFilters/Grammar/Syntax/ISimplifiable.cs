@@ -1,7 +1,7 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// Defines a <see cref="Simplify"/> method which rewrites an instance to a "simpler"
+    /// Defines a <see cref="Simplify"/> method which rewrites an instance to a "simpler" form.
     /// </summary>
     public interface ISimplifiable
     {

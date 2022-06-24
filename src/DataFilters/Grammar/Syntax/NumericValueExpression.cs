@@ -26,12 +26,21 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 
+
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
             NumericValueExpression numeric => Equals(numeric),
+            ConstantValueExpression constant => Equals(constant),
             ISimplifiable simplifiable => Equals(simplifiable.Simplify()),
             _ => false
         };
+
+        ///<inheritdoc/>
+        public static bool operator ==(NumericValueExpression left, NumericValueExpression right) => Equals(left, right);
+
+        ///<inheritdoc/>
+        public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
+
     }
 }

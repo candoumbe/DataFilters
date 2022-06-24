@@ -56,12 +56,15 @@
         /// <inheritdoc />
         public bool Equals(DateExpression other) => (Year, Month, Day) == (other?.Year, other?.Month, other?.Day);
 
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => Equals(obj as DateExpression);
+
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj switch
+        public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
             DateExpression date => Equals(date),
             DateTimeExpression { Date : var date, Time : null, Offset: null } => Equals(date),
-            _ => false
+            _ => Equals((other as ISimplifiable)?.Simplify() ?? other)
         };
 
         /// <inheritdoc />

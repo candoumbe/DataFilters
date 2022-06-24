@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Made `AsteriskExpression` default constructor private [BREAKING]
+- Added new syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
+- Dropped filter service [BREAKING]
+- Added `+` operator for combining `ConstantValueExpression` with `AsteriskExpression`
+- Added `+` operator for combining `StartWithExpreession` instance with `EndsWithExpression`
+- Added `|` operator for combining two `FilterExpression` instances into a `OrExpression`
+- Added `&` operator for combining two `FilterExpression` instances into a `AndExpression`
+
 
 ## [0.11.0] / 2022-03-13
 - Added [`FilterOptions`](/src/DataFilters/FilterOptions.cs)

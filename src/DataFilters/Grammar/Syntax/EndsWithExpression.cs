@@ -104,5 +104,13 @@
 
         ///<inheritdoc/>
         public override double Complexity => 1.5;
+
+        /// <summary>
+        /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/ to a <see cref="EndsWithExpression"/>>.
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="_"></param>
+        /// <returns></returns>
+        public static ContainsExpression operator +(EndsWithExpression left, AsteriskExpression _) => new(left.Value);        
     }
 }

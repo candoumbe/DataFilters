@@ -104,7 +104,7 @@ Wouldn't it be nice to be able to search any resource like so
 `https://my-beautiful/api/vigilantes/search?nickname=Bat*|Super*` ?
 
 This is exactly what this project is about : giving you an uniform syntax to query resources
-without having to thing about the underlying datasource.
+without having to think about the underlying datasource.
 
 # <a href='#' id='parsing'>Parsing</a>
 

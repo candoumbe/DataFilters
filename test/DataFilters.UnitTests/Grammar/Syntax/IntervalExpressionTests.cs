@@ -48,13 +48,13 @@
             get
             {
                 yield return new object[] {
-                    new BoundaryExpression(new AsteriskExpression(), included: true),
-                    new BoundaryExpression(new AsteriskExpression(), included: true),
+                    new BoundaryExpression(AsteriskExpression.Instance, included: true),
+                    new BoundaryExpression(AsteriskExpression.Instance, included: true),
                     $"min and max cannot both be {nameof(AsteriskExpression)} instances"
                 };
 
                 yield return new object[] {
-                    new BoundaryExpression(new AsteriskExpression(), included : true),
+                    new BoundaryExpression(AsteriskExpression.Instance, included : true),
                     null,
                     $"max cannot be null when min is {nameof(AsteriskExpression)} instance"
                 };
@@ -121,14 +121,14 @@
 
                 yield return new object[]
                 {
-                    new BoundaryExpression(new AsteriskExpression(), included: false),
+                    new BoundaryExpression(AsteriskExpression.Instance, included: false),
                     new BoundaryExpression(new TimeExpression(), included: false)
                 };
 
                 yield return new object[]
                 {
                     new BoundaryExpression(new TimeExpression(), included: false),
-                    new BoundaryExpression(new AsteriskExpression(), included: false)
+                    new BoundaryExpression(AsteriskExpression.Instance, included: false)
                 };
             }
         }
@@ -322,12 +322,16 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_non_null_interval_IntervalU0022IsEquivalentTo_itself_should_return_true(NonNull<IntervalExpression> interval)
+        public void IsEquivalent_should_be_reflexive(NonNull<IntervalExpression> interval)
         {
+            // Arrange
             IntervalExpression source = interval.Item;
 
+            // Act
+            bool actual = source.IsEquivalentTo(source);
+
             // Assert
-            return source.IsEquivalentTo(source).ToProperty();
+            actual.Should().BeTrue();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -383,6 +387,13 @@
                     new IntervalExpression(new (new TimeExpression(1), true), new (new TimeExpression(minutes: 60), true)),
                     new TimeExpression(1),
                     "Lower and upper bound are equivalent"
+                };
+
+                yield return new object[]
+                {
+                    new IntervalExpression(new (new NumericValueExpression("-32"), true), new (new NumericValueExpression("-32"), true)),
+                    new NumericValueExpression("-32"),
+                    "Lower and upper bound are equal"
                 };
             }
         }

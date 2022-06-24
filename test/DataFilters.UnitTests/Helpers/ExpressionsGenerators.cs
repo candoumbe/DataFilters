@@ -118,7 +118,6 @@ namespace DataFilters.UnitTests.Helpers
                                                 )
                                                 .ToArbitrary();
 
-
         public static Arbitrary<DurationExpression> DurationExpressions()
         {
             Arbitrary<(((PositiveInt years, PositiveInt months, PositiveInt days) date, (PositiveInt hours, PositiveInt minutes, PositiveInt seconds) time) dateTime, PositiveInt milliseconds)> arb = GetArbitraryFor<PositiveInt>().Generator
@@ -155,6 +154,32 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<AndExpression> AndExpressions() => Gen.Sized(SafeAndExpressionGenerator).ToArbitrary();
 
+        public static Arbitrary<GroupExpression> GroupExpressions() => Gen.Sized(SafeGroupExpressionGenerator).ToArbitrary();
+
+        private static Gen<GroupExpression> SafeGroupExpressionGenerator(int size)
+        {
+            Gen<GroupExpression> gen;
+            switch (size)
+            {
+                case 0:
+                    {
+                        gen = GenerateFilterExpressions().Generator
+                                                         .Select(expr => new GroupExpression(expr));
+                        break;
+                    }
+
+                default:
+                    {
+                        Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 2);
+                        gen = Gen.OneOf(GenerateFilterExpressions().Generator.Select(expr => new GroupExpression(expr)),
+                                        subtree.Select(expr => new GroupExpression(expr)));
+                        break;
+                    }
+            }
+
+            return gen;
+        }
+
         /// <summary>
         /// Generates an arbitrary random <see cref="FilterExpression"/>.
         /// </summary>
@@ -170,13 +195,29 @@ namespace DataFilters.UnitTests.Helpers
                 DateTimeExpressions().Generator.Select(item => (FilterExpression) item),
                 TimeExpressions().Generator.Select(item => (FilterExpression) item),
                 DurationExpressions().Generator.Select(item => (FilterExpression) item),
-                ConstantValueExpressions().Generator.Select(item => (FilterExpression) item)
+                ConstantValueExpressions().Generator.Select(item => (FilterExpression) item),
+                GroupExpressions().Generator.Select(item => (FilterExpression) item)
             };
 
             return Gen.OneOf(generators).ToArbitrary();
         }
 
-        private static Gen<OrExpression> SafeOrExpressionGenerator(int size)
+        /// <summary>
+        /// Generates an arbitrary random <see cref="BinaryFilterExpression"/>.
+        /// </summary>
+        /// <returns></returns>
+        public static Arbitrary<BinaryFilterExpression> BinaryFilterExpressions()
+        {
+            Gen<BinaryFilterExpression>[] generators =
+            {
+                AndExpressions().Generator.Select(item => (BinaryFilterExpression) item),
+                OrExpressions().Generator.Select(item => (BinaryFilterExpression) item)
+            };
+
+            return Gen.OneOf(generators).ToArbitrary();
+        }
+
+    private static Gen<OrExpression> SafeOrExpressionGenerator(int size)
         {
             Gen<OrExpression> gen;
             switch (size)
@@ -289,7 +330,7 @@ namespace DataFilters.UnitTests.Helpers
             };
 
             (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
-            (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false));
+            (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)AsteriskExpression.Instance), Gen.Constant(false));
 
             IEnumerable<Gen<IntervalExpression>> generatorsWithMinAndMax = datesGen.CrossJoin(datesGen)
                                                                                    .Concat(datesGen.CrossJoin(new[] { timeGen }))
@@ -321,7 +362,7 @@ namespace DataFilters.UnitTests.Helpers
                 CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
                 CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
-                CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)new AsteriskExpression()), Gen.Constant(false)),
+                CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)AsteriskExpression.Instance), Gen.Constant(false)),
             };
 
             return Gen.OneOf(generators)

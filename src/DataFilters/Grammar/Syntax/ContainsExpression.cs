@@ -44,7 +44,7 @@
 
             _lazyEscapedParseableString = new(() =>
             {
-                // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
+                // The length of the final parseable string in worst case scenarios will double (1 backlash + the escaped character)
                 // Also we need an extra position for the final '*' that will be append in all cases
                 bool requireEscapingCharacters = Value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
                 StringBuilder parseableString;

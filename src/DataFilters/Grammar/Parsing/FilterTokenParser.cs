@@ -73,7 +73,7 @@
         /// Parser for '*' character
         /// </summary>
         private static TokenListParser<FilterToken, AsteriskExpression> Asterisk => from __ in Token.EqualTo(FilterToken.Asterisk)
-                                                                                    select new AsteriskExpression();
+                                                                                    select AsteriskExpression.Instance;
 
         /// <summary>
         /// Parser for "starts with" expressions
@@ -99,38 +99,37 @@
         /// Parser for "contains" expression
         /// </summary>
         public static TokenListParser<FilterToken, ContainsExpression> Contains => (from _ in Asterisk
-                                                                                   from data in (
-                                                                                       from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                       from puncBefore in Punctuation.Many()
-                                                                                       from alpha in AlphaNumeric.Many()
-                                                                                       from puncAfter in Punctuation.Many()
-                                                                                       from symbolAfter in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                       where symbolBefore.AtLeastOnce()
-                                                                                             || puncBefore.AtLeastOnce()
-                                                                                             || alpha.AtLeastOnce()
-                                                                                             || puncAfter.AtLeastOnce()
-                                                                                             || symbolAfter.AtLeastOnce()
-                                                                                       select new
-                                                                                       {
-                                                                                           value = string.Concat(string.Concat(symbolBefore.Select(x => x.ToStringValue())),
-                                                                                                                 string.Concat(puncBefore.Select(x => x.Value)),
-                                                                                                                 string.Concat(alpha.Select(item => item.Value)),
-                                                                                                                 string.Concat(puncAfter.Select(x => x.Value)),
-                                                                                                                 string.Concat(symbolAfter.Select(x => x.ToStringValue())))
-                                                                                       }).AtLeastOnce()
-                                                                                   from escaped in Token.EqualTo(FilterToken.Backslash).Many()
-                                                                                   from __ in Asterisk
-                                                                                   select new ContainsExpression(string.Concat(data.Select(x => x.value)))).Try()
+                                                                                    from data in (
+                                                                                        from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                        from puncBefore in Punctuation.Many()
+                                                                                        from alpha in AlphaNumeric.Many()
+                                                                                        from puncAfter in Punctuation.Many()
+                                                                                        from symbolAfter in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                        where symbolBefore.AtLeastOnce()
+                                                                                              || puncBefore.AtLeastOnce()
+                                                                                              || alpha.AtLeastOnce()
+                                                                                              || puncAfter.AtLeastOnce()
+                                                                                              || symbolAfter.AtLeastOnce()
+                                                                                        select new
+                                                                                        {
+                                                                                            value = string.Concat(string.Concat(symbolBefore.Select(x => x.ToStringValue())),
+                                                                                                                  string.Concat(puncBefore.Select(x => x.Value)),
+                                                                                                                  string.Concat(alpha.Select(item => item.Value)),
+                                                                                                                  string.Concat(puncAfter.Select(x => x.Value)),
+                                                                                                                  string.Concat(symbolAfter.Select(x => x.ToStringValue())))
+                                                                                        }).AtLeastOnce()
+                                                                                    from escaped in Token.EqualTo(FilterToken.Backslash).Many()
+                                                                                    from __ in Asterisk
+                                                                                    select new ContainsExpression(string.Concat(data.Select(x => x.value)))).Try()
                                                                                    .Or(Text.Between(Asterisk, Asterisk)
                                                                                             .Select(text => new ContainsExpression(text)));
 
         /// <summary>
         /// Parser for logical OR expression.
         /// </summary>
-        public static TokenListParser<FilterToken, OrExpression> Or => from left in UnaryExpression
-                                                                       from _ in Token.EqualTo(FilterToken.Or)
-                                                                       from right in UnaryExpression
-                                                                       select new OrExpression(left, right);
+        public static TokenListParser<FilterToken, FilterExpression> Or => Parse.Chain(Token.EqualTo(FilterToken.Or),
+                                                                                       UnaryExpression,
+                                                                                       (_, left, right) => new OrExpression(left, right));
 
         /// <summary>
         /// Parser for logical AND expression
@@ -327,7 +326,7 @@
 
         private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>())
                                                                                                       .Or(Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()))
-                                                                                                      .Or(Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()))
+                                                                                                      .Or(Parse.Ref(() => Or.Try()))
                                                                                                       .Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
                                                                                                       .Or(Parse.Ref(() => UnaryExpression));
 
@@ -373,55 +372,100 @@
         /// <summary>
         /// Parser for expressions that contains one or more regex parts.
         /// </summary>
-        public static TokenListParser<FilterToken, OneOfExpression> OneOf => (
-                                                                                from head in Bracket
-                                                                                from body in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
-                                                                                                        .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                                        .OptionalOrDefault()
-                                                                                from tail in Bracket
+        public static TokenListParser<FilterToken, OneOfExpression> OneOf
+            => (
+                from head in Bracket
+                from body in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
+                                        .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                        .OptionalOrDefault()
+                from tail in Bracket
 
-                                                                                select (head: (FilterExpression)head, body, tail: (FilterExpression)tail)
-                                                                             ).Try()
-                                                                             .Or(
-                                                                                 from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                                         .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                                         .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                                         .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                                         .OptionalOrDefault()
-                                                                                 from body in Bracket
-                                                                                 from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                                                                                      .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                                                                                      .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                                                                                      .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                                                                                      .OptionalOrDefault()
+                select (head: (FilterExpression)head,  (object)body, tail: (FilterExpression)tail)
+                ).Try()
+                .Or(
+                    from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                            .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                            .OptionalOrDefault()
+                    from body in Bracket
+                    from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                        .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                        .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                        .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                        .OptionalOrDefault()
 
-                                                                                 select (head, body: (FilterExpression)body, tail)
-                                                                               )
+                    select (head, body: (object)body, tail)
+                ).Try()
+                .Or(
+                    from head in Group
+                    from body in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
+                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                            .OptionalOrDefault()
+                    from tail in Group
+
+                    select (head: (FilterExpression)head, (object)body, tail: (FilterExpression)tail)
+                ).Try()
+                .Or(
+                    from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                            .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                            .OptionalOrDefault()
+                    from body in Group
+                    from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                        .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                        .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                        .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                        .OptionalOrDefault()
+
+                    select (head, body: (object)body, tail)
+                ).Try()
+                .Or(
+                    from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                            .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                            .OptionalOrDefault()
+                    from _ in Token.EqualTo(FilterToken.LeftBrace)
+                    from body in Constant.AtLeastOnceDelimitedBy(Token.EqualTo(FilterToken.Or))
+                    from __ in Token.EqualTo(FilterToken.RightBrace)
+                    from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
+                                            .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
+                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
+                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                            .OptionalOrDefault()
+
+                    select (head, body: (object)body.Select(item => item).OfType<ConstantValueExpression>().ToArray(), tail)
+                )
             .Select(item =>
             {
                 return item switch
                 {
                     // *<regex>
-                    (AsteriskExpression _, BracketExpression bracket, null) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))
+                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))
                                                                                                                      .ToArray()),
-
                     // *<regex><constant>
-                    (AsteriskExpression _, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
+                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
                                                                                                                                              .ToArray()),
 
                     // <regex>*
-                    (null, BracketExpression bracket, AsteriskExpression _) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))
+                    (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))
                                                                                                                      .ToArray()),
 
                     // <endswith><regex>
                     (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))
                                                                                                                       .ToArray()),
+                    // <endswith><regex><constant>
+                    (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}{constant.Value}"))
+                                                                                                                      .ToArray()),
                     // <startswith><regex>
-                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression)new AndExpression(head,
+                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head,
                                                                                                                                                                            new EndsWithExpression(chr.ToString())))
                                                                                                                   .ToArray()),
                     // <regex><startwith>*
                     (null, BracketExpression bracket, StartsWithExpression body) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}")).ToArray()),
+
                     // <constant><regex><constant>
                     (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracket.Value}{chr}{tail.Value}")).ToArray()),
                     // <constant><regex>
@@ -435,12 +479,28 @@
 
                     // <regex><constant><regex>
                     (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new(ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
-                                                                            .Select(tuple => new { start = tuple.Item1, end = tuple.Item2 })
+                                                                            .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                                                             .Select(tuple => new StringValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
                                                                             .ToArray()),
-
+                    // <regex><regex>
+                    (BracketExpression head, null, BracketExpression tail) => new(ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
+                                                                            .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
+                                                                            .Select(tuple => new StringValueExpression($"{tuple.start}{tuple.end}"))
+                                                                            .ToArray()),
                     // <regex><endswith>
-                    (null, BracketExpression body, EndsWithExpression tail) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression)new AndExpression(new StartsWithExpression(chr.ToString()), tail)).ToArray()),
+                    (null, BracketExpression body, EndsWithExpression tail) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), tail)).ToArray()),
+
+                    // *<oneof>
+                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression(constants.Select(constant => new EndsWithExpression(constant.Value)).ToArray()),
+
+                    // <oneof>*
+                    (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression(constants.Select(constant => new StartsWithExpression(constant.Value)).ToArray()),
+
+                    // *<oneof>*
+                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression(constants.Select(constant => new ContainsExpression(constant.Value)).ToArray()),
+                    // <oneof><endswith>
+                    (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression(constants.Select(constant => constant + endsWith).ToArray()),
+
                     _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
                 };
             });
