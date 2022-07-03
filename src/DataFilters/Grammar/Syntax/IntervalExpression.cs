@@ -137,7 +137,7 @@
         {
             bool equals = false;
 
-            if (other != null)
+            if (other is not null)
             {
                 if (Min is null)
                 {
@@ -174,7 +174,11 @@
             bool equivalent = false;
             if (other is not null)
             {
-                if (other is IntervalExpression range)
+                if (ReferenceEquals(this, other))
+                {
+                    equivalent = true;
+                }
+                else if (((other as ISimplifiable)?.Simplify() ?? other) is IntervalExpression range)
                 {
                     equivalent = Equals(range);
                 }

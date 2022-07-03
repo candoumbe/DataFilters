@@ -101,19 +101,9 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
-            static DateTime ConvertToDateTime(DurationExpression duration)
-            {
-                return DateTime.MinValue.AddYears(duration.Years)
-                                        .AddMonths(duration.Months)
-                                        .AddDays((duration.Weeks * 7) + duration.Days)
-                                        .AddHours(duration.Hours)
-                                        .AddMinutes(duration.Minutes)
-                                        .AddSeconds(duration.Seconds);
-            }
-
             bool equivalent = false;
 
-            if (other is DurationExpression otherDuration)
+            if (((other as ISimplifiable)?.Simplify() ?? other) is DurationExpression otherDuration)
             {
                 equivalent = Equals(otherDuration);
                 if (!equivalent)
@@ -126,6 +116,16 @@ namespace DataFilters.Grammar.Syntax
             }
 
             return equivalent;
+
+            static DateTime ConvertToDateTime(DurationExpression duration)
+            {
+                return DateTime.MinValue.AddYears(duration.Years)
+                                        .AddMonths(duration.Months)
+                                        .AddDays((duration.Weeks * 7) + duration.Days)
+                                        .AddHours(duration.Hours)
+                                        .AddMinutes(duration.Minutes)
+                                        .AddSeconds(duration.Seconds);
+            }
         }
 
         ///<inheritdoc/>

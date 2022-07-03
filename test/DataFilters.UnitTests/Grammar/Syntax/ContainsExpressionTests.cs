@@ -113,8 +113,8 @@
             => (contains.Complexity == 1.5).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ConstainsExpression_calling_IsEquivalentTo_with_itself_should_return_true(ContainsExpression contains)
-            => (contains.IsEquivalentTo(contains)).ToProperty();
+        public void IsEquivalentTo_should_be_reflexive(ContainsExpression contains)
+            => contains.IsEquivalentTo(contains).Should().BeTrue();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)

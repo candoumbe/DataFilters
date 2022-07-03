@@ -62,11 +62,17 @@ namespace DataFilters.Grammar.Syntax
         public virtual bool Equals(StringValueExpression other) => Equals(Value, other?.Value);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => obj switch {
-            StringValueExpression stringValue => Equals(stringValue),
-            ISimplifiable simplifiable => Equals(simplifiable.Simplify() as StringValueExpression),
-            _ => false
-        };
+        public override bool Equals(object obj) => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression);
+
+        /// <inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+            => other switch
+            {
+                StringValueExpression stringValue => Equals(stringValue),
+                ISimplifiable simplifiable => Equals(simplifiable.Simplify() as StringValueExpression),
+                _ => false
+            };
+
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();
 

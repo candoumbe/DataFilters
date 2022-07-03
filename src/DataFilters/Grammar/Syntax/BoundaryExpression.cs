@@ -30,7 +30,7 @@
         }
 
         ///<inheritdoc/>
-        public bool Equals(BoundaryExpression other) => other != null
+        public bool Equals(BoundaryExpression other) => other is not null
                                                         && Included == other.Included
                                                         && Expression.Equals(other.Expression);
 

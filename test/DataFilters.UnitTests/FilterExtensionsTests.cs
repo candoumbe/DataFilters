@@ -419,6 +419,37 @@
                         }
                     }
                 };
+
+                yield return new object[]
+                {
+                    "Nickname={Bat|Sup|Wonder}*,*m[ae]n",
+                    new MultiFilter
+                    {
+                        Logic = And,
+                        Filters = new[]
+                        {
+                            new MultiFilter
+                            {
+                                Logic = Or,
+                                Filters = new[]
+                                {
+                                    new Filter(nameof(SuperHero.Nickname), StartsWith, "Bat"),
+                                    new Filter(nameof(SuperHero.Nickname), StartsWith, "Sup"),
+                                    new Filter(nameof(SuperHero.Nickname), StartsWith, "Wonder")
+                                }
+                            },
+                            new MultiFilter
+                            {
+                                Logic = Or,
+                                Filters = new[]
+                                {
+                                    new Filter(nameof(SuperHero.Nickname), EndsWith, "man"),
+                                    new Filter(nameof(SuperHero.Nickname), EndsWith, "men")
+                                }
+                            }
+                        }
+                    }
+                };
             }
         }
 
@@ -518,7 +549,7 @@
                                 new Filter("PascalCaseProperty", EqualTo, "value")
                             }
                         }
-                    }; 
+                    };
                 }
             }
         }

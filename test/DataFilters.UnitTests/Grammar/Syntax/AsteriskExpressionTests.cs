@@ -34,8 +34,8 @@
         {
             get
             {
-                yield return new object[] { new AsteriskExpression(), null, false, "Comparing to null" };
-                yield return new object[] { new AsteriskExpression(), new AsteriskExpression(), true, "Comparing to null" };
+                yield return new object[] { AsteriskExpression.Instance, null, false, "Comparing to null" };
+                yield return new object[] { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" };
             }
         }
 
@@ -66,6 +66,32 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_AsteriskExpression_GetComplexity_should_return_1(AsteriskExpression asterisk) => (asterisk.Complexity == 1).ToProperty();
+        public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpression)
+        {
+            // Arrange
+            AsteriskExpression asterisk = AsteriskExpression.Instance;
+            EndsWithExpression expected = new(constantExpression.Item.Value);
+
+            // Act
+            EndsWithExpression actual = asterisk + constantExpression.Item;
+
+            actual.Should().Be(expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_ConstantValueExpresion_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
+        {
+            // Arrange
+            AsteriskExpression asterisk = AsteriskExpression.Instance;
+            StartsWithExpression expected = new(constantExpression.Item.Value);
+
+            // Act
+            StartsWithExpression actual = constantExpression.Item + asterisk;
+
+            actual.Should().Be(expected);
+        }
     }
 }
