@@ -500,6 +500,8 @@
                     (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression(constants.Select(constant => new ContainsExpression(constant.Value)).ToArray()),
                     // <oneof><endswith>
                     (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression(constants.Select(constant => constant + endsWith).ToArray()),
+                    // <oneof>
+                    (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression(constants.ToArray()),
 
                     _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
                 };

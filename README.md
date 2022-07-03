@@ -9,6 +9,11 @@
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
+## Disclaimer
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**. The public API SHOULD NOT be considered stable. 
+
+
 **Table of contents**
 - <a href='#parsing'>Parsing</a>
 - <a href='#filtering'>Filters syntax</a>
@@ -207,7 +212,7 @@ where
 Search for `vigilante` resources where the value of `age` property is greater than or equal to `18`
 
 | Query string    | JSON                                      |
-|-----------------|-------------------------------------------|
+| --------------- | ----------------------------------------- |
 | `age=[18 TO *[` | `{"field":"age", "op":"gte", "value":18}` |
 
 will result in a [IFilter][class-ifilter] instance equivalent to
@@ -293,8 +298,8 @@ Logicial operators can be used combine several instances of [IFilter][class-ifil
 
 Use the coma character `,` to combine multiple expressions using logical AND operator 
 
-| Query string          | JSON                                                                                                                                    |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------|
+| Query string         | JSON                                                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 
@@ -319,7 +324,7 @@ ends with `"man"`
 
 | Query string          | JSON                                                                                                                                    |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `nickname=Bat*|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| `nickname=Bat*\|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
 
@@ -406,8 +411,8 @@ The backslash character (`\`) can be used to escape characters that will be othe
 a special character.
 
 
-| Query string   | JSON                                                |
-| -------------- | --------------------------------------------------- |
+| Query string  | JSON                                                |
+| ------------- | --------------------------------------------------- |
 | `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` |
 
 will be parsed into a [IFilter][class-ifilter] instance equivalent to
@@ -421,7 +426,7 @@ IFilter filter = new Filter("comment", EndsWith, "!");
 
 | Query string   | JSON                                                |
 | -------------- | --------------------------------------------------- |
-| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}`  |
+| `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}` |
 
 
 ## <a href='#' id='sorting'>Sorting</a>
@@ -532,11 +537,11 @@ Some explanation on the controller's code above  :
 You may have noticed that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` property is not.
 This is to distinguish if the `Age` criterion was provided or not when calling the `vigilantes/search` endpoint.
 
-|   Name                    | Package                                                                                                                                         | Description                                                                                                                                                                         |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DataFilters`             | [![Nuget](https://img.shields.io/nuget/v/Datafilters?style=for-the-badge)](https://www.nuget.org/packages/DataFilters)                          | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
-| `DataFilters.Expressions` | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?&style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
-| `DataFilters Queries`     | [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?style=for-the-badge)](https://www.nuget.org/packages/DataFilters.Queries)          | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
+| Package                                                                                                                                                                             | Description |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)        | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
+| [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)          | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
 
 
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs
