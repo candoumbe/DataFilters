@@ -12,7 +12,7 @@
         },
         "CodecovToken": {
           "type": "string",
-          "default": "Secrets must be entered via 'nuke :secret [profile]'"
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Configuration": {
           "type": "string",
@@ -28,7 +28,7 @@
         },
         "GitHubToken": {
           "type": "string",
-          "default": "Secrets must be entered via 'nuke :secret [profile]'"
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Help": {
           "type": "boolean",
@@ -41,6 +41,7 @@
             "AppVeyor",
             "AzurePipelines",
             "Bamboo",
+            "Bitbucket",
             "Bitrise",
             "GitHubActions",
             "GitLab",
@@ -69,7 +70,7 @@
         "NugetApiKey": {
           "type": "string",
           "description": "API key used to publish artifacts to Nuget.org",
-          "default": "Secrets must be entered via 'nuke :secret [profile]'"
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "NugetPackageSource": {
           "type": "string",
@@ -126,7 +127,7 @@
         "StrykerDashboardApiKey": {
           "type": "string",
           "description": "Api Key used to upload stryker result",
-          "default": "Secrets must be entered via 'nuke :secret [profile]'"
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Target": {
           "type": "array",
