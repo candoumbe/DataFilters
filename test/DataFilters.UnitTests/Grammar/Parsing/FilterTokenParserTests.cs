@@ -543,6 +543,14 @@ I&_Oj
                                         new StringValueExpression("bc"),
                                         new StringValueExpression("bd"))
                 };
+
+                yield return new object[]
+                {
+                    "{Bat|Sup|Wonder}",
+                    new OneOfExpression(new StringValueExpression("Bat"),
+                                        new StringValueExpression("Sup"),
+                                        new StringValueExpression("Wonder"))
+                };
             }
         }
 

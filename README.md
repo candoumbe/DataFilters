@@ -9,6 +9,11 @@
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
+## Disclaimer
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**. The public API SHOULD NOT be considered stable. 
+
+
 **Table of contents**
 - <a href='#parsing'>Parsing</a>
 - <a href='#filtering'>Filters syntax</a>
@@ -282,9 +287,9 @@ Use the pipe character `|`  to combine several expressions using logical OR oper
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
 
-| Query string            | JSON                                                                                                                                    |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `nickname=Bat* \| *man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
+| Query string          | JSON                                                                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `nickname=Bat*\|*man` | `{"logic": "or", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
 
 will result in
 
