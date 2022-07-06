@@ -34,5 +34,10 @@
 
         ///<inheritdoc/>
         public virtual string OriginalString => EscapedParseableString;
+
+        /// <summary>
+        /// Returns a <see cref="FilterExpression"/> that is the result of applying the NOT logical operator to the specified <paramref name="expression"/>.
+        /// </summary>
+        public static NotExpression operator !(FilterExpression expression) => new (expression);
     }
 }

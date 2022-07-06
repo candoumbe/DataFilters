@@ -12,18 +12,27 @@
         /// </summary>
         public FilterExpression Expression { get; }
 
+        private readonly Lazy<string> lazyEscapedParseableString;
+
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
         /// </summary>
         /// <param name="expression"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <c>null</c>.</exception>
-        public NotExpression(FilterExpression expression) => Expression = expression switch
+        /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+        /// <remarks>
+        /// <paramref name="expression"/> will be automatically wrapped inside a <see cref="GroupExpression"/> when it's a <see cref="BinaryFilterExpression"/>.
+        /// </remarks>
+        public NotExpression(FilterExpression expression)
         {
-            null => throw new ArgumentNullException(nameof(expression)),
-            AndExpression and => new GroupExpression(and),
-            OrExpression or => new GroupExpression(or),
-            FilterExpression expr => expr
-        };
+            Expression = expression switch
+            {
+                null => throw new ArgumentNullException(nameof(expression)),
+                BinaryFilterExpression expr => new GroupExpression(expr),
+                FilterExpression expr => expr
+            };
+
+            lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
+        }
 
         ///<inheritdoc/>
         public bool Equals(NotExpression other) => Expression.Equals(other?.Expression);
@@ -42,7 +51,7 @@
             $"{nameof(EscapedParseableString)} = {EscapedParseableString}}}";
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => $"!{Expression.EscapedParseableString}";
+        public override string EscapedParseableString => lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
