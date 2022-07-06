@@ -71,7 +71,7 @@
         public override int GetHashCode() => (Year, Month, Day).GetHashCode();
 
         /// <inheritdoc />
-        public override string EscapedParseableString => $"{Year:D2}-{Month:D2}-{Day:D2}";
+        public override string EscapedParseableString => $"{Year:D4}-{Month:D2}-{Day:D2}";
 
         /// <inheritdoc />
         public static bool operator ==(DateExpression left, DateExpression right) => left switch

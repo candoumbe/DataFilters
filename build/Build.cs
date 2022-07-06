@@ -364,8 +364,6 @@ namespace DataFilters.ContinuousIntegration
                 {
                     Information("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
                     AskBranchNameAndSwitchToIt(FeatureBranchPrefix, DevelopBranch);
-#pragma warning restore S2583 // Conditionally executed code should be reachable
-
                     Information($"{EnvironmentInfo.NewLine}Good bye !");
                 }
                 else
@@ -418,8 +416,6 @@ namespace DataFilters.ContinuousIntegration
                         exitCreatingFeature = true;
                         break;
                 }
-
-#pragma warning disable S2583 // Conditionally executed code should be reachable
             } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
         }
 
@@ -471,7 +467,6 @@ namespace DataFilters.ContinuousIntegration
                 {
                     Information("Enter the name of the coldfix. It will be used as the name of the coldfix/branch (leave empty to exit) :");
                     AskBranchNameAndSwitchToIt(ColdfixBranchPrefix, DevelopBranch);
-#pragma warning restore S2583 // Conditionally executed code should be reachable
                     Information($"{EnvironmentInfo.NewLine}Good bye !");
                 }
                 else

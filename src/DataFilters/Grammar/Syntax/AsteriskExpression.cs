@@ -11,10 +11,12 @@
         /// <summary>
         /// The unique instance of the <see cref="AsteriskExpression"/>.
         /// </summary>
+        /// <remarks>
+        /// This field is <see langword="readonly"/>
+        /// </remarks>
         public static AsteriskExpression Instance { get; } = new();
 
         private AsteriskExpression() { }
-        
 
         ///<inheritdoc/>
         public bool Equals(AsteriskExpression other) => other is not null;

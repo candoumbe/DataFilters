@@ -143,5 +143,21 @@ using FsCheck.Fluent;
             actual.Should()
                   .Be(expected);
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_StartsWithExpression_When_right_operand_is_EndsWithExpression_Plus_operator_should_return_AndExpression(NonNull<StartsWithExpression> startsWithGen, NonNull<EndsWithExpression> endsWithGen)
+        {
+            // Arrange
+            StartsWithExpression startsWith = startsWithGen.Item;
+            EndsWithExpression endsWith = endsWithGen.Item;
+
+            AndExpression expected = new (startsWith, endsWith);
+
+            // Act
+            AndExpression actual = startsWith + endsWith;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
     }
 }

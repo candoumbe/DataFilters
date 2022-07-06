@@ -196,5 +196,27 @@
             actual.Should()
                   .Be(firstEqualsSecond && secondEqualsThird);
         }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_operands_Equal_operator_should_return_same_result_as_using_Equals(NonNull<DateTimeExpression> left, NonNull<DateTimeExpression> right)
+        {
+            // Act
+            bool actual = left.Item == right.Item;
+
+            // Assert
+            actual.Should()
+                  .Be(left.Item.Equals(right.Item));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_operands_NotEqual_operator_should_return_opposite_result_of_Equal_operator(NonNull<DateTimeExpression> left, NonNull<DateTimeExpression> right)
+        {
+            // Act
+            bool actual = left.Item != right.Item;
+
+            // Assert
+            actual.Should()
+                  .Be(!left.Item.Equals(right.Item));
+        }
     }
 }
