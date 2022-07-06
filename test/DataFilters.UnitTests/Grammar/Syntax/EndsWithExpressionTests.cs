@@ -167,6 +167,5 @@
             actual.Should()
                   .Be(expected);
         }
-
     }
 }
