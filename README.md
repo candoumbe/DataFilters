@@ -9,9 +9,12 @@
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
-## Disclaimer
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**. The public API SHOULD NOT be considered stable. 
+## **Disclaimer**
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**.
+
+The public API SHOULD NOT be considered stable. 
 
 
 **Table of contents**
@@ -22,6 +25,7 @@ Major version zero (0.y.z) is for initial development. **Anything MAY change at 
   - <a href='#ends-with-expression'>Ends with</a>
   - <a href='#contains-expression'>Contains</a>
   - <a href='#isempty-expression'>Is empty</a>
+  - <a href='#any-of-expression'>Any of</a>
   - <a href='#interval-expressions'>Interval expressions</a>
     - <a href='#gte-expression'>Greater than or equal</a>
     - <a href='#lte-expression'>Less than or equal</a>
@@ -186,7 +190,6 @@ IFilter filter = new Filter("nickname", Contains, "bat");
 💡 `contains` also work on arrays. `powers=*strength*` will search for `vigilante`s who have `strength` related powers.
 
 
-
 ## <a href='#' id='isempty-expression'>Is empty</a>
 
 Search for `vigilante` resources that have no powers.
@@ -195,6 +198,28 @@ Search for `vigilante` resources that have no powers.
 | ------------ | -------------------------------------- |
 | `powers=!*`  | `{ "field":"powers", "op":"isempty" }` |
 
+
+## <a href='#' id='any-of-expression'>Any of</a>
+
+Search for `vigilante` resources that have at least one of the specified powers.
+
+| Query string                     | JSON |
+| -------------------------------- | ---- |
+| `powers={strength\|speed\|size}` | N/A  |
+
+will result in a [IFilter][class-ifilter] instance equivalent to
+```csharp
+IFilter filter = new MultiFilter
+{
+     Logic = Or,
+     Filters = new IFilter[]
+     {
+         new Filter("powers", EqualTo, "strength"),
+         new Filter("powers", EqualTo, "speed"),
+         new Filter("powers", EqualTo, "size")
+     }
+};
+```
 ## <a href='#' id='interval-expressions'>Interval expressions</a>
 
 Interval expressions are delimited by upper and a lower bound. The generic syntax is
@@ -537,11 +562,11 @@ Some explanation on the controller's code above  :
 You may have noticed that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` property is not.
 This is to distinguish if the `Age` criterion was provided or not when calling the `vigilantes/search` endpoint.
 
-| Package                                                                                                                                                                             | Description |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)        | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
+| Package                                                                                                                                                             | Description                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)                                     | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
 | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
-| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)          | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)             | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
 
 
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs
