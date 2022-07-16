@@ -9,9 +9,12 @@
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
-## Disclaimer
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**. The public API SHOULD NOT be considered stable. 
+## **Disclaimer**
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**.
+
+The public API SHOULD NOT be considered stable. 
 
 
 **Table of contents**
@@ -22,6 +25,7 @@ Major version zero (0.y.z) is for initial development. **Anything MAY change at 
   - <a href='#ends-with-expression'>Ends with</a>
   - <a href='#contains-expression'>Contains</a>
   - <a href='#isempty-expression'>Is empty</a>
+  - <a href='#any-of-expression'>Any of</a>
   - <a href='#isnull-expression'>Is null</a>
   - <a href='#interval-expressions'>Interval expressions</a>
     - <a href='#gte-expression'>Greater than or equal</a>
@@ -183,6 +187,28 @@ Search for `vigilante` resources that have no powers.
 
 
 
+
+## <a href='#' id='any-of-expression'>Any of</a>
+
+Search for `vigilante` resources that have at least one of the specified powers.
+
+| Query string                     | JSON |
+| -------------------------------- | ---- |
+| `powers={strength\|speed\|size}` | N/A  |
+
+will result in a [IFilter][class-ifilter] instance equivalent to
+```csharp
+IFilter filter = new MultiFilter
+{
+     Logic = Or,
+     Filters = new IFilter[]
+     {
+         new Filter("powers", EqualTo, "strength"),
+         new Filter("powers", EqualTo, "speed"),
+         new Filter("powers", EqualTo, "size")
+     }
+};
+```
 ## <a href='#' id='interval-expressions'>Interval expressions</a>
 
 Interval expressions are delimited by upper and a lower bound. The generic syntax is
