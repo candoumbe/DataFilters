@@ -34,7 +34,7 @@ namespace DataFilters.ContinuousIntegration
 
     [GitHubActions(
         "integration",
-        GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.WindowsLatest,
         OnPushBranchesIgnore = new[] { MainBranchName },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(UnitTests), nameof(ReportCoverage), nameof(Pack) },
@@ -55,7 +55,7 @@ namespace DataFilters.ContinuousIntegration
     )]
     [GitHubActions(
         "delivery",
-        GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.WindowsLatest,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(UnitTests), nameof(Publish), nameof(AddGithubRelease) },
         EnableGitHubToken = true,
@@ -75,6 +75,7 @@ namespace DataFilters.ContinuousIntegration
             "LICENSE"
         }
     )]
+    
     [UnsetVisualStudioEnvironmentVariables]
     [DotNetVerbosityMapping]
     [HandleVisualStudioDebugging]
@@ -105,7 +106,7 @@ namespace DataFilters.ContinuousIntegration
 
         [Required] [Solution] public readonly Solution Solution;
         [Required] [GitRepository] public readonly GitRepository GitRepository;
-        public GitVersion GitVersion => From<IHaveGitVersion>().Versioning;
+        internal GitVersion GitVersion => From<IHaveGitVersion>().Versioning;
 
         [CI] public readonly AzurePipelines AzurePipelines;
         [CI] public readonly GitHubActions GitHubActions;
