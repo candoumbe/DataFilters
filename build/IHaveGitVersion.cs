@@ -9,6 +9,6 @@ namespace DataFilters.ContinuousIntegration
     {
         [GitVersion(Framework = "net5.0", NoFetch = true)]
         [Required]
-        GitVersion Versioning => TryGetValue(() => Versioning);
+        public GitVersion Versioning => TryGetValue(() => Versioning);
     }
 }
