@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### New features
 - Added new syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
 - Added `+` operator for combining `ConstantValueExpression` with `AsteriskExpression`
-- Added `+` operator for combining `StartWithExpreession` instance with `EndsWithExpression`
+- Added `+` operator for combining `StartsWithExpression` instance with `EndsWithExpression`
+- Added `+` operator for combining `StartsWithExpression` instance with `ContainsExpression`
+- Added `+` operator for combining `StartsWithExpression` instance with `StartsWithExpression`
+- Added `+` operator for combining `StartsWithExpression` instance with `StringValueExpression`
 - Added `|` operator for combining two `FilterExpression` instances into a `OrExpression`
 - Added `&` operator for combining two `FilterExpression` instances into a `AndExpression`
 
@@ -21,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `MultiSort<T>` to `MultiOrder<T>`
 - Renamed `SortValidator<T>` to `OrderValidator<T>`
 - Renamed `SortToQueries` class to `OrderExtensions` in `DataFilters.Queries`
-- Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
 - Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
 
 ## [0.11.0] / 2022-03-13

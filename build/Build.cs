@@ -106,7 +106,7 @@ namespace DataFilters.ContinuousIntegration
 
         [Required] [Solution] public readonly Solution Solution;
         [Required] [GitRepository] public readonly GitRepository GitRepository;
-        internal GitVersion GitVersion => From<IHaveGitVersion>().Versioning;
+        internal GitVersion GitVersion => From<IHaveGitVersion>().Versionning;
 
         [CI] public readonly AzurePipelines AzurePipelines;
         [CI] public readonly GitHubActions GitHubActions;
