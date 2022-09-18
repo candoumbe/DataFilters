@@ -11,13 +11,13 @@
     using Xunit;
     using Xunit.Categories;
 
-    using static DataFilters.SortDirection;
+    using static DataFilters.OrderDirection;
 
     [UnitTest]
     [Feature("Expressions")]
-    public class SortToOrderClauseTests
+    public class ToOrderClauseTests
     {
-        public static IEnumerable<object[]> SortToOrderClauseCases
+        public static IEnumerable<object[]> ToOrderClauseCases
         {
             get
             {
@@ -28,7 +28,7 @@
                         new Hero { Name = "Batman"},
                         new Hero { Name = "Flash"}
                     },
-                    new Sort<Hero>(nameof(Hero.Name)),
+                    new Order<Hero>(nameof(Hero.Name)),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
@@ -42,7 +42,7 @@
                         new Hero { Name = "Batman"},
                         new Hero { Name = "Flash"}
                     },
-                    new Sort<Hero>("name"),
+                    new Order<Hero>("name"),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
@@ -56,7 +56,7 @@
                         new Hero { Name = "Batman"},
                         new Hero { Name = "Flash"}
                     },
-                    new Sort<Hero>(" name"),
+                    new Order<Hero>(" name"),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
@@ -70,7 +70,7 @@
                         new Hero { Name = "Batman"},
                         new Hero { Name = "Flash"}
                     },
-                    new Sort<Hero>(nameof(Hero.Name), Descending),
+                    new Order<Hero>(nameof(Hero.Name), Descending),
 
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Flash"
@@ -86,10 +86,10 @@
                         new Hero { Name = "Wonder Woman", Age = 30},
                         new Hero { Name = "Flash", Age = 37}
                     },
-                    new MultiSort<Hero>
+                    new MultiOrder<Hero>
                     (
-                        new Sort<Hero>(nameof(Hero.Age), Ascending),
-                        new Sort<Hero>(nameof(Hero.Name), Descending)
+                        new Order<Hero>(nameof(Hero.Age), Ascending),
+                        new Order<Hero>(nameof(Hero.Name), Descending)
                     ),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
                                                                           && heroes.First().Name == "Batman"
@@ -105,10 +105,10 @@
                         new Hero { Name = "Wonder Woman", Age = 30},
                         new Hero { Name = "Flash", Age = 37}
                     },
-                    new MultiSort<Hero>
+                    new MultiOrder<Hero>
                     (
-                        new Sort<Hero>(nameof(Hero.Name), Descending),
-                        new Sort<Hero>(nameof(Hero.Age), Ascending)
+                        new Order<Hero>(nameof(Hero.Name), Descending),
+                        new Order<Hero>(nameof(Hero.Age), Ascending)
                     ),
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
                                                                           && heroes.First().Name == "Wonder Woman"
@@ -123,7 +123,7 @@
                         new Hero { Name = "Batman", FirstAppearance = 1.May(1939)},
                         new Hero { Name = "Flash" , FirstAppearance = 1.May(1940)}
                     },
-                    new Sort<Hero>(nameof(Hero.FirstAppearance), Descending),
+                    new Order<Hero>(nameof(Hero.FirstAppearance), Descending),
 
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
                                                                           && heroes.First().Name == "Flash"
@@ -154,9 +154,9 @@
                             Acolyte = new Hero { Name = "Red Arrow", Age = 14 }
                         }
                     },
-                    new MultiSort<Hero>(
-                        new Sort<Hero>(nameof(Hero.FirstAppearance), Descending),
-                        new Sort<Hero>($"{nameof(Hero.Acolyte)}.{nameof(Hero.Age)}", Ascending)
+                    new MultiOrder<Hero>(
+                        new Order<Hero>(nameof(Hero.FirstAppearance), Descending),
+                        new Order<Hero>($"{nameof(Hero.Acolyte)}.{nameof(Hero.Age)}", Ascending)
                     ),
 
                     (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Select(x => x.Name).SequenceEqual(new []{ "Green Arrow", "Flash", "Batman"}))
@@ -165,8 +165,8 @@
         }
 
         [Theory]
-        [MemberData(nameof(SortToOrderClauseCases))]
-        public void SortToOrderTests(IEnumerable<Hero> heroes, ISort<Hero> order, Expression<Func<IEnumerable<Hero>, bool>> expectation)
+        [MemberData(nameof(ToOrderClauseCases))]
+        public void ToOrderTests(IEnumerable<Hero> heroes, IOrder<Hero> order, Expression<Func<IEnumerable<Hero>, bool>> expectation)
         {
             // Act
             IEnumerable<Hero> actual = heroes.AsQueryable()

@@ -24,7 +24,7 @@
                 yield return new object[]
                 {
                     null,
-                    new Sort<Hero>(nameof(Hero.Name))
+                    new Order<Hero>(nameof(Hero.Name))
                 };
 
                 yield return new object[]
@@ -37,7 +37,7 @@
 
         [Theory]
         [MemberData(nameof(ThrowsArgumentNullExceptionCases))]
-        public void Should_Throws_ArgumentNullException_When_Parameter_IsNull(IQueryable<Hero> heroes, ISort<Hero> orderBy)
+        public void Should_Throws_ArgumentNullException_When_Parameter_IsNull(IQueryable<Hero> heroes, IOrder<Hero> orderBy)
         {
             _outputHelper.WriteLine($"{nameof(heroes)} is null : {heroes == null}");
             _outputHelper.WriteLine($"{nameof(orderBy)} is null : {orderBy == null}");
