@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache .nuke/temp, ~/.nuget/packages
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: |
             .nuke/temp

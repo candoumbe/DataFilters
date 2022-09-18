@@ -11,7 +11,7 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    using static DataFilters.SortDirection;
+    using static DataFilters.OrderDirection;
 
     public class StringExtensionsTests
     {
@@ -46,7 +46,7 @@
 
             // Assert
             action.Should()
-                .ThrowExactly<InvalidSortExpressionException>(reason)
+                .ThrowExactly<InvalidOrderExpressionException>(reason)
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null");
         }
 
@@ -57,25 +57,25 @@
                 yield return new object[]
                 {
                     nameof(SuperHero.Nickname),
-                    new Sort<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
+                    new Order<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
                 };
                 yield return new object[]
                 {
                     $"+{nameof(SuperHero.Nickname)}",
-                    new Sort<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
+                    new Order<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
                 };
 
                 yield return new object[]
                 {
                     $"-{nameof(SuperHero.Nickname)}",
-                    new Sort<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Descending)
+                    new Order<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Descending)
                 };
 
                 {
-                    MultiSort<SuperHero> multiSort = new
+                    MultiOrder<SuperHero> multiSort = new
                     (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Age))
+                        new Order<SuperHero>(expression: nameof(SuperHero.Nickname)),
+                        new Order<SuperHero>(expression: nameof(SuperHero.Age))
                     );
 
                     yield return new object[]
@@ -85,10 +85,10 @@
                     };
                 }
                 {
-                    MultiSort<SuperHero> multiSort = new
+                    MultiOrder<SuperHero> multiSort = new
                     (
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Nickname)),
-                        new Sort<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
+                        new Order<SuperHero>(expression: nameof(SuperHero.Nickname)),
+                        new Order<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
                     yield return new object[]
@@ -102,12 +102,12 @@
 
         [Theory]
         [MemberData(nameof(ToSortCases))]
-        public void ToSortTests(string sort, ISort<SuperHero> expected)
+        public void ToSortTests(string sort, IOrder<SuperHero> expected)
         {
             _outputHelper.WriteLine($"{nameof(sort)} : '{sort}'");
 
             // Act
-            ISort<SuperHero> actual = sort.ToSort<SuperHero>();
+            IOrder<SuperHero> actual = sort.ToSort<SuperHero>();
 
             _outputHelper.WriteLine($"actual sort : '{actual}'");
 
@@ -124,52 +124,52 @@
                 {
                     "-SnakeCaseProperty",
                     PropertyNameResolutionStrategy.SnakeCase,
-                    new Sort<Model>("snake_case_property", Descending)
+                    new Order<Model>("snake_case_property", Descending)
                 };
 
                 yield return new object[]
                 {
                     "SnakeCaseProperty",
                     PropertyNameResolutionStrategy.SnakeCase,
-                    new Sort<Model>("snake_case_property", Ascending)
+                    new Order<Model>("snake_case_property", Ascending)
                 };
 
                 yield return new object[]
                 {
                     "-SnakeCaseProperty",
                     PropertyNameResolutionStrategy.SnakeCase,
-                    new Sort<Model>("snake_case_property", Descending)
+                    new Order<Model>("snake_case_property", Descending)
                 };
 
                 yield return new object[]
                 {
                     "pascal_case_property",
                     PropertyNameResolutionStrategy.PascalCase,
-                    new Sort<Model>("PascalCaseProperty", Ascending)
+                    new Order<Model>("PascalCaseProperty", Ascending)
                 };
 
                 yield return new object[]
                 {
                     "+pascal_case_property",
                     PropertyNameResolutionStrategy.PascalCase,
-                    new Sort<Model>("PascalCaseProperty", Ascending)
+                    new Order<Model>("PascalCaseProperty", Ascending)
                 };
 
                 yield return new object[]
                 {
                     "-pascal_case_property",
                     PropertyNameResolutionStrategy.PascalCase,
-                    new Sort<Model>("PascalCaseProperty", Descending)
+                    new Order<Model>("PascalCaseProperty", Descending)
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(ToSortWithPropertyNameResolutionStrategyCases))]
-        public void Given_input_and_PropertyNameResolutionStrategy_ToSort_should_return_appropriate_ISort_instance(string sort, PropertyNameResolutionStrategy propertyNameResolutionStrategy, ISort<Model> expected)
+        public void Given_input_and_PropertyNameResolutionStrategy_ToSort_should_return_appropriate_ISort_instance(string sort, PropertyNameResolutionStrategy propertyNameResolutionStrategy, IOrder<Model> expected)
         {
             // Act
-            ISort<Model> actual = sort.ToSort<Model>(propertyNameResolutionStrategy);
+            IOrder<Model> actual = sort.ToOrder<Model>(propertyNameResolutionStrategy);
 
             // Assert
             actual.Should()

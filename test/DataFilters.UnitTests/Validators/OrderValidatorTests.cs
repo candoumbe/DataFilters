@@ -6,11 +6,11 @@
 
     using Xunit;
 
-    public class SortValidatorTests
+    public class OrderValidatorTests
     {
-        private readonly SortValidator _sut;
+        private readonly OrderValidator _sut;
 
-        public SortValidatorTests() => _sut = new SortValidator();
+        public OrderValidatorTests() => _sut = new OrderValidator();
 
         [Theory]
         [InlineData("prop", true, "'prop' is a valid sort expression")]
