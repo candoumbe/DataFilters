@@ -79,7 +79,7 @@ namespace DataFilters.ContinuousIntegration
     [UnsetVisualStudioEnvironmentVariables]
     [DotNetVerbosityMapping]
     [HandleVisualStudioDebugging]
-    public partial class Build : NukeBuild, IHaveGitVersion
+    public class Build : NukeBuild, IHaveGitVersion
     {
         public static int Main() => Execute<Build>(x => x.Compile);
 
