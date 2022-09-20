@@ -35,6 +35,7 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions(
         "integration",
         GitHubActionsImage.WindowsLatest,
+        FetchDepth = 0,
         OnPushBranchesIgnore = new[] { MainBranchName },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(UnitTests), nameof(ReportCoverage), nameof(Pack) },
@@ -56,6 +57,7 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions(
         "delivery",
         GitHubActionsImage.WindowsLatest,
+        FetchDepth = 0,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(UnitTests), nameof(Publish), nameof(AddGithubRelease) },
         EnableGitHubToken = true,
@@ -75,7 +77,7 @@ namespace DataFilters.ContinuousIntegration
             "LICENSE"
         }
     )]
-    
+
     [UnsetVisualStudioEnvironmentVariables]
     [DotNetVerbosityMapping]
     [HandleVisualStudioDebugging]
