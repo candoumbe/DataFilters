@@ -7,7 +7,7 @@ namespace DataFilters.ContinuousIntegration
     [PublicAPI]
     public interface IHaveGitVersion : INukeBuild
     {
-        [GitVersion(Framework = "net5.0", NoFetch = true)]
+        [GitVersion(Framework = "net6.0", NoFetch = true)]
         [Required]
         public GitVersion Versionning => TryGetValue(() => Versionning);
     }
