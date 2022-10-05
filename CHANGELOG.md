@@ -7,14 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### New features
-- Added new syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
-- Added `+` operator for combining `ConstantValueExpression` with `AsteriskExpression`
-- Added `+` operator for combining `StartsWithExpression` instance with `EndsWithExpression`
-- Added `+` operator for combining `StartsWithExpression` instance with `ContainsExpression`
-- Added `+` operator for combining `StartsWithExpression` instance with `StartsWithExpression`
-- Added `+` operator for combining `StartsWithExpression` instance with `StringValueExpression`
-- Added `|` operator for combining two `FilterExpression` instances into a `OrExpression`
-- Added `&` operator for combining two `FilterExpression` instances into a `AndExpression`
+- Added syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
+- Added `+` operator to combine `ConstantValueExpression` with `AsteriskExpression`
+- Added `+` operator to combine `StartsWithExpression` with `EndsWithExpression`
+- Added `+` operator to combine `StartsWithExpression` with `ContainsExpression`
+- Added `+` operator to combine `StartsWithExpression` with `StartsWithExpression`
+- Added `+` operator to combine `StartsWithExpression` with `StringValueExpression` 
+- Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
+- Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
 ### Breaking changes
 - `AsteriskExpression` default constructor private
