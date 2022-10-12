@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
 ### Breaking changes
-- `AsteriskExpression` default constructor private
+- `AsteriskExpression` default constructor is now private
 - Dropped filter service
 - Renamed `ISort<T>` to `IOrder<T>`
 - Renamed `Sort<T>` to `Order<T>`
@@ -129,7 +129,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/candoumbe/DataFilters/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/candoumbe/DataFilters/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/candoumbe/DataFilters/compare/0.10.0...0.10.1

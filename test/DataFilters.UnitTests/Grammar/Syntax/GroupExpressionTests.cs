@@ -187,12 +187,21 @@
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void IsEquivalent_should_be_symetric(GroupExpression group, NonNull<FilterExpression> other)
-            => group.IsEquivalentTo(other.Item).Should().Be(other.Item.IsEquivalentTo(group));
+        {
+            _outputHelper.WriteLine($"Group : {group}");
+            _outputHelper.WriteLine($"Other : {other}");
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+            group.IsEquivalentTo(other.Item).Should().Be(other.Item.IsEquivalentTo(group));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }/*, Replay = "(1500570200792655435,5263687413201141279)"*/)]
         public void IsEquivalent_should_be_transitive(GroupExpression group, NonNull<FilterExpression> other, NonNull<FilterExpression> third)
         {
             // Arrange
+            _outputHelper.WriteLine($"Group : {group}");
+            _outputHelper.WriteLine($"Other : {other.Item.EscapedParseableString}");
+            _outputHelper.WriteLine($"Third : {third.Item.EscapedParseableString}");
+
             bool first = group.IsEquivalentTo(other.Item);
             bool second = other.Item.IsEquivalentTo(third.Item);
 
@@ -200,13 +209,10 @@
             bool actual = group.IsEquivalentTo(third.Item);
 
             // Assert
-            _ = (first, second) switch
+            if (first && second)
             {
-                (true, true) => actual.Should().BeTrue(),
-                (true, false) => actual.Should().BeFalse(),
-                (false, true) => actual.Should().BeFalse(),
-                (false, false) => actual.Should().BeFalse()
-            };
+                actual.Should().BeTrue();
+            }
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
