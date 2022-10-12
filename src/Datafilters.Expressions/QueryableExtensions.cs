@@ -16,27 +16,28 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entries"></param>
-        /// <param name="orderBy">List of <see cref="OrderClause{T}"/></param>
+        /// <param name="orderBy">List of <see cref="OrderExpression{T}"/></param>
         /// <returns><see cref="IOrderedQueryable{T}"/></returns>
         /// <exception cref="ArgumentNullException">if either <paramref name="entries"/> or <paramref name="orderBy"/> is <c>null</c></exception>
-        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> entries, in ISort<T> orderBy)
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> entries, in IOrder<T> orderBy)
         {
             if (entries is null)
             {
                 throw new ArgumentNullException(nameof(entries));
             }
+
             if (orderBy is null)
             {
                 throw new ArgumentNullException(nameof(orderBy));
             }
 
-            IEnumerable<OrderClause<T>> orders = orderBy.ToOrderClause();
-            OrderClause<T> first = orders.First();
+            IEnumerable<OrderExpression<T>> orders = orderBy.ToOrderClause();
+            OrderExpression<T> first = orders.First();
 
             Expression sortExpression = Expression.Call(typeof(Queryable),
                                                         first.Direction switch
                                                         {
-                                                            SortDirection.Ascending => nameof(Queryable.OrderBy),
+                                                            OrderDirection.Ascending => nameof(Queryable.OrderBy),
                                                             _ => nameof(Queryable.OrderByDescending)
                                                         },
                                                         new Type[] { entries.ElementType, first.Expression.ReturnType },
@@ -47,7 +48,7 @@
                 sortExpression = Expression.Call(typeof(Queryable),
                                                 order.Direction switch
                                                 {
-                                                    SortDirection.Ascending => nameof(Queryable.ThenBy),
+                                                    OrderDirection.Ascending => nameof(Queryable.ThenBy),
                                                     _ => nameof(Queryable.ThenByDescending)
                                                 },
                                                 new Type[] { entries.ElementType, order.Expression.ReturnType },

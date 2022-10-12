@@ -131,31 +131,23 @@ using System.Collections.Generic;
                   .Be(expected);
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new TimeExpression(),
-                    new DateTimeExpression(new TimeExpression()),
-                    true,
-                    $"The other object is a ${nameof(DateTimeExpression)} with {nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
-                };
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void Equals_should_work_as_expected(TimeExpression dateTime, object obj, bool expected, string reason)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void IsEquivalent_should_be_commutative(NonNull<TimeExpression> first, FilterExpression second)
         {
             // Act
-            bool actual = dateTime.Equals(obj);
+            bool actual = first.Item.IsEquivalentTo(second);
+            bool expected = second.IsEquivalentTo(first.Item);
 
             // Assert
-            actual.Should()
-                  .Be(expected, reason);
+            actual.Should().Be(expected);
         }
 
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void IsEquivalentTo_should_be_reflexive(NonNull<TimeExpression> expression)
+            => expression.Item.IsEquivalentTo(expression.Item).Should().BeTrue();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void IsEquivalentTo_should_be_symetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.IsEquivalentTo(otherExpression.Item).Should().Be(otherExpression.Item.IsEquivalentTo(expression.Item));
     }
 }

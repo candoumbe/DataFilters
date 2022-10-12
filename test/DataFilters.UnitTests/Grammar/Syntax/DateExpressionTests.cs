@@ -77,7 +77,41 @@
             => expression.Item.Equals(expression.Item).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        public void Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property IsEquivalent_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
+            => (first.Item.IsEquivalentTo(second) == second.IsEquivalentTo(first.Item)).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public Property IsEquivalentTo_should_be_reflexive(NonNull<DateExpression> expression)
+            => expression.Item.IsEquivalentTo(expression.Item).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void IsEquivalentTo_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.IsEquivalentTo(otherExpression.Item).Should().Be(otherExpression.Item.IsEquivalentTo(expression.Item));
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_operands_Equal_operator_should_return_same_result_as_using_Equals(NonNull<DateExpression> left, NonNull<DateExpression> right)
+            => (left.Item == right.Item).Should().Be(left.Item.Equals(right.Item));
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_operands_NotEquals_operator_should_return_opposite_result_of_Equals(NonNull<DateExpression> left, NonNull<DateExpression> right)
+            => (left.Item != right.Item).Should().Be(!left.Item.Equals(right.Item));
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_years_month_and_days_When_either_years_or_months_or_days_is_less_than_1_Then_constructor_should_throw_ArgumentOutOfRangeException(int years, int months, int days)
+        {
+            // Act
+            Action invokingConstructor = () => new DateExpression(years, months, days);
+
+            // Assert
+            object _ = (years, months, days) switch
+            {
+                (int y, int m, int d) when y < 1 || m < 1 || d < 1 => invokingConstructor.Should().Throw<ArgumentOutOfRangeException>("because years, months and days must be greater than or equal to 1"),
+                _ => invokingConstructor.Should().NotThrow("because years, months and days are greater than or equal to 1")
+            };
+        }
     }
 }

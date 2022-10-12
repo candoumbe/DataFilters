@@ -18,7 +18,7 @@
     <When Condition="'$(TargetFramework)' == 'net6.0'">
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-        <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="1.0.2" />
+        <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="1.0.3" />
       </ItemGroup>
     </When>
     <When Condition="'$(TargetFramework)' == 'net5.0'">
@@ -34,7 +34,7 @@
   </Choose>
 
   <ItemGroup>
-    <PackageReference Include="OneOf.Extended" Version="3.0.216" />
+    <PackageReference Include="OneOf.Extended" Version="3.0.223" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)'=='netstandard1.3'">

@@ -24,7 +24,7 @@
     using Microsoft.Extensions.Primitives;
 #endif
 
-    using static DataFilters.SortDirection;
+    using static DataFilters.OrderDirection;
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
     using System.Runtime.InteropServices;
@@ -46,35 +46,35 @@
 #endif
 
         /// <summary>
-        /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance.
+        /// Converts <paramref name="sortString"/> to a <see cref="IOrder{T}"/> instance.
         /// </summary>
-        /// <typeparam name="T">Type of the element to which the <see cref="ISort{T}"/> will be generated from</typeparam>
+        /// <typeparam name="T">Type of the element to which the <see cref="IOrder{T}"/> will be generated from</typeparam>
         /// <param name="sortString"></param>
         /// <exception cref="ArgumentOutOfRangeException">when <paramref name="sortString"/> is <c>null</c> or whitespace</exception>
-        /// <exception cref="InvalidSortExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
-        public static ISort<T> ToSort<T>(this string sortString) => sortString.ToSort<T>(PropertyNameResolutionStrategy.Default);
+        /// <exception cref="InvalidOrderExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
+        public static IOrder<T> ToSort<T>(this string sortString) => sortString.ToOrder<T>(PropertyNameResolutionStrategy.Default);
 
         /// <summary>
-        /// Converts <paramref name="sortString"/> to a <see cref="ISort{T}"/> instance.
+        /// Converts <paramref name="sortString"/> to a <see cref="IOrder{T}"/> instance.
         /// </summary>
-        /// <typeparam name="T">Type of the element to which the <see cref="ISort{T}"/> will be generated from</typeparam>
+        /// <typeparam name="T">Type of the element to which the <see cref="IOrder{T}"/> will be generated from</typeparam>
         /// <param name="sortString"></param>
         /// <param name="propertyNameResolutionStrategy">The transformation to apply to each property name.</param>
         /// <exception cref="ArgumentOutOfRangeException">when <paramref name="sortString"/> is <c>null</c> or whitespace</exception>
-        /// <exception cref="InvalidSortExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
-        public static ISort<T> ToSort<T>(this string sortString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
+        /// <exception cref="InvalidOrderExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
+        public static IOrder<T> ToOrder<T>(this string sortString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         {
             if (string.IsNullOrWhiteSpace(sortString) || sortString?.Length == 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(sortString), "cannot be be null or whitespace only");
             }
 
-            SortValidator validator = new();
+            OrderValidator validator = new();
             ValidationResult validationResult = validator.Validate(sortString);
 
             if (!validationResult.IsValid)
             {
-                throw new InvalidSortExpressionException(sortString);
+                throw new InvalidOrderExpressionException(sortString);
             }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
@@ -85,37 +85,37 @@
             string[] sorts = sortString.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries);
 
 #endif
-            ISort<T> sort = null;
+            IOrder<T> sort = null;
 
             if (sorts.Length > 1)
             {
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
-                sort = new MultiSort<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
+                sort = new MultiOrder<T>(MemoryMarshal.ToEnumerable(sorts).Select(s => s.ToOrder<T>(propertyNameResolutionStrategy) as Order<T>).ToArray());
 #else
-                sort = new MultiSort<T>(sorts.Select(s => s.ToSort<T>(propertyNameResolutionStrategy) as Sort<T>).ToArray());
+                sort = new MultiOrder<T>(sorts.Select(s => s.ToOrder<T>(propertyNameResolutionStrategy) as Order<T>).ToArray());
 #endif
             }
             else if (sortString.StartsWith("+"))
             {
 #if NETSTANDARD1_3 || NETSTANDARD2_0
-                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)));
+                sort = new Order<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)));
 #else
-                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]));
+                sort = new Order<T>(propertyNameResolutionStrategy.Handle(sortString[1..]));
 #endif
             }
             else if (sortString.StartsWith("-"))
             {
 #if NETSTANDARD1_3 || NETSTANDARD2_0
-                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)),
+                sort = new Order<T>(propertyNameResolutionStrategy.Handle(sortString.Substring(1)),
                            direction: Descending);
 #else
-                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString[1..]),
+                sort = new Order<T>(propertyNameResolutionStrategy.Handle(sortString[1..]),
                            direction: Descending);
 #endif
             }
             else
             {
-                sort = new Sort<T>(propertyNameResolutionStrategy.Handle(sortString));
+                sort = new Order<T>(propertyNameResolutionStrategy.Handle(sortString));
             }
 
             return sort;

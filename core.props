@@ -40,7 +40,7 @@
   <Choose>
     <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="10.3.6" />
+        <PackageReference Include="FluentValidation" Version="10.4.0" />
         <PackageReference Include="Ultimately" Version="2.1.1" />
       </ItemGroup>
     </When>
@@ -52,14 +52,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.8.0"/>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.0.2">
+    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.8.2"/>
+    <PackageReference Include="Roslynator.Analyzers" Version="4.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
-    <PackageReference Include="Ardalis.GuardClauses" Version="4.0.0" />
+    <PackageReference Include="Ardalis.GuardClauses" Version="4.0.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(MSBuildProjectName)' != '_build'">
       <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

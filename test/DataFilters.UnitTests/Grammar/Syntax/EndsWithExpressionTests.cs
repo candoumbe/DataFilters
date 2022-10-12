@@ -154,5 +154,18 @@
         public Property Equals_should_be_symetric(NonNull<EndsWithExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_EndsWithExpression_When_adding_AsteriskExpression_should_returns_ContainsExpression(NonNull<EndsWithExpression> endsWith)
+        {
+            // Arrange
+            ContainsExpression expected = new(endsWith.Item.Value);
+
+            // Act
+            ContainsExpression actual = endsWith.Item + AsteriskExpression.Instance;
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

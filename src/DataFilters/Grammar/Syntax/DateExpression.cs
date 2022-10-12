@@ -56,19 +56,22 @@
         /// <inheritdoc />
         public bool Equals(DateExpression other) => (Year, Month, Day) == (other?.Year, other?.Month, other?.Day);
 
+        /// <inheritdoc/>
+        public override bool Equals(object obj) => Equals(obj as DateExpression);
+
         /// <inheritdoc />
-        public override bool Equals(object obj) => obj switch
+        public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
             DateExpression date => Equals(date),
             DateTimeExpression { Date : var date, Time : null, Offset: null } => Equals(date),
-            _ => false
+            _ => Equals((other as ISimplifiable)?.Simplify() ?? other)
         };
 
         /// <inheritdoc />
         public override int GetHashCode() => (Year, Month, Day).GetHashCode();
 
         /// <inheritdoc />
-        public override string EscapedParseableString => $"{Year:D2}-{Month:D2}-{Day:D2}";
+        public override string EscapedParseableString => $"{Year:D4}-{Month:D2}-{Day:D2}";
 
         /// <inheritdoc />
         public static bool operator ==(DateExpression left, DateExpression right) => left switch

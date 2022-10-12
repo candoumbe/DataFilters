@@ -4,14 +4,14 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
     <PackageReference Include="xunit.categories" Version="2.0.6" />
-    <PackageReference Include="FluentAssertions" Version="6.5.1" />
+    <PackageReference Include="FluentAssertions" Version="6.7.0" />
     <PackageReference Include="FsCheck.XUnit" Version="3.0.0-beta2"/>
     <PackageReference Include="coverlet.msbuild" Version="3.1.2" />
-    <PackageReference Include="Moq" Version="4.17.2"/>
+    <PackageReference Include="Moq" Version="4.18.2"/>
     <PackageReference Include="NodaTime.Bogus" Version="3.0.1" />
   </ItemGroup>
 </Project>

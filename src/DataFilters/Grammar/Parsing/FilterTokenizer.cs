@@ -49,6 +49,16 @@
         public const char LeftSquareBracket = '[';
 
         /// <summary>
+        /// The <c>{</c> character
+        /// </summary>
+        public const char LeftCurlyBracket = '{';
+
+        /// <summary>
+        /// The <c>}</c> character
+        /// </summary>
+        public const char RightCurlyBracket = '}';
+
+        /// <summary>
         /// The <c>]</c> character
         /// </summary>
         public const char RightSquareBracket = ']';
@@ -104,6 +114,8 @@
             Bang,
             DoubleQuote,
             Ampersand,
+            RightCurlyBracket,
+            LeftCurlyBracket,
             ':',
             '-',
             '.',
@@ -133,6 +145,7 @@
                         yield return Result.Value(Letter, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
+
                     case char c when char.IsDigit(c):
                         yield return Result.Value(Digit, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -167,7 +180,19 @@
                                                   next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '!':
+                    case LeftCurlyBracket:
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => LeftBrace, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case RightCurlyBracket:
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => RightBrace, _ => Escaped },
+                                                  next.Location,
+                                                  next.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                        break;
+                    case Bang:
                         yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Bang, _ => Escaped },
                                                   next.Location,
                                                   next.Remainder);
@@ -215,7 +240,7 @@
                                                   next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case '&':
+                    case Ampersand:
                         yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Ampersand, _ => Escaped },
                                                   next.Location,
                                                   next.Remainder);

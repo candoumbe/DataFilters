@@ -48,5 +48,13 @@
         ///<inheritdoc/>
         public static bool operator !=(ConstantValueExpression left, ConstantValueExpression right)
             => !(left == right);
+
+        /// <summary>
+        /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => left + AsteriskExpression.Instance + new EndsWithExpression(right.Value);
     }
 }

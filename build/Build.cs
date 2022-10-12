@@ -25,7 +25,7 @@ namespace DataFilters.ContinuousIntegration
     using static Nuke.Common.ChangeLog.ChangelogTasks;
     using static Nuke.Common.IO.FileSystemTasks;
     using static Nuke.Common.IO.PathConstruction;
-    using static Nuke.Common.Logger;
+    using static Serilog.Log;
     using static Nuke.Common.Tools.DotNet.DotNetTasks;
     using static Nuke.Common.Tools.Git.GitTasks;
     using static Nuke.Common.Tools.GitVersion.GitVersionTasks;
@@ -34,7 +34,8 @@ namespace DataFilters.ContinuousIntegration
 
     [GitHubActions(
         "integration",
-        GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.WindowsLatest,
+        FetchDepth = 0,
         OnPushBranchesIgnore = new[] { MainBranchName },
         PublishArtifacts = true,
         InvokedTargets = new[] { nameof(UnitTests), nameof(ReportCoverage), nameof(Pack) },
@@ -55,10 +56,11 @@ namespace DataFilters.ContinuousIntegration
     )]
     [GitHubActions(
         "delivery",
-        GitHubActionsImage.MacOsLatest,
+        GitHubActionsImage.WindowsLatest,
+        FetchDepth = 0,
         OnPushBranches = new[] { MainBranchName, ReleaseBranchPrefix + "/*" },
         InvokedTargets = new[] { nameof(UnitTests), nameof(Publish), nameof(AddGithubRelease) },
-        ImportGitHubTokenAs = nameof(GitHubToken),
+        EnableGitHubToken = true,
         CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
         PublishArtifacts = true,
         ImportSecrets = new[]
@@ -75,10 +77,11 @@ namespace DataFilters.ContinuousIntegration
             "LICENSE"
         }
     )]
+
     [UnsetVisualStudioEnvironmentVariables]
     [DotNetVerbosityMapping]
     [HandleVisualStudioDebugging]
-    public class Build : NukeBuild
+    public class Build : NukeBuild, IHaveGitVersion
     {
         public static int Main() => Execute<Build>(x => x.Compile);
 
@@ -105,7 +108,7 @@ namespace DataFilters.ContinuousIntegration
 
         [Required] [Solution] public readonly Solution Solution;
         [Required] [GitRepository] public readonly GitRepository GitRepository;
-        [Required] [GitVersion(Framework = "net5.0")] public readonly GitVersion GitVersion;
+        internal GitVersion GitVersion => From<IHaveGitVersion>().Versionning;
 
         [CI] public readonly AzurePipelines AzurePipelines;
         [CI] public readonly GitHubActions GitHubActions;
@@ -215,7 +218,7 @@ namespace DataFilters.ContinuousIntegration
         {
             IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
 
-            Info($"Running mutation tests for {projects.Count()} project(s)");
+            Information($"Running mutation tests for {projects.Count()} project(s)");
 
             Arguments args = new();
             args.Add("--open-report:html", IsLocalBuild);
@@ -223,7 +226,7 @@ namespace DataFilters.ContinuousIntegration
 
             projects.ForEach(csproj =>
             {
-                Info($"Running tests for '{csproj.Name}' (directory : '{csproj.Path.Parent}') ");
+                Information($"Running tests for '{csproj.Name}' (directory : '{csproj.Path.Parent}') ");
                 DotNet($"stryker {args.RenderForExecution()}", workingDirectory: csproj.Path.Parent);
             });
         });
@@ -239,7 +242,7 @@ namespace DataFilters.ContinuousIntegration
                 IEnumerable<Project> projects = Solution.GetProjects("*.UnitTests");
                 IEnumerable<Project> testsProjects = TestPartition.GetCurrent(projects);
 
-                testsProjects.ForEach(project => Info(project));
+                testsProjects.ForEach(project => Information(project));
 
                 DotNetTest(s => s
                     .SetConfiguration(Configuration)
@@ -312,7 +315,7 @@ namespace DataFilters.ContinuousIntegration
                 IEnumerable<AbsolutePath> csprojs = SourceDirectory.GlobFiles("**/*.csproj");
 
                 int packageCount = csprojs.Count();
-                Info($"Packaging {packageCount} package{packageCount switch { <= 1 => string.Empty, _ => 's' }}");
+                Information($"Packaging {packageCount} package{packageCount switch { <= 1 => string.Empty, _ => 's' }}");
 
                 DotNetPack(s => s
                     .EnableIncludeSource()
@@ -344,7 +347,7 @@ namespace DataFilters.ContinuousIntegration
             .Executes(() =>
             {
                 FinalizeChangelog(ChangeLogFile, GitVersion.MajorMinorPatch, GitRepository);
-                Info($"Please review CHANGELOG.md ({ChangeLogFile}) and press 'Y' to validate (any other key will cancel changes)...");
+                Information($"Please review CHANGELOG.md ({ChangeLogFile}) and press 'Y' to validate (any other key will cancel changes)...");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
 
                 if (keyInfo.Key == ConsoleKey.Y)
@@ -362,11 +365,9 @@ namespace DataFilters.ContinuousIntegration
             {
                 if (!GitRepository.IsOnFeatureBranch())
                 {
-                    Info("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
+                    Information("Enter the name of the feature. It will be used as the name of the feature/branch (leave empty to exit) :");
                     AskBranchNameAndSwitchToIt(FeatureBranchPrefix, DevelopBranch);
-#pragma warning restore S2583 // Conditionally executed code should be reachable
-
-                    Info($"{EnvironmentInfo.NewLine}Good bye !");
+                    Information($"{EnvironmentInfo.NewLine}Good bye !");
                 }
                 else
                 {
@@ -393,33 +394,31 @@ namespace DataFilters.ContinuousIntegration
                     case string name when !string.IsNullOrWhiteSpace(name):
                         {
                             string branchName = $"{branchNamePrefix}/{featureName.Slugify()}";
-                            Info($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
+                            Information($"{Environment.NewLine}The branch '{branchName}' will be created.{Environment.NewLine}Confirm ? (Y/N) ");
 
                             switch (Console.ReadKey().Key)
                             {
                                 case ConsoleKey.Y:
-                                    Info($"{Environment.NewLine}Checking out branch '{branchName}' from '{sourceBranch}'");
+                                    Information($"{Environment.NewLine}Checking out branch '{branchName}' from '{sourceBranch}'");
 
                                     Checkout(branchName, start: sourceBranch);
 
-                                    Info($"{Environment.NewLine}'{branchName}' created successfully");
+                                    Information($"{Environment.NewLine}'{branchName}' created successfully");
                                     exitCreatingFeature = true;
                                     break;
 
                                 default:
-                                    Info($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
+                                    Information($"{Environment.NewLine}Exiting {nameof(Feature)} task.");
                                     exitCreatingFeature = true;
                                     break;
                             }
                         }
                         break;
                     default:
-                        Info($"Exiting task.");
+                        Information($"Exiting task.");
                         exitCreatingFeature = true;
                         break;
                 }
-
-#pragma warning disable S2583 // Conditionally executed code should be reachable
             } while (string.IsNullOrWhiteSpace(featureName) && !exitCreatingFeature);
         }
 
@@ -469,10 +468,9 @@ namespace DataFilters.ContinuousIntegration
             {
                 if (!GitRepository.Branch.Like($"{ColdfixBranchPrefix}/*"))
                 {
-                    Info("Enter the name of the coldfix. It will be used as the name of the coldfix/branch (leave empty to exit) :");
+                    Information("Enter the name of the coldfix. It will be used as the name of the coldfix/branch (leave empty to exit) :");
                     AskBranchNameAndSwitchToIt(ColdfixBranchPrefix, DevelopBranch);
-#pragma warning restore S2583 // Conditionally executed code should be reachable
-                    Info($"{EnvironmentInfo.NewLine}Good bye !");
+                    Information($"{EnvironmentInfo.NewLine}Good bye !");
                 }
                 else
                 {
@@ -540,7 +538,7 @@ namespace DataFilters.ContinuousIntegration
         [Parameter(@"URI where packages should be published (default : ""https://api.nuget.org/v3/index.json""")]
         public string NugetPackageSource => "https://api.nuget.org/v3/index.json";
 
-        public string GitHubPackageSource => $"https://nuget.pkg.github.com/{GitHubActions.GitHubRepositoryOwner}/index.json";
+        public string GitHubPackageSource => $"https://nuget.pkg.github.com/{GitHubActions.RepositoryOwner}/index.json";
 
         public bool IsOnGithub => GitHubActions is not null;
 
@@ -559,14 +557,13 @@ namespace DataFilters.ContinuousIntegration
             {
                 void PushPackages(IReadOnlyCollection<AbsolutePath> nupkgs)
                 {
-                    Info($"Publishing {nupkgs.Count} package{(nupkgs.Count > 1 ? "s" : string.Empty)}");
-                    Info(string.Join(EnvironmentInfo.NewLine, nupkgs));
+                    Information($"Publishing {nupkgs.Count} package{(nupkgs.Count > 1 ? "s" : string.Empty)}");
+                    Information(string.Join(EnvironmentInfo.NewLine, nupkgs));
 
                     DotNetNuGetPush(s => s.SetApiKey(NugetApiKey)
                         .SetSource(NugetPackageSource)
                         .EnableSkipDuplicate()
                         .EnableNoSymbols()
-                        .SetProcessLogTimestamp(true)
                         .CombineWith(nupkgs, (_, nupkg) => _
                                     .SetTargetPath(nupkg)),
                         degreeOfParallelism: 4,
@@ -576,7 +573,6 @@ namespace DataFilters.ContinuousIntegration
                         .SetSource(GitHubPackageSource)
                         .EnableSkipDuplicate()
                         .EnableNoSymbols()
-                        .SetProcessLogTimestamp(true)
                         .CombineWith(nupkgs, (_, nupkg) => _
                                     .SetTargetPath(nupkg)),
                         degreeOfParallelism: 4,
@@ -594,14 +590,14 @@ namespace DataFilters.ContinuousIntegration
             .OnlyWhenDynamic(() => IsServerBuild && GitRepository.IsOnMainBranch())
             .Executes(async () =>
             {
-                Info("Creating a new release");
+                Information("Creating a new release");
                 Octokit.GitHubClient gitHubClient = new(new Octokit.ProductHeaderValue(nameof(DataFilters)))
                 {
                     Credentials = new Octokit.Credentials(GitHubToken)
                 };
 
-                string repositoryName = GitHubActions.GitHubRepository.Replace(GitHubActions.GitHubRepositoryOwner + "/", string.Empty);
-                IReadOnlyList<Octokit.Release> releases = await gitHubClient.Repository.Release.GetAll(GitHubActions.GitHubRepositoryOwner, repositoryName)
+                string repositoryName = GitHubActions.Repository.Replace(GitHubActions.RepositoryOwner + "/", string.Empty);
+                IReadOnlyList<Octokit.Release> releases = await gitHubClient.Repository.Release.GetAll(GitHubActions.RepositoryOwner, repositoryName)
                                                                                                .ConfigureAwait(false);
 
                 if (!releases.AtLeastOnce(release => release.Name == MajorMinorPatchVersion))
@@ -614,14 +610,14 @@ namespace DataFilters.ContinuousIntegration
                         Name = MajorMinorPatchVersion,
                     };
 
-                    Octokit.Release release = await gitHubClient.Repository.Release.Create(GitHubActions.GitHubRepositoryOwner, repositoryName, newRelease)
+                    Octokit.Release release = await gitHubClient.Repository.Release.Create(GitHubActions.RepositoryOwner, repositoryName, newRelease)
                                                                                    .ConfigureAwait(false);
 
-                    Info($"Github release {release.TagName} created successfully");
+                    Information($"Github release {release.TagName} created successfully");
                 }
                 else
                 {
-                    Info($"Release '{MajorMinorPatchVersion}' already exists - skipping ");
+                    Information($"Release '{MajorMinorPatchVersion}' already exists - skipping ");
                 }
             });
 
@@ -629,7 +625,7 @@ namespace DataFilters.ContinuousIntegration
             .Description("Run all performance tests.")
             .DependsOn(Compile)
             .TriggeredBy(UnitTests)
-            .OnlyWhenDynamic(() => IsServerBuild)
+            //.OnlyWhenDynamic(() => IsServerBuild)
             .Produces(BenchmarkDirectory / "*")
             .Executes(() =>
             {
@@ -659,5 +655,7 @@ namespace DataFilters.ContinuousIntegration
                 EnvironmentInfo.SetVariable("DOTNET_ROLL_FORWARD", "Major");
             }
         }
+
+        T From<T>() where T : INukeBuild => (T)(object)this;
     }
 }

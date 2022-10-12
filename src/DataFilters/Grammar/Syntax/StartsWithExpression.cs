@@ -105,5 +105,57 @@
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+
+        /// <summary>
+        /// Combines the specified <paramref name="left"/> and <paramref name="right"/> <see cref="StartsWithExpression"/>s into a new <see cref="AndExpression"/>.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is 
+        /// <paramref name="right"/></returns>
+        public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new (left, right);
+
+        /// <summary>
+        /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
+        /// </summary>
+        /// <param name="left">the left operand</param>
+        /// <param name="right">the right operand</param>
+        /// <returns>
+        ///     A <see cref="OneOfExpression"/> that can either :
+        /// <list type="bullet">
+        ///     <item>exactly matches the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
+        ///     <item>exactly starts with the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
+        ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
+        /// </list>
+        /// </returns>
+        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new (new StringValueExpression(left.Value + right.Value),
+                                                                                                                new StartsWithExpression(left.Value + right.Value),
+                                                                                                                new AndExpression(left, new ContainsExpression(right.Value)));
+
+        /// <summary>
+        /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
+        /// </summary>
+        /// <param name="left">the left operand</param>
+        /// <param name="right">the right operand</param>
+        /// <returns>
+        ///     A <see cref="OneOfExpression"/> that can either :
+        /// <list type="bullet">
+        ///     <item>exactly matches the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
+        ///     <item>exactly starts with the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
+        ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
+        /// </list>
+        /// </returns>
+        public static OneOfExpression operator +(StartsWithExpression left, ContainsExpression right) => left + new StartsWithExpression(right.Value);
+
+        /// <summary>
+        /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
+        /// </summary>
+        /// <param name="left">the left operand</param>
+        /// <param name="right">the right operand</param>
+        /// <returns>
+        ///     A <see cref="AndExpression"/> that can match any <see langword="string"/> that starts with <paramref name="left"/> and end
+        /// </returns>
+        public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) => left + new EndsWithExpression(right.Value);
+
     }
 }

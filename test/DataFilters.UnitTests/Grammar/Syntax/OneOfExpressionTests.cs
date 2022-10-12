@@ -200,8 +200,8 @@
             => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(AsteriskExpression filterExpression, PositiveInt n)
-            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+        public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(PositiveInt n)
+            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(AsteriskExpression.Instance, n.Item);
 
         private static Property Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
         {
@@ -293,6 +293,8 @@
             // Act
             FilterExpression simplified = oneOf.Simplify();
 
+            _outputHelper.WriteLine($"Simplified : {simplified}");
+
             // Assert
             simplified.IsEquivalentTo(expression.Item)
                       .Should()
@@ -319,7 +321,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_OneOxpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
+        public void Given_OneExpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
         {
             // Arrange
             FilterExpression expected = new OneOfExpression(first.Item.Concat(second.Item)

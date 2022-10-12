@@ -10,13 +10,13 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    using static DataFilters.SortDirection;
+    using static DataFilters.OrderDirection;
 
-    public class SortTests
+    public class OrderTests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        public SortTests(ITestOutputHelper outputHelper)
+        public OrderTests(ITestOutputHelper outputHelper)
         {
             _outputHelper = outputHelper;
         }
@@ -28,7 +28,7 @@
         public void Ctor_Throws_ArgumentException_If_Expression_Is_Null(string expression, string reason)
         {
             // Act
-            Action action = () => new Sort<object>(expression);
+            Action action = () => new Order<object>(expression);
 
             // Assert
             action.Should()
@@ -43,34 +43,34 @@
             {
                 yield return new object[]
                 {
-                    new Sort<SuperHero>("Name"),
-                    new Sort<SuperHero>("Name"),
+                    new Order<SuperHero>("Name"),
+                    new Order<SuperHero>("Name"),
                     true,
-                    $"Two distinct {nameof(Sort<SuperHero>)} instances with same properties must be equal"
+                    $"Two distinct {nameof(Order<SuperHero>)} instances with same properties must be equal"
                 };
 
-                Sort<SuperHero> sort = new("Name");
+                Order<SuperHero> sort = new("Name");
                 yield return new object[]
                 {
                     sort,
                     sort,
                     true,
-                    $"A {nameof(Sort<SuperHero>)} instance is equal to itself"
+                    $"A {nameof(Order<SuperHero>)} instance is equal to itself"
                 };
 
                 yield return new object[]
                 {
-                    new Sort<SuperHero>("Name", Descending),
-                    new Sort<SuperHero>("Name"),
+                    new Order<SuperHero>("Name", Descending),
+                    new Order<SuperHero>("Name"),
                     false,
-                    $"Two distinct {nameof(Sort<SuperHero>)} instances with same {nameof(Sort<SuperHero>.Expression)} but different {nameof(Sort<SuperHero>.Direction)} must not be equal"
+                    $"Two distinct {nameof(Order<SuperHero>)} instances with same {nameof(Order<SuperHero>.Expression)} but different {nameof(Order<SuperHero>.Direction)} must not be equal"
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void EqualsTests(Sort<SuperHero> first, object second, bool expected, string reason)
+        public void EqualsTests(Order<SuperHero> first, object second, bool expected, string reason)
         {
             _outputHelper.WriteLine($"{nameof(first)} : '{first}'");
             _outputHelper.WriteLine($"{nameof(second)} : '{second}'");

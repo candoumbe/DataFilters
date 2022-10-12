@@ -37,6 +37,8 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         public int Seconds { get; }
 
+        private readonly Lazy<string> lazyEscapedParseableString;
+
         /// <summary>
         /// Weeks part of the expression
         /// </summary>
@@ -89,31 +91,21 @@ namespace DataFilters.Grammar.Syntax
                 throw new ArgumentOutOfRangeException(nameof(seconds), seconds, $"{nameof(seconds)} cannot be negative");
             }
 
-            Years = years;
-            Months = months;
-            Weeks = weeks;
-            Days = days;
-            Hours = hours;
-            Minutes = minutes;
-            Seconds = seconds;
+            (Years, Months, Weeks, Days, Hours, Minutes, Seconds) = (years, months, weeks, days, hours, minutes, seconds);
+
+            lazyEscapedParseableString = new Lazy<string>(() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) switch
+            {
+                (0, 0, 0, 0, 0, 0, 0) => "PT0S",
+                _ => $"P{(Years > 0 ? $"{Years}Y" : string.Empty)}{(Months > 0 ? $"{Months}M" : string.Empty)}{(Weeks > 0 ? $"{Weeks}W" : string.Empty)}{(Days > 0 ? $"{Days}D" : string.Empty)}T{(Hours > 0 ? $"{Hours}H" : string.Empty)}{(Minutes > 0 ? $"{Minutes}M" : string.Empty)}{(Seconds > 0 ? $"{Seconds}S" : string.Empty)}"
+            });
         }
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
-            static DateTime ConvertToDateTime(DurationExpression duration)
-            {
-                return DateTime.MinValue.AddYears(duration.Years)
-                                        .AddMonths(duration.Months)
-                                        .AddDays((duration.Weeks * 7) + duration.Days)
-                                        .AddHours(duration.Hours)
-                                        .AddMinutes(duration.Minutes)
-                                        .AddSeconds(duration.Seconds);
-            }
-
             bool equivalent = false;
 
-            if (other is DurationExpression otherDuration)
+            if (((other as ISimplifiable)?.Simplify() ?? other) is DurationExpression otherDuration)
             {
                 equivalent = Equals(otherDuration);
                 if (!equivalent)
@@ -126,6 +118,16 @@ namespace DataFilters.Grammar.Syntax
             }
 
             return equivalent;
+
+            static DateTime ConvertToDateTime(DurationExpression duration)
+            {
+                return DateTime.MinValue.AddYears(duration.Years)
+                                        .AddMonths(duration.Months)
+                                        .AddDays((duration.Weeks * 7) + duration.Days)
+                                        .AddHours(duration.Hours)
+                                        .AddMinutes(duration.Minutes)
+                                        .AddSeconds(duration.Seconds);
+            }
         }
 
         ///<inheritdoc/>
@@ -138,10 +140,6 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) switch
-        {
-            (0, 0, 0, 0, 0, 0, 0) => "PT0S",
-            _ => $"P{(Years > 0 ? $"{Years}Y" : string.Empty)}{(Months > 0 ? $"{Months}M" : string.Empty)}{(Weeks > 0 ? $"{Weeks}W" : string.Empty)}{(Days > 0 ? $"{Days}D" : string.Empty)}T{(Hours > 0 ? $"{Hours}H" : string.Empty)}{(Minutes > 0 ? $"{Minutes}M" : string.Empty)}{(Seconds > 0 ? $"{Seconds}S" : string.Empty)}"
-        };
+        public override string EscapedParseableString => lazyEscapedParseableString.Value;
     }
 }

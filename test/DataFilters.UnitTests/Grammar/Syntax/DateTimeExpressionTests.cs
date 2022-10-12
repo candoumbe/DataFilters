@@ -25,7 +25,7 @@
                                             .BeAssignableTo<FilterExpression>().And
                                             .Implement<IEquatable<DateTimeExpression>>().And
                                             .HaveConstructor(new[] { typeof(DateExpression), typeof(TimeExpression), typeof(OffsetExpression) }).And
-                                            .HaveConstructor(new[] { typeof(DateExpression), typeof(TimeExpression)}).And
+                                            .HaveConstructor(new[] { typeof(DateExpression), typeof(TimeExpression) }).And
                                             .HaveConstructor(new[] { typeof(TimeExpression) }).And
                                             .HaveConstructor(new[] { typeof(DateExpression) }).And
                                             .HaveProperty<DateExpression>("Date").And
@@ -86,32 +86,46 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateTimeExpression_GetComplexity_should_return_1(NonNull<DateTimeExpression> dateTime) => (dateTime.Item.Complexity == 1).ToProperty();
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateTimeExpression_where_only_date_part_is_set_IsEquivalent_should_be_true_when_comparing_to_a_non_null_DateExpression(NonNull<DateExpression> dateExpression)
+        public void Given_DateTimeExpression_Complexity_Should_be_the_sum_of_complexity_of_each_member(NonNull<DateExpression> date, NonNull<TimeExpression> time, NonNull<OffsetExpression> offset)
         {
             // Arrange
-            DateTimeExpression dateTimeExpression = new (dateExpression.Item);
+            DateTimeExpression dateTimeExpression = new(date.Item, time.Item, offset.Item);
+            double expected = date.Item.Complexity + time.Item.Complexity + offset.Item.Complexity;
 
             // Act
-            bool actual = dateTimeExpression.Equals(dateExpression.Item) == dateExpression.Item.Equals(dateTimeExpression);
+            double actual = dateTimeExpression.Complexity;
 
             // Assert
-            return actual.ToProperty();
+            actual.Should()
+                  .BeGreaterThanOrEqualTo(3).And
+                  .Be(expected);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateTimeExpression_where_only_time_part_is_set_Equals_should_be_true_when_comparing_to_a_non_null_TimeExpression(NonNull<TimeExpression> timeExpression)
+        public void Given_DateTimeExpression_where_only_date_part_is_set_When_comparing_to_DateExpression_IsEquivalentTo_should_be_true(NonNull<DateExpression> dateExpression)
+        {
+            // Arrange
+            DateTimeExpression dateTimeExpression = new(dateExpression.Item);
+
+            // Act
+            bool actual = dateTimeExpression.IsEquivalentTo(dateExpression.Item);
+
+            // Assert
+            actual.Should().BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_DateTimeExpression_where_only_time_part_is_set_When_comparing_to_that_TimeExpression(NonNull<TimeExpression> timeExpression)
         {
             // Arrange
             DateTimeExpression dateTimeExpression = new(timeExpression.Item);
 
             // Act
-            bool actual = dateTimeExpression.Equals(timeExpression.Item) == timeExpression.Item.Equals(dateTimeExpression);
+            bool actual = dateTimeExpression.IsEquivalentTo(timeExpression.Item);
 
             // Assert
-            return actual.ToProperty();
+            actual.Should().BeTrue();
+            dateTimeExpression.Complexity.Should().BeGreaterThan(timeExpression.Item.Complexity);
         }
 
         public static IEnumerable<object[]> EqualsCases
@@ -168,5 +182,41 @@
         public Property Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Equals_should_be_transitive(NonNull<DateTimeExpression> first, NonNull<DateTimeExpression> second, NonNull<DateTimeExpression> third)
+        {
+            // Arrange
+            bool firstEqualsSecond = first.Item.Equals(second.Item);
+            bool secondEqualsThird = second.Item.Equals(third.Item);
+
+            // Act
+            bool actual = first.Item.Equals(third.Item);
+
+            // Assert
+            actual.Should()
+                  .Be(firstEqualsSecond && secondEqualsThird);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_operands_Equal_operator_should_return_same_result_as_using_Equals(NonNull<DateTimeExpression> left, NonNull<DateTimeExpression> right)
+        {
+            // Act
+            bool actual = left.Item == right.Item;
+
+            // Assert
+            actual.Should()
+                  .Be(left.Item.Equals(right.Item));
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_left_and_right_operands_NotEqual_operator_should_return_opposite_result_of_Equal_operator(NonNull<DateTimeExpression> left, NonNull<DateTimeExpression> right)
+        {
+            // Act
+            bool actual = left.Item != right.Item;
+
+            // Assert
+            actual.Should()
+                  .Be(!left.Item.Equals(right.Item));
+        }
     }
 }

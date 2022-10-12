@@ -66,7 +66,7 @@
                                                            .HaveProperty<TokenListParser<FilterToken, NotExpression>>("Not").And
                                                            .HaveProperty<TokenListParser<FilterToken, NumericValueExpression>>("Number").And
                                                            .HaveProperty<TokenListParser<FilterToken, GuidValueExpression>>("GlobalUniqueIdentifier").And
-                                                           .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
+                                                           .HaveProperty<TokenListParser<FilterToken, FilterExpression>>("Or");
 
         public static IEnumerable<object[]> AlphaNumericCases
         {
@@ -305,6 +305,14 @@ I&_Oj
                         right: new NotExpression(new EndsWithExpression("man"))
                     )
                 };
+
+                yield return new object[]
+                {
+                    "Bat|Wonder|Sup",
+                    new OrExpression(new OrExpression(new StringValueExpression("Bat"),
+                                                      new StringValueExpression("Wonder")),
+                                    new StringValueExpression("Sup"))
+                };
             }
         }
 
@@ -317,7 +325,7 @@ I&_Oj
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            OrExpression expression = FilterTokenParser.Or.Parse(tokens);
+            FilterExpression expression = FilterTokenParser.Or.Parse(tokens);
 
             // Assert
             AssertThatShould_parse(expression, expected);
@@ -517,6 +525,31 @@ I&_Oj
                                                                .Concat(GetCharacters('0', '9'))
                                                                .Select(chr => new StringValueExpression(chr.ToString()))
                                                                .ToArray())
+                };
+
+                yield return new object[]
+                {
+                    "{Bat|Sup|Wonder}*",
+                    new OneOfExpression(new StartsWithExpression("Bat"),
+                                        new StartsWithExpression("Sup"),
+                                        new StartsWithExpression("Wonder"))
+                };
+
+                yield return new object[]
+                {
+                    "[ab][cd]",
+                    new OneOfExpression(new StringValueExpression("ac"),
+                                        new StringValueExpression("ad"),
+                                        new StringValueExpression("bc"),
+                                        new StringValueExpression("bd"))
+                };
+
+                yield return new object[]
+                {
+                    "{Bat|Sup|Wonder}",
+                    new OneOfExpression(new StringValueExpression("Bat"),
+                                        new StringValueExpression("Sup"),
+                                        new StringValueExpression("Wonder"))
                 };
             }
         }
@@ -828,6 +861,17 @@ I&_Oj
                                 ))
                     )
                 };
+
+                yield return new object[]
+                {
+                    "Nickname={Bat|Sup|Wonder}*",
+                    (
+                        new PropertyName("Nickname"),
+                        (FilterExpression) new OneOfExpression(new StartsWithExpression("Bat"),
+                                            new StartsWithExpression("Sup"),
+                                            new StartsWithExpression("Wonder"))
+                    )
+                };
             }
         }
 
@@ -975,7 +1019,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) }, Replay = "(5791404327053908222,2813664014226873281)", StartSize = 2)]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
@@ -996,7 +1040,6 @@ I&_Oj
                 string[] cultures = { "fr-FR", "en-GB", "en-US" };
                 foreach (string culture in cultures)
                 {
-
                     yield return new object[]
                     {
                         new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new(3, 0, 40, 583), OffsetExpression.Zero)),
@@ -1008,7 +1051,6 @@ I&_Oj
                         new GroupExpression(new DateTimeExpression(new(2010, 06, 02), new(23, 45, 54, 331), OffsetExpression.Zero)),
                         culture
                     };
-
                 }
             }
         }
@@ -1047,7 +1089,7 @@ I&_Oj
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        private void Should_parse_DurationExpression(DurationExpression expected)
+        public void Should_parse_DurationExpression(DurationExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");

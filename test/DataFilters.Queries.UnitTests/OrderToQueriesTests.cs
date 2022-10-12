@@ -14,11 +14,11 @@
 
     using static global::Queries.Core.Parts.Sorting.OrderDirection;
 
-    public class SortToQueriesTests
+    public class OrderToQueriesTests
     {
         private readonly ITestOutputHelper _outputHelper;
 
-        public SortToQueriesTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
+        public OrderToQueriesTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
         public class Person
         {
@@ -27,22 +27,22 @@
             public string Lastname { get; set; }
         }
 
-        public static IEnumerable<object[]> SortToSortCases
+        public static IEnumerable<object[]> OrderToOrderCases
         {
             get
             {
                 yield return new object[]
                 {
-                    new Sort<Person>("Name"),
+                    new Order<Person>("Name"),
                     (Expression<Func<IEnumerable<IOrder>, bool>>) (sorts => sorts.Once()
                         && sorts.First().Equals(new OrderExpression("Name".Field(), Ascending)))
                 };
 
                 {
-                    MultiSort<Person> multiSort = new
+                    MultiOrder<Person> multiSort = new
                     (
-                        new Sort<Person>(nameof(Person.Firstname)),
-                        new Sort<Person>(nameof(Person.Lastname))
+                        new Order<Person>(nameof(Person.Firstname)),
+                        new Order<Person>(nameof(Person.Lastname))
                     );
                     yield return new object[]
                     {
@@ -56,8 +56,8 @@
         }
 
         [Theory]
-        [MemberData(nameof(SortToSortCases))]
-        public void FilterToSort(ISort<Person> sort, Expression<Func<IEnumerable<IOrder>, bool>> expected)
+        [MemberData(nameof(OrderToOrderCases))]
+        public void FilterToOrder(IOrder<Person> sort, Expression<Func<IEnumerable<IOrder>, bool>> expected)
         {
             _outputHelper.WriteLine($"Sort : {sort.Jsonify()}");
 

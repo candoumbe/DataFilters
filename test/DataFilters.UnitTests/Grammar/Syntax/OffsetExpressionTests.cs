@@ -48,7 +48,6 @@
         public Property Equals_should_be_symetric(NonNull<OffsetExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
-
         [Property]
         public void Given_offset_is_Zero_When_comparing_same_offset_should_not_take_into_account_the_numeric_sign(NumericSign sign)
         {
@@ -61,8 +60,6 @@
 
             // Assert
             actual.Should().BeTrue();
-
         }
-
     }
 }

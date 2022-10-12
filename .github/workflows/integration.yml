@@ -28,11 +28,13 @@ on:
       - '!LICENSE'
 
 jobs:
-  macOS-latest:
-    name: macOS-latest
-    runs-on: macOS-latest
+  windows-latest:
+    name: windows-latest
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:

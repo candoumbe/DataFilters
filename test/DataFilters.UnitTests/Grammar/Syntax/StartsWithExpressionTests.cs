@@ -14,7 +14,9 @@ using FsCheck.Fluent;
 
     using Xunit;
     using Xunit.Abstractions;
+    using Xunit.Categories;
 
+    [UnitTest("StartsWith")]
     public class StartsWithExpressionTests
     {
         private readonly ITestOutputHelper _outputHelper;
@@ -142,6 +144,75 @@ using FsCheck.Fluent;
             // Assert
             actual.Should()
                   .Be(expected);
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_StartsWithExpression_When_right_operand_is_EndsWithExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> startsWithGen, NonNull<EndsWithExpression> endsWithGen)
+        {
+            // Arrange
+            StartsWithExpression startsWith = startsWithGen.Item;
+            EndsWithExpression endsWith = endsWithGen.Item;
+
+            AndExpression expected = new (startsWith, endsWith);
+
+            // Act
+            AndExpression actual = startsWith + endsWith;
+
+            // Assert
+            actual.IsEquivalentTo(expected).Should().BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_StartsWithExpression_When_right_operand_is_StartsWithExpression_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StartsWithExpression> rightOperandGen)
+        {
+            // Arrange
+            StartsWithExpression leftStartsWith = leftOperandGen.Item;
+            StartsWithExpression rightStartsWith = rightOperandGen.Item;
+
+            // bat*man*
+            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+                                           new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
+                                           new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+
+            // Act
+            OneOfExpression actual = leftStartsWith + rightStartsWith;
+
+            // Assert
+            actual.IsEquivalentTo(expected).Should().BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_StartsWithExpression_When_right_operand_is_Contains_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<ContainsExpression> rightOperandGen)
+        {
+            // Arrange
+            StartsWithExpression leftStartsWith = leftOperandGen.Item;
+            ContainsExpression rightStartsWith = rightOperandGen.Item;
+
+            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+                                           new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
+                                           new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+
+            // Act
+            OneOfExpression actual = leftStartsWith + rightStartsWith;
+
+            // Assert
+            actual.IsEquivalentTo(expected).Should().BeTrue();
+        }
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_StartsWithExpression_When_right_operand_is_StringValueExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StringValueExpression> rightOperandGen)
+        {
+            // Arrange
+            StartsWithExpression leftStartsWith = leftOperandGen.Item;
+            StringValueExpression rightStartsWith = rightOperandGen.Item;
+
+            AndExpression expected = leftStartsWith + new EndsWithExpression(rightStartsWith.Value);
+
+            // Act
+            AndExpression actual = leftStartsWith + rightStartsWith;
+
+            // Assert
+            actual.IsEquivalentTo(expected).Should().BeTrue();
         }
     }
 }

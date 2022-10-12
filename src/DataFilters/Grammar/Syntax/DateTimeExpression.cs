@@ -128,6 +128,9 @@
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
+        ///<inheritdoc/>
+        public override double Complexity => (Date?.Complexity ?? 1) + (Time?.Complexity ?? 1) + (Offset?.Complexity ?? 1);
+
         /// <inheritdoc />
         public static bool operator ==(DateTimeExpression left, DateTimeExpression right) => left switch
         {

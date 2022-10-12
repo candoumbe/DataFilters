@@ -19,7 +19,9 @@
         /// <returns>
         /// <c>true</c> if <paramref name="other"/> is "equivalent" to the current instance.
         /// </returns>
-        public virtual bool IsEquivalentTo(FilterExpression other) => Equals(other);
+        /// <inheritdoc/>
+        public virtual bool IsEquivalentTo(FilterExpression other)
+            => Equals(other) || Equals((other as ISimplifiable)?.Simplify());
 
         ///<inheritdoc/>
         public virtual double Complexity => 1;
@@ -32,5 +34,10 @@
 
         ///<inheritdoc/>
         public virtual string OriginalString => EscapedParseableString;
+
+        /// <summary>
+        /// Returns a <see cref="FilterExpression"/> that is the result of applying the NOT logical operator to the specified <paramref name="expression"/>.
+        /// </summary>
+        public static NotExpression operator !(FilterExpression expression) => new (expression);
     }
 }

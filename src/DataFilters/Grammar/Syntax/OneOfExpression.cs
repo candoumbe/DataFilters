@@ -43,7 +43,7 @@
             _values = values.Where(x => x is not null)
                             .ToArray();
 
-            _lazyParseableString = new (() => string.Concat(Values.Select(v => v.EscapedParseableString)));
+            _lazyParseableString = new (() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
         }
 
         /// <inheritdoc/>
@@ -98,9 +98,6 @@
 
         ///<inheritdoc/>
         public override double Complexity => Values.Sum(expression => expression.Complexity);
-
-        ///<inheritdoc/>
-        public override string ToString() => $"{{{nameof(Complexity)}:{Complexity}, {nameof(Values)}: [{string.Join(",", Values)}]}}";
 
         /// <inheritdoc/>
         public FilterExpression Simplify()
