@@ -1,7 +1,5 @@
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using System;
-
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
 
@@ -11,12 +9,20 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using FsCheck.Fluent;
     using FsCheck.Xunit;
 
+    using System;
+    using System.Collections.Generic;
+
     using Xunit;
+    using Xunit.Abstractions;
     using Xunit.Categories;
 
     [UnitTest]
     public class DurationExpressionTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public DurationExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
+
         [Fact]
         public void IsFilterExpression() => typeof(DurationExpression).Should()
                                                                       .BeDerivedFrom<FilterExpression>();
@@ -96,5 +102,63 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public Property Given_DurationExpression_GetComplexity_should_return_1(DurationExpression duration) => (duration.Complexity == 1).ToProperty();
+
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void IsEquivalentTo_should_be_transitive(DurationExpression duration, NonNull<FilterExpression> other, NonNull<FilterExpression> third)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"Duration : {duration}");
+            _outputHelper.WriteLine($"Other : {other.Item.EscapedParseableString}");
+            _outputHelper.WriteLine($"Third : {third.Item.EscapedParseableString}");
+
+            bool first = duration.IsEquivalentTo(other.Item);
+            bool second = other.Item.IsEquivalentTo(third.Item);
+
+            // Act 
+            bool actual = duration.IsEquivalentTo(third.Item);
+
+            // Assert
+            if (first && second)
+            {
+                actual.Should().BeTrue();
+            }
+        }
+
+        public static IEnumerable<object[]> IsEquivalentToCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new DurationExpression(),
+                    new StartsWithExpression("a"),
+                    new StartsWithExpression("a"),
+                    (
+                        expected: false,
+                        reason: "A is not equivalent to B and B is equivalent to C => A is not equivalent to C"
+                    )
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(IsEquivalentToCases))]
+        public void IsEquivalent_should_behave_as_expected(DurationExpression duration, FilterExpression other, FilterExpression third, (bool expected, string reason) expectation)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"Duration : {duration}");
+            _outputHelper.WriteLine($"Other : {other.EscapedParseableString}");
+            _outputHelper.WriteLine($"Third : {third.EscapedParseableString}");
+
+            bool durationIsEquivalentToOther = duration.IsEquivalentTo(other);
+            bool otherIsEquivalentToThird = other.IsEquivalentTo(third);
+
+
+            _outputHelper.WriteLine($"{duration} is equivalent to {other} : {durationIsEquivalentToOther}");
+            _outputHelper.WriteLine($"{other} is equivalent to {third} : {durationIsEquivalentToOther}");
+
+            // Act
+            bool actual = duration.IsEquivalentTo(third);
+        }
     }
 }

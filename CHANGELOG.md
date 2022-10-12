@@ -26,6 +26,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `SortToQueries` class to `OrderExtensions` in `DataFilters.Queries`
 - Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
 
+## [0.12.0] / 2022-10-12
+### New features
+- Added syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
+- Added `+` operator to combine `ConstantValueExpression` with `AsteriskExpression`
+- Added `+` operator to combine `StartsWithExpression` with `EndsWithExpression`
+- Added `+` operator to combine `StartsWithExpression` with `ContainsExpression`
+- Added `+` operator to combine `StartsWithExpression` with `StartsWithExpression`
+- Added `+` operator to combine `StartsWithExpression` with `StringValueExpression` 
+- Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
+- Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
+
+### Breaking changes
+- `AsteriskExpression` default constructor is now private
+- Dropped filter service
+- Renamed `ISort<T>` to `IOrder<T>`
+- Renamed `Sort<T>` to `Order<T>`
+- Renamed `MultiSort<T>` to `MultiOrder<T>`
+- Renamed `SortValidator<T>` to `OrderValidator<T>`
+- Renamed `SortToQueries` class to `OrderExtensions` in `DataFilters.Queries`
+- Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
+
 ## [0.11.0] / 2022-03-13
 - Added [`FilterOptions`](/src/DataFilters/FilterOptions.cs)
 - Marked `FilterService` as obsolete.
@@ -129,7 +150,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/candoumbe/DataFilters/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/candoumbe/DataFilters/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/candoumbe/DataFilters/compare/0.10.0...0.10.1

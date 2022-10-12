@@ -321,7 +321,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_OneOxpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
+        public void Given_OneExpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
         {
             // Arrange
             FilterExpression expected = new OneOfExpression(first.Item.Concat(second.Item)
