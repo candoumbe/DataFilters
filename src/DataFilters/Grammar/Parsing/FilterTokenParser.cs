@@ -8,6 +8,9 @@
 
     using System;
     using System.Collections.Generic;
+#if NET7_0_OR_GREATER
+    using System.Diagnostics;
+#endif
     using System.Globalization;
     using System.Linq;
 
@@ -202,13 +205,21 @@
                                 {
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
+#else
+                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value") 
+#endif
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
                                 {
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
-                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value") 
+#else
+                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value") 
+#endif
                                 }, included: true)
                             )
                         ).Try()
@@ -228,13 +239,21 @@
                                     AsteriskExpression asterisk => asterisk,
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
+#else
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
+#endif
                                 }, included: false),
                                 max: new BoundaryExpression(max switch
                                 {
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
+#else
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
+#endif
                                 }, included: true)
                            )
                         ).Try()
@@ -254,14 +273,22 @@
                                 {
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
+#else
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
+#endif
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
+#else
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
+#endif
                                 }, included: false)
                            )
                         ).Try()
@@ -283,14 +310,22 @@
                                     AsteriskExpression asterisk => asterisk,
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
+#else
                                     _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
+#endif
                                 }, included: false),
                                 max: new BoundaryExpression(max switch
                                 {
                                     AsteriskExpression asterisk => asterisk,
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
+#if NET7_0_OR_GREATER
+                                    _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
+#else
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
+#endif
                                 }, included: false)
                            )
                         );
@@ -365,7 +400,11 @@
                         RangeBracketValue rangeValue => Enumerable.Range(rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
                                                                     .Select(ascii => (char)ascii),
                         ConstantBracketValue constantValue => constantValue.Value.ToCharArray(),
+#if NET7_0_OR_GREATER
+                        _ => throw new UnreachableException("Unexpected regex value")
+#else
                         _ => throw new NotSupportedException("Unexpected regex value")
+#endif
                     })
                 .SelectMany(x => x);
 
@@ -503,7 +542,11 @@
                     // <oneof>
                     (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression(constants.ToArray()),
 
+#if NET7_0_OR_GREATER
+                    _ => throw new UnreachableException($"Unsupported {nameof(OneOf)} expression :  {item}")
+#else
                     _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
+#endif
                 };
             });
 

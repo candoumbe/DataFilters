@@ -29,10 +29,14 @@
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
     using System.Runtime.InteropServices;
 
-#if NET6_0_OR_GREATER
+#if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
+#endif
 
     using System.Collections.Concurrent;
+
+#if NET7_0_OR_GREATER
+    using System.Diagnostics;
 #endif
 #endif
     /// <summary>
@@ -262,7 +266,11 @@
                                 DateTimeExpression { Date: not null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"), input.Included),
                                 DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (new StringValueExpression(dateTime.EscapedParseableString), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
+#if NET7_0_OR_GREATER
+                                _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
+#else
                                 _ => throw new NotSupportedException($"Unsupported boundary type {input.Expression.GetType()}")
+#endif
                             };
 
                         (ConstantValueExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);
@@ -321,7 +329,7 @@
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
                 (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
-#if NET6_0_OR_GREATER
+#if NET6_0
                 if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
                 {
                     TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));

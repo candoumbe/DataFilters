@@ -19,7 +19,7 @@
     /// </remarks>
     public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>
     {
-        private static readonly IEqualityComparer<BracketValue[]> equalityComparer = new ArrayEqualityComparer<BracketValue>();
+        private static readonly IEqualityComparer<BracketValue[]> EqualityComparer = new ArrayEqualityComparer<BracketValue>();
 
         /// <summary>
         /// Builds a new <see cref="BracketExpression"/> instance.
@@ -43,7 +43,7 @@
 
         ///<inheritdoc/>
         public bool Equals(BracketExpression other) => other is not null
-                                                       && equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
+                                                       && EqualityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => obj switch
@@ -54,7 +54,7 @@
         };
 
         ///<inheritdoc/>
-        public override int GetHashCode() => equalityComparer.GetHashCode(Values.ToArray());
+        public override int GetHashCode() => EqualityComparer.GetHashCode(Values.ToArray());
 
         ///<inheritdoc/>
         public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Values)}]";
