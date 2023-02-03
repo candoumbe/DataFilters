@@ -1,6 +1,6 @@
 ﻿namespace DataFilters
 {
-#if NET6_0_OR_GREATER
+#if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
 #endif
 
@@ -23,7 +23,7 @@
     /// </summary>
     public static class FilterExtensions
     {
-#if NET6_0_OR_GREATER
+#if NET6_0
         private readonly static ISet<bool> HackZone = new HashSet<bool>();
 #endif
 
@@ -70,7 +70,7 @@
                 throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
             }
 
-#if NET6_0_OR_GREATER
+#if NET6_0
             // HACK require to handle DateOnly and TimeOnly types.
             if (HackZone.Add(true))
             {

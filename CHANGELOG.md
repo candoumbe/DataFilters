@@ -6,9 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### ⚠️ Breaking Changes
+- Dropped `net5.0` support
+- Dropped `netcoreapp3.1` support
+
+### ⚙️ Technical changes
+- Moved pipeline to Ubuntu agent
+- Moved build definition to [Candoumbe.Pipelines](https://www.nuget.org/packages/Candoumbe.Pipelines/0.3.0-beta0001)
+
 
 ## [0.12.0] / 2022-10-12
-### New features
+### 🚀 New features
+- Added `net7.0` support
 - Added syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
 - Added `+` operator to combine `ConstantValueExpression` with `AsteriskExpression`
 - Added `+` operator to combine `StartsWithExpression` with `EndsWithExpression`
@@ -18,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
 - Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
-### Breaking changes
+### ⚠️ Breaking changes
 - `AsteriskExpression` default constructor is now private
 - Dropped filter service
 - Renamed `ISort<T>` to `IOrder<T>`
@@ -29,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
 
 ## [0.12.0] / 2022-10-12
-### New features
+### 🚀 New features
 - Added syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
 - Added `+` operator to combine `ConstantValueExpression` with `AsteriskExpression`
 - Added `+` operator to combine `StartsWithExpression` with `EndsWithExpression`
@@ -39,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
 - Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
-### Breaking changes
+### ⚠️ Breaking changes
 - `AsteriskExpression` default constructor is now private
 - Dropped filter service
 - Renamed `ISort<T>` to `IOrder<T>`

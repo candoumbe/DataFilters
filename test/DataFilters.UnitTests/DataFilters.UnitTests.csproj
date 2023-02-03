@@ -2,17 +2,24 @@
 
   <Import Project="..\..\tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Grammar\Parsing\Filtering\**" />
     <EmbeddedResource Remove="Grammar\Parsing\Filtering\**" />
     <None Remove="Grammar\Parsing\Filtering\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\DataFilters.TestObjects\Appointment.cs" Link="TestsObjects\Appointment.cs" />
+    <Compile Include="..\DataFilters.TestObjects\Henchman.cs" Link="TestsObjects\Henchman.cs" />
+    <Compile Include="..\DataFilters.TestObjects\Model.cs" Link="TestsObjects\Model.cs" />
+    <Compile Include="..\DataFilters.TestObjects\Person.cs" Link="TestsObjects\Person.cs" />
+    <Compile Include="..\DataFilters.TestObjects\SuperHero.cs" Link="TestsObjects\SuperHero.cs" />
+    <Compile Include="..\DataFilters.TestObjects\Weapon.cs" Link="TestsObjects\Weapon.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DataFilters\DataFilters.csproj" />
-    <ProjectReference Include="..\DataFilters.TestObjects\DataFilters.TestObjects.csproj" />
   </ItemGroup>
 
   <ItemGroup>
