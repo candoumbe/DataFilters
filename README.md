@@ -268,9 +268,6 @@ Search for `vigilante` resource where the value of `age` property is lower than 
 | --------------- | ----------------------------------------- | ------------------------------------------------------------------------------------ |
 | `age=]* TO 30]` | `{"field":"age", "op":"lte", "value":30}` | `new Filter(field: "age", @operator : FilterOperator.LessThanOrEqualTo, value : 30)` |
 
-IFilter filter = new Filter("age", LessThanOrEqualTo, 30);
-```
-
 ### <a href='#' id='btw-expression'>Between</a>
 
 Search for vigilante resources where `age` property is between `20` and `35`
