@@ -127,5 +127,13 @@ namespace DataFilters.ContinuousIntegration
                                            source: new Uri("https://nukpg.github.com/"),
                                            () => this is ICreateGithubRelease && this.Get<ICreateGithubRelease>()?.GitHubToken is not null)
         };
+
+        protected override void OnBuildCreated()
+        {
+            if (IsServerBuild)
+            {
+                EnvironmentInfo.SetVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
+            }
+        }
     }
 }
