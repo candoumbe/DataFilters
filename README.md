@@ -1,10 +1,10 @@
 #  Datafilters <!-- omit in toc -->
 
-[![GitHub Workflow Status (main)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/delivery/main?label=main)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
-[![GitHub Workflow Status (develop)](https://img.shields.io/github/workflow/status/candoumbe/datafilters/integration/develop?label=develop)](https://github.com/candoumbe/DataFilters/actions/workflows/delivery.yml)
+![GitHub Main branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/delivery.yml?branch=main&label=main)
+![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop)
 [![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/DataFilters)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
-[![Nuget](https://img.shields.io/nuget/vpre/datafilters)](https://nuget.org/packages/datafilters)
+[![DataFilters ](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters)](https://nuget.org/packages/datafilters)
 
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
@@ -549,11 +549,11 @@ Some explanation on the controller's code above  :
 You may have noticed that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` property is not.
 This is to distinguish if the `Age` criterion was provided or not when calling the `vigilantes/search` endpoint.
 
-| Package                                                                                                                                                             | Description                                                                                                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)                                     | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
-| [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
-| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)             | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
+| Package                                                                                                                                                             | Downloads                                                                                                            | Description                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)                                     | ![DataFilters download count](https://img.shields.io/nuget/dt/Datafilters?label=&color=blue)                         | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                              |
+| [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | ![DataFilters.Expressions download count](https://img.shields.io/nuget/dt/Datafilters.Expressions?label=&color=blue) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
+| [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)             | ![DataFilters.Queries download count](https://img.shields.io/nuget/dt/Datafilters.Queries?label=&color=blue)         | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
 
 
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs
