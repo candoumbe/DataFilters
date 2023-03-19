@@ -26,7 +26,7 @@
     <When Condition="'$(TargetFramework)' == 'net6.0'">
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-        <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="1.0.3" />
+        <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="2.1.1" />
       </ItemGroup>
     </When>
     <Otherwise>
