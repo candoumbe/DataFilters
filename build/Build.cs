@@ -1,8 +1,8 @@
 namespace DataFilters.ContinuousIntegration
 {
-    using Candoumbe.Pipelines;
     using Candoumbe.Pipelines.Components;
     using Candoumbe.Pipelines.Components.GitHub;
+    using Candoumbe.Pipelines.Components.NuGet;
     using Candoumbe.Pipelines.Components.Workflows;
 
     using Nuke.Common;
@@ -14,7 +14,6 @@ namespace DataFilters.ContinuousIntegration
     using System.Collections.Generic;
     using System.Linq;
 
-    using static Nuke.Common.IO.PathConstruction;
 
     [GitHubActions(
         "integration",
@@ -22,7 +21,7 @@ namespace DataFilters.ContinuousIntegration
         FetchDepth = 0,
         OnPushBranchesIgnore = new[] { IHaveMainBranch.MainBranchName },
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPublish.Publish), nameof(IPack.Pack) },
+        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack) },
         CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
         ImportSecrets = new[]
         {
@@ -42,7 +41,7 @@ namespace DataFilters.ContinuousIntegration
         GitHubActionsImage.UbuntuLatest,
         FetchDepth = 0,
         OnPushBranches = new[] { IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*" },
-        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPublish.Publish), nameof(ICreateGithubRelease.AddGithubRelease) },
+        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease) },
         EnableGitHubToken = true,
         CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
         PublishArtifacts = true,
@@ -76,7 +75,7 @@ namespace DataFilters.ContinuousIntegration
         IBenchmark,
         IReportCoverage,
         IPack,
-        IPublish,
+        IPushNugetPackages,
         ICreateGithubRelease
     {
         [Parameter("API key used to publish artifacts to Nuget.org")]
@@ -87,6 +86,7 @@ namespace DataFilters.ContinuousIntegration
         [Required]
         public readonly Solution Solution;
 
+        ///<inheritdoc/>
         Solution IHaveSolution.Solution => Solution;
 
         ///<inheritdoc/>
@@ -103,13 +103,17 @@ namespace DataFilters.ContinuousIntegration
         AbsolutePath IHaveTestDirectory.TestDirectory => RootDirectory / "test";
 
         ///<inheritdoc/>
-        IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetProjects("*UnitTests");
+        IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");
 
         ///<inheritdoc/>
-        IEnumerable<Project> IMutationTest.MutationTestsProjects => this.Get<IUnitTest>().UnitTestsProjects;
+        IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects
+            => new[] { "DataFilters", "DataFilters.Expressions", "DataFilters.Queries" }
+                .Select(projectName => (SourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                        TestProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase))))
+                .ToArray();
 
         ///<inheritdoc/>
-        IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetProjects("*.PerfomanceTests");
+        IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerfomanceTests");
 
         ///<inheritdoc/>
         bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
@@ -118,12 +122,12 @@ namespace DataFilters.ContinuousIntegration
         IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
 
         ///<inheritdoc/>
-        IEnumerable<PublishConfiguration> IPublish.PublishConfigurations => new PublishConfiguration[]
+        IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations => new PushNugetPackageConfiguration[]
         {
-            new NugetPublishConfiguration(apiKey: NugetApiKey,
+            new NugetPushConfiguration(apiKey: NugetApiKey,
                                           source: new Uri("https://api.nuget.org/v3/index.json"),
                                           () => NugetApiKey is not null),
-            new GitHubPublishConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
+            new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
                                            source: new Uri("https://nukpg.github.com/"),
                                            () => this is ICreateGithubRelease && this.Get<ICreateGithubRelease>()?.GitHubToken is not null)
         };
