@@ -76,7 +76,6 @@
                   .Be(expected, reason);
         }
 
-
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<BracketValue> one,
                                                                                                     NonEmptyArray<BracketValue> two)
@@ -131,13 +130,13 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
-        public Property Given_BracketRangeValue_IsEquivalentTo_should_be_equivalent_to_many_OrExpression_where_each_expression_contains_one_charater(NonNull<RangeBracketValue> rangeBracketValue)
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        public void Given_BracketRangeValue_IsEquivalentTo_should_be_equivalent_to_many_OrExpression_where_each_expression_contains_one_charater(NonNull<RangeBracketValue> rangeBracketValue)
         {
             // Arrange
             BracketExpression rangeBracketExpression = new(rangeBracketValue.Item);
 
-            OneOfExpression oneOf = new (Enumerable.Range(rangeBracketValue.Item.Start,
+            OneOfExpression oneOf = new(Enumerable.Range(rangeBracketValue.Item.Start,
                                                           rangeBracketValue.Item.End - rangeBracketValue.Item.Start + 1)
                                                    .Select(ascii => new StringValueExpression(((char)ascii).ToString()))
                                                    .ToArray());
@@ -146,7 +145,7 @@
             bool actual = rangeBracketExpression.IsEquivalentTo(oneOf);
 
             // Assert
-            return actual.ToProperty().Label($"Range expression : {rangeBracketValue.Item}");
+            actual.Should().BeTrue($"Range expression : {rangeBracketValue.Item}");
         }
     }
 }

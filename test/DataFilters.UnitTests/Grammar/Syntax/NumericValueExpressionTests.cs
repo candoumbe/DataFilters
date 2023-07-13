@@ -6,7 +6,6 @@
     using FluentAssertions;
 
     using FsCheck;
-    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -62,32 +61,37 @@
         }
 
         [Property]
-        public Property Two_instances_are_equals_when_holding_same_values(NonEmptyString value)
+        public void Two_instances_are_equals_when_holding_same_values(NonEmptyString value)
         {
+            // Arrange
             NumericValueExpression first = new(value.Item);
             NumericValueExpression other = new(value.Item);
 
-            return first.Equals(other).ToProperty();
+            // Act
+            bool actual = first.Equals(other);
+
+            // Assert
+            actual.Should().BeTrue();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_is_commutative(NumericValueExpression first, NumericValueExpression second)
-            => (first.Equals(second) == second.Equals(first)).ToProperty();
+        public void Equals_is_commutative(NumericValueExpression first, NumericValueExpression second)
+            => first.Equals(second).Should().Be(second.Equals(first));
 
         [Property]
-        public Property Given_two_NumericValueExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
+        public void Given_two_NumericValueExpressions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
         {
             // Arrange
             NumericValueExpression first = new(input.Get);
             NumericValueExpression second = new(input.Get);
 
             // Act
-            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+            first.Equals(second).Should().Be(Equals(first.Value, second.Value));
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NumericValueExpression_GetComplexity_should_return_1(NumericValueExpression constant)
-            => (constant.Complexity == 1).ToProperty();
+        public void Given_NumericValueExpression_GetComplexity_should_return_1(NumericValueExpression constant)
+            => constant.Complexity.Should().Be(1);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_IntervalExpression_with_min_equals_max_is_equivalent_should_return_true(NumericValueExpression input)
@@ -105,17 +109,15 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<NumericValueExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        public void Equals_should_be_commutative(NonNull<NumericValueExpression> first, FilterExpression second)
+            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<NumericValueExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<NumericValueExpression> expression)
+            => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
-        {
-            return (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
-        }
+        public void Equals_should_be_symetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }
 }

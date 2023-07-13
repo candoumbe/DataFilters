@@ -6,5 +6,4 @@ namespace DataFilters.TestObjects
 
         public int Level { get; set; }
     }
-
 }

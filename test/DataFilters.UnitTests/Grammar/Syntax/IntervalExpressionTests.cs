@@ -8,7 +8,6 @@
     using FluentAssertions.Extensions;
 
     using FsCheck;
-    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -217,8 +216,8 @@
                 };
 
                 {
-                    IntervalExpression interval = new(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15,03, 45), OffsetExpression.Zero), included: false),
-                                                max: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15, 03, 45), new (hours: 1)), included: false));
+                    IntervalExpression interval = new(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15, 03, 45), OffsetExpression.Zero), included: false),
+                                                max: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15, 03, 45), new(hours: 1)), included: false));
                     yield return new object[]
                     {
                         interval,
@@ -255,7 +254,6 @@
                 .Be(expected, reason);
         }
 
-
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_min_bound_is_DateTimeExpression_When_min_does_not_hold_TimeExpression_Constructor_should_converts_Min_to_DateExpression(DateExpression date, bool included)
         {
@@ -271,7 +269,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_Min_boundary_is_a_DateTimeExpression_with_only_time_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_TimeExpression(NonNull<TimeExpression> time, bool included)
+        public void Given_Min_boundary_is_a_DateTimeExpression_with_only_time_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_TimeExpression(NonNull<TimeExpression> time, bool included)
         {
             // Arrange
             DateTimeExpression dateTimeExpression = new(time.Item);
@@ -279,11 +277,14 @@
             // Act
             IntervalExpression interval = new(min: new BoundaryExpression(dateTimeExpression, included));
 
-            return (interval.Min.Expression is TimeExpression timeExpression && timeExpression.Equals(time.Item)).ToProperty();
+            // Assert
+            interval.Min.Expression.Should()
+                                   .BeOfType<TimeExpression>()
+                                   .Which.Should().Be(time.Item);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_Min_boundary_is_a_DateTimeExpression_with_only_date_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_DateExpression(NonNull<DateExpression> date, bool included)
+        public void Given_Min_boundary_is_a_DateTimeExpression_with_only_date_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_DateExpression(NonNull<DateExpression> date, bool included)
         {
             // Arrange
             // Arrange
@@ -292,7 +293,10 @@
             // Act
             IntervalExpression interval = new(min: new BoundaryExpression(dateTimeExpression, included));
 
-            return (interval.Min.Expression is DateExpression dateExpression && dateExpression.Equals(date.Item)).ToProperty();
+            // Assert
+            interval.Min.Expression.Should()
+                                   .BeOfType<DateExpression>()
+                                   .Which.Should().Be(date.Item);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -316,9 +320,9 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(NumericValueExpression constant, bool minIsIncluded, bool maxIsIncluded)
+        public void Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(NumericValueExpression constant)
         {
-            return CreateIsEquivalentPropeprty(constant, constant, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+            CreateIsEquivalentPropeprty(constant, constant, minIncluded: true, maxIsIncluded: true);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -335,34 +339,53 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_a_DateExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateExpression(DateExpression date, bool minIsIncluded, bool maxIsIncluded)
+        public void Given_a_DateExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateExpression(DateExpression date)
         {
-            return CreateIsEquivalentPropeprty(date, date, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+            CreateIsEquivalentPropeprty(date, date, minIncluded: true, maxIsIncluded: true);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateTimeExpression(DateTimeExpression dateTime, bool minIsIncluded, bool maxIsIncluded)
+        public void Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateTimeExpression(DateTimeExpression dateTime)
         {
-            return CreateIsEquivalentPropeprty(dateTime, dateTime, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+            CreateIsEquivalentPropeprty(dateTime, dateTime, minIncluded: true, maxIsIncluded: true);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_TimeExpression(TimeExpression dateTime, bool minIsIncluded, bool maxIsIncluded)
+        public void Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_TimeExpression(TimeExpression dateTime)
         {
-            return CreateIsEquivalentPropeprty(dateTime, dateTime, minIsIncluded, maxIsIncluded).When(minIsIncluded && maxIsIncluded);
+            CreateIsEquivalentPropeprty(dateTime, dateTime, minIncluded: true, maxIsIncluded: true);
         }
 
-        private static Property CreateIsEquivalentPropeprty(FilterExpression filterExpression, IBoundaryExpression boundaryExpression, bool minIncluded, bool maxIsIncluded)
+        private static void CreateIsEquivalentPropeprty(FilterExpression filterExpression, IBoundaryExpression boundaryExpression, bool minIncluded, bool maxIsIncluded)
         {
             // Arrange
-            IntervalExpression range = new(new(boundaryExpression, minIncluded), new(boundaryExpression, maxIsIncluded));
+            IntervalExpression range = new(new BoundaryExpression(boundaryExpression, minIncluded), new BoundaryExpression(boundaryExpression, maxIsIncluded));
 
-            return range.IsEquivalentTo(filterExpression).ToProperty();
+            // Act 
+            bool actual = range.IsEquivalentTo(filterExpression);
+
+            // Assert
+            actual.Should().BeTrue();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_RangeExpression_GetComplexity_should_return_sum_of_min_and_max_complexity(IntervalExpression rangeExpression)
-            => (rangeExpression.Complexity == (rangeExpression.Min?.Expression?.Complexity ?? 0) + (rangeExpression.Max?.Expression?.Complexity ?? 0)).ToProperty();
+        public void Given_RangeExpression_GetComplexity_should_return_sum_of_min_and_max_complexity(NonNull<IntervalExpression> rangeExpressionGenerator)
+        {
+            // Arrange
+            IntervalExpression rangeExpression = rangeExpressionGenerator.Item;
+
+            // Act
+            double actualComplexity = rangeExpression.Complexity;
+
+            // Assert
+            object _ = (rangeExpression.Min, rangeExpression.Max) switch
+            {
+                ({ Expression: { } minExpression }, { Expression: { } maxExpression }) => actualComplexity.Should().Be(minExpression.Complexity + maxExpression.Complexity),
+                ({ Expression: { } minExpression }, null) => actualComplexity.Should().Be(minExpression.Complexity),
+                (null, { Expression: { } maxExpression }) => actualComplexity.Should().Be(maxExpression.Complexity),
+                _ => actualComplexity.Should().Be(0),
+            };
+        }
 
         public static IEnumerable<object[]> SimplifyCases
         {
@@ -427,16 +450,15 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<IntervalExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        public void Equals_should_be_commutative(NonNull<IntervalExpression> first, FilterExpression second)
+            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<IntervalExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<IntervalExpression> expression)
+            => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<IntervalExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
-
+        public void Equals_should_be_symetric(NonNull<IntervalExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }
 }

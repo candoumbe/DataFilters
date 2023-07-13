@@ -1,15 +1,18 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
     using FluentAssertions;
-    using FsCheck.Xunit;
+
     using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
 
     using System;
+
     using Xunit;
     using Xunit.Abstractions;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
     public class DateExpressionTests
     {
@@ -52,7 +55,7 @@
         }
 
         [Property]
-        public Property Given_two_DateExpression_instances_first_and_other_with_same_data_first_eq_other_should_be_true(PositiveInt year, PositiveInt month, PositiveInt day)
+        public void Given_two_DateExpression_instances_first_and_other_with_same_data_first_eq_other_should_be_true(PositiveInt year, PositiveInt month, PositiveInt day)
         {
             // Arrange
             DateExpression first = new(year.Item, month.Item, day.Item);
@@ -60,33 +63,37 @@
 
             // Act
             bool actual = first.Equals(other);
+            int firstHashCode = first.GetHashCode();
+            int otherHashCode = other.GetHashCode();
 
             // Assert
-            return actual.And(first.GetHashCode() == other.GetHashCode());
+            actual.Should().BeTrue();
+            firstHashCode.Should().Be(otherHashCode);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateExpression_GetComplexity_should_return_1(NonNull<DateExpression> date) => (date.Item.Complexity == 1).ToProperty();
+        public void Given_DateExpression_GetComplexity_should_return_1(NonNull<DateExpression> date)
+            => date.Item.Complexity.Should().Be(1);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
+        public void Equals_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
             => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<DateExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<DateExpression> expression)
+            => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Equals_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property IsEquivalent_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
-            => (first.Item.IsEquivalentTo(second) == second.IsEquivalentTo(first.Item)).ToProperty();
+        public void IsEquivalent_should_be_commutative(NonNull<DateExpression> first, FilterExpression second)
+            => first.Item.IsEquivalentTo(second).Should().Be(second.IsEquivalentTo(first.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property IsEquivalentTo_should_be_reflexive(NonNull<DateExpression> expression)
-            => expression.Item.IsEquivalentTo(expression.Item).ToProperty();
+        public void IsEquivalentTo_should_be_reflexive(NonNull<DateExpression> expression)
+            => expression.Item.IsEquivalentTo(expression.Item).Should().BeTrue();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void IsEquivalentTo_should_be_symetric(NonNull<DateExpression> expression, NonNull<FilterExpression> otherExpression)

@@ -1,16 +1,18 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
     using FluentAssertions;
-    using FsCheck.Xunit;
+
     using FsCheck;
+    using FsCheck.Xunit;
 
     using System;
     using System.Collections.Generic;
+
     using Xunit;
     using Xunit.Abstractions;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
     public class GroupExpressionTests
     {
@@ -48,19 +50,18 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<GroupExpression> group)
-            => group.Item.Equals(group.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<GroupExpression> group)
+            => group.Item.Equals(group.Item).Should().BeTrue();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)
-            => (group.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(group.Item)).ToProperty();
+        public void Equals_should_be_symetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)
+            => group.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(group.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_GroupExpression_Complexity_should_be_linear_to_inner_expression_complexity(GroupExpression group)
-            => (group.Complexity == 0.1 + group.Expression.Complexity).ToProperty();
+        public void Given_GroupExpression_Complexity_should_be_linear_to_inner_expression_complexity(GroupExpression group) => group.Complexity.Should().Be(0.1 + group.Expression.Complexity);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_GroupExpression_which_contains_an_arbitrary_expression_When_comparing_to_that_arbitrary_expression_IsEquivalent_should_return_true(NonNull<FilterExpression> filterExpression)
+        public void Given_GroupExpression_which_contains_an_arbitrary_expression_When_comparing_to_that_arbitrary_expression_IsEquivalent_should_return_true(NonNull<FilterExpression> filterExpression)
         {
             // Arrange
             GroupExpression group = new(filterExpression.Item);
@@ -69,7 +70,7 @@
             bool actual = group.IsEquivalentTo(filterExpression.Item);
 
             // Assert
-            return actual.ToProperty();
+            actual.Should().BeTrue();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -99,7 +100,7 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_two_GroupExpression_instances_that_wrap_equivalent_expressions_IsEquivalent_should_be_true(NonNull<FilterExpression> filterExpression)
+        public void Given_two_GroupExpression_instances_that_wrap_equivalent_expressions_IsEquivalent_should_be_true(NonNull<FilterExpression> filterExpression)
         {
             // Arrange
             GroupExpression first = new(filterExpression.Item);
@@ -109,7 +110,7 @@
             bool actual = first.IsEquivalentTo(other);
 
             // Assert
-            return actual.ToProperty();
+            actual.Should().BeTrue();
         }
 
         public static IEnumerable<object[]> EqualsCases
@@ -159,7 +160,7 @@
         {
             // Arrange
             GroupExpression group = new(filterExpression.Item);
-            GroupExpression extraGroup = new (group);
+            GroupExpression extraGroup = new(group);
 
             // Act
             bool isEquivalent = group.IsEquivalentTo(extraGroup);

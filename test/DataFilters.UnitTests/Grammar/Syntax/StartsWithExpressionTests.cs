@@ -6,7 +6,7 @@
     using FluentAssertions;
 
     using FsCheck;
-using FsCheck.Fluent;
+    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -103,17 +103,16 @@ using FsCheck.Fluent;
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<StartsWithExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        public void Equals_should_be_commutative(NonNull<StartsWithExpression> first, FilterExpression second)
+            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<StartsWithExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<StartsWithExpression> expression)
+            => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
-
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
@@ -153,7 +152,7 @@ using FsCheck.Fluent;
             StartsWithExpression startsWith = startsWithGen.Item;
             EndsWithExpression endsWith = endsWithGen.Item;
 
-            AndExpression expected = new (startsWith, endsWith);
+            AndExpression expected = new(startsWith, endsWith);
 
             // Act
             AndExpression actual = startsWith + endsWith;

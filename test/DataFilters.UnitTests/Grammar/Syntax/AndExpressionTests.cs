@@ -105,8 +105,17 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_AndExpression_GetComplexity_should_return_left_complexity_multiply_by_right_complexity(AndExpression and)
-            => (and.Complexity == and.Left.Complexity * and.Right.Complexity).ToProperty();
+        public void Given_AndExpression_GetComplexity_should_return_left_complexity_multiply_by_right_complexity(AndExpression and)
+        {
+            // Arrange
+            double expected = and.Left.Complexity * and.Right.Complexity;
+
+            // Act
+            double actual = and.Complexity;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
 
         public static IEnumerable<object[]> SimplifyCases
         {
@@ -153,7 +162,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_two_AndExpression_instances_one_and_two_where_oneU002Eleft_eq_twoU002Eright_and_oneU002Eright_eq_twoU002Eleft_IsEquivalentTo_should_return_true(FilterExpression first, FilterExpression second)
         {
             // Arrange
@@ -168,20 +177,19 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                   .BeTrue();
         }
 
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
+        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void IsEquivalent_should_be_reflexive(AndExpression and)
             => and.IsEquivalentTo(and).Should().BeTrue();
 
-        
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_two_AndExpression_instances_first_and_second_and_firstU002ERight_eq_secondU002Eright_and_firstU002ELeft_eq_secondU002ELeft_Equals_should_returns_true(FilterExpression left, FilterExpression right)
+        public void Given_two_AndExpression_instances_first_and_second_and_firstU002ERight_eq_secondU002Eright_and_firstU002ELeft_eq_secondU002ELeft_Equals_should_returns_true(FilterExpression left, FilterExpression right)
         {
             // Arrange
             AndExpression first = new(left, right);
             AndExpression second = new(left, right);
 
             // Assert
-            return first.Equals(second).ToProperty();
+            first.Should().Be(second);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -199,7 +207,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_AndExpression_instance_where_instanceU002ELeft_is_equivalent_to_instanceU002ERight_Simplify_should_return_the_expression_with_the_lowest_Complexity(FilterExpression expression, PositiveInt count)
+        public void Given_AndExpression_instance_where_instanceU002ELeft_is_equivalent_to_instanceU002ERight_Simplify_should_return_the_expression_with_the_lowest_Complexity(FilterExpression expression, PositiveInt count)
         {
             // Arrange
             OneOfExpression oneOfExpression = new(Enumerable.Repeat(expression, count.Item + 1) // if count == 1
@@ -213,20 +221,21 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             // Act
             FilterExpression actual = and.Simplify();
             bool isEquivalent = actual.IsEquivalentTo(oneOfExpression);
+            double actualComplexity = actual.Complexity;
 
             // Assert
             _outputHelper.WriteLine($"actual : {actual.EscapedParseableString} (Complexity : {actual.Complexity})");
             _outputHelper.WriteLine($"actual is equivalent to expression : {isEquivalent})");
 
-            return (actual.Complexity < oneOfExpression.Complexity)
-                .And(actual.IsEquivalentTo(expression));
+            isEquivalent.Should().BeTrue();
+            actualComplexity.Should().BeLessThan(oneOfExpression.Complexity);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Given_left_operand_is_a_AndFilterExpression_instance_When_right_is_not_null_Constructor_should_wrap_left_inside_a_GroupExpression_instance(NonNull<AndExpression> left, NonNull<FilterExpression> right)
         {
             // Act
-            AndExpression and = new (left.Item, right.Item);
+            AndExpression and = new(left.Item, right.Item);
 
             // Assert
             and.Left.Should()

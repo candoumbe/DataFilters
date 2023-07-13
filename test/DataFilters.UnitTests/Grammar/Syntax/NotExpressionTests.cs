@@ -43,27 +43,32 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NotExpression_GetComplexity_should_return_same_complexity_as_embedded_expression(NonNull<NotExpression> notExpression)
-            => (notExpression.Item.Complexity == notExpression.Item.Expression.Complexity).ToProperty();
+        public void Given_NotExpression_GetComplexity_should_return_same_complexity_as_embedded_expression(NonNull<NotExpression> notExpression)
+            => notExpression.Item.Complexity.Should().Be(notExpression.Item.Expression.Complexity);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NotExpression_Equals_should_be_reflexive(NonNull<NotExpression> notExpression)
-            => notExpression.Item.Equals(notExpression.Item).ToProperty();
+        public void Given_NotExpression_Equals_should_be_reflexive(NonNull<NotExpression> notExpression)
+            => notExpression.Item.Should().Be(notExpression.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NotExpression_and_a_filter_expression_that_is_not_null_Equals_should_be_symetric(NonNull<NotExpression> notExpression, NonNull<FilterExpression> filterExpression)
-            => (notExpression.Item.Equals(filterExpression.Item) == filterExpression.Item.Equals(notExpression.Item)).ToProperty();
+        public void Given_NotExpression_and_a_filter_expression_that_is_not_null_Equals_should_be_symetric(NonNull<NotExpression> notExpression, NonNull<FilterExpression> filterExpression)
+            => notExpression.Item.Equals(filterExpression.Item).Should().Be(filterExpression.Item.Equals(notExpression.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_two_instances_holding_same_Expressions_Equals_should_return_true(NonNull<FilterExpression> expression)
+        public void Given_two_instances_holding_same_Expressions_Equals_should_return_true(NonNull<FilterExpression> expression)
         {
             // Arrange
             NotExpression first = new(expression.Item);
             NotExpression other = new(expression.Item);
 
             // Act
-            return first.Equals(other)
-                        .And(first.GetHashCode() == other.GetHashCode());
+            bool actual = first.Equals(other);
+            int firstHashCode = first.GetHashCode();
+            int otherHashCode = other.GetHashCode();
+
+            // Assert
+            actual.Should().BeTrue();
+            firstHashCode.Should().Be(otherHashCode);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -119,7 +124,7 @@
                   .Be(expected);
         }
 
-                public static IEnumerable<object[]> EqualsCases
+        public static IEnumerable<object[]> EqualsCases
         {
             get
             {
@@ -156,16 +161,15 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<NotExpression> first, FilterExpression second)
+        public void Equals_should_be_commutative(NonNull<NotExpression> first, FilterExpression second)
             => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<NotExpression> expression)
+        public void Equals_should_be_reflexive(NonNull<NotExpression> expression)
             => expression.Item.Equals(expression.Item).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<NotExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
-
+        public void Equals_should_be_symetric(NonNull<NotExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }
 }
