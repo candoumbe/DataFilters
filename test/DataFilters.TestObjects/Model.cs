@@ -13,5 +13,4 @@
 
         public string CAPITALCASINGPROPERTY { get; set; }
     }
-
 }

@@ -102,30 +102,32 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(StringValueExpression first, FilterExpression second)
-            => (first.Equals(second) == second.Equals(first)).ToProperty();
+        public void Equals_should_be_commutative(StringValueExpression first, FilterExpression second)
+            => (first.Equals(second) == second.Equals(first)).ToProperty().QuickCheckThrowOnFailure();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<StringValueExpression> expression)
+        public void Equals_should_be_reflexive(NonNull<StringValueExpression> expression)
             => expression.Item.Equals(expression.Item).ToProperty();
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<StringValueExpression> expression, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symetric(NonNull<StringValueExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
         [Property]
-        public Property Given_two_StringValueExpresssions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
+        public void Given_two_StringValueExpresssions_Equals_should_depends_on_string_input_only(NonWhiteSpaceString input)
         {
             // Arrange
             StringValueExpression first = new(input.Get);
             StringValueExpression second = new(input.Get);
 
             // Act
-            return (first.Equals(second) == Equals(first.Value, second.Value)).ToProperty();
+            (first.Equals(second) == Equals(first.Value, second.Value))
+                .ToProperty()
+                .QuickCheckThrowOnFailure(_outputHelper);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
+        public void Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
 
         [Property]
         public void Given_StringValueExpression_and_TextExpression_are_based_on_same_value_IsEquivalentTo_should_be_true(NonWhiteSpaceString input)
@@ -147,7 +149,7 @@
         {
             // Arrange
             StringValueExpression stringValue = new(input.Item);
-            GroupExpression group = new (new StringValueExpression(input.Item));
+            GroupExpression group = new(new StringValueExpression(input.Item));
 
             // Act
             bool actual = stringValue.IsEquivalentTo(group);

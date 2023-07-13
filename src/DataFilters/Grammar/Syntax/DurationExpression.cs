@@ -113,7 +113,7 @@ namespace DataFilters.Grammar.Syntax
                     DateTime otherDateTime = ConvertToDateTime(otherDuration);
                     DateTime current = ConvertToDateTime(this);
 
-                    equivalent = current - otherDateTime == TimeSpan.Zero;
+                    equivalent = (current - otherDateTime) == TimeSpan.Zero;
                 }
             }
 

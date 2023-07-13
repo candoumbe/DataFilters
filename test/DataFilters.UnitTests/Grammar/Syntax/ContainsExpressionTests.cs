@@ -1,16 +1,18 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
     using FluentAssertions;
-    using FsCheck.Xunit;
+
     using FsCheck;
+    using FsCheck.Xunit;
 
     using System;
     using System.Collections.Generic;
+
     using Xunit;
     using Xunit.Abstractions;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
     public class ContainsExpressionTests
     {
@@ -109,8 +111,14 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ContainsExpression_Complexity_eq_1U002E5(ContainsExpression contains)
-            => (contains.Complexity == 1.5).ToProperty();
+        public void Given_ContainsExpression_Complexity_eq_1U002E5(ContainsExpression contains)
+        {
+            // Act
+            double actual = contains.Complexity;
+
+            // Assert
+            actual.Should().Be(1.5);
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void IsEquivalentTo_should_be_reflexive(ContainsExpression contains)
@@ -148,16 +156,36 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<ContainsExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        public void Equals_should_be_commutative(NonNull<ContainsExpression> first, FilterExpression second)
+        {
+            // Act
+            bool firstEqualsSecond = first.Equals(second);
+            bool secondEqualsFirst = second.Equals(first);
+
+            // Assert
+            firstEqualsSecond.Should().Be(secondEqualsFirst, "'equals' implementation must be commutative");
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<ContainsExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<ContainsExpression> expression)
+        {
+            // Act
+            bool actual = expression.Item.Equals(expression.Item);
+
+            // Assert
+            actual.Should().BeTrue("'equals' implementation must be reflexive");
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        public void Equals_should_be_symetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
+        {
+            // Act
 
+            bool expressionEqualsOther = expression.Item.Equals(otherExpression.Item);
+            bool otherEqualsExpression = otherExpression.Item.Equals(expression.Item);
+
+            // Assert
+            expressionEqualsOther.Should().Be(otherEqualsExpression, "'equals' implementation must be symetric");
+        }
     }
 }

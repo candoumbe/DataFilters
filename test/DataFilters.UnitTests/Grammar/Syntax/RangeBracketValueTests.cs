@@ -13,25 +13,34 @@
     using System.Linq;
 
     using Xunit;
+    using Xunit.Abstractions;
 
     public class RangeBracketValueTests
     {
+        private readonly ITestOutputHelper _outputHelper;
+
+        public RangeBracketValueTests(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+        }
+
         [Property]
-        public Property Value_should_be_set_by_the_parameter_of_the_constructor(char start, char end)
+        public void Value_should_be_set_by_the_parameter_of_the_constructor(char start, char end)
         {
             // Act
             RangeBracketValue rangeBracketValue = new(start, end);
 
             // Assert
-            return ((start, end).Equals((rangeBracketValue.Start, rangeBracketValue.End))).ToProperty();
+            rangeBracketValue.Start.Should().Be(start);
+            rangeBracketValue.End.Should().Be(end);
         }
 
         [Property]
-        public Property Given_ConstantBracketExpression_contains_consecutive_characters_When_comparing_to_RangeBracketValue_that_has_head_and_tail_Equals_should_returns_true()
+        public void Given_ConstantBracketExpression_contains_consecutive_characters_When_comparing_to_RangeBracketValue_that_has_head_and_tail_Equals_should_returns_true()
         {
             // Arrange
             IArbMap arbMap = ArbMap.Default;
-            return Prop.ForAll(arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower) , arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower),
+            Prop.ForAll(arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower), arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower),
                                (start, end) =>
                                 {
                                     char[] chrs = new[] { start, end }.OrderBy(x => x)
@@ -46,24 +55,61 @@
                                     bool actual = new RangeBracketValue(head, tail).Equals(constantBracketValue);
 
                                     return actual.When(start < end);
-                                });
+                                })
+                .QuickCheckThrowOnFailure(_outputHelper);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_left_and_right_RangeBracketValues_left_ne_right_should_be_same_as_not_left_Equals_right(RangeBracketValue left, RangeBracketValue right)
-            => (left != right).When(!left.Equals(right)).Label($"Left, Right : {(left, right)}");
+        public void Given_left_and_right_RangeBracketValues_left_ne_right_should_be_same_as_not_left_Equals_right(RangeBracketValue left, RangeBracketValue right)
+        {
+            // Arrange
+            bool expected = !left.Equals(right);
+
+            // Act
+            bool actual = left != right;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_left_and_right_RangeBracketValues_left_gt_right_should_be_same_as_left_Start_gt_right_Start(RangeBracketValue left, RangeBracketValue right)
-            => (left > right).When(left.Start > right.Start).Label($"Left, Right : {(left, right)}");
+        public void Given_left_and_right_RangeBracketValues_left_gt_right_should_be_same_as_left_Start_gt_right_Start(RangeBracketValue left, RangeBracketValue right)
+        {
+            // Arrange
+            bool expected = left.Start > right.Start;
+
+            // Act
+            bool actual = left > right;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_left_and_right_RangeBracketValues_left_lte_right_should_be_same_as_left_lt_right_or_left_eq_right(RangeBracketValue left, RangeBracketValue right)
-            => (left <= right).When(left < right || left == right).Label($"Left, Right : {(left, right)}");
+        public void Given_left_and_right_RangeBracketValues_left_lte_right_should_be_same_as_left_lt_right_or_left_eq_right(RangeBracketValue left, RangeBracketValue right)
+        {
+            // Arrange
+            bool expected = left < right || left == right;
+
+            // Act
+            bool actual = left <= right;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_left_and_right_RangeBracketValues_left_gte_right_should_be_same_as_left_gt_right_or_left_eq_right(RangeBracketValue left, RangeBracketValue right)
-            => (left <= right).When(left < right || left == right).Label($"Left, Right : {(left, right)}");
+        public void Given_left_and_right_RangeBracketValues_left_gte_right_should_be_same_as_left_gt_right_or_left_eq_right(RangeBracketValue left, RangeBracketValue right)
+        {
+            // Arrange
+            bool expected = left > right || left == right;
+
+            // Act
+            bool actual = left >= right;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
 
         [Theory]
         [InlineData('a', 'a', 2)]

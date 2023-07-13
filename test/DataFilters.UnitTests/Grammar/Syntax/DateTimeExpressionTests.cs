@@ -1,17 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
     using FluentAssertions;
-    using FsCheck.Xunit;
+
     using FsCheck;
+    using FsCheck.Xunit;
 
     using System;
+    using System.Collections.Generic;
+
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
-    using System.Collections.Generic;
 
     [Feature(nameof(DataFilters.Grammar.Syntax))]
     public class DateTimeExpressionTests
@@ -171,16 +173,16 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<DateTimeExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        public void Equals_should_be_commutative(NonNull<DateTimeExpression> first, FilterExpression second)
+            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<DateTimeExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<DateTimeExpression> expression)
+            => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        public void Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
         public void Equals_should_be_transitive(NonNull<DateTimeExpression> first, NonNull<DateTimeExpression> second, NonNull<DateTimeExpression> third)

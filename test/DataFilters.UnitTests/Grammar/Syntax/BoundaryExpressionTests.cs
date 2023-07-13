@@ -6,7 +6,6 @@
     using FluentAssertions;
 
     using FsCheck;
-    using FsCheck.Fluent;
     using FsCheck.Xunit;
 
     using System;
@@ -21,22 +20,40 @@
     public class BoundaryExpressionTests
     {
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_a_BoundaryExpression_instance_should_be_equals_to_itself(BoundaryExpression input)
-            => input.Equals(input).ToProperty();
+        public void Given_a_BoundaryExpression_instance_should_be_equals_to_itself(BoundaryExpression input)
+        {
+            // Act
+            bool actual = input.Equals(input);
+
+            // Assert
+            actual.Should().BeTrue("'equals' implementation should be reflexive");
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property A_BoundaryExpression_instance_should_not_be_equal_to_null(BoundaryExpression input)
-            => (!input.Equals(null)).ToProperty();
+        public void A_BoundaryExpression_instance_should_not_be_equal_to_null(BoundaryExpression input)
+        {
+            // Act
+            bool actual = input.Equals(null);
+
+            // Assert
+            actual.Should().BeFalse("a not null boundaryexpression is not equal to null");
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Two_BoundaryExpressions_instances_with_same_expression_and_included_should_be_equal(BoundaryExpression source)
+        public void Two_BoundaryExpressions_instances_with_same_expression_and_included_should_be_equal(BoundaryExpression source)
         {
             // Arrange
             BoundaryExpression first = new(source.Expression, source.Included);
             BoundaryExpression other = new(source.Expression, source.Included);
 
-            return first.Equals(other)
-                .And(first.GetHashCode() == other.GetHashCode());
+            // Act
+            bool actual = first.Equals(other);
+            int firstHashCode = first.GetHashCode();
+            int otherHashCode = other.GetHashCode();
+
+            // Assert
+            actual.Should().BeTrue();
+            firstHashCode.Should().Be(otherHashCode);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
@@ -51,12 +68,25 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<BoundaryExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        public void Equals_should_be_reflexive(NonNull<BoundaryExpression> expression)
+        {
+            // Act
+            bool actual = expression.Item.Equals(expression.Item);
+
+            // Assert
+            actual.Should().BeTrue("'equals' implementation must be reflexive");
+        }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
-            => (group.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(group.Item)).ToProperty();
+        public void Equals_should_be_symetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
+        {
+            // Act
+            bool groupEqualOtherExpression = group.Item.Equals(otherExpression.Item);
+            bool otherExpressionEqualGroup = otherExpression.Item.Equals(group);
+
+            // Assert
+            groupEqualOtherExpression.Should().Be(otherExpressionEqualGroup, "'equals' impelemntation must be symetric");
+        }
 
         public static IEnumerable<object[]> EqualsBehaviourCases
         {
@@ -91,6 +121,5 @@
             actual.Should()
                   .Be(expected, reason);
         }
-
     }
 }

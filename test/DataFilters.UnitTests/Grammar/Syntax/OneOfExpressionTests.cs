@@ -2,11 +2,11 @@
 {
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
+
     using FluentAssertions;
 
-    using FsCheck.Xunit;
-
     using FsCheck;
+    using FsCheck.Xunit;
 
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,6 @@
 
     using Xunit;
     using Xunit.Abstractions;
-    using FsCheck.Fluent;
 
     public class OneOfExpressionTests
     {
@@ -188,22 +187,22 @@
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(StringValueExpression filterExpression, PositiveInt n)
+        public void Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(StringValueExpression filterExpression, PositiveInt n)
             => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression, PositiveInt n)
+        public void Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression, PositiveInt n)
             => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression, PositiveInt n)
+        public void Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression, PositiveInt n)
             => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(PositiveInt n)
+        public void Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(PositiveInt n)
             => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(AsteriskExpression.Instance, n.Item);
 
-        private static Property Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
+        private static void Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
         {
             // Arrange
             IEnumerable<FilterExpression> filterExpressions = Enumerable.Repeat(filterExpression, n);
@@ -211,21 +210,28 @@
             OneOfExpression oneOfExpression = new(filterExpressions.ToArray());
 
             // Act
-            return oneOfExpression.IsEquivalentTo(filterExpression)
-                                  .ToProperty();
+            bool actual = oneOfExpression.IsEquivalentTo(filterExpression);
+
+            // Assert
+            actual.Should().BeTrue();
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(NonEmptyArray<FilterExpression> expressions)
+        public void Given_OneOfExpression_Complexity_should_return_sum_of_inner_expressions(NonEmptyArray<FilterExpression> expressions)
         {
             // Arrange
             OneOfExpression oneOfExpression = new(expressions.Item);
+            double expected = oneOfExpression.Values.Sum(expr => expr.Complexity);
 
-            return (oneOfExpression.Complexity == oneOfExpression.Values.Sum(expr => expr.Complexity)).ToProperty();
+            // Act
+            double actual = oneOfExpression.Complexity;
+
+            // Assert
+            actual.Should().Be(expected);
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OneOfExpression_with_same_values_repetead_more_than_once_Simplify_should_filter_out_duplicated_values(NonEmptyArray<FilterExpression> expressions)
+        public void Given_OneOfExpression_with_same_values_repetead_more_than_once_Simplify_should_filter_out_duplicated_values(NonEmptyArray<FilterExpression> expressions)
         {
             // Arrange
             OneOfExpression oneOf = new(expressions.Item);
@@ -233,10 +239,10 @@
             double complexityBeforeCallingSimplify = oneOf.Complexity;
 
             // Act
-            oneOf.Simplify();
+            FilterExpression simplifiedExpression = oneOf.Simplify();
 
             // Assert
-            return (oneOf.Complexity <= complexityBeforeCallingSimplify).ToProperty();
+            simplifiedExpression.Complexity.Should().BeLessThanOrEqualTo(complexityBeforeCallingSimplify);
         }
 
         public static IEnumerable<object[]> SimplifyCases

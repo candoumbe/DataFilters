@@ -1071,7 +1071,6 @@ I&_Oj
                 // Assert
                 AssertThatShould_parse(actual, expected);
             });
-
         }
 
         [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]

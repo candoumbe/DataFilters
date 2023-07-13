@@ -95,12 +95,10 @@ namespace DataFilters.UnitTests.Helpers
                 LessThanFilter<DateTime>(),
                 LessThanOrEqualFilter<DateTime>(),
                 FiltersOverNumericValues().Generator.Select(filter => (IFilter)filter)
-
             };
 
             return Gen.OneOf(generators).ToArbitrary();
         }
-
 
         internal static Arbitrary<Filter> EndsWithFilter() => GenerateFilterOverStrings(FilterOperator.EndsWith);
 
@@ -124,7 +122,6 @@ namespace DataFilters.UnitTests.Helpers
             {
                 case 0:
                     {
-
                         gen = GenerateFilters().Generator.Two()
                                                .Select(tuple => new[] {tuple.Item1, tuple.Item2})
                                                .Zip(generateLogic)
@@ -160,11 +157,9 @@ namespace DataFilters.UnitTests.Helpers
         private static Gen<IFilter> LessThanFilter<TValue>()
             => GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator.LessThanOrEqualTo);
 
-
         private static Gen<IFilter> GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator op)
             => GetArbitraryFor<TValue>().Generator
                                         .Select(value => (IFilter) new Filter(Faker.Hacker.Noun(), op, value));
-
 
     }
 }
