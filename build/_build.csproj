@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Nuke.Common" Version="7.0.2" PrivateAssets="all" />
     <PackageReference Include="Candoumbe.Pipelines" Version="0.4.3" />
-    <PackageReference Include="ReportGenerator" Version="[5.1.22]" />
+    <PackageReference Include="ReportGenerator" Version="[5.1.23]" />
     <PackageDownload Include="GitVersion.Tool" Version="[5.10.3]" />
     <PackageDownload Include="Codecov.Tool" Version="[1.12.3]" />
   </ItemGroup>
