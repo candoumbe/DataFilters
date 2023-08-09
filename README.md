@@ -1,25 +1,26 @@
-#  Datafilters <!-- omit in toc -->
+# Datafilters <!-- omit in toc -->
 
 ![GitHub Main branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/delivery.yml?branch=main&label=main)
 ![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop)
 [![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/DataFilters)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
-[![DataFilters ](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters)](https://nuget.org/packages/datafilters)
+[![DataFilters](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters)](https://nuget.org/packages/datafilters)
 
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
 
 ## **Disclaimer**
+
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Major version zero (0.y.z) is for initial development. **Anything MAY change at any time**.
 
-The public API SHOULD NOT be considered stable. 
+The public API SHOULD NOT be considered stable.
 
+## **Table of contents**
 
-**Table of contents**
 - <a href='#parsing'>Parsing</a>
-- <a href='#filtering'>Filters syntax</a>
+- <a href='#filtering'>Syntax</a>
   - <a href='#equals-expression'>Equals</a>
   - <a href='#starts-with-expression'>Starts with</a>
   - <a href='#ends-with-expression'>Ends with</a>
@@ -41,8 +42,9 @@ The public API SHOULD NOT be considered stable.
 - <a href='#how-to-install'>How to install</a>
 - <a href='#how-to-use'>How to use</a>
   - <a href='#how-to-use-client'>On the client</a>
-  - <a href='#how-to-use-backend'>On the backend</a>
-
+  - <a href='#how-to-use-backend'>On the backend : filtering data from any datasource
+    - <a href='#how-to-expression'>Building expression trees</a>
+    - <a href='#how-to-expression'>Extending `IFilter`s</a>
 
 The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
@@ -61,7 +63,9 @@ public class Vigilante
     public IEnumerable<Vigilante> Acolytes {get; set;} 
 }
 ```
+
 JSON Schema
+
 ```json
 {
   "id": "vigilante_root",
@@ -156,7 +160,6 @@ Search for `vigilante` resource that ends with `man` in the `nickname` property.
 | --------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `nickname=*man` | `{ "field":"nickname", "op":"endswith", "value":"man" }` | `new Filter(field: "nickname", @operator : FilterOperator.EndsWith, value : "man")` |
 
-
 ## <a href='#' id='contains-expression'>Contains</a>
 
 Search for `vigilante` resources that contains `bat` in the `nickname` property.
@@ -165,10 +168,7 @@ Search for `vigilante` resources that contains `bat` in the `nickname` property.
 | ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `nickname=*bat*` | `{ "field":"nickname", "op":"contains", "value":"bat" }` | `new Filter(field: "nickname", @operator : FilterOperator.Contains, value : "bat")` |
 
-
 💡 `contains` also work on arrays. `powers=*strength*` will search for `vigilante`s who have `strength` related powers.
-
-
 
 Search for `vigilante` resources that have no powers.
 
@@ -184,9 +184,6 @@ Search for `vigilante` resources that have no powers.
 | ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `N/A`        | `{ "field":"powers", "op":"isnull" }` | `new Filter(field: "powers", @operator : FilterOperator.IsNull)` or `new Filter(field: "powers", @operator : FilterOperator.EqualsTo, value: null)` |
 
-
-
-
 ## <a href='#' id='any-of-expression'>Any of</a>
 
 Search for `vigilante` resources that have at least one of the specified powers.
@@ -196,6 +193,7 @@ Search for `vigilante` resources that have at least one of the specified powers.
 | `powers={strength\|speed\|size}` | N/A  |
 
 will result in a [IFilter][class-ifilter] instance equivalent to
+
 ```csharp
 IFilter filter = new MultiFilter
 {
@@ -208,6 +206,7 @@ IFilter filter = new MultiFilter
      }
 };
 ```
+
 ## <a href='#' id='isnull-expression'>Is null</a>
 
 Search for `vigilante` resources that have no powers.
@@ -216,9 +215,6 @@ Search for `vigilante` resources that have no powers.
 | ------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `N/A`        | `{ "field":"powers", "op":"isnull" }` | `new Filter(field: "powers", @operator : FilterOperator.IsNull)` or `new Filter(field: "powers", @operator : FilterOperator.EqualsTo, value: null)` |
 
-
-
-
 ## <a href='#' id='any-of-expression'>Any of</a>
 
 Search for `vigilante` resources that have at least one of the specified powers.
@@ -228,6 +224,7 @@ Search for `vigilante` resources that have at least one of the specified powers.
 | `powers={strength\|speed\|size}` | N/A  |
 
 will result in a [IFilter][class-ifilter] instance equivalent to
+
 ```csharp
 IFilter filter = new MultiFilter
 {
@@ -240,6 +237,7 @@ IFilter filter = new MultiFilter
      }
 };
 ```
+
 ## <a href='#' id='interval-expressions'>Interval expressions</a>
 
 Interval expressions are delimited by upper and a lower bound. The generic syntax is
@@ -276,9 +274,9 @@ Search for vigilante resources where `age` property is between `20` and `35`
 | ---------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `age=[20 TO 35]` | `{"logic": "and", filters[{"field":"age", "op":"gte", "value":20}, {"field":"age", "op":"lte", "value":35}]}` | `new MultiFilter { Logic = And, Filters = new IFilter[] { new Filter ("age", GreaterThanOrEqualTo, 20), new Filter("age", LessThanOrEqualTo, 35) } }` |
 
-
 ---
-💡 You can exclude the lower (resp. upper) bound by using `]` (resp. `[`). 
+💡 You can exclude the lower (resp. upper) bound by using `]` (resp. `[`).
+
 - `age=]20 TO 35[` means `age` strictly greater than `20` and strictly less than`35`
 - `age=[20 TO 35[` means `age` greater than or equal to `20` and strictly less than`35`
 - `age=]20 TO 35]` means `age` greater than `20` and less than or equal to `35`
@@ -286,13 +284,14 @@ Search for vigilante resources where `age` property is between `20` and `35`
 💡 Dates, times and durations must be specified in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601)
 
 Examples :
+
 - `]1998-10-26 TO 2000-12-10[`
 - `my/beautiful/api/search?date=]1998-10-26 10:00 TO 1998-10-26 10:00[`
 - `]1998-10-12T12:20:00 TO 13:30[` is equivalent to `]1998-10-12T12:20:00 TO 1998-10-12T13:30:00[`
 
 💡 You can apply filters to any sub-property of a given collection
 
-Example : 
+Example :
 `acolytes["name"]='robin'` will filter any `vigilante` resource where at least one item in `acolytes` array with `name` equals to `robin`.
 
 The generic syntax for filtering on in a hierarchical tree
@@ -300,15 +299,15 @@ The generic syntax for filtering on in a hierarchical tree
 
 you can also use the dot character (`.`).
 `property["subproperty"]["subproperty-n"]=<expression>` and `property.subproperty["subproperty-n"]=<expression>`
-are equivalent 
+are equivalent
 
 ## <a href="regex-expression">Regular expression</a>
-The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported. 
-A bracket expression. Matches a single character that is contained within the brackets. 
+
+The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported.
+A bracket expression. Matches a single character that is contained within the brackets.
 For example, `[abc]` matches `a`, `b`, or `c`. `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
 
 `BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
-
 
 ## <a href="logic-operators">Logical operators</a>
 
@@ -316,12 +315,11 @@ Logicial operators can be used combine several instances of [IFilter][class-ifil
 
 ### <a href='#' id='and-expression'>And</a>
 
-Use the coma character `,` to combine multiple expressions using logical AND operator 
+Use the coma character `,` to combine multiple expressions using logical AND operator
 
 | Query string         | JSON                                                                                                                                     |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `nickname=Bat*,*man` | `{"logic": "and", filters[{"field":"nickname", "op":"startswith", "value":"Bat"}, {"field":"nckname", "op":"endswith", "value":"man"}]}` |
-
 
 will result in a [IFilter][class-ifilter] instance equivalent to
 
@@ -336,9 +334,10 @@ IFilter filter = new MultiFilter
     }
 }
 ```
+
 ### <a href='#' id='or-expression'>Or</a>
 
-Use the pipe character `|`  to combine several expressions using logical OR operator 
+Use the pipe character `|`  to combine several expressions using logical OR operator
 Search for `vigilante` resources where the value of the `nickname` property either starts with `"Bat"` or
 ends with `"man"`
 
@@ -434,7 +433,6 @@ a special character.
 | ------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
 
-
 💡 For longer texts, just wrap it between quotes and you're good to go
 
 | Query string   | JSON                                                | C#                                                                              |
@@ -451,7 +449,6 @@ order.
 You can sort by several properties at once by separating them with a `,`.
 
 For example `sort=+nickname,-age` allows to sort by `nickname` ascending, then by `age` property descending.
-
 
 # <a href='#' id='how-to-install'>How to install</a>
 
@@ -544,10 +541,39 @@ Some explanation on the controller's code above  :
    full [IFilter][class-ifilter].
 4. we can then either :
    - use the filter directly is there was only one filter
-   - or combine them using [composite filter][class-multi-filter] if there were more than one criterion.
+   - or combine them using [composite filter][class-multi-filter] when there is more than one criterion.
+
+💡 _Remarks_
 
 You may have noticed that `SearchVigilanteQuery.Age` property is nullable whereas `Vigilante.Age` property is not.
 This is to distinguish if the `Age` criterion was provided or not when calling the `vigilantes/search` endpoint.
+
+#### Building expression trees to filtering data from any datasource
+
+Most of the time, once you have an [IFilter][class-ifilter], you want to use it against a datasource.
+Using `Expression<Func<T, bool>>` is the most common type used for this kind of purpose.
+[DataFilters.Expressions][Datafilters.expressions] library adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it
+to an equivalent `System.Expression<Func<T, bool>>` instance.
+Using the example of the `VigilantesController`, we can turn our `filter` into a `Expression<Func<T, bool>>`
+
+```csharp
+IFilter filter = ...
+Expression<Func<Vigilante, bool>> predicate = filter.ToExpression<Vigilante>();
+```
+
+The `predicate` expression can now be used against any datasource that accepts `Expression<Func<Vigilante, bool>>` (👋🏾 EntityFramework and the likes )
+
+#### Extending `IFIlter`s
+
+What to do you cannot use expression trees when querying your datasource ? Well, you can write your own method to render it duh !!!
+
+DataFilters.Queries[![Nuget](https://img.shields.io/nuget/v/DataFilters.Queries?color=blue)](https://www.nuget.org/packages/DataFilters.Queries) adds `ToWhere<T>()` extension 
+method on top of [IFilter][class-ifilter] instance to convert
+it to an equivalent [`IWhereClause`](https://github.com/candoumbe/Queries/blob/develop/src/Queries.Core/Parts/Clauses/IWhereClause.cs) instance.
+[`IWhereClause`](https://github.com/candoumbe/Queries/blob/develop/src/Queries.Core/Parts/Clauses/IWhereClause.cs) is an interface from the [Queries](https://github.com/candoumbe/Queries) that 
+can later be translated a secure SQL string.
+You can find more info on that directly in the Github repository.
+
 
 | Package                                                                                                                                                             | Downloads                                                                                                            | Description                                                                                                                                                                         |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -555,9 +581,7 @@ This is to distinguish if the `Age` criterion was provided or not when calling t
 | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | ![DataFilters.Expressions download count](https://img.shields.io/nuget/dt/Datafilters.Expressions?label=&color=blue) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.  |
 | [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)             | ![DataFilters.Queries download count](https://img.shields.io/nuget/dt/Datafilters.Queries?label=&color=blue)         | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://dev.azure.com/candoumbe/Queries) instance. |
 
-
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs
 [class-ifilter]: /src/DataFilters/IFilter.cs
-[class-filter]: /src/DataFilters/Filter.cs
-[datafilters-expressions]: https://www.nuget.org/packages/DataFilters.Expressions
-[datafilters-queries]: https://www.nuget.org/packages/DataFilters.Queries
+[DataFilters.Expressions]: https://www.nuget.org/packages/DataFilters.Expressions
+[DataFilters.Queries]: https://www.nuget.org/packages/DataFilters.Queries
