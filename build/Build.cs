@@ -60,7 +60,6 @@ namespace DataFilters.ContinuousIntegration
     )]
 
     public class Build : NukeBuild,
-        IHaveGitVersion,
         IHaveArtifacts,
         IHaveChangeLog,
         IHaveSolution,

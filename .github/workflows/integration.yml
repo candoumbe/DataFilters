@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: unit-tests
-          path: output/artifacts/tests-results/renovate/xunit-dotnet-monorepo/unit-tests
+          path: output/artifacts/tests-results/unit-tests
       - name: 'Publish: coverage-report'
         uses: actions/upload-artifact@v3
         with:
