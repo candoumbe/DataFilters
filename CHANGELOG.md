@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dropped `net5.0` support
 - Dropped `netcoreapp3.1` support
 
-### ⚙️ Technical changes
+### 🧹 Housekeeping
 - Moved pipeline to Ubuntu agent
-- Moved build definition to [Candoumbe.Pipelines](https://www.nuget.org/packages/Candoumbe.Pipelines/0.3.0-beta0001)
+- Moved build definition to [Candoumbe.Pipelines](https://www.nuget.org/packages/Candoumbe.Pipelines/0.6.0-rc0000)
 
 
 ## [0.12.0] / 2022-10-12
