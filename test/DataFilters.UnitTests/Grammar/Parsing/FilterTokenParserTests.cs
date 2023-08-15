@@ -1101,9 +1101,33 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
+        [Theory]
+        [InlineData("P", "time separator and duration unit are mising")]
+        [InlineData("P1Y", "the time separator 'T' is missing after the 'year' duration")]
+        [InlineData("P0S", "the time separator 'T' is missing before the 'second' duration")]
+        [InlineData("PT", "the duration string does not contain any duration")]
+        public void Given_incorrect_input_for_duration_Parser_should_throw_ParseException(string input, string reason)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            // Act
+            Action callingParserWithInvalidStringInput = () => FilterTokenParser.Duration.Parse(tokens);
+
+            // Assert
+            AssertThatParseExceptionIsThrown(callingParserWithInvalidStringInput, reason);
+        }
+
         private static void AssertThatShould_parse(FilterExpression actual, FilterExpression expected, string reason = "")
             => actual.Should()
                      .NotBeSameAs(expected).And
                      .Be(expected, reason);
+
+        private static void AssertThatParseExceptionIsThrown(Action action, string reason)
+        {
+            // Act
+            action.Should().ThrowExactly<ParseException>(reason);
+        }
     }
 }

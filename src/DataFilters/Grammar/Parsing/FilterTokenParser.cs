@@ -208,7 +208,7 @@
 #if NET7_0_OR_GREATER
                                     _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
 #else
-                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value") 
+                                    _ => throw new NotSupportedException($"Unsupported '{min?.GetType()}' for min value")
 #endif
                                 }, included: true),
                                 max: new BoundaryExpression(max switch
@@ -218,7 +218,7 @@
 #if NET7_0_OR_GREATER
                                     _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value") 
 #else
-                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value") 
+                                    _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
 #endif
                                 }, included: true)
                             )
@@ -419,7 +419,7 @@
                                         .OptionalOrDefault()
                 from tail in Bracket
 
-                select (head: (FilterExpression)head,  (object)body, tail: (FilterExpression)tail)
+                select (head: (FilterExpression)head, (object)body, tail: (FilterExpression)tail)
                 ).Try()
                 .Or(
                     from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
