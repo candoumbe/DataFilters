@@ -14,7 +14,6 @@ namespace DataFilters.ContinuousIntegration
     using System.Collections.Generic;
     using System.Linq;
 
-
     [GitHubActions(
         "integration",
         GitHubActionsImage.UbuntuLatest,
@@ -57,6 +56,53 @@ namespace DataFilters.ContinuousIntegration
             "CHANGELOG.md",
             "LICENSE"
         }
+    )]
+
+    //[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
+    //    AutoGenerate = true,
+    //    FetchDepth = 0,
+    //    OnCronSchedule = "0 0 * * *",
+    //    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
+    //    OnPushBranches = new[] { IHaveDevelopBranch.DevelopBranchName },
+    //    CacheKeyFiles = new[] {
+    //        "src/**/*.csproj",
+    //        "test/**/*.csproj",
+    //        "stryker-config.json",
+    //        "test/**/*/xunit.runner.json" },
+    //    EnableGitHubToken = true,
+    //    ImportSecrets = new[]
+    //    {
+    //        nameof(NugetApiKey),
+    //        nameof(IReportCoverage.CodecovToken),
+    //        nameof(IMutationTest.StrykerDashboardApiKey)
+    //    },
+    //    PublishArtifacts = true,
+    //    OnPullRequestExcludePaths = new[]
+    //    {
+    //        "docs/*",
+    //        "README.md",
+    //        "CHANGELOG.md",
+    //        "LICENSE"
+    //    }
+    //)]
+    [GitHubActions("nightly-manual", GitHubActionsImage.UbuntuLatest,
+        AutoGenerate = true,
+        FetchDepth = 0,
+        On = new[] { GitHubActionsTrigger.WorkflowDispatch },
+        InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
+        CacheKeyFiles = new[] {
+            "src/**/*.csproj",
+            "test/**/*.csproj",
+            "stryker-config.json",
+            "test/**/*/xunit.runner.json" },
+        EnableGitHubToken = true,
+        ImportSecrets = new[]
+        {
+            nameof(NugetApiKey),
+            nameof(IReportCoverage.CodecovToken),
+            nameof(IMutationTest.StrykerDashboardApiKey)
+        },
+        PublishArtifacts = true
     )]
 
     public class Build : NukeBuild,

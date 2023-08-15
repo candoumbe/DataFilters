@@ -263,4 +263,9 @@ __pycache__/
 # VS code
 .vscode/
 output/
+
+# Nuke temp directory
 /.nuke/temp
+
+# Stryker output
+[Ss]tryker[Oo]utput/
