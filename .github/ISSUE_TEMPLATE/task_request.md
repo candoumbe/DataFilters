@@ -1,8 +1,8 @@
 ---
-name: Feature request
-about: Something that needs to be done
+name: Task request
+about: Something that needs to be done / worked on
 title: "[TASK] 💪🏾"
-labels: 'task :muscle:'
+labels: 'task 💪🏾'
 assignees: candoumbe
 
 ---
