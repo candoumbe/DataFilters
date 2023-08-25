@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🧹 Housekeeping
 - Moved pipeline to Ubuntu agent
 - Updated build definition to [Candoumbe.Pipelines 0.6.0-rc0002](https://www.nuget.org/packages/Candoumbe.Pipelines/0.6.0-rc0002)
+- Updated `build.sh` script by running `nuke :update` command
 
 
 ## [0.12.0] / 2022-10-12
