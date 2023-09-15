@@ -156,7 +156,7 @@ namespace DataFilters.ContinuousIntegration
             => new[] { "DataFilters", "DataFilters.Expressions", "DataFilters.Queries" }
                 .Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
                                                                         testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
-                                                                        configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}" / "stryker-config.json"))
+                                                                        configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
                 .ToArray();
 
         ///<inheritdoc/>
