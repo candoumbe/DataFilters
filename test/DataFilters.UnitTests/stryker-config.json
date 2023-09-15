@@ -3,6 +3,6 @@
     "project-info": {
       "module": "DataFilters"
     },
-    "concurrent": 4
+    "concurrency": 4
   }
 }
