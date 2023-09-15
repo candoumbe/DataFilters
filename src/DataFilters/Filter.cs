@@ -59,7 +59,7 @@
         /// <summary>
         /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
         /// </summary>
-        public static IEnumerable<FilterOperator> UnaryOperators { get; } = new[]{
+        public static ISet<FilterOperator> UnaryOperators { get; } = new HashSet<FilterOperator>{
             FilterOperator.IsEmpty,
             FilterOperator.IsNotEmpty,
             FilterOperator.IsNotNull,

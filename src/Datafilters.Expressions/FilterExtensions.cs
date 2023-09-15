@@ -19,8 +19,27 @@
     using DataFilters.Expressions;
 
     /// <summary>
-    /// Extension methods for <see cref="IFilter"/> type.
+    /// The `FilterExtensions` class provides extension methods for building expression trees from `IFilter` instances.
+    /// It allows for filtering data based on various conditions.
     /// </summary>
+    /// <remarks>
+    /// Example Usage:
+    /// <code>
+    /// // Create a filter
+    /// IFilter filter = new Filter
+    /// {
+    ///     Field = "Name",
+    ///     Operator = FilterOperator.EqualTo,
+    ///     Value = "John"
+    /// };
+    ///
+    /// // Build an expression tree
+    /// Expression&lt;Func&lt;Person, bool&gt;&gt; expression = filter.ToExpression&lt;Person&gt;();
+    ///
+    /// // Use the expression to filter data
+    /// var filteredData = data.Where(expression.Compile());
+    /// </code>
+    /// </remarks>
     public static class FilterExtensions
     {
 #if NET6_0
@@ -213,11 +232,11 @@
                                       Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
                 NotStartsWith => AndAlso(NotEqual(property, Constant(null)),
                                          Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression))),
-                EndsWith =>AndAlso(NotEqual(property, Constant(null)),
+                EndsWith => AndAlso(NotEqual(property, Constant(null)),
                                    Call(property,
                                         typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }),
                                         constantExpression)),
-                NotEndsWith => AndAlso(NotEqual(property, Constant(null)), 
+                NotEndsWith => AndAlso(NotEqual(property, Constant(null)),
                                        Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression))),
                 Contains => ComputeNullSafeContains(property, value),
                 NotContains => Not(ComputeNullSafeContains(property, value)),
