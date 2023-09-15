@@ -12,6 +12,7 @@ namespace DataFilters.ContinuousIntegration
 
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Linq;
 
     [GitHubActions(
@@ -151,10 +152,11 @@ namespace DataFilters.ContinuousIntegration
         IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");
 
         ///<inheritdoc/>
-        IEnumerable<(Project SourceProject, IEnumerable<Project> TestProjects)> IMutationTest.MutationTestsProjects
+        IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects
             => new[] { "DataFilters", "DataFilters.Expressions", "DataFilters.Queries" }
-                .Select(projectName => (SourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                                        TestProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase))))
+                .Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                                                        testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
+                                                                        configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}" / "stryker-config.json"))
                 .ToArray();
 
         ///<inheritdoc/>

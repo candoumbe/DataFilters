@@ -110,11 +110,8 @@
           "description": "Shows the execution plan (HTML)"
         },
         "Profile": {
-          "type": "array",
-          "description": "Defines the profiles to load",
-          "items": {
-            "type": "string"
-          }
+          "type": "string",
+          "description": "Name of the profile where the current set of secrets"
         },
         "Root": {
           "type": "string",
@@ -151,7 +148,8 @@
         },
         "StrykerDashboardApiKey": {
           "type": "string",
-          "description": "API KEY used to submit mutation report to a stryker dashboard"
+          "description": "API KEY used to submit mutation report to a stryker dashboard",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Target": {
           "type": "array",
@@ -181,11 +179,6 @@
         "Title": {
           "type": "string",
           "description": "Title that will be used when creating a PR"
-        },
-        "Token": {
-          "type": "string",
-          "description": "Token used to create a pull request",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Verbosity": {
           "type": "string",

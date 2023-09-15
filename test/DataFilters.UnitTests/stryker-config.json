@@ -1,10 +1,8 @@
 {
   "stryker-config": {
-    "reporters": [
-      "progress",
-      "html"
-    ],
-    "target-framework": "net6.0",
-    "project": "DataFilters.csproj"
+    "project-info": {
+      "module": "DataFilters"
+    },
+    "concurrent": 4
   }
 }

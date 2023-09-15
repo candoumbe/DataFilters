@@ -7,15 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### ⚠️ Breaking Changes
+
 - Dropped `net5.0` support
 - Dropped `netcoreapp3.1` support
 
 ### 🧹 Housekeeping
+
 - Moved pipeline to Ubuntu agent
-- Updated build definition to [Candoumbe.Pipelines 0.6.0-rc0002](https://www.nuget.org/packages/Candoumbe.Pipelines/0.6.0-rc0002)
+- Updated build definition to [Candoumbe.Pipelines 0.7.0-rc0003](https://www.nuget.org/packages/Candoumbe.Pipelines/0.7.0-rc0003)
 - Updated `build.sh` script by running `nuke :update` command
 - Removed explicit `Nuke.Common` dependency from the build project
-
 
 ## [0.12.0] / 2022-10-12
 ### 🚀 New features
