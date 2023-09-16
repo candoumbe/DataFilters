@@ -19,32 +19,34 @@ The public API SHOULD NOT be considered stable.
 
 ## **Table of contents**
 
-- <a href='#parsing'>Parsing</a>
-- <a href='#filtering'>Syntax</a>
-  - <a href='#equals-expression'>Equals</a>
-  - <a href='#starts-with-expression'>Starts with</a>
-  - <a href='#ends-with-expression'>Ends with</a>
-  - <a href='#contains-expression'>Contains</a>
-  - <a href='#isempty-expression'>Is empty</a>
-  - <a href='#any-of-expression'>Any of</a>
-  - <a href='#isnull-expression'>Is null</a>
-  - <a href='#interval-expressions'>Interval expressions</a>
-    - <a href='#gte-expression'>Greater than or equal</a>
-    - <a href='#lte-expression'>Less than or equal</a>
-    - <a href='#btw-expression'>Between</a>
-  - <a href='#regular-expression'>Regular expression</a>
-  - <a href="logic-operators">Logical operators</a>
-    - <a href='#and-expression'>And</a>
-    - <a href='#or-expression'>Or</a>
-    - <a href='#not-expression'>Not</a>
-  - <a href='#special-character-handling'>Special character handling</a>
-  - <a href='#sorting'>Sorting</a>
-- <a href='#how-to-install'>How to install</a>
-- <a href='#how-to-use'>How to use</a>
-  - <a href='#how-to-use-client'>On the client</a>
-  - <a href='#how-to-use-backend'>On the backend : filtering data from any datasource
-    - <a href='#how-to-expression'>Building expression trees</a>
-    - <a href='#how-to-expression'>Extending `IFilter`s</a>
+- [Parsing](#parsing)
+- [Filters syntax](#filters-syntax)
+  - [Equals](#equals)
+  - [Starts with](#starts-with)
+  - [Ends with](#ends-with)
+  - [Contains](#contains)
+  - [Is null](#is-null)
+  - [Any of](#any-of)
+  - [Is null](#is-null-1)
+  - [Any of](#any-of-1)
+  - [Interval expressions](#interval-expressions)
+    - [Greater than or equal](#greater-than-or-equal)
+    - [Less than or equal](#less-than-or-equal)
+    - [Between](#between)
+  - [Regular expression](#regular-expression)
+  - [Logical operators](#logical-operators)
+    - [And](#and)
+    - [Or](#or)
+    - [Not](#not)
+  - [Special character handling](#special-character-handling)
+  - [Sorting](#sorting)
+- [How to install](#how-to-install)
+- [How to use](#how-to-use)
+  - [On the client](#on-the-client)
+  - [On the backend](#on-the-backend)
+      - [Building expression trees to filtering data from any datasource](#building-expression-trees-to-filtering-data-from-any-datasource)
+      - [Extending `IFIlter`s](#extending-ifilters)
+
 
 The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
@@ -136,9 +138,21 @@ To parse an expression, simply call  `ToFilter<T>` extension method
 
 Several expressions are supported and here's how you can start using them in your search queries.
 
+|                                         | `string` | numeric types (`int`, `short`, ...) | Date and time types (`DateTime`, `DateTimeOffset`, ...) |
+| --------------------------------------- | -------- | ----------------------------------- | ------------------------------------------------------- |
+| [EqualTo](#equals-expression)           | ✅        | ✅                                   | ✅                                                       |
+| [StartsWith](#starts-with-expression)   | ✅        | N/A                                 | N/A                                                     |
+| [Ends with](#ends-with-expression)      | ✅        | N/A                                 | N/A                                                     |
+| [Contains](#contains-expression)        | ✅        | N/A                                 | N/A                                                     |
+| [IsNull](#isnull-expression)            | ✅        | N/A                                 | N/A                                                     |
+| [IsNotNull](#isnull-expression)         | ✅        | N/A                                 | N/A                                                     |
+| [LessThanOrEqualTo](#lte-expression)    | N/A      | ✅                                   | ✅                                                       |
+| [GreaterThanOrEqualTo](#gte-expression) | N/A      | ✅                                   | ✅                                                       |
+| [bracket expression](#regex-expression) | N/A      | ✅                                   | ✅                                                       |
+
 ## <a href='#' id='equals-expression'>Equals</a>
 
-Search for any vigilante resource where `nickname` value is `manbat`
+Search for any `vigilante` resources where the value of the property `nickname` is `manbat`
 
 | Query string      | JSON                                                  | C#                                                                                     |
 | ----------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -146,7 +160,7 @@ Search for any vigilante resource where `nickname` value is `manbat`
 
 ## <a href='#' id='starts-with-expression'>Starts with</a>
 
-Search for any vigilante resource that starts with `"bat"` in the `nickname` property
+Search for any `vigilante` resources where the value of the property `nickname` starts with `"bat"`
 
 | Query string    | JSON                                                       | C#                                                                                    |
 | --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -154,7 +168,7 @@ Search for any vigilante resource that starts with `"bat"` in the `nickname` pro
 
 ## <a href='#' id='ends-with-expression'>Ends with</a>
 
-Search for `vigilante` resource that ends with `man` in the `nickname` property.
+Search for `vigilante` resources where the value of the property `nickname` ends with `man`.
 
 | Query string    | JSON                                                     | C#                                                                                  |
 | --------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -162,7 +176,7 @@ Search for `vigilante` resource that ends with `man` in the `nickname` property.
 
 ## <a href='#' id='contains-expression'>Contains</a>
 
-Search for `vigilante` resources that contains `bat` in the `nickname` property.
+Search for any `vigilante` resources where the value of the property `nickname` contains `"bat"`.
 
 | Query string     | JSON                                                     | C#                                                                                  |
 | ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -301,7 +315,7 @@ you can also use the dot character (`.`).
 `property["subproperty"]["subproperty-n"]=<expression>` and `property.subproperty["subproperty-n"]=<expression>`
 are equivalent
 
-## <a href="regex-expression">Regular expression</a>
+## <a href="#" id="regex-expression">Regular expression</a>
 
 The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported.
 A bracket expression. Matches a single character that is contained within the brackets.
@@ -309,7 +323,7 @@ For example, `[abc]` matches `a`, `b`, or `c`. `[a-z]` specifies a range which m
 
 `BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
 
-## <a href="logic-operators">Logical operators</a>
+## <a href="#" id="logic-operators">Logical operators</a>
 
 Logicial operators can be used combine several instances of [IFilter][class-ifilter] together.
 
@@ -565,7 +579,7 @@ The `predicate` expression can now be used against any datasource that accepts `
 
 #### Extending `IFIlter`s
 
-What to do you cannot use expression trees when querying your datasource ? Well, you can write your own method to render it duh !!!
+What to do when you cannot use expression trees when querying your datasource ? Well, you can write your own method to render it duh !!!
 
 DataFilters.Queries[![Nuget](https://img.shields.io/nuget/v/DataFilters.Queries?color=blue)](https://www.nuget.org/packages/DataFilters.Queries) adds `ToWhere<T>()` extension 
 method on top of [IFilter][class-ifilter] instance to convert
@@ -573,7 +587,6 @@ it to an equivalent [`IWhereClause`](https://github.com/candoumbe/Queries/blob/d
 [`IWhereClause`](https://github.com/candoumbe/Queries/blob/develop/src/Queries.Core/Parts/Clauses/IWhereClause.cs) is an interface from the [Queries](https://github.com/candoumbe/Queries) that 
 can later be translated a secure SQL string.
 You can find more info on that directly in the Github repository.
-
 
 | Package                                                                                                                                                             | Downloads                                                                                                            | Description                                                                                                                                                                         |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
