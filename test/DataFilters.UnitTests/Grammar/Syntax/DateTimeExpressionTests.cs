@@ -4,6 +4,7 @@
     using DataFilters.UnitTests.Helpers;
 
     using FluentAssertions;
+    using FluentAssertions.Extensions;
 
     using FsCheck;
     using FsCheck.Xunit;
@@ -184,15 +185,43 @@
         public void Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_transitive(NonNull<DateTimeExpression> first, NonNull<DateTimeExpression> second, NonNull<DateTimeExpression> third)
+        public static IEnumerable<object[]> EqualsTransitivityCases
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    new DateTimeExpression(1.January(2010)),
+                    new DateTimeExpression(1.January(2010)),
+                    new DateTimeExpression(1.January(2010))
+                };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new TimeExpression(1)),
+                    new DateTimeExpression(new TimeExpression(minutes: 60)),
+                    new DateTimeExpression(new TimeExpression(seconds: 3600))
+                };
+
+                yield return new object[]
+                {
+                    new DateTimeExpression(new TimeExpression(1)),
+                    new TimeExpression(minutes: 60),
+                    new DateTimeExpression(new TimeExpression(seconds: 3600))
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualsTransitivityCases))]
+        public void Equals_should_be_transitive(DateTimeExpression first, object second, object third)
         {
             // Arrange
-            bool firstEqualsSecond = first.Item.Equals(second.Item);
-            bool secondEqualsThird = second.Item.Equals(third.Item);
+            bool firstEqualsSecond = first.Equals(second);
+            bool secondEqualsThird = second.Equals(third);
 
             // Act
-            bool actual = first.Item.Equals(third.Item);
+            bool actual = first.Equals(third);
 
             // Assert
             actual.Should()
