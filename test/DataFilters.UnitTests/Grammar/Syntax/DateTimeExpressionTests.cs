@@ -206,7 +206,7 @@
                 yield return new object[]
                 {
                     new DateTimeExpression(new TimeExpression(1)),
-                    new TimeExpression(minutes: 60),
+                    new DateTimeExpression(new TimeExpression(minutes: 60)),
                     new DateTimeExpression(new TimeExpression(seconds: 3600))
                 };
             }
