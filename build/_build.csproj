@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Candoumbe.Pipelines" Version="0.7.0" />
-    <PackageReference Include="ReportGenerator" Version="[5.1.25]" />
+    <PackageReference Include="ReportGenerator" Version="[5.1.26]" />
     <PackageDownload Include="GitVersion.Tool" Version="[5.10.3]" />
     <PackageDownload Include="Codecov.Tool" Version="[1.12.3]" />
   </ItemGroup>
