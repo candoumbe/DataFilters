@@ -58,7 +58,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
-    <PackageReference Include="Ardalis.GuardClauses" Version="4.1.1" />
+    <PackageReference Include="Ardalis.GuardClauses" Version="4.2.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(MSBuildProjectName)' != '_build'">
       <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
