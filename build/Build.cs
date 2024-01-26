@@ -1,19 +1,17 @@
 namespace DataFilters.ContinuousIntegration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Candoumbe.Pipelines.Components;
+    using Candoumbe.Pipelines.Components.Formatting;
     using Candoumbe.Pipelines.Components.GitHub;
     using Candoumbe.Pipelines.Components.NuGet;
     using Candoumbe.Pipelines.Components.Workflows;
-
     using Nuke.Common;
     using Nuke.Common.CI.GitHubActions;
     using Nuke.Common.IO;
     using Nuke.Common.ProjectModel;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Configuration;
-    using System.Linq;
 
     [GitHubActions(
         "integration",
@@ -107,14 +105,13 @@ namespace DataFilters.ContinuousIntegration
     )]
 
     public class Build : NukeBuild,
-        IHaveArtifacts,
-        IHaveChangeLog,
         IHaveSolution,
         IHaveSourceDirectory,
         IHaveTestDirectory,
         IGitFlowWithPullRequest,
         IClean,
         IRestore,
+        IDotnetFormat,
         ICompile,
         IUnitTest,
         IMutationTest,
@@ -178,6 +175,8 @@ namespace DataFilters.ContinuousIntegration
                                            source: new Uri("https://nukpg.github.com/"),
                                            () => this is ICreateGithubRelease && this.Get<ICreateGithubRelease>()?.GitHubToken is not null)
         };
+
+        bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
 
         protected override void OnBuildCreated()
         {

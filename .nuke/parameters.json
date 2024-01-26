@@ -1,4 +1,6 @@
 {
   "$schema": "./build.schema.json",
-  "Solution": "DataFilters.sln"
+  "Solution": "DataFilters.sln",
+  "NoLogo": true,
+  "Formatters": ["analyzers", "style"]
 }
