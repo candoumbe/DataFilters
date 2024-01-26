@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🧹 Housekeeping
 
 - Moved pipeline to Ubuntu agent
-- Updated build definition to [Candoumbe.Pipelines 0.7.0-rc0003](https://www.nuget.org/packages/Candoumbe.Pipelines/0.7.0-rc0003)
+- Updated build definition to [Candoumbe.Pipelines 0.9.0](https://www.nuget.org/packages/Candoumbe.Pipelines/0.9.0)
 - Updated `build.sh` script by running `nuke :update` command
 - Removed explicit `Nuke.Common` dependency from the build project
 - Added local file to store encrypted secrets needed when running some CI targets locally
