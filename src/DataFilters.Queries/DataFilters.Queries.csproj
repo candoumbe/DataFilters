@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
     <Description>Provides extension methods to convert IFilter to IWhereClause and IOrder to ISort.</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.Queries.xml</DocumentationFile>
   </PropertyGroup>
