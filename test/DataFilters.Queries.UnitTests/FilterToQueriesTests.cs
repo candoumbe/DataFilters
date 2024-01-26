@@ -1,16 +1,12 @@
 namespace DataFilters.Queries.UnitTests
 {
-    using FluentAssertions;
-    using FluentAssertions.Extensions;
-
-    using global::Queries.Core.Parts.Clauses;
-
     using System;
     using System.Collections.Generic;
-
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
+    using global::Queries.Core.Parts.Clauses;
     using Xunit;
     using Xunit.Abstractions;
-
     using static DataFilters.FilterOperator;
 
     public class FilterToQueriesTests
@@ -162,7 +158,7 @@ namespace DataFilters.Queries.UnitTests
             _outputHelper.WriteLine($"Expected : {expected.Jsonify()}");
 
             // Act
-            IWhereClause actualWhere= filter.ToWhere();
+            IWhereClause actualWhere = filter.ToWhere();
             _outputHelper.WriteLine($"actualQuery : {actualWhere.Jsonify()}");
 
             // Assert

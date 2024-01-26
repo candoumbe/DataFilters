@@ -29,11 +29,11 @@ public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
         {
             (null, _) => throw new ArgumentNullException(nameof(left)),
             (_, null) => throw new ArgumentNullException(nameof(right)),
-            (BinaryFilterExpression , BinaryFilterExpression ) => (new GroupExpression(left), new GroupExpression(right)),
-            (BinaryFilterExpression , not GroupExpression ) => (new GroupExpression(left), right),
-            (not GroupExpression , BinaryFilterExpression) => (left, new GroupExpression(right)),
-            (BinaryFilterExpression , _) => (new GroupExpression(left), right),
-            (_ , BinaryFilterExpression) => (left, new GroupExpression(right)),
+            (BinaryFilterExpression, BinaryFilterExpression) => (new GroupExpression(left), new GroupExpression(right)),
+            (BinaryFilterExpression, not GroupExpression) => (new GroupExpression(left), right),
+            (not GroupExpression, BinaryFilterExpression) => (left, new GroupExpression(right)),
+            (BinaryFilterExpression, _) => (new GroupExpression(left), right),
+            (_, BinaryFilterExpression) => (left, new GroupExpression(right)),
             _ => (left, right)
         };
     }

@@ -1,16 +1,13 @@
 namespace DataFilters.UnitTests.Helpers
 {
-    using DataFilters.Grammar.Parsing;
-    using DataFilters.Grammar.Syntax;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using FsCheck;
+    using FsCheck.Fluent;
     using static GeneratorHelper;
 
     public static class ExpressionsGenerators

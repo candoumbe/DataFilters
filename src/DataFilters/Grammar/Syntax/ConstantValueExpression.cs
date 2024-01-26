@@ -24,7 +24,7 @@
             Value = value switch
             {
                 null => throw new ArgumentNullException(nameof(value)),
-                { Length : 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+                { Length: 0 } => throw new ArgumentOutOfRangeException(nameof(value)),
                 _ => value
             };
         }

@@ -1,14 +1,10 @@
 ﻿namespace DataFilters.UnitTests;
 
+using System;
 using DataFilters.Casing;
-
 using FluentAssertions;
-
 using FsCheck;
 using FsCheck.Xunit;
-
-using System;
-
 using Xunit.Categories;
 
 [UnitTest]
@@ -25,7 +21,7 @@ public class FilterServiceOptionsTests
         _sut.PropertyNameResolutionStrategy.Should().Be(PropertyNameResolutionStrategy.Default);
     }
 
-    [Property(Arbitrary = new[] {typeof(Generators)})]
+    [Property(Arbitrary = new[] { typeof(Generators) })]
     public void Given_positive_integer_value_And_strategy_Constructor_should_set_properties(PositiveInt input, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
     {
         // Act

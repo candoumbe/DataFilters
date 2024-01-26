@@ -43,7 +43,7 @@
             _values = values.Where(x => x is not null)
                             .ToArray();
 
-            _lazyParseableString = new (() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
+            _lazyParseableString = new(() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
         }
 
         /// <inheritdoc/>
@@ -134,7 +134,7 @@
                 case 1:
                     simplifiedResult = curatedExpressions.Single();
                     break;
-                case 2 :
+                case 2:
                     FilterExpression first = curatedExpressions.First();
                     FilterExpression other = curatedExpressions.Last();
                     if (first is OneOfExpression oneOfFirst && other is OneOfExpression oneOfSecond)
@@ -155,6 +155,6 @@
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString =>_lazyParseableString.Value;
+        public override string EscapedParseableString => _lazyParseableString.Value;
     }
 }

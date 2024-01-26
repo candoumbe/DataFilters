@@ -5,25 +5,19 @@ using static Newtonsoft.Json.JsonConvert;
 
 namespace DataFilters.UnitTests
 {
-    using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-
-    using FsCheck.Xunit;
-
-    using FsCheck;
-
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Schema;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 

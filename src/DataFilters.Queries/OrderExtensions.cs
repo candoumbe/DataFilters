@@ -1,9 +1,8 @@
 ﻿namespace DataFilters
 {
-    using Queries.Core.Parts.Sorting;
-
     using System;
     using System.Collections.Generic;
+    using Queries.Core.Parts.Sorting;
 
     /// <summary>
     /// Extensions method for <see cref="IOrder{T}"/> types

@@ -1,26 +1,21 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Parsing
 {
-    using DataFilters.Grammar.Parsing;
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-    using FluentAssertions.Execution;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
-    using Superpower;
-    using Superpower.Model;
-
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
+    using Superpower;
+    using Superpower.Model;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;

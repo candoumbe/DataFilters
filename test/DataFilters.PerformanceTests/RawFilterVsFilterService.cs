@@ -1,8 +1,7 @@
 ﻿namespace DataFilters.PerfomanceTests;
 
-using BenchmarkDotNet.Attributes;
-
 using System;
+using BenchmarkDotNet.Attributes;
 
 [MemoryDiagnoser]
 [RPlotExporter]
