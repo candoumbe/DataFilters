@@ -1,22 +1,17 @@
 ﻿namespace DataFilters.Expressions.UnitTests;
 
-using DataFilters.Expressions;
-using DataFilters.TestObjects;
-
-using FluentAssertions;
-using FluentAssertions.Extensions;
-
-using NodaTime;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-
+using DataFilters.Expressions;
+using DataFilters.TestObjects;
+using FluentAssertions;
+using FluentAssertions.Extensions;
+using NodaTime;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
-
 using static DataFilters.Expressions.NullableValueBehavior;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
@@ -105,8 +100,8 @@ public class FilterToExpressionTests
                 (Expression<Func<SuperHero, bool>>)(item => item.Nickname == "Batman" || item.Nickname == "Superman")
         };
 
-        yield return new object[]
-        {
+            yield return new object[]
+            {
                 new[] {
                     new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
                     new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
@@ -128,11 +123,11 @@ public class FilterToExpressionTests
                 },
                 NoAction,
                 (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (item.Nickname == "Batman" || item.Nickname == "Superman"))
-            };
+                };
 
-                yield return new object[]
-                {
-                    new[] 
+            yield return new object[]
+            {
+                    new[]
                     {
 #if NET6_0_OR_GREATER
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
@@ -178,7 +173,7 @@ public class FilterToExpressionTests
                                                                 && item.LastBattleDate < 31.December(2012))
 
 #endif
-            };
+        };
 
             yield return new object[]
             {

@@ -1,11 +1,9 @@
 ﻿namespace DataFilters.Grammar.Parsing
 {
-    using Superpower;
-    using Superpower.Model;
-
     using System.Collections.Generic;
     using System.Linq;
-
+    using Superpower;
+    using Superpower.Model;
     using static DataFilters.Grammar.Parsing.FilterToken;
 
     /// <summary>
@@ -246,7 +244,7 @@
                                                   next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case DoubleQuote :
+                    case DoubleQuote:
                         yield return Result.Value(FilterToken.DoubleQuote,
                                                   next.Location,
                                                   next.Remainder);

@@ -163,7 +163,7 @@
             => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
 #else
         public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
-           => ToFilter<T>(queryString, new FilterOptions () { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
+           => ToFilter<T>(queryString, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
 #endif
 
         /// <summary>

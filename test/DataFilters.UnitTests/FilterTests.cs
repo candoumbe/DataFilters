@@ -1,27 +1,21 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Schema;
-
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text.RegularExpressions;
-
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
@@ -337,7 +331,7 @@
             .VerboseCheck(_output);
         }
 
-        [Property(Arbitrary = new[] {typeof(FilterGenerators)})]
+        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
         public void Given_filter_instance_Negate_should_work_as_expected(NonNull<Filter> source)
         {
             // Arrange

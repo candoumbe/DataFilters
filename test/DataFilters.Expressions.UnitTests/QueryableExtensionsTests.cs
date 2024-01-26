@@ -1,11 +1,9 @@
 ﻿namespace DataFilters.Expressions.UnitTests
 {
-    using FluentAssertions;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using FluentAssertions;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;

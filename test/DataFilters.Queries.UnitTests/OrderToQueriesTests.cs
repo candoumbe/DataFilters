@@ -1,17 +1,13 @@
 ﻿namespace DataFilters.Queries.UnitTests
 {
-    using FluentAssertions;
-
-    using global::Queries.Core.Parts.Sorting;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using FluentAssertions;
+    using global::Queries.Core.Parts.Sorting;
     using Xunit;
     using Xunit.Abstractions;
-
     using static global::Queries.Core.Parts.Sorting.OrderDirection;
 
     public class OrderToQueriesTests

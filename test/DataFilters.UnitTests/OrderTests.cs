@@ -1,15 +1,11 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using DataFilters.TestObjects;
-
-    using FluentAssertions;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.TestObjects;
+    using FluentAssertions;
     using Xunit;
     using Xunit.Abstractions;
-
     using static DataFilters.OrderDirection;
 
     public class OrderTests

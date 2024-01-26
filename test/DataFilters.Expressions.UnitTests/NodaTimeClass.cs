@@ -1,8 +1,7 @@
 ﻿namespace DataFilters.Expressions.UnitTests;
 
-using NodaTime;
-
 using System.Diagnostics.CodeAnalysis;
+using NodaTime;
 
 [ExcludeFromCodeCoverage]
 public class NodaTimeClass

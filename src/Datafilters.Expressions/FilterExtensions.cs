@@ -4,19 +4,17 @@
     using DateOnlyTimeOnly.AspNet.Converters;
 #endif
 
-    using static Expressions.NullableValueBehavior;
+    using DataFilters.Expressions;
 
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
 
     using static DataFilters.FilterOperator;
+    using static Expressions.NullableValueBehavior;
     using static System.Linq.Expressions.Expression;
-
-    using DataFilters.Expressions;
 
     /// <summary>
     /// The `FilterExtensions` class provides extension methods for building expression trees from `IFilter` instances.
@@ -323,25 +321,20 @@
                 Type genericArgType = property.Type.GenericTypeArguments[0];
                 ParameterExpression pe = Parameter(genericArgType);
 
-                if (typeof(string).Equals(genericArgType))
-                {
-                    contains = Call(typeof(Enumerable),
+                contains = typeof(string).Equals(genericArgType)
+                    ? Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
                                     new Type[] { typeof(string) },
                                     property,
                                     Lambda(
                                         Call(pe,
                                             typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
-                                            constantExpression), new[] { pe }));
-                }
-                else
-                {
-                    contains = Call(typeof(Enumerable),
+                                            constantExpression), new[] { pe }))
+                    : Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
                                     new Type[] { property.Type.GenericTypeArguments[0] },
                                     property,
                                     Lambda(Equal(pe, constantExpression), new[] { pe }));
-                }
             }
             else
             {
@@ -363,9 +356,8 @@
                 Type genericArgType = property.Type.GenericTypeArguments[0];
                 ParameterExpression pe = Parameter(genericArgType);
 
-                if (typeof(string).Equals(genericArgType))
-                {
-                    contains = Call(typeof(Enumerable),
+                contains = typeof(string).Equals(genericArgType)
+                    ? Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
                                     new Type[] { typeof(string) },
                                     property,
@@ -373,16 +365,12 @@
                                         AndAlso(NotEqual(pe, Constant(null)),
                                                 Call(pe,
                                                      typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
-                                                     constantExpression)), new[] { pe }));
-                }
-                else
-                {
-                    contains = Call(typeof(Enumerable),
+                                                     constantExpression)), new[] { pe }))
+                    : Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
                                     new Type[] { property.Type.GenericTypeArguments[0] },
                                     property,
                                     Lambda(Equal(pe, constantExpression), new[] { pe }));
-                }
             }
             else
             {
@@ -490,14 +478,9 @@
 
                         fields = fields.Skip(i)
                                        .ToArray();
-                        if (fields.Any())
-                        {
-                            localBody = ComputeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property);
-                        }
-                        else
-                        {
-                            localBody = ComputeBodyExpression(property, @operator, value);
-                        }
+                        localBody = fields.Any()
+                            ? ComputeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property)
+                            : ComputeBodyExpression(property, @operator, value);
 
                         body = Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
@@ -576,14 +559,9 @@
 
                         fields = fields.Skip(i)
                                        .ToArray();
-                        if (fields.Any())
-                        {
-                            localBody = ComputeNullSafeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property);
-                        }
-                        else
-                        {
-                            localBody = ComputeNullSafeBodyExpression(property, @operator, value);
-                        }
+                        localBody = fields.Any()
+                            ? ComputeNullSafeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property)
+                            : ComputeNullSafeBodyExpression(property, @operator, value);
 
                         body = AndAlso(NotEqual(property, Constant(null)),
                                        Call(typeof(Enumerable),

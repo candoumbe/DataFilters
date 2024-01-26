@@ -1,8 +1,8 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
     using System;
-    using System.Text;
     using System.Collections.Generic;
+    using System.Text;
 
     /// <summary>
     /// An expression that holds a string value "as is".

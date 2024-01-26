@@ -1,20 +1,16 @@
 ﻿namespace DataFilters.UnitTests
 {
+    using System;
+    using System.Collections.Generic;
+    using DataFilters;
     using DataFilters.Casing;
     using DataFilters.TestObjects;
-
     using FluentAssertions;
     using FluentAssertions.Common;
     using FluentAssertions.Extensions;
-
-    using System;
-    using System.Collections.Generic;
-
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
-    using DataFilters;
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 

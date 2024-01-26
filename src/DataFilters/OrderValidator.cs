@@ -1,10 +1,9 @@
 ﻿namespace DataFilters
 {
-    using FluentValidation;
-
     using System;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using FluentValidation;
 
     /// <summary>
     /// Validates sort expression

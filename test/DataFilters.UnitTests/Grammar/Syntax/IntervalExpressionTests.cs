@@ -1,18 +1,14 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+    using System.Collections.Generic;
     using DataFilters.Grammar.Exceptions;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
     using FluentAssertions.Extensions;
-
     using FsCheck;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-
     using Xunit;
     using Xunit.Abstractions;
 

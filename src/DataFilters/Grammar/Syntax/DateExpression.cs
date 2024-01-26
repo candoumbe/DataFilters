@@ -63,7 +63,7 @@
         public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
             DateExpression date => Equals(date),
-            DateTimeExpression { Date : var date, Time : null, Offset: null } => Equals(date),
+            DateTimeExpression { Date: var date, Time: null, Offset: null } => Equals(date),
             _ => Equals((other as ISimplifiable)?.Simplify() ?? other)
         };
 
@@ -81,6 +81,6 @@
         };
 
         /// <inheritdoc />
-        public static bool operator !=(DateExpression left, DateExpression right) => ! (left == right);
+        public static bool operator !=(DateExpression left, DateExpression right) => !(left == right);
     }
 }

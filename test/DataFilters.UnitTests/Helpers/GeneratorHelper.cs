@@ -1,7 +1,6 @@
-﻿using FsCheck;
+﻿using System;
+using FsCheck;
 using FsCheck.Fluent;
-
-using System;
 
 namespace DataFilters.UnitTests.Helpers;
 

@@ -3,19 +3,19 @@ using static Newtonsoft.Json.JsonConvert;
 #endif
 namespace DataFilters.UnitTests.Converters
 {
-    using FluentAssertions;
-    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
     using System.Linq.Expressions;
+    using FluentAssertions;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
-    using static DataFilters.FilterOperator;
-    using static DataFilters.FilterLogic;
     using Xunit.Categories;
-    using Newtonsoft.Json.Schema;
+    using static DataFilters.FilterLogic;
+    using static DataFilters.FilterOperator;
 
     [UnitTest]
     [Feature("Converters")]

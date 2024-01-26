@@ -47,7 +47,7 @@ namespace DataFilters.Grammar.Syntax
                 throw new ArgumentOutOfRangeException(nameof(minutes), $"{nameof(minutes)} must be between 0 and 59 inclusive");
             }
 
-            Hours = (int) hours;
+            Hours = (int)hours;
             Minutes = (int)minutes;
             Sign = sign;
 

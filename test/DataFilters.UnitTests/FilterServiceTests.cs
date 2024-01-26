@@ -1,19 +1,15 @@
 ﻿#if NET5_0_OR_GREATER
 namespace DataFilters.UnitTests;
 
+using System;
+using System.Collections.Generic;
+
 using DataFilters.TestObjects;
 
 using FluentAssertions;
 
-using FsCheck.Xunit;
-using FsCheck;
-
-using System;
-using System.Collections.Generic;
-
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Categories;
 
 public class FilterServiceTests
 {

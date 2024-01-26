@@ -113,7 +113,7 @@
         /// <param name="right"></param>
         /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is 
         /// <paramref name="right"/></returns>
-        public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new (left, right);
+        public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new(left, right);
 
         /// <summary>
         /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
@@ -128,7 +128,7 @@
         ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
         /// </list>
         /// </returns>
-        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new (new StringValueExpression(left.Value + right.Value),
+        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new(new StringValueExpression(left.Value + right.Value),
                                                                                                                 new StartsWithExpression(left.Value + right.Value),
                                                                                                                 new AndExpression(left, new ContainsExpression(right.Value)));
 
@@ -156,6 +156,5 @@
         ///     A <see cref="AndExpression"/> that can match any <see langword="string"/> that starts with <paramref name="left"/> and end
         /// </returns>
         public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) => left + new EndsWithExpression(right.Value);
-
     }
 }

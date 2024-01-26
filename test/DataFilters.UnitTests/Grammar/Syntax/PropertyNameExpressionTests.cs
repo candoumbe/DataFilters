@@ -1,12 +1,9 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-
-    using FluentAssertions;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.Grammar.Syntax;
+    using FluentAssertions;
     using Xunit;
     using Xunit.Abstractions;
 

@@ -1,9 +1,8 @@
 ﻿namespace DataFilters
 {
-    using Queries.Core.Parts.Clauses;
-
     using System;
     using System.Linq;
+    using Queries.Core.Parts.Clauses;
 
     /// <summary>
     /// Extensions method <see cref="IFilter"/> type.

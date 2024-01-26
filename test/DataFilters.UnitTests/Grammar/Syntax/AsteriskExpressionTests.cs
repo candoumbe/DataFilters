@@ -1,17 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using FluentAssertions;
-    using FsCheck.Xunit;
-    using FsCheck;
-
     using System;
     using System.Collections.Generic;
+
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
     [UnitTest]
     [Feature(nameof(AsteriskExpression))]
