@@ -19,44 +19,44 @@ namespace DataFilters.ContinuousIntegration
         "integration",
         GitHubActionsImage.UbuntuLatest,
         FetchDepth = 0,
-        OnPushBranchesIgnore = new[] { IHaveMainBranch.MainBranchName },
+        OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack) },
-        CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
-        ImportSecrets = new[]
-        {
+        InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack)],
+        CacheKeyFiles = ["global.json", "src/**/*.csproj"],
+        ImportSecrets =
+        [
             nameof(NugetApiKey),
             nameof(IReportCoverage.CodecovToken),
-        },
-        OnPullRequestExcludePaths = new[]
-        {
+        ],
+        OnPullRequestExcludePaths =
+        [
             "docs/*",
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
-        }
+        ]
     )]
     [GitHubActions(
         "delivery",
         GitHubActionsImage.UbuntuLatest,
         FetchDepth = 0,
-        OnPushBranches = new[] { IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*" },
-        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease) },
+        OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
+        InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
         EnableGitHubToken = true,
-        CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
+        CacheKeyFiles = ["global.json", "src/**/*.csproj"],
         PublishArtifacts = true,
-        ImportSecrets = new[]
-        {
+        ImportSecrets =
+        [
             nameof(NugetApiKey),
             nameof(IReportCoverage.CodecovToken)
-        },
-        OnPullRequestExcludePaths = new[]
-        {
+        ],
+        OnPullRequestExcludePaths =
+        [
             "docs/*",
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
-        }
+        ]
     )]
 
     //[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
@@ -89,20 +89,20 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions("nightly-manual", GitHubActionsImage.UbuntuLatest,
         AutoGenerate = true,
         FetchDepth = 0,
-        On = new[] { GitHubActionsTrigger.WorkflowDispatch },
-        InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
-        CacheKeyFiles = new[] {
+        On = [GitHubActionsTrigger.WorkflowDispatch],
+        InvokedTargets = [nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+        CacheKeyFiles = [
             "src/**/*.csproj",
             "test/**/*.csproj",
             "stryker-config.json",
-            "test/**/*/xunit.runner.json" },
+            "test/**/*/xunit.runner.json"],
         EnableGitHubToken = true,
-        ImportSecrets = new[]
-        {
+        ImportSecrets =
+        [
             nameof(NugetApiKey),
             nameof(IReportCoverage.CodecovToken),
             nameof(IMutationTest.StrykerDashboardApiKey)
-        },
+        ],
         PublishArtifacts = true
     )]
     [DotNetVerbosityMapping]

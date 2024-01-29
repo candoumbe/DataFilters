@@ -6,28 +6,22 @@
     /// <summary>
     /// stores a range value used in a bracket expression
     /// </summary>
-    public sealed class RangeBracketValue : BracketValue, IEquatable<RangeBracketValue>, IComparable<RangeBracketValue>
+    /// <remarks>
+    /// Builds a new <see cref="RangeBracketValue"/> instance.
+    /// </remarks>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    public sealed class RangeBracketValue(char start, char end) : BracketValue, IEquatable<RangeBracketValue>, IComparable<RangeBracketValue>
     {
-        /// <summary>
-        /// Builds a new <see cref="RangeBracketValue"/> instance.
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        public RangeBracketValue(char start, char end)
-        {
-            Start = start;
-            End = end;
-        }
-
         /// <summary>
         /// Start of the regex range
         /// </summary>
-        public char Start { get; }
+        public char Start { get; } = start;
 
         /// <summary>
         /// Ends of the regex range
         /// </summary>
-        public char End { get; }
+        public char End { get; } = end;
 
         ///<inheritdoc/>
         public bool Equals(RangeBracketValue other) => (Start, End) == (other?.Start, other?.End);

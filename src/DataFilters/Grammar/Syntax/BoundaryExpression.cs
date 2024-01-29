@@ -6,28 +6,22 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that can be used to construct <see cref="IntervalExpression"/> instances.
     /// </summary>
-    public sealed class BoundaryExpression : IEquatable<BoundaryExpression>
+    /// <remarks>
+    /// Builds a new <see cref="BoundaryExpression"/> instance.
+    /// </remarks>
+    /// <param name="expression">an <see cref="IBoundaryExpression"/></param>
+    /// <param name="included"><c>true</c> if <paramref name="expression"/> should be included in the interval and <c>false</c> otherwise.</param>
+    public sealed class BoundaryExpression(IBoundaryExpression expression, bool included) : IEquatable<BoundaryExpression>
     {
         /// <summary>
         /// Expression used as a boundary
         /// </summary>
-        public IBoundaryExpression Expression { get; }
+        public IBoundaryExpression Expression { get; } = expression ?? throw new ArgumentNullException(nameof(expression));
 
         /// <summary>
         /// Should the <see cref="Expression"/> be included or excluded in the <see cref="IntervalExpression"/>
         /// </summary>
-        public bool Included { get; }
-
-        /// <summary>
-        /// Builds a new <see cref="BoundaryExpression"/> instance.
-        /// </summary>
-        /// <param name="expression">an <see cref="IBoundaryExpression"/></param>
-        /// <param name="included"><c>true</c> if <paramref name="expression"/> should be included in the interval and <c>false</c> otherwise.</param>
-        public BoundaryExpression(IBoundaryExpression expression, bool included)
-        {
-            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            Included = included;
-        }
+        public bool Included { get; } = included;
 
         ///<inheritdoc/>
         public bool Equals(BoundaryExpression other) => other is not null

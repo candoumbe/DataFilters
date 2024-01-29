@@ -44,7 +44,7 @@
         public override int GetHashCode() => Expression.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{{NotExpression [" +
+        public override string ToString() => "{NotExpression [" +
             $"Expression = {Expression.GetType().Name}, " +
             $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
             $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}']," +

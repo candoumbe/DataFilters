@@ -73,7 +73,7 @@ namespace DataFilters.Grammar.Syntax
         };
 
         ///<inheritdoc/>
-#if NETSTANDARD2_1_OR_GREATER || NET5_0
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public override int GetHashCode() => HashCode.Combine(Hours, Minutes, Sign);
 #else
         public override int GetHashCode()

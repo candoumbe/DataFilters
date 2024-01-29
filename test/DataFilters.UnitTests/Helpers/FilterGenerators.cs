@@ -84,7 +84,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<IFilter> GenerateFilters()
         {
             Gen<IFilter>[] generators =
-            {
+            [
                 EndsWithFilter().Generator.Select(filter => (IFilter) filter),
                 StartsWithFilter().Generator.Select(filter => (IFilter) filter),
                 ContainsFilter().Generator.Select(filter => (IFilter) filter),
@@ -95,7 +95,7 @@ namespace DataFilters.UnitTests.Helpers
                 LessThanFilter<DateTime>(),
                 LessThanOrEqualFilter<DateTime>(),
                 FiltersOverNumericValues().Generator.Select(filter => (IFilter)filter)
-            };
+            ];
 
             return Gen.OneOf(generators).ToArbitrary();
         }
@@ -160,6 +160,5 @@ namespace DataFilters.UnitTests.Helpers
         private static Gen<IFilter> GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator op)
             => GetArbitraryFor<TValue>().Generator
                                         .Select(value => (IFilter)new Filter(Faker.Hacker.Noun(), op, value));
-
     }
 }

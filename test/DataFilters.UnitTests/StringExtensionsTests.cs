@@ -9,12 +9,8 @@
     using Xunit.Abstractions;
     using static DataFilters.OrderDirection;
 
-    public class StringExtensionsTests
+    public class StringExtensionsTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public StringExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Theory]
         [InlineData(null, "sort expression cannot be null")]
         [InlineData("  ", "sort expression cannot be whitespace only")]
@@ -100,12 +96,12 @@
         [MemberData(nameof(ToSortCases))]
         public void ToSortTests(string sort, IOrder<SuperHero> expected)
         {
-            _outputHelper.WriteLine($"{nameof(sort)} : '{sort}'");
+            outputHelper.WriteLine($"{nameof(sort)} : '{sort}'");
 
             // Act
             IOrder<SuperHero> actual = sort.ToSort<SuperHero>();
 
-            _outputHelper.WriteLine($"actual sort : '{actual}'");
+            outputHelper.WriteLine($"actual sort : '{actual}'");
 
             // Assert
             actual.Should()

@@ -8,6 +8,7 @@
     [SimpleJob(RuntimeMoniker.CoreRt31)]
     [SimpleJob(RuntimeMoniker.Net50)]
     [SimpleJob(RuntimeMoniker.Net60)]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
     public class BracketVsOr
     {
         [Benchmark]

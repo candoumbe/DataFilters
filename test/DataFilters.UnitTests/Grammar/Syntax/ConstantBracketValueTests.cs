@@ -22,7 +22,7 @@
                                       .Be(input.Item);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_RangeBracketValue_Equals_should_returns_true_when_ConstantBracketValue_contains_all_letters_of_the_interval(NonNull<RangeBracketValue> rangeBracketValue)
         {
             // Arrange
@@ -36,15 +36,15 @@
             actual.Should().BeTrue($"Range expression : {rangeBracketValue} and Constant expression is {constantBracketValue.Value}");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_ConstantBracketValues_left_eq_right_should_be_returns_same_value_as_Equals(ConstantBracketValue left, ConstantBracketValue right)
             => (left == right).When(left.Equals(right)).Label($"Left, Right : {(left, right)}");
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_ConstantBracketValues_left_neq_right_should_be_returns_same_value_as_Equals(ConstantBracketValue left, ConstantBracketValue right)
             => (left != right).When(!left.Equals(right)).Label($"Left, Right : {(left, right)}");
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<ConstantBracketValue> expression)
         {
             // Act
@@ -54,7 +54,7 @@
             actual.Should().BeTrue("'equals' implementation is reflexive");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<ConstantBracketValue> expression, NonNull<BracketValue> otherExpression)
         {
             // Act
@@ -64,7 +64,7 @@
             actual.Should().BeTrue("'equals' implementation should be symetric");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_ConstantBracketValue_Complexity_should_be_equal_to_inner_expression_complexity(ConstantBracketValue value)
         {
             // Arrange

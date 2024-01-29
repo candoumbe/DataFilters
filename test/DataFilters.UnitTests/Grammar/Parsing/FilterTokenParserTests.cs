@@ -183,7 +183,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_StartsWith(StartsWithExpression expected)
         {
             // Arrange
@@ -198,7 +198,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_EndsWith(EndsWithExpression expected)
         {
             // Arrange
@@ -238,7 +238,7 @@ I&_Oj
                     new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")
                 };
 
-                string[] punctuations = { ".", "-", ":", "_" };
+                string[] punctuations = [".", "-", ":", "_"];
 
                 foreach (string punctuation in punctuations)
                 {
@@ -372,7 +372,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
@@ -568,7 +568,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_bracket_expression_OneOf_can_parse_input(NonNull<BracketValue> bracketExpression)
         {
             // Arrange
@@ -592,7 +592,7 @@ I&_Oj
             expression.IsEquivalentTo(expected).ToProperty();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_Interval(CultureInfo culture, IntervalExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>
@@ -614,7 +614,7 @@ I&_Oj
         {
             get
             {
-                string[] cultures = { "fr-FR", "en-GB", "en-US" };
+                string[] cultures = ["fr-FR", "en-GB", "en-US"];
                 foreach (string culture in cultures)
                 {
                     yield return new object[]
@@ -662,7 +662,7 @@ I&_Oj
             });
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_text(CultureInfo culture, TextExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>
@@ -974,7 +974,7 @@ I&_Oj
                 .Match(expectation);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DateAndTime(DateTimeExpression expected)
         {
             // Arrange
@@ -1000,7 +1000,7 @@ I&_Oj
             }
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DateCases(DateExpression expected)
         {
             // Arrange
@@ -1014,7 +1014,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
@@ -1032,7 +1032,7 @@ I&_Oj
         {
             get
             {
-                string[] cultures = { "fr-FR", "en-GB", "en-US" };
+                string[] cultures = ["fr-FR", "en-GB", "en-US"];
                 foreach (string culture in cultures)
                 {
                     yield return new object[]
@@ -1068,7 +1068,7 @@ I&_Oj
             });
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_TimeExpression(NonNull<TimeExpression> expected)
         {
             // Arrange
@@ -1082,7 +1082,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected.Item);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DurationExpression(DurationExpression expected)
         {
             // Arrange

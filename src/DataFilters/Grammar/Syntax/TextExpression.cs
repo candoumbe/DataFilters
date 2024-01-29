@@ -7,17 +7,13 @@
     /// <summary>
     /// An expression that holds a string value "as is".
     /// </summary>
-    public class TextExpression : StringValueExpression, IEquatable<TextExpression>
+    /// <remarks>
+    /// Builds a new <see cref="TextExpression"/> instance.
+    /// </remarks>
+    /// <param name="value">Value of the expression</param>
+    public class TextExpression(string value) : StringValueExpression(value), IEquatable<TextExpression>
     {
-        private readonly Lazy<string> _lazyEscapedParseableString;
-
-        /// <summary>
-        /// Builds a new <see cref="TextExpression"/> instance.
-        /// </summary>
-        /// <param name="value">Value of the expression</param>
-        public TextExpression(string value) : base(value)
-        {
-            _lazyEscapedParseableString = new(() =>
+        private readonly Lazy<string> _lazyEscapedParseableString = new(() =>
             {
                 StringBuilder escapedParseableString;
                 if (value.AtLeastOnce(chr => chr == '"' || chr == '\\'))
@@ -40,7 +36,6 @@
 
                 return escapedParseableString.Insert(0, '"').Append('"').ToString();
             });
-        }
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;

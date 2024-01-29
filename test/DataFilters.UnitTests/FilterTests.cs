@@ -327,7 +327,7 @@
             .VerboseCheck(output);
         }
 
-        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
+        [Property(Arbitrary = [typeof(FilterGenerators)])]
         public void Given_filter_instance_Negate_should_work_as_expected(NonNull<Filter> source)
         {
             // Arrange

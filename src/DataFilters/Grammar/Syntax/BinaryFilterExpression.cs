@@ -8,7 +8,7 @@ namespace DataFilters.Grammar.Syntax;
 public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
 {
     /// <summary>
-    /// Left operand 
+    /// Left operand
     /// </summary>
     public FilterExpression Left { get; }
 

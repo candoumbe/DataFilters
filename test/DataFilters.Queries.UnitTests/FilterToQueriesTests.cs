@@ -9,12 +9,8 @@ namespace DataFilters.Queries.UnitTests
     using Xunit.Abstractions;
     using static DataFilters.FilterOperator;
 
-    public class FilterToQueriesTests
+    public class FilterToQueriesTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public FilterToQueriesTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         public static IEnumerable<object[]> FilterToWhereCases
         {
             get
@@ -106,8 +102,8 @@ namespace DataFilters.Queries.UnitTests
 
                 yield return new object[]
                 {
-                    new Filter(field: "XP", LessThanOrEqualTo, (int)10),
-                    new WhereClause("XP".Field(), ClauseOperator.LessThanOrEqualTo, (int)10)
+                    new Filter(field: "XP", LessThanOrEqualTo, 10),
+                    new WhereClause("XP".Field(), ClauseOperator.LessThanOrEqualTo, 10)
                 };
 
                 yield return new object[]
@@ -154,12 +150,12 @@ namespace DataFilters.Queries.UnitTests
         [MemberData(nameof(FilterToWhereCases))]
         public void FilterToWhere(IFilter filter, IWhereClause expected)
         {
-            _outputHelper.WriteLine($"Filter : {filter.Jsonify()}");
-            _outputHelper.WriteLine($"Expected : {expected.Jsonify()}");
+            outputHelper.WriteLine($"Filter : {filter.Jsonify()}");
+            outputHelper.WriteLine($"Expected : {expected.Jsonify()}");
 
             // Act
             IWhereClause actualWhere = filter.ToWhere();
-            _outputHelper.WriteLine($"actualQuery : {actualWhere.Jsonify()}");
+            outputHelper.WriteLine($"actualQuery : {actualWhere.Jsonify()}");
 
             // Assert
             actualWhere.Should()

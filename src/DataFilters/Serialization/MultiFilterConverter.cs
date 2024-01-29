@@ -47,7 +47,7 @@
                     if (filtersProperty is JProperty prop && filtersProperty.Value.Type == JTokenType.Array)
                     {
                         JArray filtersArray = token[MultiFilter.FiltersJsonPropertyName].Value<JArray>();
-                        int nbFilters = filtersArray.Count();
+                        int nbFilters = filtersArray.Count;
                         if (nbFilters >= 2)
                         {
                             IList<IFilter> filters = new List<IFilter>(nbFilters);

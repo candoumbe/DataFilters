@@ -9,12 +9,8 @@
     using Xunit.Categories;
 
     [UnitTest]
-    public class QueryableExtensionsTests
+    public class QueryableExtensionsTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public QueryableExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         public static IEnumerable<object[]> ThrowsArgumentNullExceptionCases
         {
             get
@@ -37,8 +33,8 @@
         [MemberData(nameof(ThrowsArgumentNullExceptionCases))]
         public void Should_Throws_ArgumentNullException_When_Parameter_IsNull(IQueryable<Hero> heroes, IOrder<Hero> orderBy)
         {
-            _outputHelper.WriteLine($"{nameof(heroes)} is null : {heroes == null}");
-            _outputHelper.WriteLine($"{nameof(orderBy)} is null : {orderBy == null}");
+            outputHelper.WriteLine($"{nameof(heroes)} is null : {heroes == null}");
+            outputHelper.WriteLine($"{nameof(orderBy)} is null : {orderBy == null}");
 
             // Act
             Action action = () => heroes.OrderBy(orderBy);

@@ -236,7 +236,7 @@
                         filter = ConvertExpressionToFilter(propInfo, group.Expression, tc);
                         break;
                     case OneOfExpression oneOf:
-                        FilterExpression[] possibleValues = oneOf.Values.ToArray();
+                        FilterExpression[] possibleValues = [.. oneOf.Values];
                         if (oneOf.Values.Exactly(1))
                         {
                             filter = ConvertExpressionToFilter(propInfo, possibleValues[0], tc);

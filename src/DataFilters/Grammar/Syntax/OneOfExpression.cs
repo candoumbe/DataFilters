@@ -54,28 +54,20 @@
             {
                 equivalent = true;
             }
-            else if (other is OneOfExpression oneOfExpression)
-            {
-                if (EqualityComparer.Equals(oneOfExpression._values.ToArray(), _values.ToArray()))
-                {
-                    equivalent = true;
-                }
-                else
-                {
-                    equivalent = !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any());
-                }
-            }
             else
             {
-                equivalent = other switch
-                {
-                    AsteriskExpression asterisk => Simplify().IsEquivalentTo(asterisk),
-                    ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
-                    DateExpression date => Simplify().IsEquivalentTo(date),
-                    DateTimeExpression dateTime => Simplify().IsEquivalentTo(dateTime),
-                    ISimplifiable simplifiable => Simplify().IsEquivalentTo(simplifiable.Simplify()),
-                    _ => false
-                };
+                equivalent = other is OneOfExpression oneOfExpression
+                    ? EqualityComparer.Equals([.. oneOfExpression._values], [.. _values])
+                                    || !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any())
+                    : other switch
+                    {
+                        AsteriskExpression asterisk => Simplify().IsEquivalentTo(asterisk),
+                        ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
+                        DateExpression date => Simplify().IsEquivalentTo(date),
+                        DateTimeExpression dateTime => Simplify().IsEquivalentTo(dateTime),
+                        ISimplifiable simplifiable => Simplify().IsEquivalentTo(simplifiable.Simplify()),
+                        _ => false
+                    };
             }
 
             return equivalent;
@@ -102,7 +94,7 @@
         /// <inheritdoc/>
         public FilterExpression Simplify()
         {
-            ISet<FilterExpression> curatedExpressions = new HashSet<FilterExpression>();
+            HashSet<FilterExpression> curatedExpressions = [];
 
             foreach (IGrouping<bool, FilterExpression> expr in _values.ToLookup(x => x is OneOfExpression))
             {
@@ -137,17 +129,12 @@
                 case 2:
                     FilterExpression first = curatedExpressions.First();
                     FilterExpression other = curatedExpressions.Last();
-                    if (first is OneOfExpression oneOfFirst && other is OneOfExpression oneOfSecond)
-                    {
-                        simplifiedResult = new OneOfExpression(oneOfFirst.Values.Concat(oneOfSecond.Values).ToArray());
-                    }
-                    else
-                    {
-                        simplifiedResult = new OrExpression(first, other);
-                    }
+                    simplifiedResult = first is OneOfExpression oneOfFirst && other is OneOfExpression oneOfSecond
+                        ? new OneOfExpression([.. oneOfFirst.Values, .. oneOfSecond.Values])
+                        : new OrExpression(first, other);
                     break;
                 default:
-                    simplifiedResult = new OneOfExpression(curatedExpressions.ToArray());
+                    simplifiedResult = new OneOfExpression([.. curatedExpressions]);
                     break;
             }
 

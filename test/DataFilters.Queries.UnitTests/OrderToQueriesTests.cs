@@ -10,12 +10,8 @@
     using Xunit.Abstractions;
     using static global::Queries.Core.Parts.Sorting.OrderDirection;
 
-    public class OrderToQueriesTests
+    public class OrderToQueriesTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public OrderToQueriesTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         public class Person
         {
             public string Firstname { get; set; }
@@ -55,11 +51,11 @@
         [MemberData(nameof(OrderToOrderCases))]
         public void FilterToOrder(IOrder<Person> sort, Expression<Func<IEnumerable<IOrder>, bool>> expected)
         {
-            _outputHelper.WriteLine($"Sort : {sort.Jsonify()}");
+            outputHelper.WriteLine($"Sort : {sort.Jsonify()}");
 
             // Act
             IEnumerable<IOrder> actual = sort.ToOrder();
-            _outputHelper.WriteLine($"actual result : {actual.Jsonify()}");
+            outputHelper.WriteLine($"actual result : {actual.Jsonify()}");
 
             // Assert
             actual.Should()
