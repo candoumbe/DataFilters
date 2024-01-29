@@ -1,11 +1,10 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using DataFilters.Grammar.Parsing;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using DataFilters.Grammar.Parsing;
 #if !NETSTANDARD1_3
     using Ardalis.GuardClauses;
 #endif
@@ -109,9 +108,9 @@
         /// <summary>
         /// Combines the specified <paramref name="left"/> and <paramref name="right"/> <see cref="StartsWithExpression"/>s into a new <see cref="AndExpression"/>.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is 
+        /// <param name="left">The left operand</param>
+        /// <param name="right">The right operand</param>
+        /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is
         /// <paramref name="right"/></returns>
         public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new(left, right);
 

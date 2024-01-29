@@ -42,11 +42,11 @@
                                                             OrderDirection.Ascending => nameof(Queryable.OrderBy),
                                                             _ => nameof(Queryable.OrderByDescending)
                                                         },
-                                                        new Type[] { entries.ElementType, first.Expression.ReturnType },
+                                                        [entries.ElementType, first.Expression.ReturnType],
                                                         entries.Expression, first.Expression);
 
             // Build the subsequent sorting expressions
-            foreach (var order in orders.Skip(1))
+            foreach (OrderExpression<T> order in orders.Skip(1))
             {
                 sortExpression = Expression.Call(typeof(Queryable),
                                                 order.Direction switch
@@ -54,7 +54,7 @@
                                                     OrderDirection.Ascending => nameof(Queryable.ThenBy),
                                                     _ => nameof(Queryable.ThenByDescending)
                                                 },
-                                                new Type[] { entries.ElementType, order.Expression.ReturnType },
+                                                [entries.ElementType, order.Expression.ReturnType],
                                                 sortExpression, order.Expression);
             }
 

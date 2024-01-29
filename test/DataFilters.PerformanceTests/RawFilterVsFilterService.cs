@@ -5,9 +5,10 @@ using BenchmarkDotNet.Attributes;
 
 [MemoryDiagnoser]
 [RPlotExporter]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
 public class RawFilterVsFilterService
 {
-    private IFilterService _service;
+    private FilterService _service;
 
     [Params("Nickname=((Bat|Sup)|Wonder)*m[ae]n")]
     public string Input { get; set; }

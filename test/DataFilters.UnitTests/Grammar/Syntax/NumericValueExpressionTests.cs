@@ -11,12 +11,8 @@
     using Xunit.Categories;
 
     [UnitTest]
-    public class NumericValueExpressionTests
+    public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public NumericValueExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(NumericValueExpression).Should()
                                                                            .BeAssignableTo<FilterExpression>().And
@@ -27,7 +23,7 @@
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => new NumericValueExpression(null);
+            Action action = () => _ = new NumericValueExpression(null);
 
             // Assert
             action.Should()
@@ -38,7 +34,7 @@
         public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
         {
             // Act
-            Action action = () => new NumericValueExpression(string.Empty);
+            Action action = () => _ = new NumericValueExpression(string.Empty);
 
             // Assert
             action.Should()
@@ -49,7 +45,7 @@
         public void Given_parameter_is_whitespace_Ctor_should_not_throw()
         {
             // Act
-            Action action = () => new NumericValueExpression(" ");
+            Action action = () => _ = new NumericValueExpression(" ");
 
             // Assert
             action.Should()
@@ -70,7 +66,7 @@
             actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_is_commutative(NumericValueExpression first, NumericValueExpression second)
             => first.Equals(second).Should().Be(second.Equals(first));
 
@@ -85,11 +81,11 @@
             first.Equals(second).Should().Be(Equals(first.Value, second.Value));
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_NumericValueExpression_GetComplexity_should_return_1(NumericValueExpression constant)
             => constant.Complexity.Should().Be(1);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_IntervalExpression_with_min_equals_max_is_equivalent_should_return_true(NumericValueExpression input)
         {
             // Arrange
@@ -104,15 +100,15 @@
                   .BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<NumericValueExpression> first, FilterExpression second)
             => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<NumericValueExpression> expression)
             => expression.Item.Should().Be(expression.Item);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }

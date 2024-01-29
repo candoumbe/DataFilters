@@ -12,12 +12,8 @@
     using Xunit.Categories;
 
     [UnitTest]
-    public class TimeExpressionTests
+    public class TimeExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public TimeExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(TimeExpression).Should()
                                             .BeAssignableTo<FilterExpression>().And
@@ -34,10 +30,10 @@
                                                      IntWithMinMax seconds,
                                                      IntWithMinMax milliseconds)
         {
-            _outputHelper.WriteLine($"hours : {hours.Item}");
-            _outputHelper.WriteLine($"minutes : {minutes.Item}");
-            _outputHelper.WriteLine($"seconds : {seconds.Item}");
-            _outputHelper.WriteLine($"milliseconds : {milliseconds.Item}");
+            outputHelper.WriteLine($"hours : {hours.Item}");
+            outputHelper.WriteLine($"minutes : {minutes.Item}");
+            outputHelper.WriteLine($"seconds : {seconds.Item}");
+            outputHelper.WriteLine($"milliseconds : {milliseconds.Item}");
 
             // Arrange
             Lazy<TimeExpression> timeExpressionBuilder = new(() => new TimeExpression(hours.Item, minutes.Item,
@@ -61,23 +57,23 @@
                            && timeExpression.Minutes == minutes.Item
                            && timeExpression.Seconds == seconds.Item;
                 })
-                .VerboseCheck(_outputHelper);
+                .VerboseCheck(outputHelper);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<TimeExpression> first, FilterExpression second)
             => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty()
-                .QuickCheckThrowOnFailure(_outputHelper);
+                .QuickCheckThrowOnFailure(outputHelper);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<TimeExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty().QuickCheckThrowOnFailure(_outputHelper);
+            => expression.Item.Equals(expression.Item).ToProperty().QuickCheckThrowOnFailure(outputHelper);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty().QuickCheckThrowOnFailure(_outputHelper);
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty().QuickCheckThrowOnFailure(outputHelper);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_non_null_TimeExpression_instance_should_never_be_equal_to_null(TimeExpression instance)
         {
             // Act
@@ -88,7 +84,7 @@
                   .BeFalse();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_two_TimeExpression_instances_that_have_same_values_should_be_equal(NonNegativeInt hours, NonNegativeInt minutes, NonNegativeInt seconds, NonNegativeInt milliseconds)
         {
             // Arrange
@@ -126,7 +122,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalent_should_be_commutative(NonNull<TimeExpression> first, FilterExpression second)
         {
             // Act
@@ -137,11 +133,11 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_reflexive(NonNull<TimeExpression> expression)
             => expression.Item.IsEquivalentTo(expression.Item).Should().BeTrue();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_symetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.IsEquivalentTo(otherExpression.Item).Should().Be(otherExpression.Item.IsEquivalentTo(expression.Item));
     }

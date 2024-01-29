@@ -21,7 +21,7 @@ public class FilterServiceOptionsTests
         _sut.PropertyNameResolutionStrategy.Should().Be(PropertyNameResolutionStrategy.Default);
     }
 
-    [Property(Arbitrary = new[] { typeof(Generators) })]
+    [Property(Arbitrary = [typeof(Generators)])]
     public void Given_positive_integer_value_And_strategy_Constructor_should_set_properties(PositiveInt input, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
     {
         // Act
@@ -32,7 +32,7 @@ public class FilterServiceOptionsTests
         _sut.PropertyNameResolutionStrategy.Should().Be(propertyNameResolutionStrategy);
     }
 
-    [Property(Arbitrary = new[] { typeof(Generators) })]
+    [Property(Arbitrary = [typeof(Generators)])]
     public void Given_options_Validate_should_check_all_values_are_valid(int maxCacheSize, PropertyNameResolutionStrategy strategy)
     {
         // Arrange

@@ -72,44 +72,33 @@
         /// <returns></returns>
         public static JSchema Schema(FilterOperator op)
         {
-            JSchema schema;
-            switch (op)
+            JSchema schema = op switch
             {
-                case FilterOperator.Contains:
-                case FilterOperator.StartsWith:
-                case FilterOperator.EndsWith:
-                    schema = new JSchema
-                    {
-                        Type = JSchemaType.Object,
-                        Properties =
+                FilterOperator.Contains or FilterOperator.StartsWith or FilterOperator.EndsWith => new JSchema
+                {
+                    Type = JSchemaType.Object,
+                    Properties =
                         {
                             [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String },
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String },
                             [ValueJsonPropertyName] = new JSchema { Type = JSchemaType.String }
                         },
-                        Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
-                    };
-                    break;
-                case FilterOperator.IsEmpty:
-                case FilterOperator.IsNotEmpty:
-                case FilterOperator.IsNotNull:
-                case FilterOperator.IsNull:
-                    schema = new JSchema
-                    {
-                        Type = JSchemaType.Object,
-                        Properties =
+                    Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
+                },
+                FilterOperator.IsEmpty or FilterOperator.IsNotEmpty or FilterOperator.IsNotNull or FilterOperator.IsNull => new JSchema
+                {
+                    Type = JSchemaType.Object,
+                    Properties =
                         {
                             [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String },
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String }
                         },
-                        Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
-                    };
-                    break;
-                default:
-                    schema = new JSchema
-                    {
-                        Type = JSchemaType.Object,
-                        Properties =
+                    Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
+                },
+                _ => new JSchema
+                {
+                    Type = JSchemaType.Object,
+                    Properties =
                         {
                             [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String,  },
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String },
@@ -117,10 +106,9 @@
                                 Not = new JSchema() { Type = JSchemaType.Null }
                             }
                         },
-                        Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
-                    };
-                    break;
-            }
+                    Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
+                },
+            };
             schema.AllowAdditionalProperties = false;
 
             return schema;

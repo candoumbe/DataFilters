@@ -12,12 +12,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using Xunit.Categories;
 
     [UnitTest]
-    public class DurationExpressionTests
+    public class DurationExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public DurationExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(DurationExpression).Should()
                                                                       .BeDerivedFrom<FilterExpression>();
@@ -25,9 +21,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [Property]
         public void Throws_ArgumentOutOfRangeException_when_any_ctor_input_is_negative(int years, int months, int weeks, int days, int hours, int minutes, int seconds)
         {
-            Action invokingConstructor = () => new DurationExpression(years, months, weeks, days, hours, minutes, seconds);
+            Action invokingConstructor = () => _ = new DurationExpression(years, months, weeks, days, hours, minutes, seconds);
 
-            object _ = (years, months, weeks, days, hours, minutes, seconds) switch
+            object __ = (years, months, weeks, days, hours, minutes, seconds) switch
             {
                 var tuple when tuple.years < 0
                                || tuple.months < 0
@@ -113,29 +109,29 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             durationEqualsToNull.Should().BeFalse();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<DurationExpression> first, FilterExpression second)
             => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<DurationExpression> expression)
             => expression.Item.Equals(expression.Item).Should().BeTrue();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<DurationExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DurationExpression_GetComplexity_should_return_1(DurationExpression duration)
             => duration.Complexity.Should().Be(1);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_transitive(DurationExpression duration, NonNull<FilterExpression> other, NonNull<FilterExpression> third)
         {
             // Arrange
-            _outputHelper.WriteLine($"Duration : {duration}");
-            _outputHelper.WriteLine($"Other : {other.Item.EscapedParseableString}");
-            _outputHelper.WriteLine($"Third : {third.Item.EscapedParseableString}");
+            outputHelper.WriteLine($"Duration : {duration}");
+            outputHelper.WriteLine($"Other : {other.Item.EscapedParseableString}");
+            outputHelper.WriteLine($"Third : {third.Item.EscapedParseableString}");
 
             bool first = duration.IsEquivalentTo(other.Item);
             bool second = other.Item.IsEquivalentTo(third.Item);
@@ -172,15 +168,15 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void IsEquivalent_should_behave_as_expected(DurationExpression duration, FilterExpression other, FilterExpression third, (bool expected, string reason) expectation)
         {
             // Arrange
-            _outputHelper.WriteLine($"Duration : {duration}");
-            _outputHelper.WriteLine($"Other : {other.EscapedParseableString}");
-            _outputHelper.WriteLine($"Third : {third.EscapedParseableString}");
+            outputHelper.WriteLine($"Duration : {duration}");
+            outputHelper.WriteLine($"Other : {other.EscapedParseableString}");
+            outputHelper.WriteLine($"Third : {third.EscapedParseableString}");
 
             bool durationIsEquivalentToOther = duration.IsEquivalentTo(other);
             bool otherIsEquivalentToThird = other.IsEquivalentTo(third);
 
-            _outputHelper.WriteLine($"{duration} is equivalent to {other} : {durationIsEquivalentToOther}");
-            _outputHelper.WriteLine($"{other} is equivalent to {third} : {otherIsEquivalentToThird}");
+            outputHelper.WriteLine($"{duration} is equivalent to {other} : {durationIsEquivalentToOther}");
+            outputHelper.WriteLine($"{other} is equivalent to {third} : {otherIsEquivalentToThird}");
 
             // Act
             bool actual = duration.IsEquivalentTo(third);

@@ -16,16 +16,9 @@
     [UnitTest]
     [Feature(nameof(DataFilters.Grammar.Parsing))]
     [Feature(nameof(FilterTokenizer))]
-    public class FilterTokenizerTests
+    public class FilterTokenizerTests(ITestOutputHelper outputHelper)
     {
-        private readonly FilterTokenizer _sut;
-        private readonly ITestOutputHelper _outputHelper;
-
-        public FilterTokenizerTests(ITestOutputHelper outputHelper)
-        {
-            _sut = new FilterTokenizer();
-            _outputHelper = outputHelper;
-        }
+        private readonly FilterTokenizer _sut = new FilterTokenizer();
 
         [Fact]
         public void IsTokenizer() => typeof(FilterTokenizer).Should()
@@ -371,12 +364,12 @@
         [MemberData(nameof(RecognizeTokensCases))]
         public void RecognizeTokens(string input, Expression<Func<TokenList<FilterToken>, bool>> expectation)
         {
-            _outputHelper.WriteLine($"input : '{input}'");
+            outputHelper.WriteLine($"input : '{input}'");
             // Act
             TokenList<FilterToken> tokens = _sut.Tokenize(input);
 
             // Assert 
-            _outputHelper.WriteLine($"Tokens : {tokens.Select(token => new { Value = token.ToStringValue(), Kind = token.Kind.ToString(), token.Position.Column }).Jsonify()}");
+            outputHelper.WriteLine($"Tokens : {tokens.Select(token => new { Value = token.ToStringValue(), Kind = token.Kind.ToString(), token.Position.Column }).Jsonify()}");
 
             tokens.Should()
                 .Match(expectation);

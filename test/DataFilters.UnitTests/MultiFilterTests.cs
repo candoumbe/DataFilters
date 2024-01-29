@@ -22,12 +22,8 @@ namespace DataFilters.UnitTests
     using static DataFilters.FilterOperator;
 
     [UnitTest]
-    public class MultiFilterTests
+    public class MultiFilterTests(ITestOutputHelper output)
     {
-        public MultiFilterTests(ITestOutputHelper output) => _output = output;
-
-        private readonly ITestOutputHelper _output;
-
         public class Person
         {
             public string Firstname { get; set; }
@@ -149,12 +145,12 @@ namespace DataFilters.UnitTests
         [MemberData(nameof(MultiFilterToJsonCases))]
         public void MultiFilterToJson(MultiFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
-            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
+            output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
             // Act
             string json = filter.ToJson();
 
-            _output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(json)} : {json}");
 
             // Assert
             json.Should().Match(jsonMatcher);
@@ -289,8 +285,8 @@ namespace DataFilters.UnitTests
         [MemberData(nameof(EqualsCases))]
         public void CompositeFilterImplementsEquatableProperly(MultiFilter first, object second, bool expectedResult, string reason)
         {
-            _output.WriteLine($"first : {first}");
-            _output.WriteLine($"second : {second}");
+            output.WriteLine($"first : {first}");
+            output.WriteLine($"second : {second}");
 
             // Act
             bool result = first.Equals(second);
@@ -304,7 +300,7 @@ namespace DataFilters.UnitTests
         [MemberData(nameof(CompositeFilterSchemaTestCases))]
         public void CompositeFilterSchema(string json, bool expectedValidity)
         {
-            _output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(json)} : {json}");
 
             // Arrange
             JSchema schema = MultiFilter.Schema;
@@ -316,7 +312,7 @@ namespace DataFilters.UnitTests
             isValid.Should().Be(expectedValidity);
         }
 
-        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
+        [Property(Arbitrary = [typeof(FilterGenerators)])]
         public void Given_filter_instance_Negate_should_work_as_expected(FilterLogic logic, NonEmptyArray<IFilter> source)
         {
             // Arrange

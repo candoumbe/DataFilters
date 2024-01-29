@@ -25,7 +25,7 @@
                 .Matches(Pattern)
                 .WithMessage(search =>
                 {
-                    string[] incorrectExpresions = search.Split(new[] { _separator })
+                    string[] incorrectExpresions = search.Split([_separator])
                         .Where(x => !_orderRegex.IsMatch(x))
                         .Select(x => $@"""{x}""")
                         .ToArray();

@@ -10,23 +10,22 @@
     /// Allow to sort by multiple <see cref="Order{T}"/> expression
     /// </summary>
     /// <typeparam name="T">Type onto which the sort will be applied</typeparam>
-    public class MultiOrder<T> : IOrder<T>, IEquatable<MultiOrder<T>>
+    /// <remarks>
+    /// Builds a new <see cref="MultiOrder{T}"/> instance.
+    /// </remarks>
+    /// <param name="orders"></param>
+    public class MultiOrder<T>(params Order<T>[] orders) : IOrder<T>, IEquatable<MultiOrder<T>>
     {
         /// <summary>
         /// <see cref="Order{T}"/> items that the current instance carries.
         /// </summary>
         public IEnumerable<Order<T>> Orders => _orders;
 
-        private readonly Order<T>[] _orders;
+        private readonly Order<T>[] _orders = orders.Where(s => s is not null)
+                                                                  .ToArray();
 
         private static readonly ArrayEqualityComparer<Order<T>> equalityComparer = new();
 
-        /// <summary>
-        /// Builds a new <see cref="MultiOrder{T}"/> instance.
-        /// </summary>
-        /// <param name="orders"></param>
-        public MultiOrder(params Order<T>[] orders) => _orders = orders.Where(s => s is not null)
-                                                                  .ToArray();
         /// <inheritdoc/>
         public bool Equals(IOrder<T> other) => Equals(other as MultiOrder<T>);
 
