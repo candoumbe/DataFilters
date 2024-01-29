@@ -182,7 +182,8 @@ namespace DataFilters.ContinuousIntegration
         bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
 
         ///<inheritdoc/>
-        Configure<DotNetFormatSettings> IDotnetFormat.FormatSettings => settings => settings.SetVerbosity(DotNetVerbosity.diagnostic);
+        Configure<DotNetFormatSettings> IDotnetFormat.FormatSettings => settings => settings.SetVerbosity(DotNetVerbosity.diagnostic)
+                                                                                            .SetNoRestore(false);
 
         protected override void OnBuildCreated()
         {
