@@ -12,6 +12,8 @@ namespace DataFilters.ContinuousIntegration
     using Nuke.Common.CI.GitHubActions;
     using Nuke.Common.IO;
     using Nuke.Common.ProjectModel;
+    using Nuke.Common.Tooling;
+    using Nuke.Common.Tools.DotNet;
 
     [GitHubActions(
         "integration",
@@ -103,7 +105,7 @@ namespace DataFilters.ContinuousIntegration
         ],
         PublishArtifacts = true
     )]
-
+    [DotNetVerbosityMapping]
     public class Build : NukeBuild,
         IHaveSolution,
         IHaveSourceDirectory,
@@ -176,7 +178,11 @@ namespace DataFilters.ContinuousIntegration
                                            () => this is ICreateGithubRelease && this.Get<ICreateGithubRelease>()?.GitHubToken is not null)
         };
 
+        ///<inheritdoc/>
         bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
+
+        ///<inheritdoc/>
+        Configure<DotNetFormatSettings> IDotnetFormat.FormatSettings => settings => settings.SetVerbosity(DotNetVerbosity.diagnostic);
 
         protected override void OnBuildCreated()
         {
