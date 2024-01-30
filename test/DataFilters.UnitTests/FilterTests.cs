@@ -25,49 +25,47 @@
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
-    [UnitTest]
-    public class FilterTests
+[UnitTest]
+public class FilterTests(ITestOutputHelper output)
+{
+    private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
     {
-        private readonly ITestOutputHelper _output;
+        ["contains"] = Contains,
+        ["endswith"] = EndsWith,
+        ["eq"] = EqualTo,
+        ["gt"] = GreaterThan,
+        ["gte"] = GreaterThanOrEqual,
+        ["isempty"] = IsEmpty,
+        ["isnotempty"] = IsNotEmpty,
+        ["isnotnull"] = IsNotNull,
+        ["isnull"] = IsNull,
+        ["lt"] = FilterOperator.LessThan,
+        ["lte"] = LessThanOrEqualTo,
+        ["neq"] = NotEqualTo,
+        ["startswith"] = StartsWith
+    }.ToImmutableDictionary();
 
-        private static readonly IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
+    /// <summary>
+    /// Deserialization of various json representation into <see cref="Filter"/>
+    /// </summary>
+    public static IEnumerable<object[]> FilterDeserializeCases
+    {
+        get
         {
-            ["contains"] = Contains,
-            ["endswith"] = EndsWith,
-            ["eq"] = EqualTo,
-            ["gt"] = GreaterThan,
-            ["gte"] = GreaterThanOrEqual,
-            ["isempty"] = IsEmpty,
-            ["isnotempty"] = IsNotEmpty,
-            ["isnotnull"] = IsNotNull,
-            ["isnull"] = IsNull,
-            ["lt"] = FilterOperator.LessThan,
-            ["lte"] = LessThanOrEqualTo,
-            ["neq"] = NotEqualTo,
-            ["startswith"] = StartsWith
-        }.ToImmutableDictionary();
-
-        /// <summary>
-        /// Deserialization of various json representation into <see cref="Filter"/>
-        /// </summary>
-        public static IEnumerable<object[]> FilterDeserializeCases
-        {
-            get
+            foreach (KeyValuePair<string, FilterOperator> item in Operators)
             {
-                foreach (KeyValuePair<string, FilterOperator> item in _operators)
+                yield return new object[]
                 {
-                    yield return new object[]
-                    {
-                        @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
-                        (Expression<Func<IFilter, bool>>)(result => result is Filter
-                                                                    && "Firstname".Equals(((Filter) result).Field)
-                                                                    && item.Value.Equals(((Filter) result).Operator)
-                                                                    && "Batman".Equals(((Filter) result).Value)
-                        )
-                    };
-                }
+                    @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
+                    (Expression<Func<IFilter, bool>>)(result => result is Filter
+                                                                && "Firstname".Equals(((Filter) result).Field)
+                                                                && item.Value.Equals(((Filter) result).Operator)
+                                                                && "Batman".Equals(((Filter) result).Value)
+                    )
+                };
             }
         }
+    }
 
         public static IEnumerable<object[]> CompositeFilterToJsonCases
         {

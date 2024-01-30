@@ -37,7 +37,7 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         public int Seconds { get; }
 
-        private readonly Lazy<string> lazyEscapedParseableString;
+    private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
         /// Weeks part of the expression
@@ -93,12 +93,12 @@ namespace DataFilters.Grammar.Syntax
 
             (Years, Months, Weeks, Days, Hours, Minutes, Seconds) = (years, months, weeks, days, hours, minutes, seconds);
 
-            lazyEscapedParseableString = new Lazy<string>(() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) switch
-            {
-                (0, 0, 0, 0, 0, 0, 0) => "PT0S",
-                _ => $"P{(Years > 0 ? $"{Years}Y" : string.Empty)}{(Months > 0 ? $"{Months}M" : string.Empty)}{(Weeks > 0 ? $"{Weeks}W" : string.Empty)}{(Days > 0 ? $"{Days}D" : string.Empty)}T{(Hours > 0 ? $"{Hours}H" : string.Empty)}{(Minutes > 0 ? $"{Minutes}M" : string.Empty)}{(Seconds > 0 ? $"{Seconds}S" : string.Empty)}"
-            });
-        }
+        _lazyEscapedParseableString = new Lazy<string>(() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds) switch
+        {
+            (0, 0, 0, 0, 0, 0, 0) => "PT0S",
+            _ => $"P{(Years > 0 ? $"{Years}Y" : string.Empty)}{(Months > 0 ? $"{Months}M" : string.Empty)}{(Weeks > 0 ? $"{Weeks}W" : string.Empty)}{(Days > 0 ? $"{Days}D" : string.Empty)}T{(Hours > 0 ? $"{Hours}H" : string.Empty)}{(Minutes > 0 ? $"{Minutes}M" : string.Empty)}{(Seconds > 0 ? $"{Seconds}S" : string.Empty)}"
+        });
+    }
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
@@ -139,7 +139,6 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override int GetHashCode() => (Years, Months, Weeks, Days, Hours, Minutes, Seconds).GetHashCode();
 
-        ///<inheritdoc/>
-        public override string EscapedParseableString => lazyEscapedParseableString.Value;
-    }
+    ///<inheritdoc/>
+    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 }

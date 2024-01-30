@@ -1,31 +1,22 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax;
+
+using System;
+using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+using FluentAssertions;
+using FsCheck;
+using FsCheck.Xunit;
+using Xunit;
+using Xunit.Categories;
+
+[UnitTest]
+public class NumericValueExpressionTests
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Xunit;
-
-    using System;
-
-    using Xunit;
-    using Xunit.Abstractions;
-    using Xunit.Categories;
-
-    [UnitTest]
-    public class NumericValueExpressionTests
-    {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public NumericValueExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
-        [Fact]
-        public void IsFilterExpression() => typeof(NumericValueExpression).Should()
-                                                                           .BeAssignableTo<FilterExpression>().And
-                                                                           .Implement<IEquatable<NumericValueExpression>>().And
-                                                                           .Implement<IBoundaryExpression>();
+    [Fact]
+    public void IsFilterExpression() => typeof(NumericValueExpression).Should()
+                                                                       .BeAssignableTo<FilterExpression>().And
+                                                                       .Implement<IEquatable<NumericValueExpression>>().And
+                                                                       .Implement<IBoundaryExpression>();
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()

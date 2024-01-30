@@ -22,26 +22,26 @@
     public class FilterConverter : JsonConverter<Filter>
 
 #endif
+{
+    private readonly static IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
     {
-        private readonly static IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
-        {
-            ["contains"] = FilterOperator.Contains,
-            ["ncontains"] = FilterOperator.NotContains,
-            ["endswith"] = FilterOperator.EndsWith,
-            ["nendswith"] = FilterOperator.NotEndsWith,
-            ["eq"] = FilterOperator.EqualTo,
-            ["neq"] = FilterOperator.NotEqualTo,
-            ["gt"] = FilterOperator.GreaterThan,
-            ["gte"] = FilterOperator.GreaterThanOrEqual,
-            ["isempty"] = FilterOperator.IsEmpty,
-            ["isnotempty"] = FilterOperator.IsNotEmpty,
-            ["isnull"] = FilterOperator.IsNull,
-            ["isnotnull"] = FilterOperator.IsNotNull,
-            ["lt"] = FilterOperator.LessThan,
-            ["lte"] = FilterOperator.LessThanOrEqualTo,
-            ["startswith"] = FilterOperator.StartsWith,
-            ["nstartswith"] = FilterOperator.NotStartsWith
-        }.ToImmutableDictionary();
+        ["contains"] = FilterOperator.Contains,
+        ["ncontains"] = FilterOperator.NotContains,
+        ["endswith"] = FilterOperator.EndsWith,
+        ["nendswith"] = FilterOperator.NotEndsWith,
+        ["eq"] = FilterOperator.EqualTo,
+        ["neq"] = FilterOperator.NotEqualTo,
+        ["gt"] = FilterOperator.GreaterThan,
+        ["gte"] = FilterOperator.GreaterThanOrEqual,
+        ["isempty"] = FilterOperator.IsEmpty,
+        ["isnotempty"] = FilterOperator.IsNotEmpty,
+        ["isnull"] = FilterOperator.IsNull,
+        ["isnotnull"] = FilterOperator.IsNotNull,
+        ["lt"] = FilterOperator.LessThan,
+        ["lte"] = FilterOperator.LessThanOrEqualTo,
+        ["startswith"] = FilterOperator.StartsWith,
+        ["nstartswith"] = FilterOperator.NotStartsWith
+    }.ToImmutableDictionary();
 
 #if NETSTANDARD1_3
         /// <inheritdoc/>
@@ -109,22 +109,22 @@
                 throw new JsonException($@"Missing ""{Filter.OperatorJsonPropertyName}"" property.");
             }
 
-            reader.Read();
-            FilterOperator op = _operators[reader.GetString()];
-            if (!Filter.UnaryOperators.Contains(op))
+        reader.Read();
+        FilterOperator op = Operators[reader.GetString()];
+        if (!Filter.UnaryOperators.Contains(op))
+        {
+            if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName && Filter.ValueJsonPropertyName == reader.GetString())
             {
-                if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName && Filter.ValueJsonPropertyName == reader.GetString())
+                reader.Read();
+                value = reader.TokenType switch
                 {
-                    reader.Read();
-                    value = reader.TokenType switch
-                    {
-                        JsonTokenType.Number => reader.GetInt64(),
-                        JsonTokenType.String => reader.GetString(),
-                        JsonTokenType.False => reader.GetBoolean(),
-                        JsonTokenType.True => reader.GetBoolean(),
-                        _ => null
-                    };
-                }
+                    JsonTokenType.Number => reader.GetInt64(),
+                    JsonTokenType.String => reader.GetString(),
+                    JsonTokenType.False => reader.GetBoolean(),
+                    JsonTokenType.True => reader.GetBoolean(),
+                    _ => null
+                };
+            }
 
                 if (!reader.Read() || reader.TokenType != JsonTokenType.EndObject)
                 {
@@ -165,9 +165,9 @@
             writer.WriteStringValue(filter.Field);
 #endif
 
-            // operator
-            writer.WritePropertyName(Filter.OperatorJsonPropertyName);
-            KeyValuePair<string, FilterOperator> kv = _operators.Single(item => item.Value == filter.Operator);
+        // operator
+        writer.WritePropertyName(Filter.OperatorJsonPropertyName);
+        KeyValuePair<string, FilterOperator> kv = Operators.Single(item => item.Value == filter.Operator);
 
 #if NETSTANDARD1_3
             writer.WriteValue(kv.Key);

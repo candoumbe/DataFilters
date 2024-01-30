@@ -19,7 +19,7 @@
 
         private readonly Order<T>[] _orders;
 
-        private static readonly ArrayEqualityComparer<Order<T>> equalityComparer = new();
+    private static readonly ArrayEqualityComparer<Order<T>> EqualityComparer = new();
 
         /// <summary>
         /// Builds a new <see cref="MultiOrder{T}"/> instance.
@@ -30,9 +30,8 @@
         /// <inheritdoc/>
         public bool Equals(IOrder<T> other) => Equals(other as MultiOrder<T>);
 
-        /// <inheritdoc/>
-        public bool Equals(MultiOrder<T> other) => other is not null
-                                                  && equalityComparer.Equals(_orders, other._orders);
+    /// <inheritdoc/>
+    public bool Equals(MultiOrder<T> other) => other is not null && EqualityComparer.Equals(_orders, other._orders);
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as MultiOrder<T>);
@@ -41,8 +40,8 @@
         public bool IsEquivalentTo(IOrder<T> other) => other is MultiOrder<T> otherMultisort
                                                       && Orders.SequenceEqual(otherMultisort.Orders);
 
-        /// <inheritdoc/>
-        public override int GetHashCode() => equalityComparer.GetHashCode(_orders);
+    /// <inheritdoc/>
+    public override int GetHashCode() => EqualityComparer.GetHashCode(_orders);
 
         /// <inheritdoc/>
         public override string ToString() => $"{nameof(Orders)}:[{string.Join(",", Orders.Select(x => x.ToString()))}]";
