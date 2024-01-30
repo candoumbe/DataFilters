@@ -5,8 +5,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/candoumbe/DataFilters</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
-    <PublishUrl>true</PublishUrl>
+    <PublishUrl>$(RepositoryUrl)</PublishUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <NoWarn>$(NoWarn);NU1608</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +18,7 @@
   <PropertyGroup Condition="'$(IsTestProject)' == 'false'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PublishRepositoryUrl>$(RepositoryUrl)</PublishRepositoryUrl>
     <!-- Embed source files that are not tracked by the source control manager in the PDB -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->

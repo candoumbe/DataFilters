@@ -1,217 +1,181 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax;
+
+using System;
+using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+using FluentAssertions;
+using FsCheck;
+using FsCheck.Fluent;
+using FsCheck.Xunit;
+using Xunit;
+using Xunit.Categories;
+
+[UnitTest("StartsWith")]
+public class StartsWithExpressionTests
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
+    [Fact]
+    public void IsFilterExpression() => typeof(StartsWithExpression).Should()
+                                                                    .NotBeAbstract().And
+                                                                    .BeAssignableTo<FilterExpression>().And
+                                                                    .Implement<IEquatable<StartsWithExpression>>().And
+                                                                    .Implement<IParseableString>().And
+                                                                    .NotImplement<IBoundaryExpression>();
 
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-
-    using Xunit;
-    using Xunit.Abstractions;
-    using Xunit.Categories;
-
-    [UnitTest("StartsWith")]
-    public class StartsWithExpressionTests
+    [Fact]
+    public void Given_string_argument_is_null_Constructor_should_throw_ArgumentNullException()
     {
-        private readonly ITestOutputHelper _outputHelper;
+        // Act
+        Action action = () => _ = new StartsWithExpression((string)null);
 
-        public StartsWithExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
+        // Assert
+        action.Should()
+            .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
+    }
 
-        [Fact]
-        public void IsFilterExpression() => typeof(StartsWithExpression).Should()
-                                                                        .NotBeAbstract().And
-                                                                        .BeAssignableTo<FilterExpression>().And
-                                                                        .Implement<IEquatable<StartsWithExpression>>().And
-                                                                        .Implement<IParseableString>().And
-                                                                        .NotImplement<IBoundaryExpression>();
+    [Fact]
+    public void Given_TextExpression_argument_is_null_Constructor_should_throw_ArgumentNullException()
+    {
+        // Act
+        Action action = () => _ = new StartsWithExpression((TextExpression)null);
 
-        [Fact]
-        public void Given_string_argument_is_null_Constructor_should_throw_ArgumentNullException()
-        {
-            // Act
-            Action action = () => new StartsWithExpression((string)null);
+        // Assert
+        action.Should()
+            .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
+    }
 
-            // Assert
-            action.Should()
-                .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
-        }
+    [Fact]
+    public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
+    {
+        // Act
+        Action action = () => _ = new StartsWithExpression(string.Empty);
 
-        [Fact]
-        public void Given_TextExpression_argument_is_null_Constructor_should_throw_ArgumentNullException()
-        {
-            // Act
-            Action action = () => new StartsWithExpression((TextExpression)null);
+        // Assert
+        action.Should()
+            .ThrowExactly<ArgumentOutOfRangeException>("The parameter of the constructor cannot be empty");
+    }
 
-            // Assert
-            action.Should()
-                .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
-        }
+    [Fact]
+    public void Ctor_DoesNot_Throws_ArgumentOutOfRangeException_When_Argument_Is_WhitespaceOnly()
+    {
+        // Act
+        Action action = () => _ = new StartsWithExpression("  ");
 
-        [Fact]
-        public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
-        {
-            // Act
-            Action action = () => new StartsWithExpression(string.Empty);
+        // Assert
+        action.Should()
+            .NotThrow<ArgumentOutOfRangeException>("The parameter of the constructor can be whitespace only");
+        action.Should()
+            .NotThrow("The parameter of the constructor can be whitespace only");
+    }
 
-            // Assert
-            action.Should()
-                .ThrowExactly<ArgumentOutOfRangeException>("The parameter of the constructor cannot be empty");
-        }
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Equals_should_be_commutative(NonNull<StartsWithExpression> first, FilterExpression second)
+        => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Fact]
-        public void Ctor_DoesNot_Throws_ArgumentOutOfRangeException_When_Argument_Is_WhitespaceOnly()
-        {
-            // Act
-            Action action = () => new StartsWithExpression("  ");
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Equals_should_be_reflexive(NonNull<StartsWithExpression> expression)
+        => expression.Item.Should().Be(expression.Item);
 
-            // Assert
-            action.Should()
-                .NotThrow<ArgumentOutOfRangeException>("The parameter of the constructor can be whitespace only");
-            action.Should()
-                .NotThrow("The parameter of the constructor can be whitespace only");
-        }
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
+        => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new StartsWithExpression("prop1"),
-                    new StartsWithExpression("prop1"),
-                    true,
-                    "comparing two different instances with same property name"
-                };
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+    {
+        // Arrange
+        StartsWithExpression expression = new(text.Item);
+        string expected = $"{text.Item.EscapedParseableString}*";
 
-                yield return new object[]
-                {
-                    new StartsWithExpression("prop1"),
-                    new StartsWithExpression("prop2"),
-                    false,
-                    "comparing two different instances with different property name"
-                };
-            }
-        }
+        // Act
+        string actual = expression.EscapedParseableString;
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_commutative(NonNull<StartsWithExpression> first, FilterExpression second)
-            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
+        // Assert
+        actual.Should()
+              .Be(expected);
+    }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_reflexive(NonNull<StartsWithExpression> expression)
-            => expression.Item.Should().Be(expression.Item);
+    [Property]
+    public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
+    {
+        // Arrange
+        StartsWithExpression expression = new(text.Item);
+        StringValueExpression stringValueExpression = new(text.Item);
+        string expected = $"{stringValueExpression.EscapedParseableString}*";
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        // Act
+        string actual = expression.EscapedParseableString;
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
-        {
-            // Arrange
-            StartsWithExpression expression = new(text.Item);
-            string expected = $"{text.Item.EscapedParseableString}*";
+        // Assert
+        actual.Should()
+              .Be(expected);
+    }
 
-            // Act
-            string actual = expression.EscapedParseableString;
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_StartsWithExpression_When_right_operand_is_EndsWithExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> startsWithGen, NonNull<EndsWithExpression> endsWithGen)
+    {
+        // Arrange
+        StartsWithExpression startsWith = startsWithGen.Item;
+        EndsWithExpression endsWith = endsWithGen.Item;
 
-            // Assert
-            actual.Should()
-                  .Be(expected);
-        }
+        AndExpression expected = new(startsWith, endsWith);
 
-        [Property]
-        public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
-        {
-            // Arrange
-            StartsWithExpression expression = new(text.Item);
-            StringValueExpression stringValueExpression = new(text.Item);
-            string expected = $"{stringValueExpression.EscapedParseableString}*";
+        // Act
+        AndExpression actual = startsWith + endsWith;
 
-            // Act
-            string actual = expression.EscapedParseableString;
+        // Assert
+        actual.IsEquivalentTo(expected).Should().BeTrue();
+    }
 
-            // Assert
-            actual.Should()
-                  .Be(expected);
-        }
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_StartsWithExpression_When_right_operand_is_StartsWithExpression_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StartsWithExpression> rightOperandGen)
+    {
+        // Arrange
+        StartsWithExpression leftStartsWith = leftOperandGen.Item;
+        StartsWithExpression rightStartsWith = rightOperandGen.Item;
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_StartsWithExpression_When_right_operand_is_EndsWithExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> startsWithGen, NonNull<EndsWithExpression> endsWithGen)
-        {
-            // Arrange
-            StartsWithExpression startsWith = startsWithGen.Item;
-            EndsWithExpression endsWith = endsWithGen.Item;
+        // bat*man*
+        OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+                                       new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
+                                       new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
 
-            AndExpression expected = new(startsWith, endsWith);
+        // Act
+        OneOfExpression actual = leftStartsWith + rightStartsWith;
 
-            // Act
-            AndExpression actual = startsWith + endsWith;
+        // Assert
+        actual.IsEquivalentTo(expected).Should().BeTrue();
+    }
 
-            // Assert
-            actual.IsEquivalentTo(expected).Should().BeTrue();
-        }
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_StartsWithExpression_When_right_operand_is_Contains_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<ContainsExpression> rightOperandGen)
+    {
+        // Arrange
+        StartsWithExpression leftStartsWith = leftOperandGen.Item;
+        ContainsExpression rightStartsWith = rightOperandGen.Item;
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_StartsWithExpression_When_right_operand_is_StartsWithExpression_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StartsWithExpression> rightOperandGen)
-        {
-            // Arrange
-            StartsWithExpression leftStartsWith = leftOperandGen.Item;
-            StartsWithExpression rightStartsWith = rightOperandGen.Item;
+        OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+                                       new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
+                                       new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
 
-            // bat*man*
-            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
-                                           new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-                                           new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+        // Act
+        OneOfExpression actual = leftStartsWith + rightStartsWith;
 
-            // Act
-            OneOfExpression actual = leftStartsWith + rightStartsWith;
+        // Assert
+        actual.IsEquivalentTo(expected).Should().BeTrue();
+    }
 
-            // Assert
-            actual.IsEquivalentTo(expected).Should().BeTrue();
-        }
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_StartsWithExpression_When_right_operand_is_StringValueExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StringValueExpression> rightOperandGen)
+    {
+        // Arrange
+        StartsWithExpression leftStartsWith = leftOperandGen.Item;
+        StringValueExpression rightStartsWith = rightOperandGen.Item;
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_StartsWithExpression_When_right_operand_is_Contains_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<ContainsExpression> rightOperandGen)
-        {
-            // Arrange
-            StartsWithExpression leftStartsWith = leftOperandGen.Item;
-            ContainsExpression rightStartsWith = rightOperandGen.Item;
+        AndExpression expected = leftStartsWith + new EndsWithExpression(rightStartsWith.Value);
 
-            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
-                                           new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-                                           new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+        // Act
+        AndExpression actual = leftStartsWith + rightStartsWith;
 
-            // Act
-            OneOfExpression actual = leftStartsWith + rightStartsWith;
-
-            // Assert
-            actual.IsEquivalentTo(expected).Should().BeTrue();
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_StartsWithExpression_When_right_operand_is_StringValueExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StringValueExpression> rightOperandGen)
-        {
-            // Arrange
-            StartsWithExpression leftStartsWith = leftOperandGen.Item;
-            StringValueExpression rightStartsWith = rightOperandGen.Item;
-
-            AndExpression expected = leftStartsWith + new EndsWithExpression(rightStartsWith.Value);
-
-            // Act
-            AndExpression actual = leftStartsWith + rightStartsWith;
-
-            // Assert
-            actual.IsEquivalentTo(expected).Should().BeTrue();
-        }
+        // Assert
+        actual.IsEquivalentTo(expected).Should().BeTrue();
     }
 }

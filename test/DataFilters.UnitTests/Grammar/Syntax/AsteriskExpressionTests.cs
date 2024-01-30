@@ -1,97 +1,91 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax;
+
+using System;
+using System.Collections.Generic;
+
+using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+
+using FluentAssertions;
+
+using FsCheck;
+using FsCheck.Xunit;
+
+using Xunit;
+using Xunit.Abstractions;
+using Xunit.Categories;
+
+[UnitTest]
+[Feature(nameof(AsteriskExpression))]
+public class AsteriskExpressionTests(ITestOutputHelper outputHelper)
 {
-    using DataFilters.Grammar.Syntax;
-    using FluentAssertions;
-    using FsCheck.Xunit;
-    using FsCheck;
+    [Fact]
+    public void IsFilterExpression() => typeof(AsteriskExpression).Should()
+        .BeAssignableTo<FilterExpression>().And
+        .Implement<IEquatable<AsteriskExpression>>().And
+        .HaveDefaultConstructor();
 
-    using System;
-    using System.Collections.Generic;
-    using Xunit;
-    using Xunit.Abstractions;
-    using Xunit.Categories;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
-
-    [UnitTest]
-    [Feature(nameof(AsteriskExpression))]
-    public class AsteriskExpressionTests
+    public static IEnumerable<object[]> EqualsCases
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public AsteriskExpressionTests(ITestOutputHelper outputHelper)
+        get
         {
-            _outputHelper = outputHelper;
+            yield return new object[] { AsteriskExpression.Instance, null, false, "Comparing to null" };
+            yield return new object[] { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" };
         }
+    }
 
-        [Fact]
-        public void IsFilterExpression() => typeof(AsteriskExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<AsteriskExpression>>().And
-            .HaveDefaultConstructor();
+    [Theory]
+    [MemberData(nameof(EqualsCases))]
+    public void TestEquals(AsteriskExpression first, object other, bool expected, string reason)
+    {
+        outputHelper.WriteLine($"First instance : {first}");
+        outputHelper.WriteLine($"Second instance : {other}");
 
-        public static IEnumerable<object[]> EqualsCases
+        // Act
+        bool actual = first.Equals(other);
+        int actualHashCode = first.GetHashCode();
+
+        // Assert
+        actual.Should()
+            .Be(expected, reason);
+        if (expected)
         {
-            get
-            {
-                yield return new object[] { AsteriskExpression.Instance, null, false, "Comparing to null" };
-                yield return new object[] { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" };
-            }
+            actualHashCode.Should()
+                .Be(other?.GetHashCode(), reason);
         }
-
-        [Theory]
-        [MemberData(nameof(EqualsCases))]
-        public void TestEquals(AsteriskExpression first, object other, bool expected, string reason)
+        else
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
-
-            // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
-
-            // Assert
-            actual.Should()
-                .Be(expected, reason);
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+            actualHashCode.Should()
+                .NotBe(other?.GetHashCode(), reason);
         }
+    }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpression)
-        {
-            // Arrange
-            AsteriskExpression asterisk = AsteriskExpression.Instance;
-            EndsWithExpression expected = new(constantExpression.Item.Value);
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpression)
+    {
+        // Arrange
+        AsteriskExpression asterisk = AsteriskExpression.Instance;
+        EndsWithExpression expected = new(constantExpression.Item.Value);
 
-            // Act
-            EndsWithExpression actual = asterisk + constantExpression.Item;
+        // Act
+        EndsWithExpression actual = asterisk + constantExpression.Item;
 
-            actual.Should().Be(expected);
-        }
+        actual.Should().Be(expected);
+    }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public void Given_ConstantValueExpresion_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
-        {
-            // Arrange
-            AsteriskExpression asterisk = AsteriskExpression.Instance;
-            StartsWithExpression expected = new(constantExpression.Item.Value);
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    public void Given_ConstantValueExpresion_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
+    {
+        // Arrange
+        AsteriskExpression asterisk = AsteriskExpression.Instance;
+        StartsWithExpression expected = new(constantExpression.Item.Value);
 
-            // Act
-            StartsWithExpression actual = constantExpression.Item + asterisk;
+        // Act
+        StartsWithExpression actual = constantExpression.Item + asterisk;
 
-            actual.Should().Be(expected);
-        }
+        actual.Should().Be(expected);
     }
 }

@@ -1,14 +1,13 @@
-﻿namespace DataFilters.PerfomanceTests
+﻿namespace DataFilters.PerfomanceTests;
+
+using System.Collections.Generic;
+
+public class SuperHero
 {
-    using System.Collections.Generic;
+    public string Nickname { get; set; }
 
-    public class SuperHero
-    {
-        public string Nickname { get; set; }
+    public string[] Powers { get; set; }
 
-        public string[] Powers { get; set; }
+    public IEnumerable<SuperHero> Acolytes { get; set; }
 
-        public IEnumerable<SuperHero> Acolytes { get; set; }
-
-    }
 }
