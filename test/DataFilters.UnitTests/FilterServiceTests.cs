@@ -12,19 +12,10 @@ using System;
 using System.Collections.Generic;
 
 using Xunit;
-using Xunit.Abstractions;
-using Xunit.Categories;
 
 public class FilterServiceTests
 {
-    private readonly ITestOutputHelper _outputHelper;
-    private readonly FilterService _sut;
-
-    public FilterServiceTests(ITestOutputHelper outputHelper)
-    {
-        _outputHelper = outputHelper;
-        _sut = new FilterService(new FilterServiceOptions());
-    }
+    private readonly FilterService _sut = new FilterService(new FilterServiceOptions());
 
     public static IEnumerable<object[]> ComputeCases
     {

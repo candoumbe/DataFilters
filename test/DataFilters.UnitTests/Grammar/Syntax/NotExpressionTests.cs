@@ -13,7 +13,6 @@
     using System.Collections.Generic;
 
     using Xunit;
-    using Xunit.Abstractions;
 
     public class NotExpressionTests
     {
