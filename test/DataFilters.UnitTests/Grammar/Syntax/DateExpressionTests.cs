@@ -8,9 +8,8 @@
     using FsCheck.Fluent;
     using FsCheck.Xunit;
     using Xunit;
-    using Xunit.Abstractions;
 
-    public class DateExpressionTests(ITestOutputHelper outputHelper)
+    public class DateExpressionTests
     {
         [Fact]
         public void IsFilterExpression() => typeof(DateExpression).Should()

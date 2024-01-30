@@ -9,9 +9,8 @@ using DataFilters.TestObjects;
 using FluentAssertions;
 
 using Xunit;
-using Xunit.Abstractions;
 
-public class FilterServiceTests(ITestOutputHelper outputHelper)
+public class FilterServiceTests
 {
     private readonly FilterService _sut = new FilterService(new FilterServiceOptions());
 

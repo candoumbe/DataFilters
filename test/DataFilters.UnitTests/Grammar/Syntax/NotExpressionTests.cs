@@ -9,9 +9,8 @@
     using FsCheck.Fluent;
     using FsCheck.Xunit;
     using Xunit;
-    using Xunit.Abstractions;
 
-    public class NotExpressionTests(ITestOutputHelper outputHelper)
+    public class NotExpressionTests
     {
         [Fact]
         public void IsFilterExpression() => typeof(NotExpression).Should()

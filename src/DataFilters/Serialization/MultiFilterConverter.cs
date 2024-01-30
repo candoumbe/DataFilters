@@ -107,7 +107,7 @@
 
             };
 
-            List<IFilter> filters = new ();
+            List<IFilter> filters = [];
             if (reader.Read() && (reader.TokenType != JsonTokenType.PropertyName || MultiFilter.FiltersJsonPropertyName != reader.GetString()))
             {
                 throw new JsonException($@"Expected ""{MultiFilter.FiltersJsonPropertyName}"" property.");
@@ -155,16 +155,13 @@
             }
 
             reader.Read();
-            if (reader.TokenType != JsonTokenType.EndObject)
-            {
-                throw new JsonException(@"Expected ""}"".");
-            }
-
-            return new MultiFilter
-            {
-                Logic = logic,
-                Filters = filters
-            };
+            return reader.TokenType != JsonTokenType.EndObject
+                ? throw new JsonException(@"Expected ""}"".")
+                : new MultiFilter
+                {
+                    Logic = logic,
+                    Filters = filters
+                };
         }
 #endif
         ///<inheritdoc/>
