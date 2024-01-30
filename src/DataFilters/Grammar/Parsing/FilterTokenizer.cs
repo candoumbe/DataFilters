@@ -1,310 +1,309 @@
-﻿namespace DataFilters.Grammar.Parsing
+﻿namespace DataFilters.Grammar.Parsing;
+
+using System.Collections.Generic;
+using System.Linq;
+using Superpower;
+using Superpower.Model;
+using static DataFilters.Grammar.Parsing.FilterToken;
+
+/// <summary>
+/// <see cref="FilterTokenizer"/> is the base class used to "tokenize" a string.
+/// </summary>
+/// <remarks>
+/// The tokenizer reads a string input and associated to one or more character a <see cref="FilterToken"/> which is the first step in the process of building <see cref="IFilter"/> instances.
+/// </remarks>
+public class FilterTokenizer : Tokenizer<FilterToken>
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using Superpower;
-    using Superpower.Model;
-    using static DataFilters.Grammar.Parsing.FilterToken;
+    private TokenizerMode _mode;
 
     /// <summary>
-    /// <see cref="FilterTokenizer"/> is the base class used to "tokenize" a string.
+    /// The <c>_</c> character
     /// </summary>
-    /// <remarks>
-    /// The tokenizer reads a string input and associated to one or more character a <see cref="FilterToken"/> which is the first step in the process of building <see cref="IFilter"/> instances.
-    /// </remarks>
-    public class FilterTokenizer : Tokenizer<FilterToken>
+    public const char Underscore = '_';
+
+    /// <summary>
+    /// The <c>*</c> character
+    /// </summary>
+    public const char Asterisk = '*';
+
+    /// <summary>
+    /// The <c>=</c> character
+    /// </summary>
+    public const char EqualSign = '=';
+
+    /// <summary>
+    /// The <c>(</c> character
+    /// </summary>
+    public const char LeftParenthesis = '(';
+
+    /// <summary>
+    /// The <c>)</c> character
+    /// </summary>
+    public const char RightParenthesis = ')';
+
+    /// <summary>
+    /// The <c>[</c> character
+    /// </summary>
+    public const char LeftSquareBracket = '[';
+
+    /// <summary>
+    /// The <c>{</c> character
+    /// </summary>
+    public const char LeftCurlyBracket = '{';
+
+    /// <summary>
+    /// The <c>}</c> character
+    /// </summary>
+    public const char RightCurlyBracket = '}';
+
+    /// <summary>
+    /// The <c>]</c> character
+    /// </summary>
+    public const char RightSquareBracket = ']';
+
+    /// <summary>
+    /// The <c>-</c> character
+    /// </summary>
+    public const char Hyphen = '-';
+
+    /// <summary>
+    /// The <c>\</c> character
+    /// </summary>
+    public const char BackSlash = '\\';
+
+    /// <summary>
+    /// The <c>|</c> character
+    /// </summary>
+    public const char Pipe = '|';
+
+    /// <summary>
+    /// The <c>,</c> character
+    /// </summary>
+    public const char Comma = ',';
+
+    /// <summary>
+    /// The <c>!</c> character
+    /// </summary>
+    public const char Bang = '!';
+
+    /// <summary>
+    /// The <c>"</c> character
+    /// </summary>
+    public const char DoubleQuote = '"';
+    /// <summary>
+    /// The <c>&#38;</c> character
+    /// </summary>
+    public const char Ampersand = '&';
+
+    /// <summary>
+    /// List of characters that have a special meaning and should be escaped
+    /// </summary>
+    public static readonly char[] SpecialCharacters =
+    [
+        Asterisk,
+        EqualSign,
+        LeftParenthesis,
+        RightParenthesis,
+        LeftSquareBracket,
+        RightSquareBracket,
+        BackSlash,
+        Pipe,
+        Comma,
+        Bang,
+        DoubleQuote,
+        Ampersand,
+        RightCurlyBracket,
+        LeftCurlyBracket,
+        ':',
+        '-',
+        '.',
+        ' '
+    ];
+
+    /// <summary>
+    /// Custom <see cref="Tokenizer{TKind}"/> implementation that serves as the foundation of parsing text.
+    /// </summary>
+    public FilterTokenizer() => _mode = TokenizerMode.Normal;
+
+    ///<inheritdoc/>
+    protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
     {
-        private TokenizerMode _mode;
+        Result<char> next = span.ConsumeChar();
 
-        /// <summary>
-        /// The <c>_</c> character
-        /// </summary>
-        public const char Underscore = '_';
-
-        /// <summary>
-        /// The <c>*</c> character
-        /// </summary>
-        public const char Asterisk = '*';
-
-        /// <summary>
-        /// The <c>=</c> character
-        /// </summary>
-        public const char EqualSign = '=';
-
-        /// <summary>
-        /// The <c>(</c> character
-        /// </summary>
-        public const char LeftParenthesis = '(';
-
-        /// <summary>
-        /// The <c>)</c> character
-        /// </summary>
-        public const char RightParenthesis = ')';
-
-        /// <summary>
-        /// The <c>[</c> character
-        /// </summary>
-        public const char LeftSquareBracket = '[';
-
-        /// <summary>
-        /// The <c>{</c> character
-        /// </summary>
-        public const char LeftCurlyBracket = '{';
-
-        /// <summary>
-        /// The <c>}</c> character
-        /// </summary>
-        public const char RightCurlyBracket = '}';
-
-        /// <summary>
-        /// The <c>]</c> character
-        /// </summary>
-        public const char RightSquareBracket = ']';
-
-        /// <summary>
-        /// The <c>-</c> character
-        /// </summary>
-        public const char Hyphen = '-';
-
-        /// <summary>
-        /// The <c>\</c> character
-        /// </summary>
-        public const char BackSlash = '\\';
-
-        /// <summary>
-        /// The <c>|</c> character
-        /// </summary>
-        public const char Pipe = '|';
-
-        /// <summary>
-        /// The <c>,</c> character
-        /// </summary>
-        public const char Comma = ',';
-
-        /// <summary>
-        /// The <c>!</c> character
-        /// </summary>
-        public const char Bang = '!';
-
-        /// <summary>
-        /// The <c>"</c> character
-        /// </summary>
-        public const char DoubleQuote = '"';
-        /// <summary>
-        /// The <c>&#38;</c> character
-        /// </summary>
-        public const char Ampersand = '&';
-
-        /// <summary>
-        /// List of characters that have a special meaning and should be escaped
-        /// </summary>
-        public static readonly char[] SpecialCharacters =
-        [
-            Asterisk,
-            EqualSign,
-            LeftParenthesis,
-            RightParenthesis,
-            LeftSquareBracket,
-            RightSquareBracket,
-            BackSlash,
-            Pipe,
-            Comma,
-            Bang,
-            DoubleQuote,
-            Ampersand,
-            RightCurlyBracket,
-            LeftCurlyBracket,
-            ':',
-            '-',
-            '.',
-            ' '
-        ];
-
-        /// <summary>
-        /// Custom <see cref="Tokenizer{TKind}"/> implementation that serves as the foundation of parsing text.
-        /// </summary>
-        public FilterTokenizer() => _mode = TokenizerMode.Normal;
-
-        ///<inheritdoc/>
-        protected override IEnumerable<Result<FilterToken>> Tokenize(TextSpan span, TokenizationState<FilterToken> state)
+        if (!next.HasValue)
         {
-            Result<char> next = span.ConsumeChar();
+            yield break;
+        }
 
-            if (!next.HasValue)
+        do
+        {
+            switch (next.Value)
             {
-                yield break;
-            }
+                case char c when char.IsLetter(c):
+                    yield return Result.Value(Letter, next.Location, next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
 
-            do
-            {
-                switch (next.Value)
-                {
-                    case char c when char.IsLetter(c):
-                        yield return Result.Value(Letter, next.Location, next.Remainder);
+                case char c when char.IsDigit(c):
+                    yield return Result.Value(Digit, next.Location, next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Underscore:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Underscore, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Pipe:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => Or, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Comma:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => And, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case EqualSign:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => Equal, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Asterisk:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Asterisk, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case LeftCurlyBracket:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => LeftBrace, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case RightCurlyBracket:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => RightBrace, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Bang:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Bang, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case LeftSquareBracket:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenSquaredBracket, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case RightSquareBracket:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseSquaredBracket, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Hyphen:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => Dash, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case LeftParenthesis:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenParenthese, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case RightParenthesis:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseParenthese, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case ' ':
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => Whitespace, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case ':':
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => Colon, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case Ampersand:
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Ampersand, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case DoubleQuote:
+                    yield return Result.Value(FilterToken.DoubleQuote,
+                                              next.Location,
+                                              next.Remainder);
+                    _mode = ToggleMode(_mode);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case '.':
+                    yield return Result.Value(_mode switch { TokenizerMode.Normal => Dot, _ => Escaped },
+                                              next.Location,
+                                              next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+                case BackSlash:
+                    TextSpan backSlashStart = next.Location;
+                    if (_mode == TokenizerMode.Normal)
+                    {
                         next = next.Remainder.ConsumeChar();
-                        break;
+                        yield return next.HasValue && SpecialCharacters.Contains(next.Value)
+                            ? Result.Value(Escaped, next.Location, next.Remainder)
+                            : Result.Value(Letter, backSlashStart, next.Remainder);
 
-                    case char c when char.IsDigit(c):
-                        yield return Result.Value(Digit, next.Location, next.Remainder);
                         next = next.Remainder.ConsumeChar();
-                        break;
-                    case Underscore:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Underscore, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
+                    }
+                    else
+                    {
+                        TextSpan remainderAfterBackslah = next.Remainder;
                         next = next.Remainder.ConsumeChar();
-                        break;
-                    case Pipe:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Or, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case Comma:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => And, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case EqualSign:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Equal, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case Asterisk:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Asterisk, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case LeftCurlyBracket:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => LeftBrace, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case RightCurlyBracket:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => RightBrace, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case Bang:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Bang, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case LeftSquareBracket:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenSquaredBracket, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case RightSquareBracket:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseSquaredBracket, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case Hyphen:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Dash, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case LeftParenthesis:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenParenthese, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case RightParenthesis:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseParenthese, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case ' ':
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Whitespace, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case ':':
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Colon, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case Ampersand:
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Ampersand, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case DoubleQuote:
-                        yield return Result.Value(FilterToken.DoubleQuote,
-                                                  next.Location,
-                                                  next.Remainder);
-                        _mode = ToggleMode(_mode);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case '.':
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Dot, _ => Escaped },
-                                                  next.Location,
-                                                  next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                    case BackSlash:
-                        TextSpan backSlashStart = next.Location;
-                        if (_mode == TokenizerMode.Normal)
+                        // Only backslash and double quote need to be escaped when in Escaped mode
+                        bool shouldEscape = next.Value == BackSlash || next.Value == DoubleQuote;
+                        if (next.HasValue)
                         {
-                            next = next.Remainder.ConsumeChar();
-                            yield return next.HasValue && SpecialCharacters.Contains(next.Value)
-                                ? Result.Value(Escaped, next.Location, next.Remainder)
-                                : Result.Value(Letter, backSlashStart, next.Remainder);
-
-                            next = next.Remainder.ConsumeChar();
-                        }
-                        else
-                        {
-                            TextSpan remainderAfterBackslah = next.Remainder;
-                            next = next.Remainder.ConsumeChar();
-                            // Only backslash and double quote need to be escaped when in Escaped mode
-                            bool shouldEscape = next.Value == BackSlash || next.Value == DoubleQuote;
-                            if (next.HasValue)
+                            if (shouldEscape)
                             {
-                                if (shouldEscape)
-                                {
-                                    yield return Result.Value(Escaped, next.Location, next.Remainder);
-                                    next = next.Remainder.ConsumeChar();
-                                }
-                                else
-                                {
-                                    yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
-                                }
+                                yield return Result.Value(Escaped, next.Location, next.Remainder);
+                                next = next.Remainder.ConsumeChar();
                             }
                             else
                             {
                                 yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
                             }
                         }
+                        else
+                        {
+                            yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
+                        }
+                    }
 
-                        break;
-                    default:
-                        yield return Result.Value(None, next.Location, next.Remainder);
-                        next = next.Remainder.ConsumeChar();
-                        break;
-                }
-            } while (next.HasValue);
+                    break;
+                default:
+                    yield return Result.Value(None, next.Location, next.Remainder);
+                    next = next.Remainder.ConsumeChar();
+                    break;
+            }
+        } while (next.HasValue);
 
-            static TokenizerMode ToggleMode(TokenizerMode currentMode) => currentMode switch
-            {
-                TokenizerMode.Normal => TokenizerMode.Escaped,
-                _ => TokenizerMode.Normal
-            };
-        }
+        static TokenizerMode ToggleMode(TokenizerMode currentMode) => currentMode switch
+        {
+            TokenizerMode.Normal => TokenizerMode.Escaped,
+            _ => TokenizerMode.Normal
+        };
     }
 }

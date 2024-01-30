@@ -1,9 +1,8 @@
-namespace DataFilters.TestObjects
-{
-    public class Weapon
-    {
-        public string Name { get; set; }
+namespace DataFilters.TestObjects;
 
-        public int Level { get; set; }
-    }
+public class Weapon
+{
+    public string Name { get; set; }
+
+    public int Level { get; set; }
 }

@@ -1,28 +1,27 @@
-﻿namespace DataFilters.TestObjects
+﻿namespace DataFilters.TestObjects;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+
+[ExcludeFromCodeCoverage]
+public class SuperHero : Person
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-
-    [ExcludeFromCodeCoverage]
-    public class SuperHero : Person
-    {
 #if NET6_0_OR_GREATER
-        public DateOnly? LastBattleDate { get; init; }
+    public DateOnly? LastBattleDate { get; init; }
 
-        public TimeOnly? PeakShape { get; init; }
+    public TimeOnly? PeakShape { get; init; }
 #else
-        public DateTimeOffset? LastBattleDate { get; set; }
+    public DateTimeOffset? LastBattleDate { get; set; }
 #endif
-        public Henchman Henchman { get; set; }
+    public Henchman Henchman { get; set; }
 
-        public IEnumerable<string> Powers { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> Powers { get; set; } = Enumerable.Empty<string>();
 
-        public int Age { get; set; }
+    public int Age { get; set; }
 
-        public IEnumerable<SuperHero> Acolytes { get; set; } = Enumerable.Empty<SuperHero>();
+    public IEnumerable<SuperHero> Acolytes { get; set; } = Enumerable.Empty<SuperHero>();
 
-        public IEnumerable<Weapon> Weapons { get; set; } = Enumerable.Empty<Weapon>();
-    }
+    public IEnumerable<Weapon> Weapons { get; set; } = Enumerable.Empty<Weapon>();
 }
