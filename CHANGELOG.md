@@ -6,10 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 🚀 New features
+- Added `net8.0` support
+
 ### ⚠️ Breaking Changes
 
 - Dropped `net5.0` support
 - Dropped `netcoreapp3.1` support
+- Dropped `netstandard1.3` support
+- Removed `IFilterService` and `FilterService`
 
 ### 🧹 Housekeeping
 
