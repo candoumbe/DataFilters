@@ -1,71 +1,65 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Schema;
-
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text.RegularExpressions;
-
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
-[UnitTest]
-public class FilterTests(ITestOutputHelper output)
-{
-    private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
+    [UnitTest]
+    public class FilterTests(ITestOutputHelper output)
     {
-        ["contains"] = Contains,
-        ["endswith"] = EndsWith,
-        ["eq"] = EqualTo,
-        ["gt"] = GreaterThan,
-        ["gte"] = GreaterThanOrEqual,
-        ["isempty"] = IsEmpty,
-        ["isnotempty"] = IsNotEmpty,
-        ["isnotnull"] = IsNotNull,
-        ["isnull"] = IsNull,
-        ["lt"] = FilterOperator.LessThan,
-        ["lte"] = LessThanOrEqualTo,
-        ["neq"] = NotEqualTo,
-        ["startswith"] = StartsWith
-    }.ToImmutableDictionary();
-
-    /// <summary>
-    /// Deserialization of various json representation into <see cref="Filter"/>
-    /// </summary>
-    public static IEnumerable<object[]> FilterDeserializeCases
-    {
-        get
+        private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
         {
-            foreach (KeyValuePair<string, FilterOperator> item in Operators)
+            ["contains"] = Contains,
+            ["endswith"] = EndsWith,
+            ["eq"] = EqualTo,
+            ["gt"] = GreaterThan,
+            ["gte"] = GreaterThanOrEqual,
+            ["isempty"] = IsEmpty,
+            ["isnotempty"] = IsNotEmpty,
+            ["isnotnull"] = IsNotNull,
+            ["isnull"] = IsNull,
+            ["lt"] = FilterOperator.LessThan,
+            ["lte"] = LessThanOrEqualTo,
+            ["neq"] = NotEqualTo,
+            ["startswith"] = StartsWith
+        }.ToImmutableDictionary();
+
+        /// <summary>
+        /// Deserialization of various json representation into <see cref="Filter"/>
+        /// </summary>
+        public static IEnumerable<object[]> FilterDeserializeCases
+        {
+            get
             {
-                yield return new object[]
+                foreach (KeyValuePair<string, FilterOperator> item in Operators)
                 {
+                    yield return new object[]
+                    {
                     @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
                     (Expression<Func<IFilter, bool>>)(result => result is Filter
                                                                 && "Firstname".Equals(((Filter) result).Field)
                                                                 && item.Value.Equals(((Filter) result).Operator)
                                                                 && "Batman".Equals(((Filter) result).Value)
                     )
-                };
+                    };
+                }
             }
         }
-    }
 
         public static IEnumerable<object[]> CompositeFilterToJsonCases
         {
@@ -169,8 +163,6 @@ public class FilterTests(ITestOutputHelper output)
             }
         }
 
-        public FilterTests(ITestOutputHelper output) => _output = output;
-
         /// <summary>
         /// Serialization of instance of <see cref="Filter"/> test cases
         /// </summary>
@@ -197,13 +189,13 @@ public class FilterTests(ITestOutputHelper output)
 
         private void ToJson(IFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
-            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
+            output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
             // Act
             string json = filter.ToJson();
 
             // Assert
-            _output.WriteLine($"ToJson result is '{json}'");
+            output.WriteLine($"ToJson result is '{json}'");
             json.Should().Match(jsonMatcher);
         }
 
@@ -211,8 +203,8 @@ public class FilterTests(ITestOutputHelper output)
         [MemberData(nameof(FilterSchemaTestCases))]
         public void FilterSchema(string json, FilterOperator @operator, bool expectedValidity)
         {
-            _output.WriteLine($"{nameof(json)} : {json}");
-            _output.WriteLine($"{nameof(FilterOperator)} : {@operator}");
+            output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(FilterOperator)} : {@operator}");
 
             // Arrange
             JSchema schema = Filter.Schema(@operator);
@@ -289,8 +281,8 @@ public class FilterTests(ITestOutputHelper output)
         [MemberData(nameof(FilterEquatableCases))]
         public void FilterImplementsEquatableProperly(Filter first, Filter second, bool expectedResult)
         {
-            _output.WriteLine($"first : {first}");
-            _output.WriteLine($"second : {second}");
+            output.WriteLine($"first : {first}");
+            output.WriteLine($"second : {second}");
 
             // Act
             bool result = first.Equals(second);
@@ -330,12 +322,12 @@ public class FilterTests(ITestOutputHelper output)
                             && filter.Operator == @operator
                             && value.Equals(filter.Value);
                     }).When(!Filter.UnaryOperators.Contains(@operator)).Label("Binary operator")
-                    .VerboseCheck(_output);
+                    .VerboseCheck(output);
             })
-            .VerboseCheck(_output);
+            .VerboseCheck(output);
         }
 
-        [Property(Arbitrary = new[] {typeof(FilterGenerators)})]
+        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
         public void Given_filter_instance_Negate_should_work_as_expected(NonNull<Filter> source)
         {
             // Arrange
