@@ -5,35 +5,25 @@ using static Newtonsoft.Json.JsonConvert;
 
 namespace DataFilters.UnitTests
 {
-    using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-
-    using FsCheck.Xunit;
-
-    using FsCheck;
-
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Schema;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
     [UnitTest]
-    public class MultiFilterTests
+    public class MultiFilterTests(ITestOutputHelper output)
     {
-        public MultiFilterTests(ITestOutputHelper output) => _output = output;
-
-        private readonly ITestOutputHelper _output;
-
         public class Person
         {
             public string Firstname { get; set; }
@@ -155,12 +145,12 @@ using FluentAssertions;
         [MemberData(nameof(MultiFilterToJsonCases))]
         public void MultiFilterToJson(MultiFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
-            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
+            output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
             // Act
             string json = filter.ToJson();
 
-            _output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(json)} : {json}");
 
             // Assert
             json.Should().Match(jsonMatcher);
@@ -295,8 +285,8 @@ using FluentAssertions;
         [MemberData(nameof(EqualsCases))]
         public void CompositeFilterImplementsEquatableProperly(MultiFilter first, object second, bool expectedResult, string reason)
         {
-            _output.WriteLine($"first : {first}");
-            _output.WriteLine($"second : {second}");
+            output.WriteLine($"first : {first}");
+            output.WriteLine($"second : {second}");
 
             // Act
             bool result = first.Equals(second);
@@ -310,7 +300,7 @@ using FluentAssertions;
         [MemberData(nameof(CompositeFilterSchemaTestCases))]
         public void CompositeFilterSchema(string json, bool expectedValidity)
         {
-            _output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(json)} : {json}");
 
             // Arrange
             JSchema schema = MultiFilter.Schema;
@@ -322,7 +312,7 @@ using FluentAssertions;
             isValid.Should().Be(expectedValidity);
         }
 
-        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
+        [Property(Arbitrary = [typeof(FilterGenerators)])]
         public void Given_filter_instance_Negate_should_work_as_expected(FilterLogic logic, NonEmptyArray<IFilter> source)
         {
             // Arrange

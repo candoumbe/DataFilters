@@ -1,30 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+    using System.Collections.Generic;
     using DataFilters.Grammar.Exceptions;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
     using FluentAssertions.Extensions;
-
     using FsCheck;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-
     using Xunit;
     using Xunit.Abstractions;
 
-    public class IntervalExpressionTests
+    public class IntervalExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public IntervalExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(IntervalExpression).Should()
                                                                    .BeAssignableTo<FilterExpression>().And
@@ -243,8 +232,8 @@
         [MemberData(nameof(EqualCases))]
         public void Equals_should_work_as_expected(IntervalExpression first, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
@@ -254,7 +243,7 @@
                 .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_min_bound_is_DateTimeExpression_When_min_does_not_hold_TimeExpression_Constructor_should_converts_Min_to_DateExpression(DateExpression date, bool included)
         {
             // Arrange
@@ -268,7 +257,7 @@
             sut.Min.Expression.Should().Be(date);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_Min_boundary_is_a_DateTimeExpression_with_only_time_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_TimeExpression(NonNull<TimeExpression> time, bool included)
         {
             // Arrange
@@ -283,7 +272,7 @@
                                    .Which.Should().Be(time.Item);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_Min_boundary_is_a_DateTimeExpression_with_only_date_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_DateExpression(NonNull<DateExpression> date, bool included)
         {
             // Arrange
@@ -299,7 +288,7 @@
                                    .Which.Should().Be(date.Item);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Ctor_should_converts_Max_DateTimeExpression_to_TimeExpression_when_DateExpression_is_not_provided(PositiveInt hours,
                                                                                                                       PositiveInt minutes,
                                                                                                                       PositiveInt seconds,
@@ -319,13 +308,13 @@
                       .Be(time);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_a_ConstantExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_ConstantExpression(NumericValueExpression constant)
         {
             CreateIsEquivalentPropeprty(constant, constant, minIncluded: true, maxIsIncluded: true);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalent_should_be_reflexive(NonNull<IntervalExpression> interval)
         {
             // Arrange
@@ -338,19 +327,19 @@
             actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_a_DateExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateExpression(DateExpression date)
         {
             CreateIsEquivalentPropeprty(date, date, minIncluded: true, maxIsIncluded: true);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_DateTimeExpression(DateTimeExpression dateTime)
         {
             CreateIsEquivalentPropeprty(dateTime, dateTime, minIncluded: true, maxIsIncluded: true);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_a_DateTimeExpression_that_is_equal_to_min_and_min_and_max_are_equal_and_min_and_max_are_included_IsEquivalent_should_return_true_when_comparing_with_TimeExpression(TimeExpression dateTime)
         {
             CreateIsEquivalentPropeprty(dateTime, dateTime, minIncluded: true, maxIsIncluded: true);
@@ -368,7 +357,7 @@
             actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_RangeExpression_GetComplexity_should_return_sum_of_min_and_max_complexity(NonNull<IntervalExpression> rangeExpressionGenerator)
         {
             // Arrange
@@ -425,7 +414,7 @@
         [MemberData(nameof(SimplifyCases))]
         public void Given_IntervalExpression_Simplify_should_return_expected_expression(IntervalExpression rangeExpression, FilterExpression expected, string reason)
         {
-            _outputHelper.WriteLine($"Range expression : {rangeExpression}");
+            outputHelper.WriteLine($"Range expression : {rangeExpression}");
 
             // Act
             FilterExpression actual = rangeExpression.Simplify();
@@ -435,7 +424,7 @@
                   .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void An_IntervalExpression_instance_built_from_data_from_a_previously_deconstructed_instance_should_be_equal(IntervalExpression expected)
         {
             // Arrange
@@ -449,15 +438,15 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<IntervalExpression> first, FilterExpression second)
             => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<IntervalExpression> expression)
             => expression.Item.Should().Be(expression.Item);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<IntervalExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }

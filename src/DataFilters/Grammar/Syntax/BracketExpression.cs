@@ -19,7 +19,7 @@
     /// </remarks>
     public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>
     {
-        private static readonly IEqualityComparer<BracketValue[]> EqualityComparer = new ArrayEqualityComparer<BracketValue>();
+        private static readonly ArrayEqualityComparer<BracketValue> EqualityComparer = new();
 
         /// <summary>
         /// Builds a new <see cref="BracketExpression"/> instance.

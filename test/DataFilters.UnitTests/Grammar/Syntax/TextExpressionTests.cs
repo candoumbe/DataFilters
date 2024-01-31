@@ -14,12 +14,8 @@ using Xunit.Categories;
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
     [UnitTest]
-    public class TextExpressionTests
+    public class TextExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public TextExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Theory]
         [InlineData(@"<\\Y!A", @"""<\\\\Y!A""")]
         public void Given_input_EscapedParseableString_should_be_correct(string input, string expected)
@@ -53,7 +49,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void Given_two_instances_with_same_input_Equals_should_return_true(NonWhiteSpaceString input)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{input.Item}'");
+            outputHelper.WriteLine($"input : '{input.Item}'");
             TextExpression first = new(input.Item);
             TextExpression other = new(input.Item);
 
@@ -65,21 +61,21 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                   .BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<TextExpression> first, FilterExpression second)
             => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty()
-                .QuickCheckThrowOnFailure(_outputHelper);
+                .QuickCheckThrowOnFailure(outputHelper);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<TextExpression> expression)
             => expression.Item.Equals(expression.Item).ToProperty()
-                .QuickCheckThrowOnFailure(_outputHelper);
+                .QuickCheckThrowOnFailure(outputHelper);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<TextExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_non_null_TextExpression_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
         {
             // Arrange

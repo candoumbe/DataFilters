@@ -1,16 +1,13 @@
 ﻿namespace DataFilters.Expressions.UnitTests
 {
-    using FluentAssertions;
-    using FluentAssertions.Extensions;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
     using Xunit;
     using Xunit.Categories;
-
     using static DataFilters.OrderDirection;
 
     [UnitTest]

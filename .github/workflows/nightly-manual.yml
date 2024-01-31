@@ -23,11 +23,11 @@ jobs:
     name: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: 'Cache: .nuke/temp, ~/.nuget/packages'
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: |
             .nuke/temp
@@ -41,27 +41,27 @@ jobs:
           StrykerDashboardApiKey: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Publish: mutation-tests'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: mutation-tests
           path: output/artifacts/tests-results/mutation-tests
       - name: 'Publish: unit-tests'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
       - name: 'Publish: packages'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: packages
           path: output/artifacts/packages
       - name: 'Publish: coverage-report'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-report
           path: output/artifacts/reports/coverage-report
       - name: 'Publish: coverage-history'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-history
           path: output/artifacts/reports/coverage-history

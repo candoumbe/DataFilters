@@ -1,29 +1,18 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+    using System.Linq;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
-
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Linq;
-
     using Xunit;
     using Xunit.Abstractions;
 
-    public class RangeBracketValueTests
+    public class RangeBracketValueTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public RangeBracketValueTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Property]
         public void Value_should_be_set_by_the_parameter_of_the_constructor(char start, char end)
         {
@@ -43,8 +32,8 @@
             Prop.ForAll(arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower), arbMap.ArbFor<char>().Filter(char.IsLetter).Filter(char.IsLower),
                                (start, end) =>
                                 {
-                                    char[] chrs = new[] { start, end }.OrderBy(x => x)
-                                                                      .ToArray();
+                                    char[] chrs = [.. new[] { start, end }.OrderBy(x => x)
+];
                                     char head = chrs[0];
                                     char tail = chrs[1];
                                     ConstantBracketValue constantBracketValue = new(Enumerable.Range(head, tail - head + 1)
@@ -56,10 +45,10 @@
 
                                     return actual.When(start < end);
                                 })
-                .QuickCheckThrowOnFailure(_outputHelper);
+                .QuickCheckThrowOnFailure(outputHelper);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_RangeBracketValues_left_ne_right_should_be_same_as_not_left_Equals_right(RangeBracketValue left, RangeBracketValue right)
         {
             // Arrange
@@ -72,7 +61,7 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_RangeBracketValues_left_gt_right_should_be_same_as_left_Start_gt_right_Start(RangeBracketValue left, RangeBracketValue right)
         {
             // Arrange
@@ -85,7 +74,7 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_RangeBracketValues_left_lte_right_should_be_same_as_left_lt_right_or_left_eq_right(RangeBracketValue left, RangeBracketValue right)
         {
             // Arrange
@@ -98,7 +87,7 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_RangeBracketValues_left_gte_right_should_be_same_as_left_gt_right_or_left_eq_right(RangeBracketValue left, RangeBracketValue right)
         {
             // Arrange
@@ -126,7 +115,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_RangeBracketValue_Complexity_should_depends_on_start_and_end(RangeBracketValue bracketValue)
         {
             // Arrange

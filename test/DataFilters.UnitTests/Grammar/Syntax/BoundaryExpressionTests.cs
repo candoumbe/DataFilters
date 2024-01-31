@@ -1,16 +1,12 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Xunit;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Categories;
 
@@ -19,7 +15,7 @@
     [Feature(nameof(IntervalExpression))]
     public class BoundaryExpressionTests
     {
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_a_BoundaryExpression_instance_should_be_equals_to_itself(BoundaryExpression input)
         {
             // Act
@@ -29,7 +25,7 @@
             actual.Should().BeTrue("'equals' implementation should be reflexive");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void A_BoundaryExpression_instance_should_not_be_equal_to_null(BoundaryExpression input)
         {
             // Act
@@ -39,7 +35,7 @@
             actual.Should().BeFalse("a not null boundaryexpression is not equal to null");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Two_BoundaryExpressions_instances_with_same_expression_and_included_should_be_equal(BoundaryExpression source)
         {
             // Arrange
@@ -56,7 +52,7 @@
             firstHashCode.Should().Be(otherHashCode);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included)
         {
             // Act
@@ -67,7 +63,7 @@
                                            .ThrowExactly<ArgumentNullException>();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<BoundaryExpression> expression)
         {
             // Act
@@ -77,7 +73,7 @@
             actual.Should().BeTrue("'equals' implementation must be reflexive");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
         {
             // Act

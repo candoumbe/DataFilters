@@ -12,7 +12,7 @@
         /// </summary>
         public FilterExpression Expression { get; }
 
-        private readonly Lazy<string> lazyEscapedParseableString;
+    private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
@@ -31,8 +31,8 @@
                 FilterExpression expr => expr
             };
 
-            lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
-        }
+        _lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
+    }
 
         ///<inheritdoc/>
         public bool Equals(NotExpression other) => Expression.Equals(other?.Expression);
@@ -44,14 +44,14 @@
         public override int GetHashCode() => Expression.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => $"{{NotExpression [" +
+        public override string ToString() => "{NotExpression [" +
             $"Expression = {Expression.GetType().Name}, " +
             $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
             $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}']," +
             $"{nameof(EscapedParseableString)} = {EscapedParseableString}}}";
 
-        ///<inheritdoc/>
-        public override string EscapedParseableString => lazyEscapedParseableString.Value;
+    ///<inheritdoc/>
+    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;

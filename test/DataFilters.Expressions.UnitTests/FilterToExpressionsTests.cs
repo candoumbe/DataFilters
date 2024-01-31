@@ -1,34 +1,25 @@
 ﻿namespace DataFilters.Expressions.UnitTests;
 
-using DataFilters.Expressions;
-using DataFilters.TestObjects;
-
-using FluentAssertions;
-using FluentAssertions.Extensions;
-
-using NodaTime;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-
+using DataFilters.Expressions;
+using DataFilters.TestObjects;
+using FluentAssertions;
+using FluentAssertions.Extensions;
+using NodaTime;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
-
 using static DataFilters.Expressions.NullableValueBehavior;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
 [Feature("Filters")]
 [UnitTest]
-public class FilterToExpressionTests
+public class FilterToExpressionTests(ITestOutputHelper output)
 {
-    private readonly ITestOutputHelper _output;
-
-    public FilterToExpressionTests(ITestOutputHelper output) => _output = output;
-
     public static IEnumerable<object[]> EqualToTestCases
     {
         get
@@ -105,8 +96,8 @@ public class FilterToExpressionTests
                 (Expression<Func<SuperHero, bool>>)(item => item.Nickname == "Batman" || item.Nickname == "Superman")
         };
 
-        yield return new object[]
-        {
+            yield return new object[]
+            {
                 new[] {
                     new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
                     new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
@@ -127,12 +118,12 @@ public class FilterToExpressionTests
                     }
                 },
                 NoAction,
-                (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a") && (item.Nickname == "Batman" || item.Nickname == "Superman"))
-            };
+                (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains('a') && (item.Nickname == "Batman" || item.Nickname == "Superman"))
+                };
 
-                yield return new object[]
-                {
-                    new[] 
+            yield return new object[]
+            {
+                    new[]
                     {
 #if NET6_0_OR_GREATER
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
@@ -167,9 +158,9 @@ public class FilterToExpressionTests
                         }
                     },
                     NoAction,
-                    
+
 #if NET6_0_OR_GREATER
-                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains('a')
                                                                 && DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate
                                                                 && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012)))
 #else
@@ -178,7 +169,7 @@ public class FilterToExpressionTests
                                                                 && item.LastBattleDate < 31.December(2012))
 
 #endif
-            };
+        };
 
             yield return new object[]
             {
@@ -215,7 +206,7 @@ public class FilterToExpressionTests
                     },
                     NoAction,
 #if NET6_0_OR_GREATER
-                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains('a')
                                                                 && DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate
                                                                 && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012)))
 #else
@@ -491,7 +482,7 @@ public class FilterToExpressionTests
                     },
                     new Filter(field : nameof(SuperHero.Nickname), @operator : StartsWith, value: "B"),
                     AddNullCheck,
-                    (Expression<Func<SuperHero, bool>>)(item => item != null && item.Nickname != null && item.Nickname.StartsWith("B"))
+                    (Expression<Func<SuperHero, bool>>)(item => item != null && item.Nickname != null && item.Nickname.StartsWith('B'))
             };
         }
     }
@@ -507,14 +498,14 @@ public class FilterToExpressionTests
         {
             yield return new object[]
             {
-                    new[] {
-                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
-                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
-                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
-                    },
-                    new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: "B"),
-                    NoAction,
-                    (Expression<Func<SuperHero, bool>>)(item => item != null && !item.Nickname.StartsWith("B"))
+                new[] {
+                    new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                    new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+                },
+                new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: "B"),
+                NoAction,
+                (Expression<Func<SuperHero, bool>>)(item => item != null && !item.Nickname.StartsWith('B'))
             };
         }
     }
@@ -538,7 +529,7 @@ public class FilterToExpressionTests
                     },
                     new Filter(field: nameof(SuperHero.Nickname), @operator: EndsWith, value:"n"),
                     NoAction,
-                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.EndsWith("n"))
+                    (Expression<Func<SuperHero, bool>>)(item => item.Nickname.EndsWith('n'))
             };
         }
     }
@@ -562,7 +553,7 @@ public class FilterToExpressionTests
                     },
                     new Filter(field: nameof(SuperHero.Nickname), @operator: NotEndsWith, value:"n"),
                     NoAction,
-                    (Expression<Func<SuperHero, bool>>)(item => !item.Nickname.EndsWith("n"))
+                    (Expression<Func<SuperHero, bool>>)(item => !item.Nickname.EndsWith('n'))
             };
         }
     }
@@ -757,7 +748,7 @@ public class FilterToExpressionTests
                     },
                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : LessThanOrEqualTo, value : DateOnly.FromDateTime(1.January(2007))),
                     NullableValueBehavior.NoAction,
-                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
+                    (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains('a')
                                                                 && item.LastBattleDate <= DateOnly.FromDateTime(1.January(2007)))
 #else
                     new[]
@@ -788,17 +779,17 @@ public class FilterToExpressionTests
     /// <param name="expression">Expression the filter should match once built</param>
     private void Build<T>(IEnumerable<T> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<T, bool>> expression)
     {
-        _output.WriteLine($"Filtering {elements.Jsonify()}");
-        _output.WriteLine($"Filter under test : {filter}");
-        _output.WriteLine($"Behavior : {nullableValueBehavior}");
-        _output.WriteLine($"Reference expression : {expression.Body}");
+        output.WriteLine($"Filtering {elements.Jsonify()}");
+        output.WriteLine($"Filter under test : {filter}");
+        output.WriteLine($"Behavior : {nullableValueBehavior}");
+        output.WriteLine($"Reference expression : {expression.Body}");
 
         // Act
         Expression<Func<T, bool>> filterExpression = filter.ToExpression<T>(nullableValueBehavior);
         IEnumerable<T> filteredResult = elements
             .Where(filterExpression.Compile())
             .ToList();
-        _output.WriteLine($"Current expression : {filterExpression.Body}");
+        output.WriteLine($"Current expression : {filterExpression.Body}");
 
         // Assert
         filteredResult.Should()
@@ -896,18 +887,18 @@ public class FilterToExpressionTests
     [MemberData(nameof(DateTimeOffsetFilterCases))]
     public void Filter_DateTimeOffset(IEnumerable<Appointment> appointments, IFilter filter, Expression<Func<Appointment, bool>> expression)
     {
-        _output.WriteLine($"Filtering {appointments.Jsonify()}");
-        _output.WriteLine($"Filter under test : {filter}");
-        _output.WriteLine($"Reference expression : {expression.Body}");
+        output.WriteLine($"Filtering {appointments.Jsonify()}");
+        output.WriteLine($"Filter under test : {filter}");
+        output.WriteLine($"Reference expression : {expression.Body}");
 
         // Act
         Expression<Func<Appointment, bool>> buildResult = filter.ToExpression<Appointment>();
         IEnumerable<Appointment> filteredResult = appointments.Where(buildResult.Compile())
                                                               .ToArray();
-        _output.WriteLine($"Current expression : {buildResult.Body}");
+        output.WriteLine($"Current expression : {buildResult.Body}");
 
         // Assert
-        _output.WriteLine($"Filtered result : {filteredResult.Jsonify()}");
+        output.WriteLine($"Filtered result : {filteredResult.Jsonify()}");
         filteredResult.Should()
                       .NotBeNull().And
                       .BeEquivalentTo(appointments?.Where(expression.Compile()));
@@ -946,20 +937,17 @@ public class FilterToExpressionTests
     public void Given_property_contains_null_value_and_behaviour_is_set_operator_will_result_in_instance_method_call_Expression_should_throws_NullReferenceException(FilterOperator op, object value)
     {
         // Arrange
-        Hero[] heroes = new Hero[]
-        {
-                new()
-        };
+        Hero[] heroes = [new()];
 
         Filter filter = new(nameof(Hero.Name), op, value);
 
         // Act
         Expression<Func<Hero, bool>> expression = filter.ToExpression<Hero>(NoAction);
-        Action act = () => heroes.Where(expression.Compile()).ToArray();
+        Action act = () => _ = heroes.Where(expression.Compile()).ToArray();
 
         // Assert
         act.Should()
-           .Throw<NullReferenceException>();
+           .Throw<NullReferenceException>("the resulting expression would apply to a property without checking if it's null");
     }
 
     [Theory]
@@ -972,17 +960,17 @@ public class FilterToExpressionTests
     public void Given_property_is_enumerable_and_behaviour_is_set_operator_will_result_in_instance_method_call_Expression_should_not_throws_NullReferenceException(FilterOperator op, object value)
     {
         // Arrange
-        SuperHero[] heroes = new SuperHero[]
-        {
-                new() { Acolytes = null}
-        };
+        SuperHero[] heroes =
+        [
+                new() { Acolytes = null }
+        ];
 
         Filter filter = new($"{nameof(SuperHero.Acolytes)}.{nameof(SuperHero.Nickname)}", op, value);
 
         // Act
         Expression<Func<SuperHero, bool>> expression = filter.ToExpression<SuperHero>(AddNullCheck);
-        _output.WriteLine($"Computed expression : {expression.Body}");
-        Action act = () => heroes.Where(expression.Compile()).ToArray();
+        output.WriteLine($"Computed expression : {expression.Body}");
+        Action act = () => _ = heroes.Where(expression.Compile()).ToArray();
 
         // Assert
         act.Should()

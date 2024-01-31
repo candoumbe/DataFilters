@@ -1,22 +1,14 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using FluentAssertions;
     using System.Collections.Generic;
-
+    using DataFilters.TestObjects;
+    using FluentAssertions;
     using Xunit;
     using Xunit.Abstractions;
     using static DataFilters.OrderDirection;
-    using DataFilters.TestObjects;
 
-    public class MultiOrderTests
+    public class MultiOrderTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public MultiOrderTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S1199:Nested code blocks should not be used")]
         public static IEnumerable<object[]> EqualsCases
         {
@@ -85,8 +77,8 @@
         [MemberData(nameof(EqualsCases))]
         public void EqualsTests(IOrder<SuperHero> first, object second, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"{nameof(first)} : '{first}'");
-            _outputHelper.WriteLine($"{nameof(second)} : '{second}'");
+            outputHelper.WriteLine($"{nameof(first)} : '{first}'");
+            outputHelper.WriteLine($"{nameof(second)} : '{second}'");
 
             // Act
             bool actual = first.Equals(second);

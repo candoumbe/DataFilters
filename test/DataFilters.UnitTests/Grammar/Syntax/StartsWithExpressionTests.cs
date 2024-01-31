@@ -1,31 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
-
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
 
     [UnitTest("StartsWith")]
-    public class StartsWithExpressionTests
+    public class StartsWithExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public StartsWithExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(StartsWithExpression).Should()
                                                                         .NotBeAbstract().And
@@ -38,7 +26,7 @@
         public void Given_string_argument_is_null_Constructor_should_throw_ArgumentNullException()
         {
             // Act
-            Action action = () => new StartsWithExpression((string)null);
+            Action action = () => _ = new StartsWithExpression((string)null);
 
             // Assert
             action.Should()
@@ -49,7 +37,7 @@
         public void Given_TextExpression_argument_is_null_Constructor_should_throw_ArgumentNullException()
         {
             // Act
-            Action action = () => new StartsWithExpression((TextExpression)null);
+            Action action = () => _ = new StartsWithExpression((TextExpression)null);
 
             // Assert
             action.Should()
@@ -60,7 +48,7 @@
         public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
         {
             // Act
-            Action action = () => new StartsWithExpression(string.Empty);
+            Action action = () => _ = new StartsWithExpression(string.Empty);
 
             // Assert
             action.Should()
@@ -71,7 +59,7 @@
         public void Ctor_DoesNot_Throws_ArgumentOutOfRangeException_When_Argument_Is_WhitespaceOnly()
         {
             // Act
-            Action action = () => new StartsWithExpression("  ");
+            Action action = () => _ = new StartsWithExpression("  ");
 
             // Assert
             action.Should()
@@ -80,41 +68,19 @@
                 .NotThrow("The parameter of the constructor can be whitespace only");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    new StartsWithExpression("prop1"),
-                    new StartsWithExpression("prop1"),
-                    true,
-                    "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
-                {
-                    new StartsWithExpression("prop1"),
-                    new StartsWithExpression("prop2"),
-                    false,
-                    "comparing two different instances with different property name"
-                };
-            }
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<StartsWithExpression> first, FilterExpression second)
             => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<StartsWithExpression> expression)
             => expression.Item.Should().Be(expression.Item);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
         {
             // Arrange
@@ -145,7 +111,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_StartsWithExpression_When_right_operand_is_EndsWithExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> startsWithGen, NonNull<EndsWithExpression> endsWithGen)
         {
             // Arrange
@@ -161,7 +127,7 @@
             actual.IsEquivalentTo(expected).Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_StartsWithExpression_When_right_operand_is_StartsWithExpression_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StartsWithExpression> rightOperandGen)
         {
             // Arrange
@@ -180,7 +146,7 @@
             actual.IsEquivalentTo(expected).Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_StartsWithExpression_When_right_operand_is_Contains_Plus_operator_should_return_OneOfExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<ContainsExpression> rightOperandGen)
         {
             // Arrange
@@ -198,7 +164,7 @@
             actual.IsEquivalentTo(expected).Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_StartsWithExpression_When_right_operand_is_StringValueExpression_Plus_operator_should_return_expected_AndExpression(NonNull<StartsWithExpression> leftOperandGen, NonNull<StringValueExpression> rightOperandGen)
         {
             // Arrange

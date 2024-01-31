@@ -22,25 +22,25 @@
     public class FilterOperatorConverter : JsonConverter<FilterOperator>
     {
 #endif
-        private readonly static IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
-        {
-            ["contains"] = FilterOperator.Contains,
-            ["ncontains"] = FilterOperator.NotContains,
-            ["endswith"] = FilterOperator.EndsWith,
-            ["nendswith"] = FilterOperator.NotEndsWith,
-            ["eq"] = FilterOperator.EqualTo,
-            ["neq"] = FilterOperator.NotEqualTo,
-            ["gt"] = FilterOperator.GreaterThan,
-            ["gte"] = FilterOperator.GreaterThanOrEqual,
-            ["isempty"] = FilterOperator.IsEmpty,
-            ["isnotempty"] = FilterOperator.IsNotEmpty,
-            ["isnull"] = FilterOperator.IsNull,
-            ["isnotnull"] = FilterOperator.IsNotNull,
-            ["lt"] = FilterOperator.LessThan,
-            ["lte"] = FilterOperator.LessThanOrEqualTo,
-            ["startswith"] = FilterOperator.StartsWith,
-            ["nstartswith"] = FilterOperator.NotStartsWith
-        }.ToImmutableDictionary();
+    private readonly static IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
+    {
+        ["contains"] = FilterOperator.Contains,
+        ["ncontains"] = FilterOperator.NotContains,
+        ["endswith"] = FilterOperator.EndsWith,
+        ["nendswith"] = FilterOperator.NotEndsWith,
+        ["eq"] = FilterOperator.EqualTo,
+        ["neq"] = FilterOperator.NotEqualTo,
+        ["gt"] = FilterOperator.GreaterThan,
+        ["gte"] = FilterOperator.GreaterThanOrEqual,
+        ["isempty"] = FilterOperator.IsEmpty,
+        ["isnotempty"] = FilterOperator.IsNotEmpty,
+        ["isnull"] = FilterOperator.IsNull,
+        ["isnotnull"] = FilterOperator.IsNotNull,
+        ["lt"] = FilterOperator.LessThan,
+        ["lte"] = FilterOperator.LessThanOrEqualTo,
+        ["startswith"] = FilterOperator.StartsWith,
+        ["nstartswith"] = FilterOperator.NotStartsWith
+    }.ToImmutableDictionary();
 
 #if NETSTANDARD1_3
         /// <inheritdoc/>
@@ -67,9 +67,9 @@
                 throw new JsonException($"Expected {nameof(FilterOperator)} value");
             }
 
-            string op = reader.GetString();
-            return _operators[op.ToLower()];
-        }
+        string op = reader.GetString();
+        return Operators[op.ToLower()];
+    }
 #endif
 
 #if NETSTANDARD1_3
@@ -85,13 +85,12 @@
         public override void Write(Utf8JsonWriter writer, FilterOperator value, JsonSerializerOptions options)
         {
 #if NETSTANDARD2_0
-            string key = _operators.Single(op => op.Value == value).Key;
+        string key = Operators.Single(op => op.Value == value).Key;
 #else
-            (string key, _) = _operators.Single(op => op.Value == value);
+        (string key, _) = Operators.Single(op => op.Value == value);
 #endif
             writer.WriteStringValue(key);
         }
 #endif
     }
 }
-

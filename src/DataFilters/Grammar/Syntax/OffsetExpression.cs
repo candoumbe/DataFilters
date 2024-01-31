@@ -47,7 +47,7 @@ namespace DataFilters.Grammar.Syntax
                 throw new ArgumentOutOfRangeException(nameof(minutes), $"{nameof(minutes)} must be between 0 and 59 inclusive");
             }
 
-            Hours = (int) hours;
+            Hours = (int)hours;
             Minutes = (int)minutes;
             Sign = sign;
 
@@ -73,7 +73,7 @@ namespace DataFilters.Grammar.Syntax
         };
 
         ///<inheritdoc/>
-#if NETSTANDARD2_1_OR_GREATER || NET5_0
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public override int GetHashCode() => HashCode.Combine(Hours, Minutes, Sign);
 #else
         public override int GetHashCode()

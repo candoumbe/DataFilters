@@ -10,7 +10,6 @@
         private readonly Lazy<string> _lazyToString;
         private readonly Lazy<string> _lazyEscapedParseableString;
 
-
         /// <inheritdoc/>
         public override double Complexity => Right.Complexity * Left.Complexity;
 

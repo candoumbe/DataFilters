@@ -1,24 +1,14 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-
-    using FluentAssertions;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.Grammar.Syntax;
+    using FluentAssertions;
     using Xunit;
     using Xunit.Abstractions;
 
-    public class PropertyNameTests
+    public class PropertyNameTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public PropertyNameTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(PropertyName).Should()
                                                                 .HaveConstructor(new[] { typeof(string) }).And
@@ -74,8 +64,8 @@
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(PropertyName first, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);

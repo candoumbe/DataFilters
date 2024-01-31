@@ -1,11 +1,9 @@
 ﻿namespace DataFilters.Grammar.Parsing
 {
-    using Superpower;
-    using Superpower.Model;
-
     using System.Collections.Generic;
     using System.Linq;
-
+    using Superpower;
+    using Superpower.Model;
     using static DataFilters.Grammar.Parsing.FilterToken;
 
     /// <summary>
@@ -101,7 +99,7 @@
         /// List of characters that have a special meaning and should be escaped
         /// </summary>
         public static readonly char[] SpecialCharacters =
-        {
+        [
             Asterisk,
             EqualSign,
             LeftParenthesis,
@@ -120,7 +118,7 @@
             '-',
             '.',
             ' '
-        };
+        ];
 
         /// <summary>
         /// Custom <see cref="Tokenizer{TKind}"/> implementation that serves as the foundation of parsing text.
@@ -246,7 +244,7 @@
                                                   next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
-                    case DoubleQuote :
+                    case DoubleQuote:
                         yield return Result.Value(FilterToken.DoubleQuote,
                                                   next.Location,
                                                   next.Remainder);

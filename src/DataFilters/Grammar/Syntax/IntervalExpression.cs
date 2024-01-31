@@ -1,8 +1,7 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using Exceptions;
-
     using System;
+    using Exceptions;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.

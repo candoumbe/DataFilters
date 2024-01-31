@@ -1,30 +1,22 @@
 ﻿namespace DataFilters.UnitTests
 {
+    using System;
+    using System.Collections.Generic;
+    using DataFilters;
     using DataFilters.Casing;
     using DataFilters.TestObjects;
-
     using FluentAssertions;
     using FluentAssertions.Common;
     using FluentAssertions.Extensions;
-
-    using System;
-    using System.Collections.Generic;
-
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
-    using DataFilters;
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
     [UnitTest]
-    public class FilterExtensionsTests
+    public class FilterExtensionsTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public FilterExtensionsTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         public static IEnumerable<object[]> ToFilterCases
         {
             get
@@ -457,7 +449,7 @@
         [MemberData(nameof(ToFilterCases))]
         public void ToFilter(string filter, IFilter expected)
         {
-            _outputHelper.WriteLine($"{nameof(filter)} : '{filter}'");
+            outputHelper.WriteLine($"{nameof(filter)} : '{filter}'");
 
             // Act
             IFilter actual = filter.ToFilter<SuperHero>();
@@ -517,7 +509,7 @@
         {
             get
             {
-                FilterLogic[] logics = { And, Or };
+                FilterLogic[] logics = [And, Or];
 
                 foreach (FilterLogic logic in logics)
                 {

@@ -3,26 +3,24 @@ using static Newtonsoft.Json.JsonConvert;
 #endif
 namespace DataFilters.UnitTests.Converters
 {
-    using FluentAssertions;
-    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
     using System.Linq.Expressions;
+    using FluentAssertions;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
-    using static DataFilters.FilterOperator;
-    using static DataFilters.FilterLogic;
     using Xunit.Categories;
-    using Newtonsoft.Json.Schema;
+    using static DataFilters.FilterLogic;
+    using static DataFilters.FilterOperator;
 
     [UnitTest]
     [Feature("Converters")]
-    public class DataFilterConverterTests
+    public class DataFilterConverterTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
         private static IImmutableDictionary<string, FilterOperator> Operators => new Dictionary<string, FilterOperator>
         {
             ["eq"] = EqualTo,
@@ -37,8 +35,6 @@ namespace DataFilters.UnitTests.Converters
             ["isnotempty"] = IsNotEmpty,
             ["isempty"] = IsEmpty
         }.ToImmutableDictionary();
-
-        public DataFilterConverterTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
 
         /// <summary>
         /// Deserialize tests cases
@@ -236,7 +232,7 @@ namespace DataFilters.UnitTests.Converters
         [MemberData(nameof(DeserializeCases))]
         public void Deserialize(string json, Type targetType, Expression<Func<object, bool>> expectation)
         {
-            _outputHelper.WriteLine($"{nameof(json)} : {json}");
+            outputHelper.WriteLine($"{nameof(json)} : {json}");
 
             object result = System.Text.Json.JsonSerializer.Deserialize(json, targetType);
 
@@ -254,7 +250,7 @@ namespace DataFilters.UnitTests.Converters
         [MemberData(nameof(SerializeCases))]
         public void Serialize(IFilter filter, Expression<Func<string, bool>> expectation)
         {
-            _outputHelper.WriteLine($"Serializing {filter}");
+            outputHelper.WriteLine($"Serializing {filter}");
 
             string result = System.Text.Json.JsonSerializer.Serialize(filter, filter.GetType());
 

@@ -1,27 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Xunit;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
 
     [UnitTest]
-    public class EndsWithExpressionTests
+    public class EndsWithExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public EndsWithExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(EndsWithExpression).Should()
                                                                       .BeAssignableTo<FilterExpression>().And
@@ -87,8 +79,8 @@
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(EndsWithExpression first, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
@@ -109,11 +101,11 @@
             }
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_EndsWithExpression_Complexity_should_return_1U002E5(EndsWithExpression endsWith)
             => endsWith.Complexity.Should().Be(1.5);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
         {
             // Arrange
@@ -144,19 +136,19 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<EndsWithExpression> first, FilterExpression second)
             => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<EndsWithExpression> expression)
             => expression.Item.Equals(expression.Item).Should().BeTrue();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<EndsWithExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_EndsWithExpression_When_adding_AsteriskExpression_should_returns_ContainsExpression(NonNull<EndsWithExpression> endsWith)
         {
             // Arrange

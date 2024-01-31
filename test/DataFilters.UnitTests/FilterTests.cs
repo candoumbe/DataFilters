@@ -1,36 +1,28 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Schema;
-
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text.RegularExpressions;
-
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
     [UnitTest]
-    public class FilterTests
+    public class FilterTests(ITestOutputHelper output)
     {
-        private readonly ITestOutputHelper _output;
-
-        private static readonly IImmutableDictionary<string, FilterOperator> _operators = new Dictionary<string, FilterOperator>
+        private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
         {
             ["contains"] = Contains,
             ["endswith"] = EndsWith,
@@ -54,16 +46,16 @@
         {
             get
             {
-                foreach (KeyValuePair<string, FilterOperator> item in _operators)
+                foreach (KeyValuePair<string, FilterOperator> item in Operators)
                 {
                     yield return new object[]
                     {
-                        @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
-                        (Expression<Func<IFilter, bool>>)(result => result is Filter
-                                                                    && "Firstname".Equals(((Filter) result).Field)
-                                                                    && item.Value.Equals(((Filter) result).Operator)
-                                                                    && "Batman".Equals(((Filter) result).Value)
-                        )
+                    @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
+                    (Expression<Func<IFilter, bool>>)(result => result is Filter
+                                                                && "Firstname".Equals(((Filter) result).Field)
+                                                                && item.Value.Equals(((Filter) result).Operator)
+                                                                && "Batman".Equals(((Filter) result).Value)
+                    )
                     };
                 }
             }
@@ -171,8 +163,6 @@
             }
         }
 
-        public FilterTests(ITestOutputHelper output) => _output = output;
-
         /// <summary>
         /// Serialization of instance of <see cref="Filter"/> test cases
         /// </summary>
@@ -199,13 +189,13 @@
 
         private void ToJson(IFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
-            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
+            output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
             // Act
             string json = filter.ToJson();
 
             // Assert
-            _output.WriteLine($"ToJson result is '{json}'");
+            output.WriteLine($"ToJson result is '{json}'");
             json.Should().Match(jsonMatcher);
         }
 
@@ -213,8 +203,8 @@
         [MemberData(nameof(FilterSchemaTestCases))]
         public void FilterSchema(string json, FilterOperator @operator, bool expectedValidity)
         {
-            _output.WriteLine($"{nameof(json)} : {json}");
-            _output.WriteLine($"{nameof(FilterOperator)} : {@operator}");
+            output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(FilterOperator)} : {@operator}");
 
             // Arrange
             JSchema schema = Filter.Schema(@operator);
@@ -291,8 +281,8 @@
         [MemberData(nameof(FilterEquatableCases))]
         public void FilterImplementsEquatableProperly(Filter first, Filter second, bool expectedResult)
         {
-            _output.WriteLine($"first : {first}");
-            _output.WriteLine($"second : {second}");
+            output.WriteLine($"first : {first}");
+            output.WriteLine($"second : {second}");
 
             // Act
             bool result = first.Equals(second);
@@ -332,12 +322,12 @@
                             && filter.Operator == @operator
                             && value.Equals(filter.Value);
                     }).When(!Filter.UnaryOperators.Contains(@operator)).Label("Binary operator")
-                    .VerboseCheck(_output);
+                    .VerboseCheck(output);
             })
-            .VerboseCheck(_output);
+            .VerboseCheck(output);
         }
 
-        [Property(Arbitrary = new[] {typeof(FilterGenerators)})]
+        [Property(Arbitrary = [typeof(FilterGenerators)])]
         public void Given_filter_instance_Negate_should_work_as_expected(NonNull<Filter> source)
         {
             // Arrange

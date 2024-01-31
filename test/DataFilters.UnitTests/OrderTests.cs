@@ -1,26 +1,15 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using DataFilters.TestObjects;
-
-    using FluentAssertions;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.TestObjects;
+    using FluentAssertions;
     using Xunit;
     using Xunit.Abstractions;
-
     using static DataFilters.OrderDirection;
 
-    public class OrderTests
+    public class OrderTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public OrderTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Theory]
         [InlineData("", "Expression is empty")]
         [InlineData(" ", "Expression is whitespace only")]
@@ -28,7 +17,7 @@
         public void Ctor_Throws_ArgumentException_If_Expression_Is_Null(string expression, string reason)
         {
             // Act
-            Action action = () => new Order<object>(expression);
+            Action action = () => _ = new Order<object>(expression);
 
             // Assert
             action.Should()
@@ -72,8 +61,8 @@
         [MemberData(nameof(EqualsCases))]
         public void EqualsTests(Order<SuperHero> first, object second, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"{nameof(first)} : '{first}'");
-            _outputHelper.WriteLine($"{nameof(second)} : '{second}'");
+            outputHelper.WriteLine($"{nameof(first)} : '{first}'");
+            outputHelper.WriteLine($"{nameof(second)} : '{second}'");
 
             // Act
             bool actual = first.Equals(second);

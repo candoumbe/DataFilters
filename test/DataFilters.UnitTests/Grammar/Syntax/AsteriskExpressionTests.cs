@@ -1,29 +1,24 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using FluentAssertions;
-    using FsCheck.Xunit;
-    using FsCheck;
-
     using System;
     using System.Collections.Generic;
+
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
     [UnitTest]
     [Feature(nameof(AsteriskExpression))]
-    public class AsteriskExpressionTests
+    public class AsteriskExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public AsteriskExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(AsteriskExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -43,8 +38,8 @@
         [MemberData(nameof(EqualsCases))]
         public void TestEquals(AsteriskExpression first, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
@@ -65,10 +60,10 @@
             }
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpression)
         {
             // Arrange
@@ -81,7 +76,7 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_ConstantValueExpresion_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
         {
             // Arrange

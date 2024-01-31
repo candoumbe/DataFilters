@@ -216,7 +216,7 @@
                                     NumericValueExpression constant => constant,
                                     DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
-                                    _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value") 
+                                    _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
 #else
                                     _ => throw new NotSupportedException($"Unsupported '{max?.GetType()}' for max value")
 #endif

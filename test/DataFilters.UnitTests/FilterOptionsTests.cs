@@ -14,7 +14,7 @@ public class FilterOptionsTests
     public void Ctor_should_create_instance_with_default_values()
     {
         // Act
-        FilterOptions options = new ();
+        FilterOptions options = new();
 
         // Assert
         options.DefaultPropertyNameResolutionStrategy.Should()
@@ -31,7 +31,7 @@ public class FilterOptionsTests
 
         // Act
 #if NET6_0_OR_GREATER
-        options = options with { DefaultPropertyNameResolutionStrategy = null }; 
+        options = options with { DefaultPropertyNameResolutionStrategy = null };
 #else
         options = new () { DefaultPropertyNameResolutionStrategy = null };
 #endif

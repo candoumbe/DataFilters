@@ -1,30 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
 
-    public class BracketExpressionTests
+    public class BracketExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public BracketExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(BracketExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -76,7 +65,7 @@
                   .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<BracketValue> one,
                                                                                                     NonEmptyArray<BracketValue> two)
         {
@@ -84,10 +73,10 @@
             BracketExpression first = new(one.Item);
             BracketExpression second = new(two.Item);
 
-            first.Equals(second).ToProperty().When(one.Item.Equals(two.Item)).VerboseCheck(_outputHelper);
+            first.Equals(second).ToProperty().When(one.Item.Equals(two.Item)).VerboseCheck(outputHelper);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Complexity_should_depends_on_input(NonEmptyArray<BracketValue> values)
         {
             // Arrange
@@ -130,7 +119,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_BracketRangeValue_IsEquivalentTo_should_be_equivalent_to_many_OrExpression_where_each_expression_contains_one_charater(NonNull<RangeBracketValue> rangeBracketValue)
         {
             // Arrange

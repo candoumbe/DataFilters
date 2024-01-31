@@ -1,62 +1,62 @@
 namespace DataFilters.ContinuousIntegration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Candoumbe.Pipelines.Components;
+    using Candoumbe.Pipelines.Components.Formatting;
     using Candoumbe.Pipelines.Components.GitHub;
     using Candoumbe.Pipelines.Components.NuGet;
     using Candoumbe.Pipelines.Components.Workflows;
-
     using Nuke.Common;
     using Nuke.Common.CI.GitHubActions;
     using Nuke.Common.IO;
     using Nuke.Common.ProjectModel;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Configuration;
-    using System.Linq;
+    using Nuke.Common.Tooling;
+    using Nuke.Common.Tools.DotNet;
 
     [GitHubActions(
         "integration",
         GitHubActionsImage.UbuntuLatest,
         FetchDepth = 0,
-        OnPushBranchesIgnore = new[] { IHaveMainBranch.MainBranchName },
+        OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
         PublishArtifacts = true,
-        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack) },
-        CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
-        ImportSecrets = new[]
-        {
+        InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack)],
+        CacheKeyFiles = ["global.json", "src/**/*.csproj"],
+        ImportSecrets =
+        [
             nameof(NugetApiKey),
             nameof(IReportCoverage.CodecovToken),
-        },
-        OnPullRequestExcludePaths = new[]
-        {
+        ],
+        OnPullRequestExcludePaths =
+        [
             "docs/*",
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
-        }
+        ]
     )]
     [GitHubActions(
         "delivery",
         GitHubActionsImage.UbuntuLatest,
         FetchDepth = 0,
-        OnPushBranches = new[] { IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*" },
-        InvokedTargets = new[] { nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease) },
+        OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
+        InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
         EnableGitHubToken = true,
-        CacheKeyFiles = new[] { "global.json", "src/**/*.csproj" },
+        CacheKeyFiles = ["global.json", "src/**/*.csproj"],
         PublishArtifacts = true,
-        ImportSecrets = new[]
-        {
+        ImportSecrets =
+        [
             nameof(NugetApiKey),
             nameof(IReportCoverage.CodecovToken)
-        },
-        OnPullRequestExcludePaths = new[]
-        {
+        ],
+        OnPullRequestExcludePaths =
+        [
             "docs/*",
             "README.md",
             "CHANGELOG.md",
             "LICENSE"
-        }
+        ]
     )]
 
     //[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
@@ -89,32 +89,31 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions("nightly-manual", GitHubActionsImage.UbuntuLatest,
         AutoGenerate = true,
         FetchDepth = 0,
-        On = new[] { GitHubActionsTrigger.WorkflowDispatch },
-        InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
-        CacheKeyFiles = new[] {
+        On = [GitHubActionsTrigger.WorkflowDispatch],
+        InvokedTargets = [nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+        CacheKeyFiles = [
             "src/**/*.csproj",
             "test/**/*.csproj",
             "stryker-config.json",
-            "test/**/*/xunit.runner.json" },
+            "test/**/*/xunit.runner.json"],
         EnableGitHubToken = true,
-        ImportSecrets = new[]
-        {
+        ImportSecrets =
+        [
             nameof(NugetApiKey),
             nameof(IReportCoverage.CodecovToken),
             nameof(IMutationTest.StrykerDashboardApiKey)
-        },
+        ],
         PublishArtifacts = true
     )]
-
+    [DotNetVerbosityMapping]
     public class Build : NukeBuild,
-        IHaveArtifacts,
-        IHaveChangeLog,
         IHaveSolution,
         IHaveSourceDirectory,
         IHaveTestDirectory,
         IGitFlowWithPullRequest,
         IClean,
         IRestore,
+        IDotnetFormat,
         ICompile,
         IUnitTest,
         IMutationTest,
@@ -178,6 +177,12 @@ namespace DataFilters.ContinuousIntegration
                                            source: new Uri("https://nukpg.github.com/"),
                                            () => this is ICreateGithubRelease && this.Get<ICreateGithubRelease>()?.GitHubToken is not null)
         };
+
+        ///<inheritdoc/>
+        bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
+
+        ///<inheritdoc/>
+        Configure<DotNetFormatSettings> IDotnetFormat.FormatSettings => settings => settings.SetVerbosity(DotNetVerbosity.diagnostic);
 
         protected override void OnBuildCreated()
         {

@@ -1,8 +1,8 @@
 ﻿namespace DataFilters.UnitTests.Helpers
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
-    using System;
 
     /// <summary>
     /// A helper class to control the <see cref="CultureInfo.CurrentCulture"/> value during tests.
@@ -41,7 +41,7 @@
         public void Run(string cultureToUse, Action action) => Run(CultureInfo.CreateSpecificCulture(cultureToUse), action);
 
         /// <summary>
-        /// Performs the specified <see cref="action"/> <strong>AFTER</strong> switching <see cref="CultureInfo.CurrentCulture"/> and 
+        /// Performs the specified <see cref="action"/> <strong>AFTER</strong> switching <see cref="CultureInfo.CurrentCulture"/> and
         /// <see cref="CultureInfo.DefaultThreadCurrentCulture"/> to the specified <paramref name="cultureToUse"/>.
         /// </summary>
         /// <param name="cultureToUse">The culture to use when running the specified <paramref name="action"/>.</param>

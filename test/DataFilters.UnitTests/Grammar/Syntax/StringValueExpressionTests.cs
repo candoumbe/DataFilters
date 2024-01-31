@@ -1,28 +1,20 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
-
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
 
     [UnitTest]
-    public class StringValueExpressionTests
+    public class StringValueExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public StringValueExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(StringValueExpression).Should()
                                                                            .BeAssignableTo<FilterExpression>().And
@@ -32,7 +24,7 @@
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => new StringValueExpression(null);
+            Action action = () => _ = new StringValueExpression(null);
 
             // Assert
             action.Should()
@@ -43,7 +35,7 @@
         public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
         {
             // Act
-            Action action = () => new StringValueExpression(string.Empty);
+            Action action = () => _ = new StringValueExpression(string.Empty);
 
             // Assert
             action.Should()
@@ -54,7 +46,7 @@
         public void Given_parameter_is_whitespace_Ctor_should_not_throw()
         {
             // Act
-            Action action = () => new StringValueExpression(" ");
+            Action action = () => _ = new StringValueExpression(" ");
 
             // Assert
             action.Should()
@@ -101,15 +93,15 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(StringValueExpression first, FilterExpression second)
             => (first.Equals(second) == second.Equals(first)).ToProperty().QuickCheckThrowOnFailure();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<StringValueExpression> expression)
             => expression.Item.Equals(expression.Item).ToProperty();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<StringValueExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
@@ -123,10 +115,10 @@
             // Act
             (first.Equals(second) == Equals(first.Value, second.Value))
                 .ToProperty()
-                .QuickCheckThrowOnFailure(_outputHelper);
+                .QuickCheckThrowOnFailure(outputHelper);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
 
         [Property]

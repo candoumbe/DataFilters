@@ -1,28 +1,20 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-    using FluentAssertions.Extensions;
-
-    using FsCheck;
-    using FsCheck.Xunit;
-
     using System;
     using System.Collections.Generic;
-
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
+    using FsCheck;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
 
     [Feature(nameof(DataFilters.Grammar.Syntax))]
-    public class DateTimeExpressionTests
+    public class DateTimeExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public DateTimeExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(DateTimeExpression).Should()
                                             .BeAssignableTo<FilterExpression>().And
@@ -46,7 +38,7 @@
                 .ThrowExactly<ArgumentException>("both date and time are null");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void A_non_null_DateTimeExpression_instance_should_never_be_equal_to_null(DateTimeExpression instance)
         {
             // Act
@@ -57,7 +49,7 @@
                   .BeFalse();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Two_DateTimeExpression_instances_which_have_same_data_should_be_equal(DateExpression date, TimeExpression time, OffsetExpression offset)
         {
             // Arrange
@@ -74,10 +66,10 @@
                                .Be(other.GetHashCode(), "Two instances that are equal should have same hashcode");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void A_DateTimeExpression_built_from_variables_obtained_from_deconstructing_a_DateTimeExpression_should_equal_the_original_DateTimeExpression_value(DateTimeExpression source)
         {
-            _outputHelper.WriteLine(message: $"DateTimeExpression is {source}");
+            outputHelper.WriteLine(message: $"DateTimeExpression is {source}");
             (DateExpression date, TimeExpression time, OffsetExpression offset, _) = source;
 
             // Act
@@ -88,7 +80,7 @@
                  .Be(source);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateTimeExpression_Complexity_Should_be_the_sum_of_complexity_of_each_member(NonNull<DateExpression> date, NonNull<TimeExpression> time, NonNull<OffsetExpression> offset)
         {
             // Arrange
@@ -104,7 +96,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateTimeExpression_where_only_date_part_is_set_When_comparing_to_DateExpression_IsEquivalentTo_should_be_true(NonNull<DateExpression> dateExpression)
         {
             // Arrange
@@ -117,7 +109,7 @@
             actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateTimeExpression_where_only_time_part_is_set_When_comparing_to_that_TimeExpression(NonNull<TimeExpression> timeExpression)
         {
             // Arrange
@@ -173,15 +165,15 @@
                   .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_commutative(NonNull<DateTimeExpression> first, FilterExpression second)
             => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<DateTimeExpression> expression)
             => expression.Item.Should().Be(expression.Item);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
@@ -228,7 +220,7 @@
                   .Be(firstEqualsSecond && secondEqualsThird);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_operands_Equal_operator_should_return_same_result_as_using_Equals(NonNull<DateTimeExpression> left, NonNull<DateTimeExpression> right)
         {
             // Act
@@ -239,7 +231,7 @@
                   .Be(left.Item.Equals(right.Item));
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_and_right_operands_NotEqual_operator_should_return_opposite_result_of_Equal_operator(NonNull<DateTimeExpression> left, NonNull<DateTimeExpression> right)
         {
             // Act

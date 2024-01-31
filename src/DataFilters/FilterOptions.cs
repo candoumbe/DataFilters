@@ -21,7 +21,7 @@ namespace DataFilters
         {
             get => _propertyNameResolutionStrategy;
 #if !NET6_0_OR_GREATER
-            set 
+            set
 #else
             init
 #endif
