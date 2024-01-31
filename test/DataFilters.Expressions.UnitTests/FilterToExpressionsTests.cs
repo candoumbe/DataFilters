@@ -498,14 +498,14 @@ public class FilterToExpressionTests(ITestOutputHelper output)
         {
             yield return new object[]
             {
-                    new[] {
-                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
-                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
-                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
-                    },
-                    new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: 'B'),
-                    NoAction,
-                    (Expression<Func<SuperHero, bool>>)(item => item != null && !item.Nickname.StartsWith('B'))
+                new[] {
+                    new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                    new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+                },
+                new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: "B"),
+                NoAction,
+                (Expression<Func<SuperHero, bool>>)(item => item != null && !item.Nickname.StartsWith('B'))
             };
         }
     }
