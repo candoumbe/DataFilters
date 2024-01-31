@@ -31,9 +31,9 @@
 
 #if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
+    using System.Collections.Concurrent;
 #endif
 
-    using System.Collections.Concurrent;
 
 #if NET7_0_OR_GREATER
     using System.Diagnostics;
@@ -45,8 +45,8 @@
     public static class StringExtensions
     {
         private static char Separator => ',';
-#if NET6_0_OR_GREATER
-        private readonly static ConcurrentDictionary<bool, byte> HackZone = new ();
+#if NET6_0
+        private readonly static ConcurrentDictionary<bool, byte> HackZone = new();
 #endif
 
         /// <summary>
@@ -160,7 +160,7 @@
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
 #if STRING_SEGMENT
         public static IFilter ToFilter<T>(this StringSegment queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
-            => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
+            => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
 #else
         public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
            => ToFilter<T>(queryString, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
