@@ -2,6 +2,7 @@
 {
 #if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
+    using System.ComponentModel;
 #endif
 
     using DataFilters.Expressions;
