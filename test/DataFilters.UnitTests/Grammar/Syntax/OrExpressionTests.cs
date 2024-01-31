@@ -238,23 +238,18 @@
                         .BeTrue("the meaning of the expression should remain the same even after being simplified");
         }
 
-        public static IEnumerable<object[]> SimplifyCases
-        {
-            get
+        public static TheoryData<OrExpression, FilterExpression> SimplifyCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OrExpression(new NumericValueExpression("1"), new OrExpression(new NumericValueExpression("1"), new NumericValueExpression("1"))),
                     new NumericValueExpression("1")
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")), new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1"))),
                     new StringValueExpression("prop1")
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(SimplifyCases))]
