@@ -24,15 +24,18 @@
                                                                 .HaveProperty<FilterExpression>("Left").And
                                                                 .HaveProperty<FilterExpression>("Right");
 
-        public static IEnumerable<object[]> ArgumentNullExceptionCases
+        public static TheoryData<FilterExpression, FilterExpression> ArgumentNullExceptionCases
         {
             get
             {
                 FilterExpression[] expression = [new StartsWithExpression("ce"), null];
+                TheoryData<FilterExpression, FilterExpression> cases = [];
 
-                return expression.CrossJoin(expression, (left, right) => (left, right))
+                expression.CrossJoin(expression, (left, right) => (left, right))
                     .Where(tuple => tuple.left == null || tuple.right is null)
-                    .Select(tuple => new object[] { tuple.left, tuple.right });
+                    .ForEach(tuple => cases.Add(tuple.left, tuple.right));
+
+                return cases;
             }
         }
 
@@ -48,88 +51,72 @@
                 .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<OrExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop3")),
                     false,
                     "comparing two different instances with different property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")),
                     new StringValueExpression("prop1"),
                     false,
                     "comparing to a filter expression that is semantically equivalent"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void Equals_should_behave_has_expected(OrExpression first, object other, bool expected, string reason)
+        public void Equals_should_behave_has_expected(OrExpression current, object other, bool expected, string reason)
         {
-            outputHelper.WriteLine($"First instance : {first}");
-            outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"Current instance : {current}");
+            outputHelper.WriteLine($"Other instance : {other}");
 
             // Act
-            bool actual = first.Equals(other);
+            bool actual = current.Equals(other);
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
         }
 
-        public static IEnumerable<object[]> IsEquivalentToCases
-        {
-            get
+        public static TheoryData<OrExpression, FilterExpression, bool, string> IsEquivalentToCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     true,
                     $"both {nameof(OrExpression)} instances are identical"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop3")),
                     false,
                     $"the two {nameof(OrExpression)} instances contain different data."
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop2"), new StartsWithExpression("prop1")),
                     true,
                     $"both {nameof(OrExpression)} contains same data but not in the same order"
-                };
-
-                yield return new object[]
+                },
                 {
                      new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")),
                      new StringValueExpression("prop1"),
                      true,
                      "comparing to a filter expression that is semantically equivalent"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(IsEquivalentToCases))]

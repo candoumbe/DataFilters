@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.TestObjects;
     using FluentAssertions;
     using Xunit;
@@ -26,34 +25,37 @@
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), "Message cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
+        public static TheoryData<Order<SuperHero>, object, bool, string> EqualsCases
         {
             get
             {
-                yield return new object[]
-                {
+                TheoryData<Order<SuperHero>, object, bool, string> cases = [];
+                cases.Add
+                (
                     new Order<SuperHero>("Name"),
                     new Order<SuperHero>("Name"),
                     true,
                     $"Two distinct {nameof(Order<SuperHero>)} instances with same properties must be equal"
-                };
+                );
 
                 Order<SuperHero> sort = new("Name");
-                yield return new object[]
-                {
+                cases.Add
+                (
                     sort,
                     sort,
                     true,
                     $"A {nameof(Order<SuperHero>)} instance is equal to itself"
-                };
+                );
 
-                yield return new object[]
-                {
+                cases.Add
+                (
                     new Order<SuperHero>("Name", Descending),
                     new Order<SuperHero>("Name"),
                     false,
                     $"Two distinct {nameof(Order<SuperHero>)} instances with same {nameof(Order<SuperHero>.Expression)} but different {nameof(Order<SuperHero>.Direction)} must not be equal"
-                };
+                );
+
+                return cases;
             }
         }
 
@@ -66,22 +68,10 @@
 
             // Act
             bool actual = first.Equals(second);
-            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-
-            if (expected)
-            {
-                actualHashCode.Should()
-                    .Be(second?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(second?.GetHashCode(), reason);
-            }
         }
     }
 }

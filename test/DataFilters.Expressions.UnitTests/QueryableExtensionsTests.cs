@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.Expressions.UnitTests
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using FluentAssertions;
     using Xunit;
@@ -11,23 +10,18 @@
     [UnitTest]
     public class QueryableExtensionsTests(ITestOutputHelper outputHelper)
     {
-        public static IEnumerable<object[]> ThrowsArgumentNullExceptionCases
-        {
-            get
+        public static TheoryData<IQueryable<Hero>, IOrder<Hero>> ThrowsArgumentNullExceptionCases
+            => new()
             {
-                yield return new object[]
                 {
                     null,
                     new Order<Hero>(nameof(Hero.Name))
-                };
-
-                yield return new object[]
+                },
                 {
                     Enumerable.Empty<Hero>().AsQueryable(),
                     null
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(ThrowsArgumentNullExceptionCases))]

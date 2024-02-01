@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -65,27 +64,22 @@
                 .NotThrow("The parameter of the constructor can be whitespace only");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<ContainsExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new ContainsExpression("prop1"),
                     new ContainsExpression("prop1"),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new ContainsExpression("prop1"),
                     new ContainsExpression("prop2"),
                     false,
                     "comparing two different instances with different property name"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]

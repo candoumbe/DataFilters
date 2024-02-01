@@ -42,35 +42,28 @@
                               .ThrowExactly<InvalidOperationException>($"The parameter {nameof(OneOfExpression)}'s constructor cannot be a empty array");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<OneOfExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop2"), new StringValueExpression("prop1")),
                     false,
                     "comparing two different instances with same data but the order does not matter"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -86,71 +79,54 @@
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
+
+            object _ = expected switch
             {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                true => actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason),
+                _ => true
+            };
         }
 
-        public static IEnumerable<object[]> IsEquivalentToCases
-        {
-            get
+        public static TheoryData<OneOfExpression, FilterExpression, bool, string> IsEquivalentToCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     "comparing two different instances with same data in same order"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop2"), new StringValueExpression("prop1")),
                     true,
                     "comparing two different instances with same data but the order does not matter"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop3")),
                     false,
                     "comparing two different instances with different data"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2"), new StringValueExpression("prop3")),
                     false,
                     "the other instance contains all data of the first instance and one item that is not in the current instance"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds duplicates is equivalent a {nameof(OneOfExpression)} with no duplicate"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to an {nameof(OrExpression)} with the same values"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                                 new BoundaryExpression(new NumericValueExpression("-1"), true)),
@@ -159,9 +135,8 @@
                     new NumericValueExpression("-1"),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to its simplified version"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(IsEquivalentToCases))]
@@ -234,38 +209,29 @@
             simplifiedExpression.Complexity.Should().BeLessThanOrEqualTo(complexityBeforeCallingSimplify);
         }
 
-        public static IEnumerable<object[]> SimplifyCases
-        {
-            get
+        public static TheoryData<OneOfExpression, FilterExpression> SimplifyCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OneOfExpression(new StringValueExpression("val1"), new StringValueExpression("val2")),
                     new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val2"))
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("val1"), new StringValueExpression("val1")),
                     new StringValueExpression("val1")
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new StringValueExpression("val1"), new OrExpression(new StringValueExpression("val1"), new StringValueExpression("val1"))),
                     new StringValueExpression("val1")
-                };
-
-                yield return new object[]
+                },
                 {
                     new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                                 new BoundaryExpression(new NumericValueExpression("-1"), true)),
                                                new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                                 new BoundaryExpression(new NumericValueExpression("-1"), true))),
-                    new NumericValueExpression("-1"),
-                };
-            }
-        }
+                    new NumericValueExpression("-1")
+                }
+            };
 
         [Theory]
         [MemberData(nameof(SimplifyCases))]

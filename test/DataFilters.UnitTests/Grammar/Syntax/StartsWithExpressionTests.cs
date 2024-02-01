@@ -8,11 +8,10 @@
     using FsCheck.Fluent;
     using FsCheck.Xunit;
     using Xunit;
-    using Xunit.Abstractions;
     using Xunit.Categories;
 
     [UnitTest("StartsWith")]
-    public class StartsWithExpressionTests(ITestOutputHelper outputHelper)
+    public class StartsWithExpressionTests
     {
         [Fact]
         public void IsFilterExpression() => typeof(StartsWithExpression).Should()

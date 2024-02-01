@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -84,27 +83,22 @@
             groupEqualOtherExpression.Should().Be(otherExpressionEqualGroup, "'equals' impelemntation must be symetric");
         }
 
-        public static IEnumerable<object[]> EqualsBehaviourCases
-        {
-            get
+        public static TheoryData<BoundaryExpression, object, bool, string> EqualsBehaviourCases
+            => new()
             {
-                yield return new object[]
                 {
                     new BoundaryExpression(new DateExpression(), true),
                     new BoundaryExpression(new DateExpression(), true),
                     true,
                     $"Two instances with {nameof(DateExpression)} that are equal"
-                };
-
-                yield return new object[]
+                },
                 {
                     new BoundaryExpression(new DateTimeExpression(new (), new (), new()), true),
                     new BoundaryExpression(new DateTimeExpression(new (), new (), new()), true),
                     true,
                     $"Two instances with {nameof(DateExpression)} that are equal"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsBehaviourCases))]

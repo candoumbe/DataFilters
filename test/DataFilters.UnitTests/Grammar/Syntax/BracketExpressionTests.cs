@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
@@ -31,27 +30,22 @@
                 .ThrowExactly<ArgumentNullException>($"{nameof(BracketExpression)}.{nameof(BracketExpression.Values)} cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<BracketExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     true,
                     $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
-                };
-
-                yield return new object[]
+                },
                 {
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     true,
                     $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -91,11 +85,9 @@
             complexity.Should().Be(expected);
         }
 
-        public static IEnumerable<object[]> ComplexityCases
-        {
-            get
+        public static TheoryData<BracketExpression, double> ComplexityCases
+            => new()
             {
-                yield return new object[]
                 {
                     new BracketExpression
                     (
@@ -103,9 +95,8 @@
                         new RangeBracketValue('a', 'c')
                     ),
                     new ConstantBracketValue("aa").Complexity * new RangeBracketValue('a', 'c').Complexity
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(ComplexityCases))]

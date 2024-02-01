@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -105,35 +104,28 @@
             actual.Should().BeTrue();
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<GroupExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new GroupExpression(new StartsWithExpression("prop1")),
                     new GroupExpression(new StartsWithExpression("prop1")),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new GroupExpression(new StartsWithExpression("prop1")),
                     new GroupExpression(new StartsWithExpression("prop2")),
                     false,
                     "comparing two different instances with different inner expressions"
-                };
-
-                yield return new object[]
+                },
                 {
                     new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero)),
                     new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero)),
                     true,
                     "Two instances with inner expressions that are equal"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]

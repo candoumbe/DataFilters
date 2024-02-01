@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -68,18 +67,15 @@
                   .BeTrue();
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<StringValueExpression, object, bool> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new StringValueExpression("True"),
                     new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
                     false
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]

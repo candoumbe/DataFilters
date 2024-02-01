@@ -19,33 +19,26 @@
             public string Lastname { get; set; }
         }
 
-        public static IEnumerable<object[]> OrderToOrderCases
-        {
-            get
+        public static TheoryData<IOrder<Person>, Expression<Func<IEnumerable<IOrder>, bool>>> OrderToOrderCases
+            => new()
             {
-                yield return new object[]
                 {
                     new Order<Person>("Name"),
-                    (Expression<Func<IEnumerable<IOrder>, bool>>) (sorts => sorts.Once()
-                        && sorts.First().Equals(new OrderExpression("Name".Field(), Ascending)))
-                };
+                     sorts => sorts.Once()
+                        && sorts.First().Equals(new OrderExpression("Name".Field(), Ascending))
+                },
 
                 {
-                    MultiOrder<Person> multiSort = new
+                    new MultiOrder<Person>
                     (
                         new Order<Person>(nameof(Person.Firstname)),
                         new Order<Person>(nameof(Person.Lastname))
-                    );
-                    yield return new object[]
-                    {
-                        multiSort,
-                        (Expression<Func<IEnumerable<IOrder>, bool>>) (sorts => sorts.Exactly(2)
+                    ),
+                         sorts => sorts.Exactly(2)
                             && sorts.First().Equals(new OrderExpression(nameof(Person.Firstname), Ascending))
-                            && sorts.Last().Equals(new OrderExpression(nameof(Person.Lastname), Ascending)))
-                    };
+                            && sorts.Last().Equals(new OrderExpression(nameof(Person.Lastname), Ascending))
                 }
-            }
-        }
+            };
 
         [Theory]
         [MemberData(nameof(OrderToOrderCases))]

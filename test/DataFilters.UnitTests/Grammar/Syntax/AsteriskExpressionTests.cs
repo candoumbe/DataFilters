@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
 
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
@@ -25,14 +24,12 @@
             .Implement<IEquatable<AsteriskExpression>>().And
             .HaveDefaultConstructor();
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<AsteriskExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[] { AsteriskExpression.Instance, null, false, "Comparing to null" };
-                yield return new object[] { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" };
-            }
-        }
+                { AsteriskExpression.Instance, null, false, "Comparing to null" },
+                { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -48,16 +45,14 @@
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
+
+            _ = expected switch
             {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                true => actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason),
+                _ => actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason)
+            };
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

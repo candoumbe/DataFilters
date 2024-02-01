@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using FluentAssertions;
     using Xunit;
@@ -38,27 +37,22 @@
                 .ThrowExactly<ArgumentOutOfRangeException>("The parameter of the constructor cannot be empty or whitespace only");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<PropertyName, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new PropertyName("prop1"),
                     new PropertyName("prop1"),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new PropertyName("prop1"),
                     new PropertyName("prop2"),
                     false,
                     "comparing two different instances with different property name"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -74,16 +68,13 @@
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
+
+            object _ = expected switch
             {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                true => actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason),
+                _ => true
+            };
         }
     }
 }
