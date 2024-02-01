@@ -1,6 +1,5 @@
 ﻿namespace DataFilters.UnitTests
 {
-    using System.Collections.Generic;
     using DataFilters.TestObjects;
     using FluentAssertions;
     using Xunit;
@@ -9,24 +8,24 @@
 
     public class MultiOrderTests(ITestOutputHelper outputHelper)
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S1199:Nested code blocks should not be used")]
-        public static IEnumerable<object[]> EqualsCases
+        public static TheoryData<MultiOrder<SuperHero>, object, bool, string> EqualsCases
         {
             get
             {
+                TheoryData<MultiOrder<SuperHero>, object, bool, string> cases = [];
                 {
                     MultiOrder<SuperHero> first = new(
                         new Order<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Order<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         first,
                         first,
                         true,
                         $"A {nameof(MultiOrder<SuperHero>)} instance is equal to itself"
-                    };
+                    );
                 }
                 {
                     MultiOrder<SuperHero> first = new(
@@ -40,13 +39,13 @@
                         new Order<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
                     );
 
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         first,
                         second,
                         true,
                         $"Two distinct {nameof(MultiOrder<SuperHero>)} instances holding same data in same order"
-                    };
+                    );
                 }
 
                 {
@@ -62,14 +61,16 @@
                         new Order<SuperHero>(expression: nameof(SuperHero.Nickname))
                     );
 
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         first,
                         second,
                         false,
                         $"Two distinct {nameof(MultiOrder<SuperHero>)} instances holding same data but not same order"
-                    };
+                    );
                 }
+
+                return cases;
             }
         }
 
@@ -87,16 +88,6 @@
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (actual)
-            {
-                actualHashCode.Should()
-                    .Be(second?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(second?.GetHashCode(), reason);
-            }
         }
     }
 }

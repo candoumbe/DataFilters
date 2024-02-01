@@ -1,7 +1,6 @@
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -146,11 +145,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             }
         }
 
-        public static IEnumerable<object[]> IsEquivalentToCases
-        {
-            get
+        public static TheoryData<DurationExpression, FilterExpression, FilterExpression, (bool expected, string reason)> IsEquivalentToCases
+            => new()
             {
-                yield return new object[]
                 {
                     new DurationExpression(),
                     new StartsWithExpression("a"),
@@ -159,9 +156,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                         expected: false,
                         reason: "A is not equivalent to B and B is equivalent to C => A is not equivalent to C"
                     )
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(IsEquivalentToCases))]

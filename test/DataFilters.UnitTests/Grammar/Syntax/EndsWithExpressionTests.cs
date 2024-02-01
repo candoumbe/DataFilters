@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -53,52 +52,44 @@
                 .ThrowExactly<ArgumentOutOfRangeException>($"The value of {nameof(EndsWithExpression)}'s constructor cannot be empty");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<EndsWithExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new EndsWithExpression("prop1"),
                     new EndsWithExpression("prop1"),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new EndsWithExpression("prop1"),
                     new EndsWithExpression("prop2"),
                     false,
                     "comparing two different instances with different property name"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(EndsWithExpression first, object other, bool expected, string reason)
+        public void ImplementsEqualsCorrectly(EndsWithExpression current, object other, bool expected, string reason)
         {
-            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"First instance : {current}");
             outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+            bool actual = current.Equals(other);
+            int actualHashCode = current.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
+
+            object _ = expected switch
             {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                true => actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason),
+                _ => true
+            };
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -123,35 +122,28 @@
             dateTimeExpression.Complexity.Should().BeGreaterThan(timeExpression.Item.Complexity);
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<DateTimeExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new DateTimeExpression(new TimeExpression()),
                     new TimeExpression(),
                     true,
                     $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
-                };
-
-                yield return new object[]
+                },
                 {
                     new DateTimeExpression(new (), new (), new()),
                     new DateTimeExpression(new (), new (), new()),
                     true,
                     $"Two instances with {nameof(DateTimeExpression)} that are equal"
-                };
-
-                yield return new object[]
+                },
                 {
                     new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero),
                     new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero),
                     true,
                     $"Two instances with {nameof(DateTimeExpression.Date)}, {nameof(DateTimeExpression.Time)}, {nameof(DateTimeExpression.Offset)} are equal and not null"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -177,32 +169,25 @@
         public void Equals_should_be_symetric(NonNull<DateTimeExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
-        public static IEnumerable<object[]> EqualsTransitivityCases
-        {
-            get
+        public static TheoryData<DateTimeExpression, object, object> EqualsTransitivityCases
+            => new()
             {
-                yield return new object[]
                 {
                     new DateTimeExpression(1.January(2010)),
                     new DateTimeExpression(1.January(2010)),
                     new DateTimeExpression(1.January(2010))
-                };
-
-                yield return new object[]
+                },
                 {
                     new DateTimeExpression(new TimeExpression(1)),
                     new DateTimeExpression(new TimeExpression(minutes: 60)),
                     new DateTimeExpression(new TimeExpression(seconds: 3600))
-                };
-
-                yield return new object[]
+                },
                 {
                     new DateTimeExpression(new TimeExpression(1)),
                     new DateTimeExpression(new TimeExpression(minutes: 60)),
                     new DateTimeExpression(new TimeExpression(seconds: 3600))
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsTransitivityCases))]

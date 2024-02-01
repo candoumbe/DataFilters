@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Casing;
     using DataFilters.TestObjects;
     using FluentAssertions;
@@ -42,55 +41,38 @@
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.Message), $"{nameof(ArgumentOutOfRangeException.Message)} must not be null");
         }
 
-        public static IEnumerable<object[]> ToSortCases
-        {
-            get
+        public static TheoryData<string, IOrder<SuperHero>> ToSortCases
+            => new()
             {
-                yield return new object[]
                 {
                     nameof(SuperHero.Nickname),
                     new Order<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
-                };
-                yield return new object[]
+                },
                 {
                     $"+{nameof(SuperHero.Nickname)}",
                     new Order<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Ascending)
-                };
-
-                yield return new object[]
+                },
                 {
                     $"-{nameof(SuperHero.Nickname)}",
                     new Order<SuperHero>(expression : nameof(SuperHero.Nickname), direction : Descending)
-                };
-
+                },
                 {
-                    MultiOrder<SuperHero> multiSort = new
+                    $"{nameof(SuperHero.Nickname)},{nameof(SuperHero.Age)}",
+                    new MultiOrder<SuperHero>
                     (
                         new Order<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Order<SuperHero>(expression: nameof(SuperHero.Age))
-                    );
-
-                    yield return new object[]
-                    {
-                        $"{nameof(SuperHero.Nickname)},{nameof(SuperHero.Age)}",
-                        multiSort
-                    };
-                }
+                    )
+                },
                 {
-                    MultiOrder<SuperHero> multiSort = new
+                    $"+{nameof(SuperHero.Nickname)},-{nameof(SuperHero.Age)}",
+                    new MultiOrder<SuperHero>
                     (
                         new Order<SuperHero>(expression: nameof(SuperHero.Nickname)),
                         new Order<SuperHero>(expression: nameof(SuperHero.Age), direction: Descending)
-                    );
-
-                    yield return new object[]
-                    {
-                        $"+{nameof(SuperHero.Nickname)},-{nameof(SuperHero.Age)}",
-                        multiSort
-                    };
+                    )
                 }
-            }
-        }
+            };
 
         [Theory]
         [MemberData(nameof(ToSortCases))]
@@ -108,53 +90,40 @@
                   .Be(expected);
         }
 
-        public static IEnumerable<object[]> ToSortWithPropertyNameResolutionStrategyCases
-        {
-            get
+        public static TheoryData<string, PropertyNameResolutionStrategy, IOrder<Model>> ToSortWithPropertyNameResolutionStrategyCases
+            => new()
             {
-                yield return new object[]
                 {
                     "-SnakeCaseProperty",
                     PropertyNameResolutionStrategy.SnakeCase,
                     new Order<Model>("snake_case_property", Descending)
-                };
-
-                yield return new object[]
+                },
                 {
                     "SnakeCaseProperty",
                     PropertyNameResolutionStrategy.SnakeCase,
                     new Order<Model>("snake_case_property", Ascending)
-                };
-
-                yield return new object[]
+                },
                 {
                     "-SnakeCaseProperty",
                     PropertyNameResolutionStrategy.SnakeCase,
                     new Order<Model>("snake_case_property", Descending)
-                };
-
-                yield return new object[]
+                },
                 {
                     "pascal_case_property",
                     PropertyNameResolutionStrategy.PascalCase,
                     new Order<Model>("PascalCaseProperty", Ascending)
-                };
-
-                yield return new object[]
+                },
                 {
                     "+pascal_case_property",
                     PropertyNameResolutionStrategy.PascalCase,
                     new Order<Model>("PascalCaseProperty", Ascending)
-                };
-
-                yield return new object[]
+                },
                 {
                     "-pascal_case_property",
                     PropertyNameResolutionStrategy.PascalCase,
                     new Order<Model>("PascalCaseProperty", Descending)
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(ToSortWithPropertyNameResolutionStrategyCases))]

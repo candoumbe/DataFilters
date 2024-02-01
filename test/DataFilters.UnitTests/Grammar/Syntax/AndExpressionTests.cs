@@ -27,15 +27,18 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                                                                  .HaveProperty<FilterExpression>("Left").And
                                                                  .HaveProperty<FilterExpression>("Right");
 
-        public static IEnumerable<object[]> ArgumentNullExceptionCases
+        public static TheoryData<FilterExpression, FilterExpression> ArgumentNullExceptionCases
         {
             get
             {
                 FilterExpression[] left = [new StartsWithExpression("ce"), null];
+                TheoryData<FilterExpression, FilterExpression> cases = [];
 
-                return left.CrossJoin(left, (left, right) => (left, right))
-                    .Where(tuple => tuple.left == null || tuple.right is null)
-                    .Select(tuple => new object[] { tuple.left, tuple.right });
+                left.CrossJoin(left, (left, right) => (left, right))
+                           .Where(tuple => tuple.left == null || tuple.right is null)
+                           .ForEach(tuple => cases.Add(tuple.left, tuple.right));
+
+                return cases;
             }
         }
 
@@ -44,46 +47,39 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null(FilterExpression left, FilterExpression right)
         {
             // Act
-            Action action = () => new AndExpression(left, right);
+            Action action = () => _ = new AndExpression(left, right);
 
             // Assert
             action.Should()
                 .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<AndExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new AndExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new AndExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     true,
                     "operands are the same and in the same order"
-                };
-
-                yield return new object[]
+                },
                 {
                     new AndExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new AndExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop3")),
                     false,
                     "one operand is different"
-                };
-
-                yield return new object[]
+                },
                 {
                     new AndExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new AndExpression(new StartsWithExpression("prop2"), new StartsWithExpression("prop1")),
                     true,
                     "operands are the same but their order differs"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void Equals_should_work_as_expected(AndExpression first, object other, bool expected, string reason)
+        public void Equals_should_behave_as_expected(AndExpression first, object other, bool expected, string reason)
         {
             outputHelper.WriteLine($"First instance : {first}");
             outputHelper.WriteLine($"Second instance : {other}");
@@ -109,38 +105,29 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             actual.Should().Be(expected);
         }
 
-        public static IEnumerable<object[]> SimplifyCases
-        {
-            get
+        public static TheoryData<AndExpression, FilterExpression> SimplifyCases
+            => new()
             {
-                yield return new object[]
                 {
                     new AndExpression(new StringValueExpression("val"), new StringValueExpression("val")),
                     new StringValueExpression("val")
-                };
-
-                yield return new object[]
+                },
                 {
                     new AndExpression(new StringValueExpression("val"), new OrExpression(new StringValueExpression("val"), new StringValueExpression("val"))),
                     new StringValueExpression("val")
-                };
-
-                yield return new object[]
+                },
                 {
                     new AndExpression(new OrExpression(new StringValueExpression("val"), new StringValueExpression("val")), new StringValueExpression("val")),
                     new StringValueExpression("val")
-                };
-
-                yield return new object[]
+                },
                 {
                     new AndExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                                 new BoundaryExpression(new NumericValueExpression("-1"), true)),
                                         new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                         new BoundaryExpression(new NumericValueExpression("-1"), true))),
-                    new NumericValueExpression("-1"),
-                };
-            }
-        }
+                    new NumericValueExpression("-1")
+                }
+            };
 
         [Theory]
         [MemberData(nameof(SimplifyCases))]

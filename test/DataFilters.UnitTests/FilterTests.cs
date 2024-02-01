@@ -42,30 +42,30 @@
         /// <summary>
         /// Deserialization of various json representation into <see cref="Filter"/>
         /// </summary>
-        public static IEnumerable<object[]> FilterDeserializeCases
+        public static TheoryData<string, Expression<Func<IFilter, bool>>> FilterDeserializeCases
         {
             get
             {
+                TheoryData<string, Expression<Func<IFilter, bool>>> cases = [];
                 foreach (KeyValuePair<string, FilterOperator> item in Operators)
                 {
-                    yield return new object[]
-                    {
-                    @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
-                    (Expression<Func<IFilter, bool>>)(result => result is Filter
-                                                                && "Firstname".Equals(((Filter) result).Field)
-                                                                && item.Value.Equals(((Filter) result).Operator)
-                                                                && "Batman".Equals(((Filter) result).Value)
-                    )
-                    };
+                    cases.Add
+                    (
+                        @$"{{ ""field"" : ""Firstname"", ""op"" : ""{item.Key}"",  ""Value"" : ""Batman""}}",
+                        result => result is Filter
+                                                                    && "Firstname".Equals(((Filter)result).Field)
+                                                                    && item.Value.Equals(((Filter)result).Operator)
+                                                                    && "Batman".Equals(((Filter)result).Value)
+
+                    );
                 }
+
+                return cases;
             }
         }
 
-        public static IEnumerable<object[]> CompositeFilterToJsonCases
-        {
-            get
-            {
-                yield return new object[]
+        public static TheoryData<MultiFilter, Expression<Func<string, bool>>> CompositeFilterToJsonCases
+           => new() {
                 {
                     new MultiFilter  {
                         Logic = Or,
@@ -74,7 +74,7 @@
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Robin")
                         }
                     },
-                    (Expression<Func<string, bool>>)(json =>
+                    json =>
                         JObject.Parse(json).Properties().Count() == 2
 
                         && "or".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
@@ -86,10 +86,7 @@
                         && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
                         && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
-                    )
-                };
-
-                yield return new object[]
+                },
                 {
                     new MultiFilter  {
                         Filters = new [] {
@@ -97,7 +94,7 @@
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Robin")
                         }
                     },
-                    (Expression<Func<string, bool>>)(json =>
+                    json =>
                         JObject.Parse(json).Properties().Count() == 2
 
                         && "and".Equals((string) JObject.Parse(json)[MultiFilter.LogicJsonPropertyName])
@@ -110,78 +107,24 @@
                         && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
                         && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
-                    )
-                };
-            }
-        }
-
-        public static IEnumerable<object[]> FilterSchemaTestCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} :'batman' }}",
-                    EqualTo,
-                    true
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : null }}",
-                    EqualTo,
-                    false
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq' }}",
-                    EqualTo,
-                    false
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'contains', {Filter.ValueJsonPropertyName} : 'br' }}",
-                    Contains,
-                    true
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'contains', {Filter.ValueJsonPropertyName} : 6 }}",
-                    Contains,
-                    false
-                };
-
-                yield return new object[]
-                {
-                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'isnull', {Filter.ValueJsonPropertyName} : 6 }}",
-                    IsNull,
-                    false
-                };
-            }
-        }
+                }
+            };
 
         /// <summary>
         /// Serialization of instance of <see cref="Filter"/> test cases
         /// </summary>
-        public static IEnumerable<object[]> FilterToJsonCases
-        {
-            get
-            {
-                yield return new object[]
+        public static TheoryData<Filter, Expression<Func<string, bool>>> FilterToJsonCases
+            => new()
                 {
-                    new Filter (field : "Firstname", @operator  : EqualTo,  value : "Batman"),
-                    (Expression<Func<string, bool>>)(json =>
-                        "Firstname".Equals((string) JObject.Parse(json)[Filter.FieldJsonPropertyName])
-                        && "eq".Equals((string) JObject.Parse(json)[Filter.OperatorJsonPropertyName])
-                        && "Batman".Equals((string) JObject.Parse(json)[Filter.ValueJsonPropertyName])
-                    )
-                };
-            }
-        }
+                    {
+                        new Filter (field : "Firstname", @operator  : EqualTo,  value : "Batman"),
+                        json =>
+                            "Firstname".Equals((string) JObject.Parse(json)[Filter.FieldJsonPropertyName])
+                            && "eq".Equals((string) JObject.Parse(json)[Filter.OperatorJsonPropertyName])
+                            && "Batman".Equals((string) JObject.Parse(json)[Filter.ValueJsonPropertyName])
 
+                    }
+                };
         [Theory]
         [MemberData(nameof(FilterToJsonCases))]
         public void FilterToJson(Filter filter, Expression<Func<string, bool>> jsonMatcher)
@@ -198,6 +141,46 @@
             output.WriteLine($"ToJson result is '{json}'");
             json.Should().Match(jsonMatcher);
         }
+
+        public static TheoryData<string, FilterOperator, bool> FilterSchemaTestCases
+            => new()
+            {
+                {
+                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} :'batman' }}",
+                    EqualTo,
+                    true
+                },
+
+                {
+                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq', {Filter.ValueJsonPropertyName} : null }}",
+                    EqualTo,
+                    false
+                },
+
+                {
+                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'eq' }}",
+                    EqualTo,
+                    false
+                },
+
+                {
+                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'contains', {Filter.ValueJsonPropertyName} : 'br' }}",
+                    Contains,
+                    true
+                },
+
+                {
+                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'contains', {Filter.ValueJsonPropertyName} : 6 }}",
+                    Contains,
+                    false
+                },
+
+                {
+                    $"{{{Filter.FieldJsonPropertyName} : 'nickname', {Filter.OperatorJsonPropertyName} : 'isnull', {Filter.ValueJsonPropertyName} : 6 }}",
+                    IsNull,
+                    false
+                }
+            };
 
         [Theory]
         [MemberData(nameof(FilterSchemaTestCases))]
@@ -216,64 +199,52 @@
             isValid.Should().Be(expectedValidity);
         }
 
-        public static IEnumerable<object[]> FilterEquatableCases
+        public static TheoryData<Filter, Filter, bool> FilterEquatableCases
         {
             get
             {
-                yield return new object[]
+                TheoryData<Filter, Filter, bool> cases = new()
                 {
-                    new Filter("property", EqualTo, "value"),
-                    new Filter("property", EqualTo, "value"),
-                    true
-                };
-
-                yield return new object[]
-                {
-                    new Filter("property", IsNull ),
-                    new Filter("property", IsNull, null),
-                    true
-                };
-
-                yield return new object[]
-                {
-                    new Filter("property", EqualTo, null),
-                    new Filter("property", IsNull),
-                    true
-                };
-
-                yield return new object[]
-                {
-                    new Filter("property", EqualTo, "value"),
-                    new Filter("property", NotEqualTo, "value"),
-                    false
-                };
-
-                yield return new object[]
-                {
-                    new Filter("Property", EqualTo, "value"),
-                    new Filter("property", EqualTo, "value"),
-                    false
-                };
-
-                {
-                    Filter first = new("Property", EqualTo, "value");
-                    yield return new object[]
                     {
-                        first,
-                        first,
+                        new Filter("property", EqualTo, "value"),
+                        new Filter("property", EqualTo, "value"),
                         true
-                    };
-                }
+                    },
 
-                {
-                    Guid guid = Guid.NewGuid();
-                    yield return new object[]
                     {
-                        new Filter("Prop", EqualTo, guid),
-                        new Filter("Prop", EqualTo, guid),
+                        new Filter("property", IsNull),
+                        new Filter("property", IsNull, null),
                         true
-                    };
-                }
+                    },
+
+                    {
+                        new Filter("property", EqualTo, null),
+                        new Filter("property", IsNull),
+                        true
+                    },
+
+                    {
+                        new Filter("property", EqualTo, "value"),
+                        new Filter("property", NotEqualTo, "value"),
+                        false
+                    },
+
+                    {
+                        new Filter("Property", EqualTo, "value"),
+                        new Filter("property", EqualTo, "value"),
+                        false
+                    },
+                };
+
+                Filter current = new("Property", EqualTo, "value");
+
+                cases.Add(current, current, true);
+
+                Guid guid = Guid.NewGuid();
+                cases.Add(new Filter("Prop", EqualTo, guid), new Filter("Prop", EqualTo, guid),
+                        true);
+
+                return cases;
             }
         }
 

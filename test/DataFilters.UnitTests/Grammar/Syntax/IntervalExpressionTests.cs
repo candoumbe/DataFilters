@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Exceptions;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
@@ -31,46 +30,20 @@
                 .ThrowExactly<IncorrectBoundaryException>($"Either {nameof(IntervalExpression.Min)}/{nameof(IntervalExpression.Max)} must not be null");
         }
 
-        public static IEnumerable<object[]> IncorrectBoundariesCases
-        {
-            get
+        public static TheoryData<BoundaryExpression, BoundaryExpression, string> IncorrectBoundariesCases
+            => new()
             {
-                yield return new object[] {
+                {
                     new BoundaryExpression(AsteriskExpression.Instance, included: true),
                     new BoundaryExpression(AsteriskExpression.Instance, included: true),
                     $"min and max cannot both be {nameof(AsteriskExpression)} instances"
-                };
-
-                yield return new object[] {
+                },
+                {
                     new BoundaryExpression(AsteriskExpression.Instance, included : true),
                     null,
                     $"max cannot be null when min is {nameof(AsteriskExpression)} instance"
-                };
-            }
-        }
-
-        public static IEnumerable<object[]> BoundariesTypeMismatchCases
-        {
-            get
-            {
-                yield return new object[] {
-                    new BoundaryExpression(new DateExpression(), included: true), new BoundaryExpression(new NumericValueExpression("10"), included: true),
-                    $"min holds {nameof(DateExpression)} and max holds {nameof(ConstantValueExpression)}"
-                };
-
-                yield return new object[] {
-                    new BoundaryExpression(new NumericValueExpression("10"), included : true), new BoundaryExpression(new DateExpression(), included : true),
-                    $"min holds {nameof(ConstantValueExpression)} and max holds {nameof(DateExpression)}"
-                };
-
-                yield return new object[]
-                {
-                    new BoundaryExpression(new TimeExpression(), included: true),
-                    new BoundaryExpression(new DateExpression(), included: true),
-                    $"min holds  { nameof(TimeExpression) } and max holds { nameof(DateExpression) }"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(IncorrectBoundariesCases))]
@@ -84,12 +57,30 @@
                 .ThrowExactly<IncorrectBoundaryException>(reason);
         }
 
+        public static TheoryData<BoundaryExpression, BoundaryExpression, string> BoundariesTypeMismatchCases
+            => new()
+            {
+                {
+                    new BoundaryExpression(new DateExpression(), included: true), new BoundaryExpression(new NumericValueExpression("10"), included: true),
+                    $"min holds {nameof(DateExpression)} and max holds {nameof(ConstantValueExpression)}"
+                },
+                {
+                    new BoundaryExpression(new NumericValueExpression("10"), included : true), new BoundaryExpression(new DateExpression(), included : true),
+                    $"min holds {nameof(ConstantValueExpression)} and max holds {nameof(DateExpression)}"
+                },
+                {
+                    new BoundaryExpression(new TimeExpression(), included: true),
+                    new BoundaryExpression(new DateExpression(), included: true),
+                    $"min holds  { nameof(TimeExpression) } and max holds { nameof(DateExpression) }"
+                }
+            };
+
         [Theory]
         [MemberData(nameof(BoundariesTypeMismatchCases))]
         public void Given_boundaries_that_are_not_compatible_Ctor_should_throws_BoundaryTypeMismatchException(BoundaryExpression min, BoundaryExpression max, string reason)
         {
             // Act
-            Action action = () => new IntervalExpression(min, max);
+            Action action = () => _ = new IntervalExpression(min, max);
 
             // Assert
             action.Should()
@@ -97,29 +88,22 @@
                 .Where(ex => !string.IsNullOrWhiteSpace(ex.ParamName));
         }
 
-        public static IEnumerable<object[]> ValidCtorCases
-        {
-            get
+        public static TheoryData<BoundaryExpression, BoundaryExpression> ValidCtorCases
+            => new()
             {
-                yield return new object[]
                 {
                     new BoundaryExpression(new DateExpression(), included: false),
                     new BoundaryExpression(new TimeExpression(), included: false)
-                };
-
-                yield return new object[]
+                },
                 {
                     new BoundaryExpression(AsteriskExpression.Instance, included: false),
                     new BoundaryExpression(new TimeExpression(), included: false)
-                };
-
-                yield return new object[]
+                },
                 {
                     new BoundaryExpression(new TimeExpression(), included: false),
                     new BoundaryExpression(AsteriskExpression.Instance, included: false)
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(ValidCtorCases))]
@@ -132,19 +116,23 @@
                 .NotThrow();
         }
 
-        public static IEnumerable<object[]> CtorLogicCases
+        public static TheoryData<BoundaryExpression, BoundaryExpression, IntervalExpression, string> CtorLogicCases
         {
             get
             {
+                TheoryData<BoundaryExpression, BoundaryExpression, IntervalExpression, string> cases = [];
                 DateTime dateTime = 12.March(2019);
-                yield return new object[]
-                {
-                    new BoundaryExpression(new DateTimeExpression(dateTime), included : true),
-                    new BoundaryExpression(new TimeExpression(hours: 10), included : true),
-                    new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(dateTime), included : true),
+
+                cases.Add
+                (
+                    new BoundaryExpression(new DateTimeExpression(dateTime), included: true),
+                    new BoundaryExpression(new TimeExpression(hours: 10), included: true),
+                    new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(dateTime), included: true),
                                            max: new BoundaryExpression(new DateTimeExpression(dateTime.Add(10.Hours())), included: true)),
                     "max date part should be deduced from min date part when max date part is not specified"
-                };
+                );
+
+                return cases;
             }
         }
 
@@ -160,71 +148,66 @@
                   .Be(expected, reason);
         }
 
-        public static IEnumerable<object[]> EqualCases
+        public static TheoryData<IntervalExpression, object, bool, string> EqualCases
         {
             get
             {
-                yield return new object[]
+                TheoryData<IntervalExpression, object, bool, string> cases = new()
                 {
-                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
-                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
-                    true,
-                    $"comparing two {nameof(IntervalExpression)} instances with same min and max"
-                };
-
-                yield return new object[]
-                {
-                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
-                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : false)),
-                    false,
-                    $"comparing two {nameof(IntervalExpression)} instances with same min and max but not same {nameof(BoundaryExpression.Included)}"
-                };
-
-                yield return new object[]
-                {
-                    new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
-                    null,
-                    false,
-                    "comparing to null"
-                };
-
-                yield return new object[]
-                {
-                    new IntervalExpression(max: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
-                    new IntervalExpression(max: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
-                    true,
-                    $"comparing two {nameof(IntervalExpression)} instances with same min and max"
-                };
-
-                yield return new object[]
-                {
-                    new IntervalExpression(max: new BoundaryExpression( new DateTimeExpression(new DateExpression()), included : true)),
-                    new IntervalExpression(max: new BoundaryExpression( new DateTimeExpression(new DateExpression()), included : true)),
-                    true,
-                    $"comparing two {nameof(IntervalExpression)} instances with same {nameof(DateTimeExpression)} min and max"
+                    {
+                        new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                        new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                        true,
+                        $"comparing two {nameof(IntervalExpression)} instances with same min and max"
+                    },
+                    {
+                        new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                        new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : false)),
+                        false,
+                        $"comparing two {nameof(IntervalExpression)} instances with same min and max but not same {nameof(BoundaryExpression.Included)}"
+                    },
+                    {
+                        new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                        null,
+                        false,
+                        "comparing to null"
+                    },
+                    {
+                        new IntervalExpression(max: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                        new IntervalExpression(max: new BoundaryExpression(new NumericValueExpression("10"), included : true)),
+                        true,
+                        $"comparing two {nameof(IntervalExpression)} instances with same min and max"
+                    },
+                    {
+                        new IntervalExpression(max: new BoundaryExpression( new DateTimeExpression(new DateExpression()), included : true)),
+                        new IntervalExpression(max: new BoundaryExpression( new DateTimeExpression(new DateExpression()), included : true)),
+                        true,
+                        $"comparing two {nameof(IntervalExpression)} instances with same {nameof(DateTimeExpression)} min and max"
+                    },
                 };
 
                 {
                     IntervalExpression interval = new(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15, 03, 45), OffsetExpression.Zero), included: false),
                                                 max: new BoundaryExpression(new DateTimeExpression(new DateExpression(2012, 10, 19), new TimeExpression(15, 03, 45), new(hours: 1)), included: false));
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         interval,
                         interval,
                         true,
                         "Comparing two ranges"
-                    };
+                    );
                 }
 
-                yield return new object[]
-                {
-                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1973, 09, 02), new (18, 50, 17, 403), OffsetExpression.Zero), true),
+                cases.Add(
+                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new(1973, 09, 02), new(18, 50, 17, 403), OffsetExpression.Zero), true),
                                            new BoundaryExpression(new DateExpression(1944, 09, 06), true)),
-                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1973, 09, 02), new (18, 50, 17, 403), OffsetExpression.Zero), true),
+                    new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new(1973, 09, 02), new(18, 50, 17, 403), OffsetExpression.Zero), true),
                                            new BoundaryExpression(new DateExpression(1944, 09, 06), true)),
                     true,
                     "Two intervals with same data"
-                };
+                );
+
+                return cases;
             }
         }
 
@@ -376,39 +359,30 @@
             };
         }
 
-        public static IEnumerable<object[]> SimplifyCases
-        {
-            get
+        public static TheoryData<IntervalExpression, FilterExpression, string> SimplifyCases
+            => new()
             {
-                yield return new object[]
                 {
                     new IntervalExpression(new (new NumericValueExpression("10"), true), new (new NumericValueExpression("10"), true)),
                     new NumericValueExpression("10"),
                     "Lower and upper bound are equal"
-                };
-
-                yield return new object[]
+                },
                 {
                     new IntervalExpression(new (new NumericValueExpression("10"), true), new (new NumericValueExpression("12"), true)),
                     new IntervalExpression(new (new NumericValueExpression("10"), true), new (new NumericValueExpression("12"), true)),
                     "Lower and upper bound are not equals and not equivalent"
-                };
-
-                yield return new object[]
+                },
                 {
                     new IntervalExpression(new (new TimeExpression(1), true), new (new TimeExpression(minutes: 60), true)),
                     new TimeExpression(1),
                     "Lower and upper bound are equivalent"
-                };
-
-                yield return new object[]
+                },
                 {
                     new IntervalExpression(new (new NumericValueExpression("-32"), true), new (new NumericValueExpression("-32"), true)),
                     new NumericValueExpression("-32"),
                     "Lower and upper bound are equal"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(SimplifyCases))]

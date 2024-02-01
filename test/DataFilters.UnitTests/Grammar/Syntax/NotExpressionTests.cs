@@ -1,7 +1,6 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
@@ -9,9 +8,8 @@
     using FsCheck.Fluent;
     using FsCheck.Xunit;
     using Xunit;
-    using Xunit.Abstractions;
 
-    public class NotExpressionTests(ITestOutputHelper outputHelper)
+    public class NotExpressionTests
     {
         [Fact]
         public void IsFilterExpression() => typeof(NotExpression).Should()
@@ -71,11 +69,9 @@
                           .BeOfType<GroupExpression>("the parameter is a BinaryFilterExpression");
         }
 
-        public static IEnumerable<object[]> EscapedParseableStringCases
-        {
-            get
+        public static TheoryData<NotExpression, string> EscapedParseableStringCases
+            => new()
             {
-                yield return new object[]
                 {
                     new NotExpression(
                         new OrExpression(new DateTimeExpression(new TimeExpression(2, 53, 39, 827)),
@@ -85,9 +81,7 @@
                         ),
 
                     "!(T02:53:39.827|1901-06-17T09:13:44.17Z)"
-                };
-
-                yield return new object[]
+                },
                 {
                     new NotExpression(
                        new OrExpression(new TimeExpression(2, 53, 39, 827),
@@ -97,9 +91,8 @@
                         ),
 
                     "!(02:53:39.827|1901-06-17T09:13:44.17Z)"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EscapedParseableStringCases))]
@@ -113,11 +106,9 @@
                   .Be(expected);
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<NotExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                      new NotExpression(
                         new OrExpression(new DateTimeExpression(new TimeExpression(2, 53, 39, 827)),
@@ -133,9 +124,8 @@
                         ),
                     true,
                     $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
