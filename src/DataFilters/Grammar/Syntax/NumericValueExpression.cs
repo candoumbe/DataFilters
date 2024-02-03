@@ -17,9 +17,6 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override string EscapedParseableString => Value;
 
-        /////<inheritdoc/>
-        //public override bool Equals(object obj) => Equals(obj as NumericValueExpression);
-
         ///<inheritdoc/>
         public virtual bool Equals(NumericValueExpression other) => Value.Equals(other?.Value);
 
@@ -29,8 +26,7 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
-            NumericValueExpression numeric => Equals(numeric),
-            ConstantValueExpression constant => Equals(constant),
+            ConstantValueExpression constant => base.Equals(constant),
             ISimplifiable simplifiable => Equals(simplifiable.Simplify()),
             _ => false
         };
@@ -41,8 +37,5 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
-        ///<inheritdoc/>
-        public override bool Equals(object obj)
-            => ReferenceEquals(this, obj) || Equals(obj.As<NumericValueExpression>()?.Value, Value);
     }
 }

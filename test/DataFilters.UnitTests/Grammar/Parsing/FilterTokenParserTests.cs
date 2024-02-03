@@ -341,7 +341,8 @@ I&_Oj
         public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            _outputHelper.WriteLine($"source : '{expected}'");
+            _outputHelper.WriteLine($"input (escaped parseable string): '{expected.EscapedParseableString}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
             _outputHelper.WriteLine($"Tokens : '{StringifyTokens(tokens)}'");
 
@@ -782,6 +783,14 @@ I&_Oj
                         new OneOfExpression(new StartsWithExpression("Bat"),
                                             new StartsWithExpression("Sup"),
                                             new StartsWithExpression("Wonder"))
+                    )
+                },
+
+                {
+                    "Value=!!5",
+                    (
+                        new PropertyName("Value"),
+                        new NotExpression(new NotExpression(new NumericValueExpression("5")))
                     )
                 },
             };

@@ -33,7 +33,7 @@
         public virtual bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as ConstantValueExpression);
+        public override bool Equals(object obj) => ReferenceEquals(this, obj) || Equals(obj as ConstantValueExpression);
 
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();

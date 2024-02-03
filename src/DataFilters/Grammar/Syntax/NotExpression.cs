@@ -5,14 +5,14 @@
     /// <summary>
     /// An expression that negate wrapped inside
     /// </summary>
-    public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>
+    public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>, ISimplifiable
     {
         /// <summary>
         /// Expression that the NOT logical is applied to
         /// </summary>
         public FilterExpression Expression { get; }
 
-    private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
@@ -31,8 +31,8 @@
                 FilterExpression expr => expr
             };
 
-        _lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
-    }
+            _lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
+        }
 
         ///<inheritdoc/>
         public bool Equals(NotExpression other) => Expression.Equals(other?.Expression);
@@ -48,10 +48,20 @@
             $"Expression = {Expression.GetType().Name}, " +
             $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
             $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}']," +
-            $"{nameof(EscapedParseableString)} = {EscapedParseableString}}}";
+            $"{nameof(EscapedParseableString)} = {EscapedParseableString}}}" +
+            $"{nameof(Expression)} : {Expression} ]";
 
-    ///<inheritdoc/>
-    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        ///<inheritdoc/>
+        public FilterExpression Simplify()
+            => Expression switch
+            {
+                NotExpression innerNotExpression => innerNotExpression.Expression,
+                ISimplifiable simplifiable => new NotExpression(simplifiable.Simplify()),
+                _ => this
+            };
+
+        ///<inheritdoc/>
+        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
@@ -65,5 +75,6 @@
 
         ///<inheritdoc/>
         public static bool operator !=(NotExpression left, NotExpression right) => !(left == right);
+
     }
 }
