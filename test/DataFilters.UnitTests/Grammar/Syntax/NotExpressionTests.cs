@@ -181,30 +181,19 @@
         public void Equals_should_be_symetric(NonNull<NotExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
-        public static TheoryData<NotExpression, FilterExpression> SimplifyCases
-            => new()
-            {
-                {
-                    new NotExpression(new StringValueExpression("val")),
-                    new NotExpression(new StringValueExpression("val"))
-                },
-
-                {
-                    new NotExpression(new NotExpression(new StringValueExpression("val"))),
-                    new StringValueExpression("val")
-                },
-            };
-
-        [Theory]
-        [MemberData(nameof(SimplifyCases))]
-        public void Given_NotExpression_Simplify_should_return_the_expected_expression(NotExpression notExpression, FilterExpression expected)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_NotExpression_Simplify_should_return_the_expected_expression(FilterExpression innerExpression)
         {
             // Act
-            FilterExpression actual = notExpression.Simplify();
+            NotExpression notExpression = new(innerExpression);
+            double complexityBeforeSimplification = notExpression.Complexity;
+
+            // Act
+            FilterExpression simplifiedExpression = notExpression.Simplify();
 
             // Assert
-            actual.Should()
-                  .Be(expected);
+            notExpression.IsEquivalentTo(simplifiedExpression);
         }
+
     }
 }
