@@ -1,12 +1,15 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
+    using DataFilters.Grammar.Parsing;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
+    using Superpower;
+    using Superpower.Model;
     using Xunit;
 
     public class NotExpressionTests
@@ -22,11 +25,32 @@
         public void Ctor_should_throws_ArgumentNullException_when_argument_is_null()
         {
             // Act
-            Action action = () => new NotExpression(null);
+            Action action = () => _ = new NotExpression(null);
 
             // Assert
             action.Should()
                 .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(NotExpression)}'s constructor cannot be null");
+        }
+
+        public static TheoryData<string, NotExpression> ParsingCases
+            => new()
+            {
+                { "!!5", new NotExpression(new NotExpression(new StringValueExpression("5"))) }
+            };
+
+        [Theory]
+        [MemberData(nameof(ParsingCases))]
+        public void Should_parse_to_NotExpression(string input, NotExpression expected)
+        {
+            // Arrange
+            FilterTokenizer tokenizer = new();
+            TokenList<FilterToken> tokens = tokenizer.Tokenize(input);
+
+            // Act
+            NotExpression actual = FilterTokenParser.Not.Parse(tokens);
+
+            // Assert
+            actual.Should().Be(expected);
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -124,6 +148,12 @@
                         ),
                     true,
                     $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
+                },
+                {
+                    new NotExpression(new NotExpression(new NumericValueExpression("5"))),
+                    new NotExpression(new NotExpression(new NumericValueExpression("5"))),
+                    true,
+                    $"Two {nameof(NotExpression)} instances that contains equal inner expressions"
                 }
             };
 
@@ -150,5 +180,31 @@
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_symetric(NonNull<NotExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+
+        public static TheoryData<NotExpression, FilterExpression> SimplifyCases
+            => new()
+            {
+                {
+                    new NotExpression(new StringValueExpression("val")),
+                    new NotExpression(new StringValueExpression("val"))
+                },
+
+                {
+                    new NotExpression(new NotExpression(new StringValueExpression("val"))),
+                    new StringValueExpression("val")
+                },
+            };
+
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_NotExpression_Simplify_should_return_the_expected_expression(NotExpression notExpression, FilterExpression expected)
+        {
+            // Act
+            FilterExpression actual = notExpression.Simplify();
+
+            // Assert
+            actual.Should()
+                  .Be(expected);
+        }
     }
 }

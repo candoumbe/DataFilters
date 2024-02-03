@@ -84,18 +84,18 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<IFilter> GenerateFilters()
         {
             Gen<IFilter>[] generators =
-            {
-                EndsWithFilter().Generator.Select(filter => (IFilter) filter),
-                StartsWithFilter().Generator.Select(filter => (IFilter) filter),
-                ContainsFilter().Generator.Select(filter => (IFilter) filter),
-                EqualsWithFilter().Generator.Select(filter => (IFilter) filter),
-                Gen.Sized(SafeFilterGenerator).Select(filter => (IFilter) filter),
+            [
+                EndsWithFilter().Generator.Select(filter => (IFilter)filter),
+                StartsWithFilter().Generator.Select(filter => (IFilter)filter),
+                ContainsFilter().Generator.Select(filter => (IFilter)filter),
+                EqualsWithFilter().Generator.Select(filter => (IFilter)filter),
+                Gen.Sized(SafeFilterGenerator).Select(filter => (IFilter)filter),
                 GreaterThanFilter<DateTime>(),
                 GreaterThanOrEqualFilter<DateTime>(),
                 LessThanFilter<DateTime>(),
                 LessThanOrEqualFilter<DateTime>(),
                 FiltersOverNumericValues().Generator.Select(filter => (IFilter)filter)
-            };
+            ];
 
             return Gen.OneOf(generators).ToArbitrary();
         }

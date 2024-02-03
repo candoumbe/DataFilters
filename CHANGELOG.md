@@ -16,9 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dropped `netstandard1.3` support
 - Removed `IFilterService` and `FilterService`
 
+### 🚨 Fixes
+
+- `NumericValueExpression` and `StringValueExpression` can be equal when they wrap the same underlying value ([#80](https://github.com/candoumbe/datafilters/issues/80)
+
+
 ### 🧹 Housekeeping
 
-- Moved pipeline to Ubuntu agent
+- Moved CI pipeline to Ubuntu agent
 - Updated build definition to [Candoumbe.Pipelines 0.9.0](https://www.nuget.org/packages/Candoumbe.Pipelines/0.9.0)
 - Updated `build.sh` script by running `nuke :update` command
 - Removed explicit `Nuke.Common` dependency from the build project
