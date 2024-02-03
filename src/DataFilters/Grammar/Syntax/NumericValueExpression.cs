@@ -37,5 +37,7 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
+        ///<inheritdoc/>
+        public override bool Equals(object obj) => base.Equals(obj);
     }
 }
