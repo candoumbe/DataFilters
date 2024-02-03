@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚨 Fixes
 
-- `NumericValueExpression` and `StringValueExpression` can be equal when they wrap the same underlying value ([#80](https://github.com/candoumbe/datafilters/issues/80)
+- `NumericValueExpression` and `StringValueExpression` can be equal when they wrap the same underlying value ([#80](https://github.com/candoumbe/datafilters/issues/80))
 
 
 ### 🧹 Housekeeping
