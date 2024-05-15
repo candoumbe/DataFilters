@@ -49,7 +49,7 @@
     <When Condition="'$(TargetFramework)'=='netstandard1.3'">
       <ItemGroup>
         <PackageReference Include="Superpower" Version="2.*" />
-        <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.15" />
+        <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.16" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       </ItemGroup>
     </When>
