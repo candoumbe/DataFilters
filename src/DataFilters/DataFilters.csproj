@@ -37,7 +37,7 @@
   </Choose>
 
   <ItemGroup>
-    <PackageReference Include="OneOf.Extended" Version="3.0.263" />
+    <PackageReference Include="OneOf.Extended" Version="3.0.271" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)'=='netstandard1.3'">
