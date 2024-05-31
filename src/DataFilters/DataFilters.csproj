@@ -2,7 +2,7 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
@@ -26,12 +26,6 @@
     <When Condition="'$(TargetFramework)' == 'net6.0'">
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-        <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="2.1.1" />
-      </ItemGroup>
-    </When>
-    <When Condition="'$(TargetFramework)' == 'net7.0'">
-      <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
         <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="2.1.1" />
       </ItemGroup>
     </When>

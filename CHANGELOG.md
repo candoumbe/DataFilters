@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `net8.0` support
 
 ### ⚠️ Breaking Changes
-
+- Dropped `net7.0` support
 - Dropped `net5.0` support
 - Dropped `netcoreapp3.1` support
 - Dropped `netstandard1.3` support
@@ -194,4 +194,3 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 [0.3.0]: https://github.com/candoumbe/DataFilters/compare/0.2.2...0.3.0
 [0.2.2]: https://github.com/candoumbe/DataFilters/compare/0.2.0...0.2.2
 [0.2.0]: https://github.com/candoumbe/DataFilters/tree/0.2.0
-
