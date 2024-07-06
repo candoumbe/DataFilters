@@ -43,18 +43,6 @@
           "type": "boolean",
           "description": "Indicates to open the pull request as 'draft'"
         },
-        "Formatters": {
-          "type": "array",
-          "description": "Sets of formatters that the tool must apply",
-          "items": {
-            "type": "string",
-            "enum": [
-              "Analyzers",
-              "Style",
-              "Whitespace"
-            ]
-          }
-        },
         "GitHubToken": {
           "type": "string",
           "description": "Token used to create a new release in GitHub",
@@ -145,7 +133,6 @@
               "Coldfix",
               "Compile",
               "Feature",
-              "Format",
               "Hotfix",
               "MutationTests",
               "Pack",
@@ -179,7 +166,6 @@
               "Coldfix",
               "Compile",
               "Feature",
-              "Format",
               "Hotfix",
               "MutationTests",
               "Pack",
