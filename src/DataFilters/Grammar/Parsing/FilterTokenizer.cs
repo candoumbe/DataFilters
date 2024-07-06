@@ -4,7 +4,7 @@
     using System.Linq;
     using Superpower;
     using Superpower.Model;
-    using static DataFilters.Grammar.Parsing.FilterToken;
+    using static FilterToken;
 
     /// <summary>
     /// <see cref="FilterTokenizer"/> is the base class used to "tokenize" a string.
@@ -19,52 +19,52 @@
         /// <summary>
         /// The <c>_</c> character
         /// </summary>
-        public const char Underscore = '_';
+        private const char Underscore = '_';
 
         /// <summary>
         /// The <c>*</c> character
         /// </summary>
-        public const char Asterisk = '*';
+        private const char Asterisk = '*';
 
         /// <summary>
         /// The <c>=</c> character
         /// </summary>
-        public const char EqualSign = '=';
+        private const char EqualSign = '=';
 
         /// <summary>
         /// The <c>(</c> character
         /// </summary>
-        public const char LeftParenthesis = '(';
+        private const char LeftParenthesis = '(';
 
         /// <summary>
         /// The <c>)</c> character
         /// </summary>
-        public const char RightParenthesis = ')';
+        private const char RightParenthesis = ')';
 
         /// <summary>
         /// The <c>[</c> character
         /// </summary>
-        public const char LeftSquareBracket = '[';
+        private const char LeftSquareBracket = '[';
 
         /// <summary>
         /// The <c>{</c> character
         /// </summary>
-        public const char LeftCurlyBracket = '{';
+        private const char LeftCurlyBracket = '{';
 
         /// <summary>
         /// The <c>}</c> character
         /// </summary>
-        public const char RightCurlyBracket = '}';
+        private const char RightCurlyBracket = '}';
 
         /// <summary>
         /// The <c>]</c> character
         /// </summary>
-        public const char RightSquareBracket = ']';
+        private const char RightSquareBracket = ']';
 
         /// <summary>
         /// The <c>-</c> character
         /// </summary>
-        public const char Hyphen = '-';
+        private const char Hyphen = '-';
 
         /// <summary>
         /// The <c>\</c> character
@@ -74,17 +74,17 @@
         /// <summary>
         /// The <c>|</c> character
         /// </summary>
-        public const char Pipe = '|';
+        private const char Pipe = '|';
 
         /// <summary>
         /// The <c>,</c> character
         /// </summary>
-        public const char Comma = ',';
+        private const char Comma = ',';
 
         /// <summary>
         /// The <c>!</c> character
         /// </summary>
-        public const char Bang = '!';
+        private const char Bang = '!';
 
         /// <summary>
         /// The <c>"</c> character
@@ -93,7 +93,7 @@
         /// <summary>
         /// The <c>&#38;</c> character
         /// </summary>
-        public const char Ampersand = '&';
+        private const char Ampersand = '&';
 
         /// <summary>
         /// List of characters that have a special meaning and should be escaped
