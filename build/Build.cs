@@ -18,6 +18,7 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions(
         "integration",
         GitHubActionsImage.UbuntuLatest,
+        AutoGenerate = false,
         FetchDepth = 0,
         OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
         PublishArtifacts = true,
@@ -39,6 +40,7 @@ namespace DataFilters.ContinuousIntegration
     [GitHubActions(
         "delivery",
         GitHubActionsImage.UbuntuLatest,
+        AutoGenerate = false,
         FetchDepth = 0,
         OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
         InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
@@ -60,7 +62,7 @@ namespace DataFilters.ContinuousIntegration
     )]
 
     //[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
-    //    AutoGenerate = true,
+    //    AutoGenerate = false,
     //    FetchDepth = 0,
     //    OnCronSchedule = "0 0 * * *",
     //    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
@@ -87,7 +89,7 @@ namespace DataFilters.ContinuousIntegration
     //    }
     //)]
     [GitHubActions("nightly-manual", GitHubActionsImage.UbuntuLatest,
-        AutoGenerate = true,
+        AutoGenerate = false,
         FetchDepth = 0,
         On = [GitHubActionsTrigger.WorkflowDispatch],
         InvokedTargets = [nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
