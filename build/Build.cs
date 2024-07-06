@@ -115,7 +115,6 @@ namespace DataFilters.ContinuousIntegration
         IGitFlowWithPullRequest,
         IClean,
         IRestore,
-        IDotnetFormat,
         ICompile,
         IUnitTest,
         IMutationTest,
@@ -177,14 +176,8 @@ namespace DataFilters.ContinuousIntegration
                                           () => NugetApiKey is not null),
             new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
                                            source: new Uri("https://nukpg.github.com/"),
-                                           () => this is ICreateGithubRelease && this.Get<ICreateGithubRelease>()?.GitHubToken is not null)
+                                           () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
         };
-
-        ///<inheritdoc/>
-        bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
-
-        ///<inheritdoc/>
-        Configure<DotNetFormatSettings> IDotnetFormat.FormatSettings => settings => settings.SetVerbosity(DotNetVerbosity.diagnostic);
 
         protected override void OnBuildCreated()
         {
