@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚨 Fixes
 
 - `NumericValueExpression` and `StringValueExpression` can be equal when they wrap the same underlying value ([#80](https://github.com/candoumbe/datafilters/issues/80))
+- Fixed `ArgumentException` thrown when creating a [`Filter`](./src/DataFilters/Filter.cs) with
+`startswith` | `contains` | `endswith` operator and a `char` value ([#284](https://github.com/candoumbe/DataFilters/issues/284)) 
 
 
 ### 🧹 Housekeeping

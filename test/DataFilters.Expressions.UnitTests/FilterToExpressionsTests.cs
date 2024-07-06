@@ -1,10 +1,7 @@
-﻿namespace DataFilters.Expressions.UnitTests;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using DataFilters.Expressions;
 using DataFilters.TestObjects;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -12,9 +9,12 @@ using NodaTime;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
-using static DataFilters.Expressions.NullableValueBehavior;
-using static DataFilters.FilterLogic;
-using static DataFilters.FilterOperator;
+
+namespace DataFilters.Expressions.UnitTests;
+
+using static NullableValueBehavior;
+using static FilterLogic;
+using static FilterOperator;
 
 [Feature("Filters")]
 [UnitTest]
@@ -32,7 +32,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
                 {
                     [
-                        new SuperHero() { Acolytes = null }
+                        new SuperHero { Acolytes = null }
                     ],
                     new Filter(field: $"{nameof(SuperHero.Acolytes)}.{nameof(SuperHero.Firstname)}", @operator: EqualTo, value: "Bruce"),
                     AddNullCheck,
@@ -134,8 +134,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                                 Filters = new[] {
 #if NET6_0_OR_GREATER
                                     new Filter(field: nameof(SuperHero.LastBattleDate), @operator: GreaterThan, value: DateOnly.FromDateTime(1.January(2007))),
-                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: FilterOperator.LessThan, value: DateOnly.FromDateTime(31.December(2012))),
-                                    //new Filter(field : nameof(SuperHero.PeakShape), @operator : FilterOperator.LessThan, value : TimeOnly.FromTimeSpan(12.Hours()))
+                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: LessThan, value: DateOnly.FromDateTime(31.December(2012))),
 #else
 		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
@@ -148,8 +147,8 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
 #if NET6_0_OR_GREATER
                     item => item.Firstname.Contains('a')
-                                                                && DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate
-                                                                && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012))
+                                      && DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate
+                                      && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012))
 #else
                     (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
                                                                 && 1.January(2007) < item.LastBattleDate
@@ -181,7 +180,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                                 Filters = new[] {
 #if NET6_0_OR_GREATER
                                     new Filter(field: nameof(SuperHero.LastBattleDate), @operator: GreaterThan, value: DateOnly.FromDateTime(1.January(2007))),
-                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: FilterOperator.LessThan, value: DateOnly.FromDateTime(31.December(2012)))
+                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: LessThan, value: DateOnly.FromDateTime(31.December(2012)))
 #else
 		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
@@ -193,8 +192,8 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     NoAction,
 #if NET6_0_OR_GREATER
                     item => item.Firstname.Contains('a')
-                                                                && DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate
-                                                                && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012))
+                                      && DateOnly.FromDateTime(1.January(2007)) < item.LastBattleDate
+                                      && item.LastBattleDate < DateOnly.FromDateTime(31.December(2012))
 #else
                     (Expression<Func<SuperHero, bool>>)(item => item.Firstname.Contains("a")
                                                                 && 1.January(2007) < item.LastBattleDate
@@ -202,7 +201,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 #endif
                 },
                 {
-                    new[] {
+                    [
                         new SuperHero
                         {
                             Firstname = "Bruce",
@@ -215,15 +214,15 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                             Firstname = "Clark",
                             Lastname = "Kent",
                             Nickname = "Superman",
-                            Powers = new[] { "super strength", "heat vision" }
+                            Powers = [ "super strength", "heat vision" ]
                         }
-                    },
+                    ],
                     new Filter(field: nameof(SuperHero.Powers), @operator: EqualTo, value: "heat"),
                     NoAction,
                     item => item.Powers.Any(power => power == "heat")
                 },
                 {
-                    new[] {
+                    [
                         new SuperHero
                         {
                             Firstname = "Bruce",
@@ -233,13 +232,13 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                             Henchman = new Henchman
                             {
                                 Nickname = "Robin",
-                                Weapons = new[]
-                                {
+                                Weapons =
+                                [
                                     new Weapon { Name = "stick", Level = 100 }
-                                }
+                                ]
                             }
                         }
-                    },
+                    ],
                     new Filter(field: @$"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Weapons)}""][""{nameof(Weapon.Name)}""]",
                                @operator: EqualTo,
                                value: "stick"),
@@ -250,7 +249,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(EqualToTestCases))]
-    public void BuildEqual(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildEqual(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> IsNullTestCases
@@ -263,10 +262,10 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     item => item.Firstname == null
             },
             {
-                    new[] {
+                    [
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
                         new SuperHero { Firstname = null, Lastname = "", Height = 178, Nickname = "Sinestro" }
-                    },
+                    ],
                     new Filter(field : nameof(SuperHero.Firstname), @operator : IsNull),
                     NoAction,
                     item => item.Firstname == null
@@ -275,96 +274,103 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(IsNullTestCases))]
-    public void BuildIsNull(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildIsNull(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> IsEmptyTestCases
         => new()
         {
             {
-                    [],
-                    new Filter(field : nameof(SuperHero.Lastname), @operator : IsEmpty),
-                    NoAction,
-                    item => item.Lastname == string.Empty
+                [],
+                new Filter(field : nameof(SuperHero.Lastname), @operator : IsEmpty),
+                NoAction,
+                item => item.Lastname == string.Empty
             },
             {
-                    [
-                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
-                        new SuperHero { Firstname = "", Lastname = "", Height = 178, Nickname = "Sinestro" }
-                    ],
-                    new Filter(field : nameof(SuperHero.Lastname), @operator : IsEmpty),
-                    NoAction,
-                    item => item.Lastname == string.Empty
+                [
+                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                    new SuperHero { Firstname = "", Lastname = "", Height = 178, Nickname = "Sinestro" }
+                ],
+                new Filter(field : nameof(SuperHero.Lastname), @operator : IsEmpty),
+                NoAction,
+                item => item.Lastname == string.Empty
             },
             {
-                    [
-                        new SuperHero {
-                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
-                            Henchman = new Henchman
-                            {
-                                Firstname = "Dick", Lastname = "Grayson", Nickname = "Robin"
-                            }
-                        },
-                        new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman",
-                           Henchman = new Henchman { Nickname = "Krypto" } }
-                    ],
-                    new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Lastname)}""]", @operator : IsEmpty),
-                    NoAction,
-                    item => item.Henchman.Lastname == string.Empty
-            },
-            {
-                    [
-                        new SuperHero {
-                            Firstname = "Bruce",
-                            Lastname = "Wayne",
-                            Height = 190,
-                            Nickname = "Batman",
-                            Henchman = new Henchman
-                            {
-                                Firstname = "Dick",
-                                Lastname = "Grayson"
-                            }
-                        }
-                    ],
-                    new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Firstname)}""]", @operator : NotEqualTo, value: "Dick"),
-                    NoAction,
-                    item => item.Henchman.Firstname != "Dick"
-            },
-            {
-                    new[] {
-                        new SuperHero {
-                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
-                        },
-                        new SuperHero
+                [
+                    new SuperHero {
+                        Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        Henchman = new Henchman
                         {
-                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
-                            Powers = new [] { "super strength", "heat vision" }
+                            Firstname = "Dick", Lastname = "Grayson", Nickname = "Robin"
                         }
                     },
-                    new Filter(field : nameof(SuperHero.Powers), @operator : IsEmpty),
-                    NoAction,
-                    item => !item.Powers.Any()
+                    new SuperHero 
+                    {
+                        Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman",
+                        Henchman = new Henchman
+                        {
+                            Nickname = "Krypto"
+                        }
+                    }
+                ],
+                new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Lastname)}""]", @operator : IsEmpty),
+                NoAction,
+                item => item.Henchman.Lastname == string.Empty
             },
             {
-                    [
-                        new SuperHero {
-                            Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
-                        },
-                        new SuperHero
+                [
+                    new SuperHero
+                    {
+                        Firstname = "Bruce",
+                        Lastname = "Wayne",
+                        Height = 190,
+                        Nickname = "Batman",
+                        Henchman = new Henchman
                         {
-                            Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
-                            Powers = new [] { "super strength", "heat vision" }
+                            Firstname = "Dick",
+                            Lastname = "Grayson"
                         }
-                    ],
-                    new Filter(field : $@"{nameof(SuperHero.Acolytes)}[""{nameof(SuperHero.Weapons)}""]", @operator : IsEmpty),
-                    NoAction,
-                    item => item.Acolytes.Any(acolyte => !acolyte.Weapons.Any())
+                    }
+                ],
+                new Filter(field : $@"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Firstname)}""]", @operator : NotEqualTo, value: "Dick"),
+                NoAction,
+                item => item.Henchman.Firstname != "Dick"
+            },
+            {
+                [
+                    new SuperHero {
+                        Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                    },
+                    new SuperHero
+                    {
+                        Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                        Powers = new [] { "super strength", "heat vision" }
+                    }
+                ],
+                new Filter(field : nameof(SuperHero.Powers), @operator : IsEmpty),
+                NoAction,
+                item => !item.Powers.Any()
+            },
+            {
+                [
+                    new SuperHero {
+                        Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                    },
+                    new SuperHero
+                    {
+                        Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
+                        Powers = new [] { "super strength", "heat vision" }
+                    }
+                ],
+                new Filter(field : $@"{nameof(SuperHero.Acolytes)}[""{nameof(SuperHero.Weapons)}""]", @operator : IsEmpty),
+                NoAction,
+                item => item.Acolytes.Any(acolyte => !acolyte.Weapons.Any())
             }
         };
 
     [Theory]
     [MemberData(nameof(IsEmptyTestCases))]
-    public void BuildIsEmpty(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildIsEmpty(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> IsNotEmptyTestCases
@@ -419,7 +425,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     new SuperHero
                     {
                         Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
-                        Powers = new [] { "super strength", "heat vision" }
+                        Powers = [ "super strength", "heat vision" ]
                     }
                 ],
                 new Filter(field : nameof(SuperHero.Powers), @operator : IsNotEmpty),
@@ -430,7 +436,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(IsNotEmptyTestCases))]
-    public void BuildIsNotEmpty(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildIsNotEmpty(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> StartsWithCases
@@ -450,7 +456,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(StartsWithCases))]
-    public void BuildStartsWith(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildStartsWith(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> NotStartsWithCases
@@ -464,13 +470,23 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                 ],
                 new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: "B"),
                 NoAction,
+                item => item != null && !item.Nickname.StartsWith("B")
+            },
+            {
+                [
+                    new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                    new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+                ],
+                new Filter(field : nameof(SuperHero.Nickname), @operator : NotStartsWith, value: 'B'),
+                NoAction,
                 item => item != null && !item.Nickname.StartsWith('B')
             }
         };
 
     [Theory]
     [MemberData(nameof(NotStartsWithCases))]
-    public void BuildNotStartsWith(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildNotStartsWith(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> EndsWithCases
@@ -484,13 +500,23 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                 ],
                 new Filter(field: nameof(SuperHero.Nickname), @operator: EndsWith, value:"n"),
                 NoAction,
+                item => item.Nickname.EndsWith("n")
+            },
+            {
+                [
+                    new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
+                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
+                    new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash" }
+                ],
+                new Filter(field: nameof(SuperHero.Nickname), @operator: EndsWith, value:'n'),
+                NoAction,
                 item => item.Nickname.EndsWith('n')
             }
         };
 
     [Theory]
     [MemberData(nameof(EndsWithCases))]
-    public void BuildEndsWith(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildEndsWith(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> NotEndsWithCases
@@ -510,7 +536,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(NotEndsWithCases))]
-    public void BuildNotEndsWith(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildNotEndsWith(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> ContainsCases
@@ -530,8 +556,8 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
                 [
                     new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman" },
-                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", Powers = new[]{ "super strength", "heat vision"} },
-                    new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", Powers = new[]{ "super speed"} }
+                    new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", Powers = [ "super strength", "heat vision"] },
+                    new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", Powers = ["super speed"] }
                 ],
                 new Filter(field:nameof(SuperHero.Powers), @operator: Contains, value: "strength"),
                 NoAction,
@@ -545,12 +571,12 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     new SuperHero
                     {
                         Firstname = "Clark", Lastname = "Kent", Nickname = "Superman",
-                        Powers = new [] { "super strength", "heat vision" }
+                        Powers = ["super strength", "heat vision"]
                     },
                     new SuperHero
                     {
                         Firstname = "Barry", Lastname = "Allen", Nickname = "Flash",
-                        Powers = new [] { "super speed" }
+                        Powers = [ "super speed" ]
                     }
                 ],
                 new MultiFilter
@@ -569,7 +595,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(ContainsCases))]
-    public void BuildContains(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildContains(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> NotContainsCases
@@ -589,7 +615,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(NotContainsCases))]
-    public void BuildNotContains(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildNotContains(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> LessThanTestCases
@@ -600,7 +626,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
                     new SuperHero { Firstname = null, Lastname = "", Height = 178, Nickname = "Sinestro" }
                 ],
-                new Filter(field : nameof(SuperHero.Height), @operator : FilterOperator.LessThan, value: 150),
+                new Filter(field : nameof(SuperHero.Height), @operator : LessThan, value: 150),
                 NoAction,
                 item => item.Height < 150
             }
@@ -608,7 +634,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(LessThanTestCases))]
-    public void BuildLessThan(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildLessThan(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> NotEqualToTestCases
@@ -659,7 +685,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(NotEqualToTestCases))]
-    public void BuildNotEqual(IEnumerable<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildNotEqual(IReadOnlyList<SuperHero> superheroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superheroes, filter, nullableValueBehavior, expression);
 
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> LessThanOrEqualToCases
@@ -673,7 +699,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = DateOnly.FromDateTime(18.April(2014)) }
                 ],
                 new Filter(field : nameof(SuperHero.LastBattleDate), @operator : LessThanOrEqualTo, value : DateOnly.FromDateTime(1.January(2007))),
-                NullableValueBehavior.NoAction,
+                NoAction,
                 item => item.Firstname.Contains('a')
                                                             && item.LastBattleDate <= DateOnly.FromDateTime(1.January(2007))
 #else
@@ -692,7 +718,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(LessThanOrEqualToCases))]
-    public void BuildLessThanOrEqual(IEnumerable<SuperHero> superHeroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
+    public void BuildLessThanOrEqual(IReadOnlyList<SuperHero> superHeroes, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<SuperHero, bool>> expression)
         => Build(superHeroes, filter, nullableValueBehavior, expression);
 
     /// <summary>
@@ -701,7 +727,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
     /// <param name="elements">Collections of </param>
     /// <param name="filter">filter under test</param>
     /// <param name="expression">Expression the filter should match once built</param>
-    private void Build<T>(IEnumerable<T> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<T, bool>> expression)
+    private void Build<T>(IReadOnlyList<T> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<T, bool>> expression)
     {
         output.WriteLine($"Filtering {elements.Jsonify()}");
         output.WriteLine($"Filter under test : {filter}");
@@ -743,7 +769,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
     [InlineData(IsNotEmpty, "")]
     [InlineData(IsNull, "")]
     [InlineData(IsNotNull, "")]
-    [InlineData(FilterOperator.LessThan, " ")]
+    [InlineData(LessThan, " ")]
     [InlineData(LessThanOrEqualTo, " ")]
     [InlineData(NotEqualTo, " ")]
     [InlineData(StartsWith, " ")]
@@ -833,7 +859,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(LocalDateFilterCases))]
-    public void Filter_LocalDate(IEnumerable<NodaTimeClass> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<NodaTimeClass, bool>> expression)
+    public void Filter_LocalDate(IReadOnlyList<NodaTimeClass> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<NodaTimeClass, bool>> expression)
         => Build(elements, filter, nullableValueBehavior, expression);
 
     [Theory]
@@ -851,7 +877,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
         Filter filter = new(nameof(Hero.Name), op, value);
 
         // Act
-        Expression<Func<Hero, bool>> expression = filter.ToExpression<Hero>(NoAction);
+        Expression<Func<Hero, bool>> expression = filter.ToExpression<Hero>();
         Action act = () => _ = heroes.Where(expression.Compile()).ToArray();
 
         // Assert
