@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `build.sh` script by running `nuke :update` command
 - Removed explicit `Nuke.Common` dependency from the build project
 - Added local file to store encrypted secrets needed when running some CI targets locally
-- Replaced property based testing with hand written test cases to validate `DateTimeExpression.Equals` implementation([#237](https://github.com/candoumbe/datafilters/issues/237))
+- Replaced property based testing with handwritten test cases to validate `DateTimeExpression.Equals` implementation([#237](https://github.com/candoumbe/datafilters/issues/237))
+- Fixed incorrect casing filename for `IFilter.cs`
 
 ## [0.12.0] / 2022-10-12
 ### 🚀 New features
