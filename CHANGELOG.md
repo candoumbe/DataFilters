@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed incorrect parsing of numeric values with `E` symbol.
 
+### 🧹 Housekeeping
+
+- Pipeline fails to publish NuGet packages to GitHub due to incorrect URL
+
 
 ## [0.13.0] / 2024-07-11
 ### 🚀 New features
