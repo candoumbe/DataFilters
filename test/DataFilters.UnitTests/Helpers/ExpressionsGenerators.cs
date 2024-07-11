@@ -100,7 +100,7 @@ namespace DataFilters.UnitTests.Helpers
             {
                 GetArbitraryFor<int>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
                 GetArbitraryFor<long>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
-                GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture)))
+                GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString(CultureInfo.InvariantCulture)))
             };
 
             return Gen.OneOf(generators)

@@ -138,7 +138,7 @@
 
         [Theory]
         [MemberData(nameof(CtorLogicCases))]
-        public void Given_min_and_max_bounds_Constructor_logic_shoud_work_as_expected(BoundaryExpression min, BoundaryExpression max, IntervalExpression expected, string reason)
+        public void Given_min_and_max_bounds_Constructor_logic_should_work_as_expected(BoundaryExpression min, BoundaryExpression max, IntervalExpression expected, string reason)
         {
             // Act
             IntervalExpression actual = new(min, max);

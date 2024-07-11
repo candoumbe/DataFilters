@@ -459,15 +459,15 @@ I&_Oj
 
                 {
                     "[a-z]",
-                    new OneOfExpression(GetCharacters('a', 'z').Select(chr => new StringValueExpression(chr.ToString())).ToArray())
+                    new OneOfExpression([ .. GetCharacters('a', 'z').Select(chr => new StringValueExpression(chr.ToString())) ])
                 },
 
                 {
                     "[a-zA-Z0-9]",
-                    new OneOfExpression(GetCharacters('a', 'z').Concat(GetCharacters('A', 'Z'))
+                    new OneOfExpression([.. GetCharacters('a', 'z').Concat(GetCharacters('A', 'Z'))
                                                                .Concat(GetCharacters('0', '9'))
                                                                .Select(chr => new StringValueExpression(chr.ToString()))
-                                                               .ToArray())
+                                                               ])
                 },
 
                 {
@@ -582,6 +582,31 @@ I&_Oj
                         culture,
                         "]* TO 1963-06-03T15:53:44.609Z]",
                         new IntervalExpression(max: new BoundaryExpression(new DateTimeExpression(new(1963, 6, 3), new(15, 53, 44, 609), OffsetExpression.Zero), true))
+                    );
+
+                    cases.Add
+                    (
+                        culture,
+                        "]2E-05 TO 32[",
+                        new IntervalExpression(
+                            min: new BoundaryExpression(new NumericValueExpression("2E-05"), included: false),
+                            max: new BoundaryExpression(new NumericValueExpression("32"), included: false))
+                    );
+                    cases.Add
+                    (
+                        culture,
+                        "]-2E-05 TO 32[",
+                        new IntervalExpression(
+                            min: new BoundaryExpression(new NumericValueExpression("-2E-05"), included: false),
+                            max: new BoundaryExpression(new NumericValueExpression("32"), included: false))
+                    );
+                    cases.Add
+                    (
+                        culture,
+                        "]+2E-05 TO 32[",
+                        new IntervalExpression(
+                            min: new BoundaryExpression(new NumericValueExpression("+2E-05"), included: false),
+                            max: new BoundaryExpression(new NumericValueExpression("32"), included: false))
                     );
                 }
 
@@ -980,6 +1005,39 @@ I&_Oj
             });
         }
 
+        public static TheoryData<CultureInfo, NumericValueExpression> ParseNumberCases
+            => new ()
+            {
+                {
+                    CultureInfo.InvariantCulture,
+                    new NumericValueExpression(float.MinValue.ToString(CultureInfo.InvariantCulture))
+                },
+                {
+                    CultureInfo.InvariantCulture,
+                    new NumericValueExpression(float.MaxValue.ToString(CultureInfo.InvariantCulture))
+                }
+            };
+        
+        [Theory]
+        [MemberData(nameof(ParseNumberCases))]
+        // [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Should_parse_Number(CultureInfo culture, NumericValueExpression expected)
+        {
+            _cultureSwitcher.Run(culture, () =>
+            {
+                _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
+                _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+                TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+
+                // Act
+                NumericValueExpression actual = FilterTokenParser.Number.Parse(tokens);
+
+                // Assert
+                AssertThatShould_parse(actual, expected);
+            });
+        }
+
+
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_TimeExpression(NonNull<TimeExpression> expected)
         {
@@ -993,7 +1051,7 @@ I&_Oj
             // Assert
             AssertThatShould_parse(actual, expected.Item);
         }
-
+        
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DurationExpression(DurationExpression expected)
         {
@@ -1009,7 +1067,7 @@ I&_Oj
         }
 
         [Theory]
-        [InlineData("P", "time separator and duration unit are mising")]
+        [InlineData("P", "time separator and duration unit are missing")]
         [InlineData("P1Y", "the time separator 'T' is missing after the 'year' duration")]
         [InlineData("P0S", "the time separator 'T' is missing before the 'second' duration")]
         [InlineData("PT", "the duration string does not contain any duration")]
