@@ -1,25 +1,18 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using FluentAssertions;
-    using FsCheck.Xunit;
-    using FsCheck;
-
     using System;
-    using System.Collections.Generic;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
     using Xunit.Categories;
 
     [UnitTest]
-    public class EndsWithExpressionTests
+    public class EndsWithExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public EndsWithExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(EndsWithExpression).Should()
                                                                       .BeAssignableTo<FilterExpression>().And
@@ -59,63 +52,55 @@
                 .ThrowExactly<ArgumentOutOfRangeException>($"The value of {nameof(EndsWithExpression)}'s constructor cannot be empty");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<EndsWithExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new EndsWithExpression("prop1"),
                     new EndsWithExpression("prop1"),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new EndsWithExpression("prop1"),
                     new EndsWithExpression("prop2"),
                     false,
                     "comparing two different instances with different property name"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void ImplementsEqualsCorrectly(EndsWithExpression first, object other, bool expected, string reason)
+        public void ImplementsEqualsCorrectly(EndsWithExpression current, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {current}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
-            bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
+            bool actual = current.Equals(other);
+            int actualHashCode = current.GetHashCode();
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
+
+            object _ = expected switch
             {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                true => actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason),
+                _ => true
+            };
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_EndsWithExpression_Complexity_should_return_1U002E5(EndsWithExpression endsWith)
-            => (endsWith.Complexity == 1.5).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_EndsWithExpression_Complexity_should_return_1U002E5(EndsWithExpression endsWith)
+            => endsWith.Complexity.Should().Be(1.5);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
         {
             // Arrange
-            EndsWithExpression expression = new (text.Item);
+            EndsWithExpression expression = new(text.Item);
             string expected = $"*{text.Item.EscapedParseableString}";
 
             // Act
@@ -142,19 +127,19 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<EndsWithExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_commutative(NonNull<EndsWithExpression> first, FilterExpression second)
+            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<EndsWithExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_reflexive(NonNull<EndsWithExpression> expression)
+            => expression.Item.Equals(expression.Item).Should().BeTrue();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<EndsWithExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_symetric(NonNull<EndsWithExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_EndsWithExpression_When_adding_AsteriskExpression_should_returns_ContainsExpression(NonNull<EndsWithExpression> endsWith)
         {
             // Arrange

@@ -1,32 +1,21 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
 
     [UnitTest]
-    public class OrExpressionTests
+    public class OrExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public OrExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(OrExpression).Should()
                                                                 .BeAssignableTo<FilterExpression>().And
@@ -35,15 +24,18 @@
                                                                 .HaveProperty<FilterExpression>("Left").And
                                                                 .HaveProperty<FilterExpression>("Right");
 
-        public static IEnumerable<object[]> ArgumentNullExceptionCases
+        public static TheoryData<FilterExpression, FilterExpression> ArgumentNullExceptionCases
         {
             get
             {
-                FilterExpression[] expression = { new StartsWithExpression("ce"), null };
+                FilterExpression[] expression = [new StartsWithExpression("ce"), null];
+                TheoryData<FilterExpression, FilterExpression> cases = [];
 
-                return expression.CrossJoin(expression, (left, right) => (left, right))
+                expression.CrossJoin(expression, (left, right) => (left, right))
                     .Where(tuple => tuple.left == null || tuple.right is null)
-                    .Select(tuple => new object[] { tuple.left, tuple.right });
+                    .ForEach(tuple => cases.Add(tuple.left, tuple.right));
+
+                return cases;
             }
         }
 
@@ -59,95 +51,79 @@
                 .ThrowExactly<ArgumentNullException>("The parameter of the constructor cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<OrExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop3")),
                     false,
                     "comparing two different instances with different property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")),
                     new StringValueExpression("prop1"),
                     false,
                     "comparing to a filter expression that is semantically equivalent"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
-        public void Equals_should_behave_has_expected(OrExpression first, object other, bool expected, string reason)
+        public void Equals_should_behave_has_expected(OrExpression current, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"Current instance : {current}");
+            outputHelper.WriteLine($"Other instance : {other}");
 
             // Act
-            bool actual = first.Equals(other);
+            bool actual = current.Equals(other);
 
             // Assert
             actual.Should()
                 .Be(expected, reason);
         }
 
-        public static IEnumerable<object[]> IsEquivalentToCases
-        {
-            get
+        public static TheoryData<OrExpression, FilterExpression, bool, string> IsEquivalentToCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     true,
                     $"both {nameof(OrExpression)} instances are identical"
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop3")),
                     false,
                     $"the two {nameof(OrExpression)} instances contain different data."
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new StartsWithExpression("prop1"), new StartsWithExpression("prop2")),
                     new OrExpression(new StartsWithExpression("prop2"), new StartsWithExpression("prop1")),
                     true,
                     $"both {nameof(OrExpression)} contains same data but not in the same order"
-                };
-
-                yield return new object[]
+                },
                 {
                      new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")),
                      new StringValueExpression("prop1"),
                      true,
                      "comparing to a filter expression that is semantically equivalent"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(IsEquivalentToCases))]
         public void Implements_IsEquivalentTo_Correctly(OrExpression first, FilterExpression other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.IsEquivalentTo(other);
@@ -157,18 +133,22 @@
                 .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_two_OrExpression_instances_that_left_and_right_expressions_are_both_equals_IsEquivalentTo_should_return_true(FilterExpression left, FilterExpression right)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_two_OrExpression_instances_that_left_and_right_expressions_are_both_equals_IsEquivalentTo_should_return_true(FilterExpression left, FilterExpression right)
         {
             // Arrange
             OrExpression one = new(left, right);
             OrExpression two = new(left: right, right: left);
-            
-            return one.IsEquivalentTo(two).ToProperty();
+
+            // Act
+            bool actual = one.IsEquivalentTo(two);
+
+            // Assert
+            actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OrExpression_and_OneOfExpression_that_contains_the_same_two_expression_then_calling_IsEquivalentTo_with_that_OneOfExpression_should_return_true(FilterExpression left, FilterExpression right)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_OrExpression_and_OneOfExpression_that_contains_the_same_two_expression_then_calling_IsEquivalentTo_with_that_OneOfExpression_should_return_true(FilterExpression left, FilterExpression right)
         {
             // Arrange
             OneOfExpression oneOf = new(left, right);
@@ -178,26 +158,26 @@
             bool actual = or.IsEquivalentTo(oneOf);
 
             // Assert
-            return actual.ToProperty();
+            actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(ConstantValueExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression)
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(filterExpression);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true()
             => Given_FilterExpression_equals_left_and_right_IsEquivalentTo_should_return_true(AsteriskExpression.Instance);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_eq_right_eq_OrExpression_Simplify_should_returns_the_inner_OrExpression(OrExpression filterExpression)
         {
             // Arrange
@@ -220,14 +200,14 @@
             bool actual = filterExpression.IsEquivalentTo(expression);
 
             // Assert
-            actual.Should().Be(true);
+            actual.Should().BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_OrExpression_GetComplexity_should_return_sum_of_left_and_right_complexity(OrExpression orExpression)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_OrExpression_GetComplexity_should_return_sum_of_left_and_right_complexity(OrExpression orExpression)
             => (orExpression.Complexity == orExpression.Left.Complexity + orExpression.Right.Complexity).ToProperty();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_eq_right_Simplify_should_return_left(FilterExpression expected)
         {
             // Arrange
@@ -236,7 +216,7 @@
             // Act
             FilterExpression actual = orExpression.Simplify();
 
-            _outputHelper.WriteLine($"Simplifiied expression : {actual}");
+            outputHelper.WriteLine($"Simplifiied expression : {actual}");
 
             bool isEquivalent = actual.IsEquivalentTo(expected);
 
@@ -245,23 +225,18 @@
                         .BeTrue("the meaning of the expression should remain the same even after being simplified");
         }
 
-        public static IEnumerable<object[]> SimplifyCases
-        {
-            get
+        public static TheoryData<OrExpression, FilterExpression> SimplifyCases
+            => new()
             {
-                yield return new object[]
                 {
                     new OrExpression(new NumericValueExpression("1"), new OrExpression(new NumericValueExpression("1"), new NumericValueExpression("1"))),
                     new NumericValueExpression("1")
-                };
-
-                yield return new object[]
+                },
                 {
                     new OrExpression(new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")), new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1"))),
                     new StringValueExpression("prop1")
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(SimplifyCases))]
@@ -275,7 +250,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_two_OrExpression_instances_one_and_two_where_oneU002Eleft_eq_twoU002Eright_and_oneU002Eright_eq_twoU002Eleft_IsEquivalentTo_should_return_true(FilterExpression first, FilterExpression second)
         {
             // Arrange
@@ -290,12 +265,12 @@
                   .BeTrue();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_reflexive(OrExpression or)
             => or.IsEquivalentTo(or).Should()
                                     .BeTrue();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_symetric(OrExpression or)
         {
             // Arrange
@@ -310,7 +285,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalent_should_be_transitive(OrExpression or)
         {
             // Arrange
@@ -326,7 +301,7 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_right_and_left_are_OrExpression_Constructor_should_wrap_right_and_left_inside_a_GroupExpression_instance(NonNull<BinaryFilterExpression> left,
                                                                                                                                    NonNull<BinaryFilterExpression> right)
         {
@@ -341,7 +316,7 @@
                    .BeOfType<GroupExpression>($"Right instance is a '{nameof(BinaryFilterExpression)}'");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_is_ConstantValueExpression_and_right_is_ConstantValueExpression_Constructor_should_leave_right_and_left_untouched(NonNull<ConstantValueExpression> left,
                                                                                                                                                  NonNull<ConstantValueExpression> right)
         {
@@ -356,16 +331,16 @@
                     .NotBeOfType<GroupExpression>($"Left instance is a '{nameof(ConstantValueExpression)}'");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<OrExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_commutative(NonNull<OrExpression> first, FilterExpression second)
+            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<OrExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_reflexive(NonNull<OrExpression> expression)
+            => expression.Item.Should().Be(expression.Item);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<OrExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_symetric(NonNull<OrExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }
 }

@@ -1,50 +1,42 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using FluentAssertions;
-    using FsCheck.Xunit;
-    using FsCheck;
-
     using System;
-    using System.Collections.Generic;
+
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+
+    using FluentAssertions;
+
+    using FsCheck;
+    using FsCheck.Xunit;
+
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
     [UnitTest]
     [Feature(nameof(AsteriskExpression))]
-    public class AsteriskExpressionTests
+    public class AsteriskExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public AsteriskExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(AsteriskExpression).Should()
             .BeAssignableTo<FilterExpression>().And
             .Implement<IEquatable<AsteriskExpression>>().And
             .HaveDefaultConstructor();
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<AsteriskExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[] { AsteriskExpression.Instance, null, false, "Comparing to null" };
-                yield return new object[] { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" };
-            }
-        }
+                { AsteriskExpression.Instance, null, false, "Comparing to null" },
+                { AsteriskExpression.Instance, AsteriskExpression.Instance, true, "Comparing to null" }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
         public void TestEquals(AsteriskExpression first, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
@@ -53,22 +45,20 @@
             // Assert
             actual.Should()
                 .Be(expected, reason);
-            if (expected)
+
+            _ = expected switch
             {
-                actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason);
-            }
-            else
-            {
-                actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason);
-            }
+                true => actualHashCode.Should()
+                    .Be(other?.GetHashCode(), reason),
+                _ => actualHashCode.Should()
+                    .NotBe(other?.GetHashCode(), reason)
+            };
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpression)
         {
             // Arrange
@@ -81,7 +71,7 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_ConstantValueExpresion_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
         {
             // Arrange

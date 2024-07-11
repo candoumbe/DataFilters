@@ -1,30 +1,18 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+    using System.Linq;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
-
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
     using Xunit;
     using Xunit.Abstractions;
 
-    public class BracketExpressionTests
+    public class BracketExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public BracketExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(BracketExpression).Should()
             .BeAssignableTo<FilterExpression>().And
@@ -42,27 +30,22 @@
                 .ThrowExactly<ArgumentNullException>($"{nameof(BracketExpression)}.{nameof(BracketExpression.Values)} cannot be null");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<BracketExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     true,
                     $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
-                };
-
-                yield return new object[]
+                },
                 {
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     new BracketExpression(new ConstantBracketValue("aBc")),
                     true,
                     $"Two {nameof(BracketExpression)} instances built with inputs that are equals"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -76,8 +59,7 @@
                   .Be(expected, reason);
         }
 
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Two_BracketExpression_instances_built_with_different_inputs_should_not_be_equal(NonEmptyArray<BracketValue> one,
                                                                                                     NonEmptyArray<BracketValue> two)
         {
@@ -85,10 +67,10 @@
             BracketExpression first = new(one.Item);
             BracketExpression second = new(two.Item);
 
-            first.Equals(second).ToProperty().When(one.Item.Equals(two.Item)).VerboseCheck(_outputHelper);
+            first.Equals(second).ToProperty().When(one.Item.Equals(two.Item)).VerboseCheck(outputHelper);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Complexity_should_depends_on_input(NonEmptyArray<BracketValue> values)
         {
             // Arrange
@@ -103,11 +85,9 @@
             complexity.Should().Be(expected);
         }
 
-        public static IEnumerable<object[]> ComplexityCases
-        {
-            get
+        public static TheoryData<BracketExpression, double> ComplexityCases
+            => new()
             {
-                yield return new object[]
                 {
                     new BracketExpression
                     (
@@ -115,9 +95,8 @@
                         new RangeBracketValue('a', 'c')
                     ),
                     new ConstantBracketValue("aa").Complexity * new RangeBracketValue('a', 'c').Complexity
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(ComplexityCases))]
@@ -131,13 +110,13 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] {typeof(ExpressionsGenerators)})]
-        public Property Given_BracketRangeValue_IsEquivalentTo_should_be_equivalent_to_many_OrExpression_where_each_expression_contains_one_charater(NonNull<RangeBracketValue> rangeBracketValue)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_BracketRangeValue_IsEquivalentTo_should_be_equivalent_to_many_OrExpression_where_each_expression_contains_one_charater(NonNull<RangeBracketValue> rangeBracketValue)
         {
             // Arrange
             BracketExpression rangeBracketExpression = new(rangeBracketValue.Item);
 
-            OneOfExpression oneOf = new (Enumerable.Range(rangeBracketValue.Item.Start,
+            OneOfExpression oneOf = new(Enumerable.Range(rangeBracketValue.Item.Start,
                                                           rangeBracketValue.Item.End - rangeBracketValue.Item.Start + 1)
                                                    .Select(ascii => new StringValueExpression(((char)ascii).ToString()))
                                                    .ToArray());
@@ -146,7 +125,7 @@
             bool actual = rangeBracketExpression.IsEquivalentTo(oneOf);
 
             // Assert
-            return actual.ToProperty().Label($"Range expression : {rangeBracketValue.Item}");
+            actual.Should().BeTrue($"Range expression : {rangeBracketValue.Item}");
         }
     }
 }

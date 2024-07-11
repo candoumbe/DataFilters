@@ -1,29 +1,19 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
+    using System;
+    using DataFilters.Grammar.Parsing;
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
-
     using FluentAssertions;
-
     using FsCheck;
     using FsCheck.Fluent;
     using FsCheck.Xunit;
-
-    using System;
-    using System.Collections.Generic;
-
+    using Superpower;
+    using Superpower.Model;
     using Xunit;
-    using Xunit.Abstractions;
 
     public class NotExpressionTests
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public NotExpressionTests(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
         [Fact]
         public void IsFilterExpression() => typeof(NotExpression).Should()
                                                                  .BeAssignableTo<FilterExpression>().And
@@ -35,38 +25,64 @@
         public void Ctor_should_throws_ArgumentNullException_when_argument_is_null()
         {
             // Act
-            Action action = () => new NotExpression(null);
+            Action action = () => _ = new NotExpression(null);
 
             // Assert
             action.Should()
                 .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(NotExpression)}'s constructor cannot be null");
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NotExpression_GetComplexity_should_return_same_complexity_as_embedded_expression(NonNull<NotExpression> notExpression)
-            => (notExpression.Item.Complexity == notExpression.Item.Expression.Complexity).ToProperty();
+        public static TheoryData<string, NotExpression> ParsingCases
+            => new()
+            {
+                { "!!5", new NotExpression(new NotExpression(new StringValueExpression("5"))) }
+            };
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NotExpression_Equals_should_be_reflexive(NonNull<NotExpression> notExpression)
-            => notExpression.Item.Equals(notExpression.Item).ToProperty();
+        [Theory]
+        [MemberData(nameof(ParsingCases))]
+        public void Should_parse_to_NotExpression(string input, NotExpression expected)
+        {
+            // Arrange
+            FilterTokenizer tokenizer = new();
+            TokenList<FilterToken> tokens = tokenizer.Tokenize(input);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_NotExpression_and_a_filter_expression_that_is_not_null_Equals_should_be_symetric(NonNull<NotExpression> notExpression, NonNull<FilterExpression> filterExpression)
-            => (notExpression.Item.Equals(filterExpression.Item) == filterExpression.Item.Equals(notExpression.Item)).ToProperty();
+            // Act
+            NotExpression actual = FilterTokenParser.Not.Parse(tokens);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_two_instances_holding_same_Expressions_Equals_should_return_true(NonNull<FilterExpression> expression)
+            // Assert
+            actual.Should().Be(expected);
+        }
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_NotExpression_GetComplexity_should_return_same_complexity_as_embedded_expression(NonNull<NotExpression> notExpression)
+            => notExpression.Item.Complexity.Should().Be(notExpression.Item.Expression.Complexity);
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_NotExpression_Equals_should_be_reflexive(NonNull<NotExpression> notExpression)
+            => notExpression.Item.Should().Be(notExpression.Item);
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_NotExpression_and_a_filter_expression_that_is_not_null_Equals_should_be_symetric(NonNull<NotExpression> notExpression, NonNull<FilterExpression> filterExpression)
+            => notExpression.Item.Equals(filterExpression.Item).Should().Be(filterExpression.Item.Equals(notExpression.Item));
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_two_instances_holding_same_Expressions_Equals_should_return_true(NonNull<FilterExpression> expression)
         {
             // Arrange
             NotExpression first = new(expression.Item);
             NotExpression other = new(expression.Item);
 
             // Act
-            return first.Equals(other)
-                        .And(first.GetHashCode() == other.GetHashCode());
+            bool actual = first.Equals(other);
+            int firstHashCode = first.GetHashCode();
+            int otherHashCode = other.GetHashCode();
+
+            // Assert
+            actual.Should().BeTrue();
+            firstHashCode.Should().Be(otherHashCode);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_argument_is_AndExpression_Constructor_should_wrap_it_inside_a_GroupExpression(NonNull<BinaryFilterExpression> expression)
         {
             // Act
@@ -77,11 +93,9 @@
                           .BeOfType<GroupExpression>("the parameter is a BinaryFilterExpression");
         }
 
-        public static IEnumerable<object[]> EscapedParseableStringCases
-        {
-            get
+        public static TheoryData<NotExpression, string> EscapedParseableStringCases
+            => new()
             {
-                yield return new object[]
                 {
                     new NotExpression(
                         new OrExpression(new DateTimeExpression(new TimeExpression(2, 53, 39, 827)),
@@ -91,9 +105,7 @@
                         ),
 
                     "!(T02:53:39.827|1901-06-17T09:13:44.17Z)"
-                };
-
-                yield return new object[]
+                },
                 {
                     new NotExpression(
                        new OrExpression(new TimeExpression(2, 53, 39, 827),
@@ -103,9 +115,8 @@
                         ),
 
                     "!(02:53:39.827|1901-06-17T09:13:44.17Z)"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EscapedParseableStringCases))]
@@ -119,11 +130,9 @@
                   .Be(expected);
         }
 
-                public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<NotExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                      new NotExpression(
                         new OrExpression(new DateTimeExpression(new TimeExpression(2, 53, 39, 827)),
@@ -139,9 +148,14 @@
                         ),
                     true,
                     $"{nameof(DateTimeExpression.Date)} and {nameof(DateTimeExpression.Date)} are null and TimeExpression are equal"
-                };
-            }
-        }
+                },
+                {
+                    new NotExpression(new NotExpression(new NumericValueExpression("5"))),
+                    new NotExpression(new NotExpression(new NumericValueExpression("5"))),
+                    true,
+                    $"Two {nameof(NotExpression)} instances that contains equal inner expressions"
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
@@ -155,17 +169,31 @@
                   .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<NotExpression> first, FilterExpression second)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_commutative(NonNull<NotExpression> first, FilterExpression second)
             => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<NotExpression> expression)
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_reflexive(NonNull<NotExpression> expression)
             => expression.Item.Equals(expression.Item).ToProperty();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<NotExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_symetric(NonNull<NotExpression> expression, NonNull<FilterExpression> otherExpression)
+            => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_NotExpression_Simplify_should_return_the_expected_expression(FilterExpression innerExpression)
+        {
+            // Act
+            NotExpression notExpression = new(innerExpression);
+            double complexityBeforeSimplification = notExpression.Complexity;
+
+            // Act
+            FilterExpression simplifiedExpression = notExpression.Simplify();
+
+            // Assert
+            notExpression.IsEquivalentTo(simplifiedExpression);
+        }
 
     }
 }

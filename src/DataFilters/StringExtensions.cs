@@ -29,10 +29,13 @@
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
     using System.Runtime.InteropServices;
 
-#if NET6_0_OR_GREATER
+#if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
-
     using System.Collections.Concurrent;
+#endif
+
+#if NET7_0_OR_GREATER
+    using System.Diagnostics;
 #endif
 #endif
     /// <summary>
@@ -41,8 +44,8 @@
     public static class StringExtensions
     {
         private static char Separator => ',';
-#if NET6_0_OR_GREATER
-        private readonly static ConcurrentDictionary<bool, byte> HackZone = new ();
+#if NET6_0
+        private readonly static ConcurrentDictionary<bool, byte> HackZone = new();
 #endif
 
         /// <summary>
@@ -156,10 +159,10 @@
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
 #if STRING_SEGMENT
         public static IFilter ToFilter<T>(this StringSegment queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
-            => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
+            => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
 #else
         public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
-           => ToFilter<T>(queryString, new FilterOptions () { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy});
+           => ToFilter<T>(queryString, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
 #endif
 
         /// <summary>
@@ -232,7 +235,7 @@
                         filter = ConvertExpressionToFilter(propInfo, group.Expression, tc);
                         break;
                     case OneOfExpression oneOf:
-                        FilterExpression[] possibleValues = oneOf.Values.ToArray();
+                        FilterExpression[] possibleValues = [.. oneOf.Values];
                         if (oneOf.Values.Exactly(1))
                         {
                             filter = ConvertExpressionToFilter(propInfo, possibleValues[0], tc);
@@ -262,7 +265,11 @@
                                 DateTimeExpression { Date: not null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"), input.Included),
                                 DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (new StringValueExpression(dateTime.EscapedParseableString), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
+#if NET7_0_OR_GREATER
+                                _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
+#else
                                 _ => throw new NotSupportedException($"Unsupported boundary type {input.Expression.GetType()}")
+#endif
                             };
 
                         (ConstantValueExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);
@@ -321,7 +328,7 @@
                 TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
 
                 (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
-#if NET6_0_OR_GREATER
+#if NET6_0
                 if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
                 {
                     TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));

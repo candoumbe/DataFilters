@@ -1,12 +1,10 @@
 ﻿namespace DataFilters.UnitTests;
 
-using DataFilters.Casing;
-
-using FsCheck;
-using FsCheck.Fluent;
-
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using DataFilters.Casing;
+using FsCheck;
+using FsCheck.Fluent;
 
 // "Copyright (c) Cyrille NDOUMBE.
 // Licenced under Apache, version 2.0"

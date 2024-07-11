@@ -77,7 +77,7 @@
         public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
             TimeExpression time => Equals(time),
-            DateTimeExpression { Date: null, Time: var time, Offset: null} => Equals(time),
+            DateTimeExpression { Date: null, Time: var time, Offset: null } => Equals(time),
             _ => Equals((other as ISimplifiable)?.Simplify() ?? other)
         };
 

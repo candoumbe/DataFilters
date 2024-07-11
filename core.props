@@ -5,8 +5,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/candoumbe/DataFilters</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
-    <PublishUrl>true</PublishUrl>
+    <PublishUrl>$(RepositoryUrl)</PublishUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <NoWarn>$(NoWarn);NU1608</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +18,7 @@
   <PropertyGroup Condition="'$(IsTestProject)' == 'false'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PublishRepositoryUrl>$(RepositoryUrl)</PublishRepositoryUrl>
     <!-- Embed source files that are not tracked by the source control manager in the PDB -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
@@ -31,7 +32,7 @@
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
       </PropertyGroup>
       <ItemGroup Condition="'$(IsTestProject)' == 'false'">
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" Condition="'$(GITHUB_ACTIONS)' == 'true'"/>
       </ItemGroup>
     </When>
   </Choose>
@@ -40,26 +41,25 @@
   <Choose>
     <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="10.4.0" />
-        <PackageReference Include="Ultimately" Version="2.1.1" />
+        <PackageReference Include="FluentValidation" Version="11.9.2" />
+        <PackageReference Include="Ultimately" Version="3.0.0" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="8.6.3" />
+        <PackageReference Include="FluentValidation" Version="11.9.2" />
         <PackageReference Include="Optional" Version="4.0.0"/>
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="Candoumbe.MiscUtilities" Version="0.8.2"/>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.1.1">
+    <PackageReference Include="Roslynator.Analyzers" Version="4.12.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
-    <PackageReference Include="Ardalis.GuardClauses" Version="4.0.1" />
+    <PackageReference Include="Ardalis.GuardClauses" Version="4.6.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(MSBuildProjectName)' != '_build'">
       <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

@@ -5,35 +5,25 @@ using static Newtonsoft.Json.JsonConvert;
 
 namespace DataFilters.UnitTests
 {
-    using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-
-    using FsCheck.Xunit;
-
-    using FsCheck;
-
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Schema;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
+    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json.Schema;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
-
     using static DataFilters.FilterLogic;
     using static DataFilters.FilterOperator;
 
     [UnitTest]
-    public class MultiFilterTests
+    public class MultiFilterTests(ITestOutputHelper output)
     {
-        public MultiFilterTests(ITestOutputHelper output) => _output = output;
-
-        private readonly ITestOutputHelper _output;
-
         public class Person
         {
             public string Firstname { get; set; }
@@ -43,11 +33,9 @@ using FluentAssertions;
             public DateTime BirthDate { get; set; }
         }
 
-        public static IEnumerable<object[]> MultiFilterToJsonCases
-        {
-            get
+        public static TheoryData<MultiFilter, Expression<Func<string, bool>>> MultiFilterToJsonCases
+            => new()
             {
-                yield return new object[]
                 {
                     new MultiFilter  {
                         Logic = Or,
@@ -56,7 +44,7 @@ using FluentAssertions;
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Robin")
                         }
                     },
-                    (Expression<Func<string, bool>>)(json =>
+                    json =>
                         JObject.Parse(json).IsValid(MultiFilter.Schema)
                         && JObject.Parse(json).Properties().Exactly(2)
 
@@ -70,10 +58,8 @@ using FluentAssertions;
                         && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
                         && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
-                    )
-                };
 
-                yield return new object[]
+                },
                 {
                     new MultiFilter  {
                         Filters = new [] {
@@ -81,7 +67,7 @@ using FluentAssertions;
                             new Filter (field : "Nickname", @operator : EqualTo, value : "Robin")
                         }
                     },
-                    (Expression<Func<string, bool>>)(json =>
+                    json =>
                         JObject.Parse(json).IsValid(MultiFilter.Schema)
                         && JObject.Parse(json).Properties().Count() == 2
 
@@ -95,16 +81,14 @@ using FluentAssertions;
                         && "eq".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.OperatorJsonPropertyName])
                         && "Robin".Equals((string)JObject.Parse(json)[MultiFilter.FiltersJsonPropertyName][1][Filter.ValueJsonPropertyName])
 
-                    )
-                };
-            }
-        }
 
-        public static IEnumerable<object[]> CompositeFilterSchemaTestCases
-        {
-            get
+                }
+            };
+
+
+        public static TheoryData<string, bool> CompositeFilterSchemaTestCases
+            => new()
             {
-                yield return new object[]
                 {
                     "{" +
                         $"{MultiFilter.LogicJsonPropertyName} : 'or'," +
@@ -114,9 +98,7 @@ using FluentAssertions;
                         "]" +
                     "}",
                     true
-                };
-
-                yield return new object[]
+                },
                 {
                     "{" +
                         $"{MultiFilter.LogicJsonPropertyName} : 'and'," +
@@ -126,9 +108,7 @@ using FluentAssertions;
                         "]" +
                     "}",
                     true
-                };
-
-                yield return new object[]
+                },
                 {
                     "{" +
                         $"{MultiFilter.FiltersJsonPropertyName}: [" +
@@ -137,9 +117,7 @@ using FluentAssertions;
                         "]" +
                     "}",
                     true
-                };
-
-                yield return new object[]
+                },
                 {
                     "{" +
                         $"{MultiFilter.FiltersJsonPropertyName}: [" +
@@ -147,86 +125,83 @@ using FluentAssertions;
                         "]" +
                     "}",
                     false
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(MultiFilterToJsonCases))]
         public void MultiFilterToJson(MultiFilter filter, Expression<Func<string, bool>> jsonMatcher)
         {
-            _output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
+            output.WriteLine($"Testing : {filter}{Environment.NewLine} against {Environment.NewLine} {jsonMatcher} ");
 
             // Act
             string json = filter.ToJson();
 
-            _output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(json)} : {json}");
 
             // Assert
             json.Should().Match(jsonMatcher);
         }
 
-        public static IEnumerable<object[]> EqualsCases
+        public static TheoryData<MultiFilter, object, bool, string> EqualsCases
         {
             get
             {
-                yield return new object[]
+                TheoryData<MultiFilter, object, bool, string> cases = new()
                 {
-                    new MultiFilter
                     {
-                        Logic = And,
-                        Filters = new IFilter[]{
-                            new Filter("property", EqualTo, "value"),
-                            new Filter("property", EqualTo, "value"),
-                        }
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]{
+                                new Filter("property", EqualTo, "value"),
+                                new Filter("property", EqualTo, "value"),
+                            }
+                        },
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]{
+                                new Filter("property", EqualTo, "value"),
+                                new Filter("property", EqualTo, "value"),
+                            }
+                        },
+                        true,
+                        $"Two instances of {nameof(MultiFilter)} contains same ${nameof(MultiFilter.Filters)} in same order"
                     },
-                    new MultiFilter
                     {
-                        Logic = And,
-                        Filters = new IFilter[]{
-                            new Filter("property", EqualTo, "value"),
-                            new Filter("property", EqualTo, "value"),
-                        }
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]{
+                                new Filter("property", EqualTo, "value"),
+                                new Filter("property", EqualTo, "value"),
+                            }
+                        },
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]{
+                                new Filter("property", NotEqualTo, "value"),
+                                new Filter("property", EqualTo, "value"),
+                            }
+                        },
+                        false,
+                        "the second instance contains one filter that has a different operator"
                     },
-                    true,
-                    $"Two instances of {nameof(MultiFilter)} contains same ${nameof(MultiFilter.Filters)} in same order"
-                };
-
-                yield return new object[]
-                {
-                    new MultiFilter
                     {
-                        Logic = And,
-                        Filters = new IFilter[]{
-                            new Filter("property", EqualTo, "value"),
-                            new Filter("property", EqualTo, "value"),
-                        }
-                    },
-                    new MultiFilter
-                    {
-                        Logic = And,
-                        Filters = new IFilter[]{
-                            new Filter("property", NotEqualTo, "value"),
-                            new Filter("property", EqualTo, "value"),
-                        }
-                    },
-                    false,
-                    "the second instance contains one filter that has a different operator"
-                };
-
-                yield return new object[]
-                {
-                    new MultiFilter
-                    {
-                        Logic = And,
-                        Filters = new IFilter[]{
-                            new Filter("property", EqualTo, "value"),
-                            new Filter("property", EqualTo, "value"),
-                        }
-                    },
-                    null,
-                    false,
-                    "comparing to null"
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters = new IFilter[]{
+                                new Filter("property", EqualTo, "value"),
+                                new Filter("property", EqualTo, "value"),
+                            }
+                        },
+                        null,
+                        false,
+                        "comparing to null"
+                    }
                 };
 
                 {
@@ -238,18 +213,17 @@ using FluentAssertions;
                             new Filter("property", EqualTo, "value"),
                         }
                     };
-                    yield return new object[]
-                    {
+
+                    cases.Add
+                    (
                         filter,
                         filter,
                         true,
                         "comparing a too itself must always returns true"
-                    };
+                    );
                 }
 
-                {
-                    yield return new object[]
-                    {
+                cases.Add(
                         new MultiFilter
                         {
                             Logic = And,
@@ -286,8 +260,9 @@ using FluentAssertions;
                         },
                         true,
                         "Two distinct instances of multifilters that holds same data in same order"
-                    };
-                }
+                    );
+
+                return cases;
             }
         }
 
@@ -295,8 +270,8 @@ using FluentAssertions;
         [MemberData(nameof(EqualsCases))]
         public void CompositeFilterImplementsEquatableProperly(MultiFilter first, object second, bool expectedResult, string reason)
         {
-            _output.WriteLine($"first : {first}");
-            _output.WriteLine($"second : {second}");
+            output.WriteLine($"first : {first}");
+            output.WriteLine($"second : {second}");
 
             // Act
             bool result = first.Equals(second);
@@ -310,7 +285,7 @@ using FluentAssertions;
         [MemberData(nameof(CompositeFilterSchemaTestCases))]
         public void CompositeFilterSchema(string json, bool expectedValidity)
         {
-            _output.WriteLine($"{nameof(json)} : {json}");
+            output.WriteLine($"{nameof(json)} : {json}");
 
             // Arrange
             JSchema schema = MultiFilter.Schema;
@@ -322,7 +297,7 @@ using FluentAssertions;
             isValid.Should().Be(expectedValidity);
         }
 
-        [Property(Arbitrary = new[] { typeof(FilterGenerators) })]
+        [Property(Arbitrary = [typeof(FilterGenerators)])]
         public void Given_filter_instance_Negate_should_work_as_expected(FilterLogic logic, NonEmptyArray<IFilter> source)
         {
             // Arrange

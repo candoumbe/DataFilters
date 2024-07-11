@@ -1,26 +1,21 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Parsing
 {
-    using DataFilters.Grammar.Parsing;
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-
-    using FluentAssertions;
-    using FluentAssertions.Execution;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-
-    using Superpower;
-    using Superpower.Model;
-
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
+    using FsCheck;
+    using FsCheck.Fluent;
+    using FsCheck.Xunit;
+    using Superpower;
+    using Superpower.Model;
     using Xunit;
     using Xunit.Abstractions;
     using Xunit.Categories;
@@ -68,56 +63,48 @@
                                                            .HaveProperty<TokenListParser<FilterToken, GuidValueExpression>>("GlobalUniqueIdentifier").And
                                                            .HaveProperty<TokenListParser<FilterToken, FilterExpression>>("Or");
 
-        public static IEnumerable<object[]> AlphaNumericCases
-        {
-            get
-            {
-                yield return new object[]
+        public static TheoryData<string, ConstantValueExpression> AlphaNumericCases
+            => new()
                 {
-                    "Bruce",
-                    new StringValueExpression("Bruce")
-                };
+                    {
+                        "Bruce",
+                        new StringValueExpression("Bruce")
+                    },
 
-                yield return new object[]
-                {
-                    @"Vandal\*",
-                    new StringValueExpression("Vandal*")
-                };
+                    {
+                        @"Vandal\*",
+                        new StringValueExpression("Vandal*")
+                    },
 
-                yield return new object[]
-                {
-                    @"Van\*dal",
-                    new StringValueExpression("Van*dal")
-                };
-                yield return new object[]
-                {
-                    "1Bruce",
-                    new StringValueExpression("1Bruce")
-                };
+                    {
+                        @"Van\*dal",
+                        new StringValueExpression("Van*dal")
+                    },
 
-                yield return new object[]
-                {
-                    @"0\ \,i#y",
-                    new StringValueExpression("0 ,i#y")
-                };
+                    {
+                        "1Bruce",
+                        new StringValueExpression("1Bruce")
+                    },
 
-                yield return new object[]
-                {
-                    @"E
+                    {
+                        @"0\ \,i#y",
+                        new StringValueExpression("0 ,i#y")
+                    },
+
+                    {
+                        @"E
 I\&_Oj
 \.",
-                    new StringValueExpression(@"E
+                        new StringValueExpression(@"E
 I&_Oj
 .")
-                };
+                    },
 
-                yield return new object[]
-                {
-                    "39.95173047301258862",
-                    new NumericValueExpression("39.95173047301258862")
+                    {
+                        "39.95173047301258862",
+                        new NumericValueExpression("39.95173047301258862")
+                    },
                 };
-            }
-        }
 
         [Theory]
         [MemberData(nameof(AlphaNumericCases))]
@@ -188,7 +175,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_StartsWith(StartsWithExpression expected)
         {
             // Arrange
@@ -203,7 +190,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_EndsWith(EndsWithExpression expected)
         {
             // Arrange
@@ -221,38 +208,29 @@ I&_Oj
         private static string StringifyTokens(TokenList<FilterToken> tokens)
             => tokens.Select(token => new { token.Kind, Value = token.ToStringValue() }).Jsonify();
 
-        public static IEnumerable<object[]> ContainsCases
+        public static TheoryData<string, ContainsExpression> ContainsCases
         {
             get
             {
-                yield return new object[]
+                TheoryData<string, ContainsExpression> cases = new()
                 {
-                    "*bat*",
-                    new ContainsExpression("bat")
+                    { "*bat*", new ContainsExpression("bat")},
+                    { @"*bat\*man*", new ContainsExpression("bat*man")},
+                    {"*d3aa022d-ec52-47aa-be13-6823c478c60a*", new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")}
                 };
 
-                yield return new object[]
-                {
-                    @"*bat\*man*",
-                    new ContainsExpression("bat*man")
-                };
-
-                yield return new object[]
-                {
-                    "*d3aa022d-ec52-47aa-be13-6823c478c60a*",
-                    new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")
-                };
-
-                string[] punctuations = { ".", "-", ":", "_" };
+                string[] punctuations = [".", "-", ":", "_"];
 
                 foreach (string punctuation in punctuations)
                 {
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         $"*{punctuation}*",
                         new ContainsExpression(punctuation)
-                    };
+                    );
                 }
+
+                return cases;
             }
         }
 
@@ -271,29 +249,21 @@ I&_Oj
             AssertThatShould_parse(expression, expectedContains);
         }
 
-        public static IEnumerable<object[]> OrExpressionCases
-        {
-            get
+        public static TheoryData<string, OrExpression> OrExpressionCases
+            => new()
             {
-                yield return new object[]
                 {
                     "Bruce|bat*",
                     new OrExpression(new StringValueExpression("Bruce"), new StartsWithExpression("bat"))
-                };
-
-                yield return new object[]
+                },
                 {
                     "Bruce|Wayne",
                     new OrExpression(new StringValueExpression("Bruce"), new StringValueExpression("Wayne"))
-                };
-
-                yield return new object[]
+                },
                 {
                     "Bru*|Di*",
                     new OrExpression(new StartsWithExpression("Bru"), new StartsWithExpression("Di"))
-                };
-
-                yield return new object[]
+                },
                 {
                     "!(Bat*|Sup*)|!*man",
                     new OrExpression(
@@ -304,17 +274,14 @@ I&_Oj
                             ),
                         right: new NotExpression(new EndsWithExpression("man"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Bat|Wonder|Sup",
                     new OrExpression(new OrExpression(new StringValueExpression("Bat"),
                                                       new StringValueExpression("Wonder")),
                                     new StringValueExpression("Sup"))
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(OrExpressionCases))]
@@ -331,17 +298,13 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        public static IEnumerable<object[]> AndExpressionCases
-        {
-            get
+        public static TheoryData<string, AndExpression> AndExpressionCases
+            => new()
             {
-                yield return new object[]
                 {
                     "bat*,man*",
                     new AndExpression(new StartsWithExpression("bat"), new StartsWithExpression("man"))
-                };
-
-                yield return new object[]
+                },
                 {
                     "!(Bat*|Sup*),!*man",
                     new AndExpression(
@@ -352,15 +315,12 @@ I&_Oj
                             ),
                         right: new NotExpression(new EndsWithExpression("man"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "bat*man",
                     new AndExpression(new StartsWithExpression("bat"), new EndsWithExpression("man"))
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(AndExpressionCases))]
@@ -377,11 +337,12 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
-            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            _outputHelper.WriteLine($"source : '{expected}'");
+            _outputHelper.WriteLine($"input (escaped parseable string): '{expected.EscapedParseableString}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
             _outputHelper.WriteLine($"Tokens : '{StringifyTokens(tokens)}'");
 
@@ -392,11 +353,9 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        public static IEnumerable<object[]> NotParsingCases
-        {
-            get
+        public static TheoryData<string, NotExpression> NotParsingCases
+            => new()
             {
-                yield return new object[]
                 {
                     "!!!!!(w%A*@,2088-08-10)",
                     new NotExpression(
@@ -416,18 +375,15 @@ I&_Oj
                                     )
                                 )
                             )
-                };
-
-                yield return new object[]
+                },
                 {
                     "!![50 TO 50]",
                     new NotExpression
                         (new NotExpression(
                                 new IntervalExpression(min: new (new NumericValueExpression("50"), true),
                                                                                new(new NumericValueExpression("60"), true))))
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(NotParsingCases))]
@@ -444,115 +400,98 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        public static IEnumerable<object[]> OneOfExpressionCases
-        {
-            get
+        public static TheoryData<string, OneOfExpression> OneOfExpressionCases
+            => new()
             {
-                yield return new object[]
                 {
                     "[Bb]",
                     new OneOfExpression(new StringValueExpression("B"), new StringValueExpression("b"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "[Bb]ruce",
                     new OneOfExpression(new StringValueExpression("Bruce"), new StringValueExpression("bruce"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "[Bb]at*",
                     new OneOfExpression(new StartsWithExpression("Bat"), new StartsWithExpression("bat"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "Ma*[Nn]",
                     new OneOfExpression(
                         new AndExpression(new StartsWithExpression("Ma"), new EndsWithExpression("N")),
                         new AndExpression(new StartsWithExpression("Ma"), new EndsWithExpression("n"))
                     )
-                };
+                },
 
-                yield return new object[]
                 {
                     "cat[Ww]oman",
                     new OneOfExpression(new StringValueExpression("catWoman"), new StringValueExpression("catwoman"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "*Br[Uu]",
                     new OneOfExpression(new EndsWithExpression("BrU"), new EndsWithExpression("Bru"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "Bo[Bb]",
                     new OneOfExpression(new StringValueExpression("BoB"), new StringValueExpression("Bob"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "[Bb]*ob",
                     new OneOfExpression(new AndExpression(new StartsWithExpression("B"), new EndsWithExpression("ob")),
                                         new AndExpression(new StartsWithExpression("b"), new EndsWithExpression("ob")))
-                };
+                },
 
-                yield return new object[]
                 {
                     "*[Mm]an",
                     new OneOfExpression(new EndsWithExpression("Man"), new EndsWithExpression("man"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "*[Mm]",
                     new OneOfExpression(new EndsWithExpression("M"), new EndsWithExpression("m"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "[a-z]",
                     new OneOfExpression(GetCharacters('a', 'z').Select(chr => new StringValueExpression(chr.ToString())).ToArray())
-                };
+                },
 
-                yield return new object[]
                 {
                     "[a-zA-Z0-9]",
                     new OneOfExpression(GetCharacters('a', 'z').Concat(GetCharacters('A', 'Z'))
                                                                .Concat(GetCharacters('0', '9'))
                                                                .Select(chr => new StringValueExpression(chr.ToString()))
                                                                .ToArray())
-                };
+                },
 
-                yield return new object[]
                 {
                     "{Bat|Sup|Wonder}*",
                     new OneOfExpression(new StartsWithExpression("Bat"),
                                         new StartsWithExpression("Sup"),
                                         new StartsWithExpression("Wonder"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "[ab][cd]",
                     new OneOfExpression(new StringValueExpression("ac"),
                                         new StringValueExpression("ad"),
                                         new StringValueExpression("bc"),
                                         new StringValueExpression("bd"))
-                };
+                },
 
-                yield return new object[]
                 {
                     "{Bat|Sup|Wonder}",
                     new OneOfExpression(new StringValueExpression("Bat"),
                                         new StringValueExpression("Sup"),
                                         new StringValueExpression("Wonder"))
-                };
-            }
-        }
+                }
+            };
 
         private static IEnumerable<char> GetCharacters(char regexStart, char regexEnd)
             => Enumerable.Range(regexStart, regexEnd - regexStart + 1)
@@ -573,7 +512,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_bracket_expression_OneOf_can_parse_input(NonNull<BracketValue> bracketExpression)
         {
             // Arrange
@@ -597,7 +536,7 @@ I&_Oj
             expression.IsEquivalentTo(expected).ToProperty();
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_Interval(CultureInfo culture, IntervalExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>
@@ -615,35 +554,38 @@ I&_Oj
             });
         }
 
-        public static IEnumerable<object[]> IntervalCases
+        public static TheoryData<string, string, IntervalExpression> IntervalCases
         {
             get
             {
-                string[] cultures = { "fr-FR", "en-GB", "en-US" };
+                TheoryData<string, string, IntervalExpression> cases = [];
+                string[] cultures = ["fr-FR", "en-GB", "en-US"];
                 foreach (string culture in cultures)
                 {
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         culture,
                         "[5 TO 5[",
-                        new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true) , new BoundaryExpression(new NumericValueExpression("5"), false))
-                    };
+                        new IntervalExpression(new BoundaryExpression(new NumericValueExpression("5"), true), new BoundaryExpression(new NumericValueExpression("5"), false))
+                    );
 
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         culture,
                         "[1993-08-04T00:25:05.155Z TO 1908-06-08T03:18:46.745-09:50[",
-                        new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new (1993, 8, 4), new(0, 25, 5, 155), OffsetExpression.Zero), true),
-                                               new BoundaryExpression(new DateTimeExpression(new (1908, 6, 8), new(3, 18, 46,745), new(NumericSign.Minus, 9, 50)), false))
-                    };
+                        new IntervalExpression(new BoundaryExpression(new DateTimeExpression(new(1993, 8, 4), new(0, 25, 5, 155), OffsetExpression.Zero), true),
+                                               new BoundaryExpression(new DateTimeExpression(new(1908, 6, 8), new(3, 18, 46, 745), new(NumericSign.Minus, 9, 50)), false))
+                    );
 
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         culture,
                         "]* TO 1963-06-03T15:53:44.609Z]",
-                        new IntervalExpression(max:new BoundaryExpression(new DateTimeExpression(new (1963, 6, 3), new (15, 53, 44, 609), OffsetExpression.Zero), true))
-                    };
+                        new IntervalExpression(max: new BoundaryExpression(new DateTimeExpression(new(1963, 6, 3), new(15, 53, 44, 609), OffsetExpression.Zero), true))
+                    );
                 }
+
+                return cases;
             }
         }
 
@@ -667,7 +609,7 @@ I&_Oj
             });
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_text(CultureInfo culture, TextExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>
@@ -685,41 +627,34 @@ I&_Oj
             });
         }
 
-        public static IEnumerable<object[]> PropertyNameCases
-        {
-            get
+        public static TheoryData<string, PropertyName> PropertyNameCases
+            => new()
             {
-                yield return new object[]
                 {
                     "Firstname=Bruce",
                     new PropertyName("Firstname")
-                };
+                },
 
-                yield return new object[]
                 {
                     @"Henchmen[""Name""]=*rob*",
                     new PropertyName(@"Henchmen[""Name""]")
-                };
+                },
 
-                yield return new object[]
                 {
                     @"Henchmen[""Powers""][""Description""]=*strength*",
                     new PropertyName(@"Henchmen[""Powers""][""Description""]")
-                };
+                },
 
-                yield return new object[]
                 {
                     @"Henchmen[""first_name""]=*rob*",
                     new PropertyName(@"Henchmen[""first_name""]")
-                };
+                },
 
-                yield return new object[]
                 {
                     "first_name=Bruce",
                     new PropertyName("first_name")
-                };
-            }
-        }
+                },
+            };
 
         [Theory]
         [MemberData(nameof(PropertyNameCases))]
@@ -738,73 +673,59 @@ I&_Oj
                       .Be(expected);
         }
 
-        public static IEnumerable<object[]> CriterionCases
-        {
-            get
+        public static TheoryData<string, (PropertyName prop, FilterExpression expression)> CriterionCases
+            => new()
             {
-                yield return new object[]
                 {
                     "Name=Vandal",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new StringValueExpression("Vandal")
+                         new StringValueExpression("Vandal")
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "first_name=Vandal",
                     (
                         new PropertyName("first_name"),
-                        (FilterExpression) new StringValueExpression("Vandal")
+                         new StringValueExpression("Vandal")
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Name=Vandal|Banner",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
+                         new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Name=Vandal|Banner",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
+                         new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Size=[10 TO 20]",
                     (
                         new PropertyName("Size"),
-                        (FilterExpression) new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"),
+                         new IntervalExpression(min: new BoundaryExpression(new NumericValueExpression("10"),
                                                                                            included: true),
                                                                max: new BoundaryExpression(new NumericValueExpression("20"),
                                                                                            included: true))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     @"Acolytes[""Name""][""Superior""]=Vandal|Banner",
                     (
                         new PropertyName(@"Acolytes[""Name""][""Superior""]"),
-                        (FilterExpression) new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
+                         new OrExpression(new StringValueExpression("Vandal"), new StringValueExpression("Banner"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     @"Appointment[""Date""]=]2012-10-19T15:03:45Z TO 2012-10-19T15:30:45+01:00[",
                     (
                         new PropertyName(@"Appointment[""Date""]"),
-                        (FilterExpression) new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                         new IntervalExpression(min: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
                                                                                                                                new TimeExpression(hours : 15, minutes: 03, seconds: 45),
                                                                                                                                OffsetExpression.Zero),
                                                                                               included: false),
@@ -814,36 +735,30 @@ I&_Oj
                                                                                               included: false)
                         )
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Name=*[Mm]an",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression) new OneOfExpression(new EndsWithExpression("Man"),
+                         new OneOfExpression(new EndsWithExpression("Man"),
                                                                new EndsWithExpression("man"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Name=[Bb]o[Bb]",
                     (
                         new PropertyName("Name"),
-                        (FilterExpression)new OneOfExpression(new StringValueExpression("BoB"),
+                        new OneOfExpression(new StringValueExpression("BoB"),
                                                               new StringValueExpression("Bob"),
                                                               new StringValueExpression("boB"),
                                                               new StringValueExpression("bob"))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "prop=!(((1908-09-30T00:31:33.127+05:13|2000-06-19)|(00:01:40.443|*))|((2003-05-27|89ae5244-2a98-16cc-6f99-d17658594604)|(s*|*0$)))",
                     (
                         new PropertyName("prop"),
-                        (FilterExpression) new NotExpression(
+                        new NotExpression(
                                 new OrExpression(
                                 new OrExpression(
 
@@ -860,20 +775,25 @@ I&_Oj
                                         )
                                 ))
                     )
-                };
-
-                yield return new object[]
+                },
                 {
                     "Nickname={Bat|Sup|Wonder}*",
                     (
                         new PropertyName("Nickname"),
-                        (FilterExpression) new OneOfExpression(new StartsWithExpression("Bat"),
+                        new OneOfExpression(new StartsWithExpression("Bat"),
                                             new StartsWithExpression("Sup"),
                                             new StartsWithExpression("Wonder"))
                     )
-                };
-            }
-        }
+                },
+
+                {
+                    "Value=!!5",
+                    (
+                        new PropertyName("Value"),
+                        new NotExpression(new NotExpression(new NumericValueExpression("5")))
+                    )
+                },
+            };
 
         /// <summary>
         /// Tests if <see cref="FilterTokenParser.Criteria"/> can parse a criteria
@@ -905,56 +825,52 @@ I&_Oj
             }
         }
 
-        public static IEnumerable<object[]> CriteriaCases
+        public static TheoryData<string, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
         {
             get
             {
-                yield return new object[]
+                TheoryData<string, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
                 {
-                    "Firstname=Vandal&Lastname=Savage",
-                    (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
-                        expressions => expressions.Exactly(2)
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new StringValueExpression("Vandal")))
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new StringValueExpression("Savage")))
-                    )
-                };
+                    {
+                        "Firstname=Vandal&Lastname=Savage",
 
-                yield return new object[]
-                {
-                    "Firstname=[Vv]andal",
-                    (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
+                            expressions => expressions.Exactly(2)
+                            && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new StringValueExpression("Vandal")))
+                            && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new StringValueExpression("Savage")))
+
+                    },
+                    {
+                        "Firstname=[Vv]andal",
                         expressions => expressions.Exactly(1)
-                        && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname"))
-                            && expr.expression.Equals(new OneOfExpression(new StringValueExpression("Vandal"),
-                                                                              new StringValueExpression("vandal"))))
-                    )
+                            && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname"))
+                                && expr.expression.Equals(new OneOfExpression(new StringValueExpression("Vandal"),
+                                                                                  new StringValueExpression("vandal"))))
+                    }
                 };
 
                 foreach (char c in FilterTokenizer.SpecialCharacters)
                 {
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         $@"Firstname=Vand\{c}al&Lastname=Savage",
-                        (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
-                            expressions => expressions.Exactly(2)
+                        expressions => expressions.Exactly(2)
                                && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new StringValueExpression($"Vand{c}al")))
                                && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new StringValueExpression("Savage")))
-                        )
-                    };
+                    );
                 }
 
                 foreach (char c in FilterTokenizer.SpecialCharacters)
                 {
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         $@"first_name=Vand\{c}al&last_name=Savage",
-                        (Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>)(
-                            expressions => expressions.Exactly(2)
+                        expressions => expressions.Exactly(2)
                                && expressions.Once(expr => expr.prop.Equals(new PropertyName("first_name")) && expr.expression.Equals(new StringValueExpression($"Vand{c}al")))
                                && expressions.Once(expr => expr.prop.Equals(new PropertyName("last_name")) && expr.expression.Equals(new StringValueExpression("Savage")))
-                        )
-                    };
+                    );
                 }
+
+                return cases;
             }
         }
 
@@ -979,7 +895,7 @@ I&_Oj
                 .Match(expectation);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DateAndTime(DateTimeExpression expected)
         {
             // Arrange
@@ -993,19 +909,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        public static IEnumerable<object[]> DateCases
-        {
-            get
-            {
-                yield return new object[]
-                {
-                    "2019-01-12",
-                    new DateExpression(year : 2019, month: 01, day: 12)
-                };
-            }
-        }
-
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DateCases(DateExpression expected)
         {
             // Arrange
@@ -1019,7 +923,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
@@ -1033,25 +937,28 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        public static IEnumerable<object[]> ParseGroupCases
+        public static TheoryData<GroupExpression, string> ParseGroupCases
         {
             get
             {
-                string[] cultures = { "fr-FR", "en-GB", "en-US" };
+                TheoryData<GroupExpression, string> cases = [];
+                string[] cultures = ["fr-FR", "en-GB", "en-US"];
                 foreach (string culture in cultures)
                 {
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new(3, 0, 40, 583), OffsetExpression.Zero)),
                         culture
-                    };
+                    );
 
-                    yield return new object[]
-                    {
+                    cases.Add
+                    (
                         new GroupExpression(new DateTimeExpression(new(2010, 06, 02), new(23, 45, 54, 331), OffsetExpression.Zero)),
                         culture
-                    };
+                    );
                 }
+
+                return cases;
             }
         }
 
@@ -1071,10 +978,9 @@ I&_Oj
                 // Assert
                 AssertThatShould_parse(actual, expected);
             });
-
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_TimeExpression(NonNull<TimeExpression> expected)
         {
             // Arrange
@@ -1088,7 +994,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected.Item);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_DurationExpression(DurationExpression expected)
         {
             // Arrange
@@ -1102,9 +1008,33 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
+        [Theory]
+        [InlineData("P", "time separator and duration unit are mising")]
+        [InlineData("P1Y", "the time separator 'T' is missing after the 'year' duration")]
+        [InlineData("P0S", "the time separator 'T' is missing before the 'second' duration")]
+        [InlineData("PT", "the duration string does not contain any duration")]
+        public void Given_incorrect_input_for_duration_Parser_should_throw_ParseException(string input, string reason)
+        {
+            // Arrange
+            _outputHelper.WriteLine($"input : '{input}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+
+            // Act
+            Action callingParserWithInvalidStringInput = () => FilterTokenParser.Duration.Parse(tokens);
+
+            // Assert
+            AssertThatParseExceptionIsThrown(callingParserWithInvalidStringInput, reason);
+        }
+
         private static void AssertThatShould_parse(FilterExpression actual, FilterExpression expected, string reason = "")
             => actual.Should()
                      .NotBeSameAs(expected).And
                      .Be(expected, reason);
+
+        private static void AssertThatParseExceptionIsThrown(Action action, string reason)
+        {
+            // Act
+            action.Should().ThrowExactly<ParseException>(reason);
+        }
     }
 }

@@ -7,8 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] / 2024-07-11
+### 🚀 New features
+- Added `net8.0` support
+
+### ⚠️ Breaking Changes
+- Dropped `net7.0` support
+- Dropped `net5.0` support
+- Dropped `netcoreapp3.1` support
+- Dropped `netstandard1.3` support
+- Removed `IFilterService` and `FilterService`
+
+### 🚨 Fixes
+
+- `NumericValueExpression` and `StringValueExpression` can be equal when they wrap the same underlying value ([#80](https://github.com/candoumbe/datafilters/issues/80))
+- Fixed `ArgumentException` thrown when creating a [`Filter`](./src/DataFilters/Filter.cs) with
+`startswith` | `contains` | `endswith` operator and a `char` value ([#284](https://github.com/candoumbe/DataFilters/issues/284)) 
+
+
+### 🧹 Housekeeping
+
+- Moved CI pipeline to Ubuntu agent
+- Updated build definition to [Candoumbe.Pipelines 0.9.0](https://www.nuget.org/packages/Candoumbe.Pipelines/0.9.0)
+- Updated `build.sh` script by running `nuke :update` command
+- Removed explicit `Nuke.Common` dependency from the build project
+- Added local file to store encrypted secrets needed when running some CI targets locally
+- Replaced property based testing with handwritten test cases to validate `DateTimeExpression.Equals` implementation([#237](https://github.com/candoumbe/datafilters/issues/237))
+- Fixed incorrect casing filename for `IFilter.cs`
+- Dropped `xunit` and `xunit.extensibility.execution` direct dependencies for tests 
+
 ## [0.12.0] / 2022-10-12
-### New features
+### 🚀 New features
+- Added `net7.0` support
 - Added syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
 - Added `+` operator to combine `ConstantValueExpression` with `AsteriskExpression`
 - Added `+` operator to combine `StartsWithExpression` with `EndsWithExpression`
@@ -18,7 +48,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
 - Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
-### Breaking changes
+### ⚠️ Breaking changes
+- `AsteriskExpression` default constructor is now private
+- Dropped filter service
+- Renamed `ISort<T>` to `IOrder<T>`
+- Renamed `Sort<T>` to `Order<T>`
+- Renamed `MultiSort<T>` to `MultiOrder<T>`
+- Renamed `SortValidator<T>` to `OrderValidator<T>`
+- Renamed `SortToQueries` class to `OrderExtensions` in `DataFilters.Queries`
+- Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
+
+## [0.12.0] / 2022-10-12
+### 🚀 New features
+- Added syntax for `OneOfExpression` using curly braces ([#123](https://github.com/candoumbe/datafilters/issues/123))
+- Added `+` operator to combine `ConstantValueExpression` with `AsteriskExpression`
+- Added `+` operator to combine `StartsWithExpression` with `EndsWithExpression`
+- Added `+` operator to combine `StartsWithExpression` with `ContainsExpression`
+- Added `+` operator to combine `StartsWithExpression` with `StartsWithExpression`
+- Added `+` operator to combine `StartsWithExpression` with `StringValueExpression` 
+- Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
+- Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
+
+### ⚠️ Breaking changes
 - `AsteriskExpression` default constructor is now private
 - Dropped filter service
 - Renamed `ISort<T>` to `IOrder<T>`
@@ -131,7 +182,9 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.13.0
+[0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.12.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/candoumbe/DataFilters/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/candoumbe/DataFilters/compare/0.10.1...0.10.2
@@ -149,4 +202,3 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 [0.3.0]: https://github.com/candoumbe/DataFilters/compare/0.2.2...0.3.0
 [0.2.2]: https://github.com/candoumbe/DataFilters/compare/0.2.0...0.2.2
 [0.2.0]: https://github.com/candoumbe/DataFilters/tree/0.2.0
-

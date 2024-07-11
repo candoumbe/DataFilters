@@ -1,8 +1,7 @@
 ﻿namespace DataFilters.Grammar.Syntax
 {
-    using Exceptions;
-
     using System;
+    using Exceptions;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
@@ -117,10 +116,8 @@
             }
 #if NETSTANDARD1_3
         .Jsonify(new Newtonsoft.Json.JsonSerializerSettings() { Formatting = Newtonsoft.Json.Formatting.Indented })
-#elif NETSTANDARD2_0_OR_GREATER || NET5_0
-        .Jsonify(new() { WriteIndented = true, IgnoreNullValues = true })
-#elif NET6_0_OR_GREATER
-        .Jsonify(new() { WriteIndented = true, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull})
+#elif NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+        .Jsonify(new() { WriteIndented = true, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull })
 #endif
                 )
         ;

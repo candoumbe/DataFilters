@@ -1,9 +1,9 @@
-﻿using FsCheck.Fluent;
-using FsCheck;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bogus;
+using FsCheck;
+using FsCheck.Fluent;
 
 namespace DataFilters.UnitTests.Helpers
 {
@@ -14,7 +14,7 @@ namespace DataFilters.UnitTests.Helpers
     /// </summary>
     internal static class FilterGenerators
     {
-        private readonly static Faker Faker = new ();
+        private readonly static Faker Faker = new();
 
         /// <summary>
         /// Generates a <see cref="Arbitrary{Filter}"/> where the value of the filter is a string
@@ -29,7 +29,7 @@ namespace DataFilters.UnitTests.Helpers
             Gen<FilterOperator> genOperator = Gen.OneOf(operators.Select(op => Gen.Constant(op)));
 
             return genOperator.Zip(GetArbitraryFor<string>().Generator)
-                              .Select(tuple => (Op : tuple.Item1, Value: tuple.Item2))
+                              .Select(tuple => (Op: tuple.Item1, Value: tuple.Item2))
                               .Select(tuple => new Filter(Faker.Hacker.Noun(), tuple.Op, tuple.Value))
                               .ToArbitrary();
         }
@@ -84,23 +84,21 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<IFilter> GenerateFilters()
         {
             Gen<IFilter>[] generators =
-            {
-                EndsWithFilter().Generator.Select(filter => (IFilter) filter),
-                StartsWithFilter().Generator.Select(filter => (IFilter) filter),
-                ContainsFilter().Generator.Select(filter => (IFilter) filter),
-                EqualsWithFilter().Generator.Select(filter => (IFilter) filter),
-                Gen.Sized(SafeFilterGenerator).Select(filter => (IFilter) filter),
+            [
+                EndsWithFilter().Generator.Select(filter => (IFilter)filter),
+                StartsWithFilter().Generator.Select(filter => (IFilter)filter),
+                ContainsFilter().Generator.Select(filter => (IFilter)filter),
+                EqualsWithFilter().Generator.Select(filter => (IFilter)filter),
+                Gen.Sized(SafeFilterGenerator).Select(filter => (IFilter)filter),
                 GreaterThanFilter<DateTime>(),
                 GreaterThanOrEqualFilter<DateTime>(),
                 LessThanFilter<DateTime>(),
                 LessThanOrEqualFilter<DateTime>(),
                 FiltersOverNumericValues().Generator.Select(filter => (IFilter)filter)
-
-            };
+            ];
 
             return Gen.OneOf(generators).ToArbitrary();
         }
-
 
         internal static Arbitrary<Filter> EndsWithFilter() => GenerateFilterOverStrings(FilterOperator.EndsWith);
 
@@ -124,11 +122,10 @@ namespace DataFilters.UnitTests.Helpers
             {
                 case 0:
                     {
-
                         gen = GenerateFilters().Generator.Two()
-                                               .Select(tuple => new[] {tuple.Item1, tuple.Item2})
+                                               .Select(tuple => new[] { tuple.Item1, tuple.Item2 })
                                                .Zip(generateLogic)
-                                               .Select(tuple => new MultiFilter { Logic = tuple.Item2, Filters = tuple.Item1});
+                                               .Select(tuple => new MultiFilter { Logic = tuple.Item2, Filters = tuple.Item1 });
                         break;
                     }
 
@@ -153,18 +150,15 @@ namespace DataFilters.UnitTests.Helpers
 
         private static Gen<IFilter> GreaterThanOrEqualFilter<TValue>()
             => GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator.GreaterThanOrEqual);
-        
+
         private static Gen<IFilter> LessThanOrEqualFilter<TValue>()
             => GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator.LessThanOrEqualTo);
-        
+
         private static Gen<IFilter> LessThanFilter<TValue>()
             => GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator.LessThanOrEqualTo);
 
-
         private static Gen<IFilter> GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator op)
             => GetArbitraryFor<TValue>().Generator
-                                        .Select(value => (IFilter) new Filter(Faker.Hacker.Noun(), op, value));
-
-
+                                        .Select(value => (IFilter)new Filter(Faker.Hacker.Noun(), op, value));
     }
 }

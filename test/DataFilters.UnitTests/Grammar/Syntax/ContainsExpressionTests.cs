@@ -1,23 +1,16 @@
 ﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using DataFilters.Grammar.Syntax;
-    using FluentAssertions;
-    using FsCheck.Xunit;
-    using FsCheck;
-
     using System;
-    using System.Collections.Generic;
+    using DataFilters.Grammar.Syntax;
+    using DataFilters.UnitTests.Helpers;
+    using FluentAssertions;
+    using FsCheck;
+    using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
-    using DataFilters.UnitTests.Helpers;
-    using FsCheck.Fluent;
 
-    public class ContainsExpressionTests
+    public class ContainsExpressionTests(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
-
-        public ContainsExpressionTests(ITestOutputHelper outputHelper) => _outputHelper = outputHelper;
-
         [Fact]
         public void IsFilterExpression() => typeof(ContainsExpression).Should()
                                                                       .BeAssignableTo<FilterExpression>().And
@@ -29,7 +22,7 @@
         public void Given_string_argument_is_null_Constructor_should_thros_ArgumentNullException()
         {
             // Act
-            Action action = () => new ContainsExpression((string)null);
+            Action action = () => _ = new ContainsExpression((string)null);
 
             // Assert
             action.Should()
@@ -40,7 +33,7 @@
         public void Given_TextExpression_is_null_Constructor_should_thros_ArgumentNullException()
         {
             // Act
-            Action action = () => new ContainsExpression((TextExpression)null);
+            Action action = () => _ = new ContainsExpression((TextExpression)null);
 
             // Assert
             action.Should()
@@ -51,7 +44,7 @@
         public void Given_TextExpression_argument_is_null_Constructor_should_thros_ArgumentNullException()
         {
             // Act
-            Action action = () => new ContainsExpression(string.Empty);
+            Action action = () => _ = new ContainsExpression(string.Empty);
 
             // Assert
             action.Should()
@@ -62,7 +55,7 @@
         public void Ctor_DoesNot_Throws_ArgumentOutOfRangeException_When_Argument_Is_WhitespaceOnly()
         {
             // Act
-            Action action = () => new ContainsExpression("  ");
+            Action action = () => _ = new ContainsExpression("  ");
 
             // Assert
             action.Should()
@@ -71,34 +64,29 @@
                 .NotThrow("The parameter of the constructor can be whitespace only");
         }
 
-        public static IEnumerable<object[]> EqualsCases
-        {
-            get
+        public static TheoryData<ContainsExpression, object, bool, string> EqualsCases
+            => new()
             {
-                yield return new object[]
                 {
                     new ContainsExpression("prop1"),
                     new ContainsExpression("prop1"),
                     true,
                     "comparing two different instances with same property name"
-                };
-
-                yield return new object[]
+                },
                 {
                     new ContainsExpression("prop1"),
                     new ContainsExpression("prop2"),
                     false,
                     "comparing two different instances with different property name"
-                };
-            }
-        }
+                }
+            };
 
         [Theory]
         [MemberData(nameof(EqualsCases))]
         public void ImplementsEqualsCorrectly(ContainsExpression first, object other, bool expected, string reason)
         {
-            _outputHelper.WriteLine($"First instance : {first}");
-            _outputHelper.WriteLine($"Second instance : {other}");
+            outputHelper.WriteLine($"First instance : {first}");
+            outputHelper.WriteLine($"Second instance : {other}");
 
             // Act
             bool actual = first.Equals(other);
@@ -108,15 +96,21 @@
                 .Be(expected, reason);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Given_ContainsExpression_Complexity_eq_1U002E5(ContainsExpression contains)
-            => (contains.Complexity == 1.5).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_ContainsExpression_Complexity_eq_1U002E5(ContainsExpression contains)
+        {
+            // Act
+            double actual = contains.Complexity;
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+            // Assert
+            actual.Should().Be(1.5);
+        }
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_reflexive(ContainsExpression contains)
             => contains.IsEquivalentTo(contains).Should().BeTrue();
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
         {
             // Arrange
@@ -147,17 +141,37 @@
                   .Be(expected);
         }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_commutative(NonNull<ContainsExpression> first, FilterExpression second)
-            => (first.Item.Equals(second) == second.Equals(first.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_commutative(NonNull<ContainsExpression> first, FilterExpression second)
+        {
+            // Act
+            bool firstEqualsSecond = first.Equals(second);
+            bool secondEqualsFirst = second.Equals(first);
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_reflexive(NonNull<ContainsExpression> expression)
-            => expression.Item.Equals(expression.Item).ToProperty();
+            // Assert
+            firstEqualsSecond.Should().Be(secondEqualsFirst, "'equals' implementation must be commutative");
+        }
 
-        [Property(Arbitrary = new[] { typeof(ExpressionsGenerators) })]
-        public Property Equals_should_be_symetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_reflexive(NonNull<ContainsExpression> expression)
+        {
+            // Act
+            bool actual = expression.Item.Equals(expression.Item);
 
+            // Assert
+            actual.Should().BeTrue("'equals' implementation must be reflexive");
+        }
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Equals_should_be_symetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
+        {
+            // Act
+
+            bool expressionEqualsOther = expression.Item.Equals(otherExpression.Item);
+            bool otherEqualsExpression = otherExpression.Item.Equals(expression.Item);
+
+            // Assert
+            expressionEqualsOther.Should().Be(otherEqualsExpression, "'equals' implementation must be symetric");
+        }
     }
 }

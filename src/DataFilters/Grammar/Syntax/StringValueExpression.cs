@@ -11,20 +11,16 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// Wraps a string that represents a constant string value
     /// </summary>
-    public class StringValueExpression : ConstantValueExpression, IEquatable<StringValueExpression>
+    /// <remarks>
+    /// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
+    /// </remarks>
+    /// <param name="value">value of the expression.</param>
+    /// <remarks>
+    /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
+    /// </remarks>
+    public class StringValueExpression(string value) : ConstantValueExpression(value), IEquatable<StringValueExpression>
     {
-        private readonly Lazy<string> _lazyParseableString;
-
-        /// <summary>
-        /// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
-        /// </summary>
-        /// <param name="value">value of the expression.</param>
-        /// <remarks>
-        /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
-        /// </remarks>
-        public StringValueExpression(string value) : base(value)
-        {
-            _lazyParseableString = new(() =>
+        private readonly Lazy<string> _lazyParseableString = new(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
                 // Also we need an extra position for the final '*' that will be append in all cases
@@ -50,7 +46,6 @@ namespace DataFilters.Grammar.Syntax
 
                 return parseableString.ToString();
             });
-        }
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyParseableString.Value;

@@ -7,5 +7,4 @@ namespace DataFilters.TestObjects
         public string Name { get; set; }
         public DateTimeOffset? Date { get; set; }
     }
-
 }

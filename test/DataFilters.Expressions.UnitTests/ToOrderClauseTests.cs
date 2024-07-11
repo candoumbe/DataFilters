@@ -1,55 +1,45 @@
 ﻿namespace DataFilters.Expressions.UnitTests
 {
-    using FluentAssertions;
-    using FluentAssertions.Extensions;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-
+    using FluentAssertions;
+    using FluentAssertions.Extensions;
     using Xunit;
     using Xunit.Categories;
-
     using static DataFilters.OrderDirection;
 
     [UnitTest]
     [Feature("Expressions")]
     public class ToOrderClauseTests
     {
-        public static IEnumerable<object[]> ToOrderClauseCases
-        {
-            get
+        public static TheoryData<IReadOnlyList<Hero>, IOrder<Hero>, Expression<Func<IEnumerable<Hero>, bool>>> ToOrderClauseCases
+            => new()
             {
-                yield return new object[]
                 {
-                    new[]
-                    {
+                    [
                         new Hero { Name = "Batman"},
                         new Hero { Name = "Flash"}
-                    },
+                    ],
                     new Order<Hero>(nameof(Hero.Name)),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
+                    heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
-                    )
-                };
 
-                yield return new object[]
+                },
                 {
-                    new[]
-                    {
+                    [
                         new Hero { Name = "Batman"},
                         new Hero { Name = "Flash"}
-                    },
+                    ],
                     new Order<Hero>("name"),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
+                    heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
-                    )
-                };
 
-                yield return new object[]
+                },
+
                 {
                     new[]
                     {
@@ -57,13 +47,12 @@
                         new Hero { Name = "Flash"}
                     },
                     new Order<Hero>(" name"),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
+                    heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Batman"
                         && heroes.Last().Name == "Flash"
-                    )
-                };
 
-                yield return new object[]
+                },
+
                 {
                     new[]
                     {
@@ -72,13 +61,12 @@
                     },
                     new Order<Hero>(nameof(Hero.Name), Descending),
 
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
+                    heroes => heroes.Exactly(2)
                         && heroes.First().Name == "Flash"
                         && heroes.Last().Name == "Batman"
-                    )
-                };
 
-                yield return new object[]
+                },
+
                 {
                     new[]
                     {
@@ -91,13 +79,12 @@
                         new Order<Hero>(nameof(Hero.Age), Ascending),
                         new Order<Hero>(nameof(Hero.Name), Descending)
                     ),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
+                    heroes => heroes.Exactly(3)
                                                                           && heroes.First().Name == "Batman"
                                                                           && heroes.Last().Name == "Flash"
-                    )
-                };
 
-                yield return new object[]
+                },
+
                 {
                     new[]
                     {
@@ -110,13 +97,12 @@
                         new Order<Hero>(nameof(Hero.Name), Descending),
                         new Order<Hero>(nameof(Hero.Age), Ascending)
                     ),
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(3)
+                    heroes => heroes.Exactly(3)
                                                                           && heroes.First().Name == "Wonder Woman"
                                                                           && heroes.Last().Name == "Batman"
-                    )
-                };
 
-                yield return new object[]
+                },
+
                 {
                     new[]
                     {
@@ -125,13 +111,12 @@
                     },
                     new Order<Hero>(nameof(Hero.FirstAppearance), Descending),
 
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Exactly(2)
+                    heroes => heroes.Exactly(2)
                                                                           && heroes.First().Name == "Flash"
                                                                           && heroes.Last().Name == "Batman"
-                    )
-                };
 
-                yield return new object[]
+                },
+
                 {
                     new[]
                     {
@@ -159,10 +144,9 @@
                         new Order<Hero>($"{nameof(Hero.Acolyte)}.{nameof(Hero.Age)}", Ascending)
                     ),
 
-                    (Expression<Func<IEnumerable<Hero>, bool>>)(heroes => heroes.Select(x => x.Name).SequenceEqual(new []{ "Green Arrow", "Flash", "Batman"}))
-                };
-            }
-        }
+                    heroes => heroes.Select(x => x.Name).SequenceEqual(new []{ "Green Arrow", "Flash", "Batman"})
+                },
+            };
 
         [Theory]
         [MemberData(nameof(ToOrderClauseCases))]
@@ -170,8 +154,7 @@
         {
             // Act
             IEnumerable<Hero> actual = heroes.AsQueryable()
-                                             .OrderBy(order)
-                                             .ToList();
+                                             .OrderBy(order);
 
             // Assert
             actual.Should()

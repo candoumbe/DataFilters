@@ -13,19 +13,13 @@
     /// An <see cref="OrderExpression{T}"/> only can be created by calling either
     /// <see cref="Create{TProperty}(Expression{Func{T, TProperty}}, OrderDirection)"/> or <see cref="Create(LambdaExpression, OrderDirection)"/>
     /// </remarks>
-    public sealed class OrderExpression<T>
+    /// <remarks>
+    /// Builds a new <see cref="OrderExpression{T}"/> instance
+    /// </remarks>
+    /// <param name="keySelector">Lambda expression to the property onto which the sort will be performed. </param>
+    /// <param name="direction">Direction of the sort.</param>
+    public sealed class OrderExpression<T>(LambdaExpression keySelector, OrderDirection direction)
     {
-        /// <summary>
-        /// Builds a new <see cref="OrderExpression{T}"/> instance
-        /// </summary>
-        /// <param name="keySelector">Lambda expression to the property onto which the sort will be performed. </param>
-        /// <param name="direction">Direction of the sort.</param>
-        public OrderExpression(LambdaExpression keySelector, OrderDirection direction)
-        {
-            Expression = keySelector;
-            Direction = direction;
-        }
-
         /// <summary>
         /// Creates a new instance of <see cref="OrderExpression{T}"/>
         /// </summary>
@@ -46,11 +40,11 @@
         /// <summary>
         /// The lambda expression to use when
         /// </summary>
-        public LambdaExpression Expression { get; }
+        public LambdaExpression Expression { get; } = keySelector;
 
         /// <summary>
         /// Order direction (either <see cref="Ascending"/> or <see cref="Descending"/>
         /// </summary>
-        public OrderDirection Direction { get; }
+        public OrderDirection Direction { get; } = direction;
     }
 }

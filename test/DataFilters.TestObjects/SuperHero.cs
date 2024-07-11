@@ -11,7 +11,7 @@
 #if NET6_0_OR_GREATER
         public DateOnly? LastBattleDate { get; init; }
 
-        public TimeOnly? PeakShape {get; init;} 
+        public TimeOnly? PeakShape { get; init; }
 #else
         public DateTimeOffset? LastBattleDate { get; set; }
 #endif

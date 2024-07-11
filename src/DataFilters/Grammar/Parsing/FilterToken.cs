@@ -91,7 +91,7 @@
         /// <summary>
         /// Bang sign
         /// </summary>
-        [Token(Example = "!", Description ="exclamation point")]
+        [Token(Example = "!", Description = "exclamation point")]
         Bang,
 
         /// <summary>
@@ -133,7 +133,7 @@
         /// <summary>
         /// The <c>&#38;</c> character.
         /// </summary>
-        [Token(Example = "&", Description ="ampersand")]
+        [Token(Example = "&", Description = "ampersand")]
         Ampersand,
 
         /// <summary>

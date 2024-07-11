@@ -1,9 +1,8 @@
 ﻿namespace DataFilters
 {
-    using DataFilters.Expressions;
-
     using System;
     using System.Collections.Generic;
+    using DataFilters.Expressions;
 
     /// <summary>
     /// Extension methods for <see cref="IOrder{T}"/> instances.
@@ -46,4 +45,3 @@
         }
     }
 }
-

@@ -12,10 +12,10 @@
         public DateTimeOffset FirstAppearance { get; set; }
 
 #if NET6_0_OR_GREATER
-        public DateOnly LastAppearance { get; set; } 
+        public DateOnly LastAppearance { get; set; }
 #endif
 
-        public Hero Acolyte {get; set; }
+        public Hero Acolyte { get; set; }
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as Hero);

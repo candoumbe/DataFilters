@@ -1,16 +1,13 @@
 namespace DataFilters.UnitTests.Helpers
 {
-    using DataFilters.Grammar.Parsing;
-    using DataFilters.Grammar.Syntax;
-
-    using FsCheck;
-    using FsCheck.Fluent;
-
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-
+    using DataFilters.Grammar.Parsing;
+    using DataFilters.Grammar.Syntax;
+    using FsCheck;
+    using FsCheck.Fluent;
     using static GeneratorHelper;
 
     public static class ExpressionsGenerators
@@ -186,7 +183,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<FilterExpression> GenerateFilterExpressions()
         {
             Gen<FilterExpression>[] generators =
-            {
+            [
                 EndsWithExpressions().Generator.Select(item => (FilterExpression) item),
                 StartsWithExpressions().Generator.Select(item => (FilterExpression) item),
                 ContainsExpressions().Generator.Select(item => (FilterExpression) item),
@@ -197,7 +194,7 @@ namespace DataFilters.UnitTests.Helpers
                 DurationExpressions().Generator.Select(item => (FilterExpression) item),
                 ConstantValueExpressions().Generator.Select(item => (FilterExpression) item),
                 GroupExpressions().Generator.Select(item => (FilterExpression) item)
-            };
+            ];
 
             return Gen.OneOf(generators).ToArbitrary();
         }
@@ -209,15 +206,15 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<BinaryFilterExpression> BinaryFilterExpressions()
         {
             Gen<BinaryFilterExpression>[] generators =
-            {
+            [
                 AndExpressions().Generator.Select(item => (BinaryFilterExpression) item),
                 OrExpressions().Generator.Select(item => (BinaryFilterExpression) item)
-            };
+            ];
 
             return Gen.OneOf(generators).ToArbitrary();
         }
 
-    private static Gen<OrExpression> SafeOrExpressionGenerator(int size)
+        private static Gen<OrExpression> SafeOrExpressionGenerator(int size)
         {
             Gen<OrExpression> gen;
             switch (size)
@@ -236,7 +233,7 @@ namespace DataFilters.UnitTests.Helpers
                                                          .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
                                                                                                  tuple => new OrExpression(tuple.Item1, tuple.Item2))),
                                         subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
-                                                                                                tuple => new OrExpression(tuple.Item1, tuple.Item2))));
+                                                                                              tuple => new OrExpression(tuple.Item1, tuple.Item2))));
                         break;
                     }
             }
@@ -252,7 +249,8 @@ namespace DataFilters.UnitTests.Helpers
                 case 0:
                     {
                         gen = GenerateFilterExpressions().Generator.Two()
-                                                         .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2)));
+                                                         .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
+                                                                                                 tuple => new AndExpression(tuple.Item1, tuple.Item2)));
                         break;
                     }
 
@@ -276,7 +274,7 @@ namespace DataFilters.UnitTests.Helpers
             static Gen<NotExpression> SafeNotExpressionGenerator(int size)
             {
                 Gen<FilterExpression>[] generators =
-                {
+                [
                     AndExpressions().Generator.Select(expr => (FilterExpression)expr),
                     OrExpressions().Generator.Select(expr => (FilterExpression)expr),
                     ConstantValueExpressions().Generator.Select(expr => (FilterExpression)expr),
@@ -285,7 +283,7 @@ namespace DataFilters.UnitTests.Helpers
                     TimeExpressions().Generator.Select(expr => (FilterExpression)expr),
                     DateTimeExpressions().Generator.Select(expr => (FilterExpression)expr),
                     IntervalExpressions().Generator.Select(expr => (FilterExpression)expr)
-                };
+                ];
 
                 Gen<NotExpression> gen;
                 switch (size)
@@ -395,22 +393,22 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<BracketValue> GenerateRegexValues()
         {
             Gen<BracketValue> regexRangeGenerator = RangeBracketValues().Convert(range => (BracketValue)range,
-                                                                                         bracket => (RangeBracketValue)bracket)
+                                                                                 bracket => (RangeBracketValue)bracket)
                                                                                                           .Generator;
             Gen<BracketValue> regexConstantGenerator = ConstantBracketValues().Convert(range => (BracketValue)range,
-                                                                                                  bracket => (ConstantBracketValue)bracket)
+                                                                                       bracket => (ConstantBracketValue)bracket)
                                                                                          .Generator;
 
             return Gen.OneOf(regexConstantGenerator, regexRangeGenerator).ToArbitrary();
         }
 
-        private static Arbitrary<ConstantBracketValue> ConstantBracketValues() => GetArbitraryFor<string>()
-                                                                                                       .Filter(input => !string.IsNullOrWhiteSpace(input)
-                                                                                                                        && input.Length > 1
-                                                                                                                        && input.All(chr => char.IsLetterOrDigit(chr)))
-                                                                                                       .Generator
-                                                                                                       .Select(item => new ConstantBracketValue(item))
-                                                                                                       .ToArbitrary();
+        private static Arbitrary<ConstantBracketValue> ConstantBracketValues()
+            => GetArbitraryFor<string>().Filter(input => !string.IsNullOrWhiteSpace(input)
+                                                        && input.Length > 1
+                                                        && input.All(chr => char.IsLetterOrDigit(chr)))
+                                        .Generator
+                                        .Select(item => new ConstantBracketValue(item))
+                                        .ToArbitrary();
 
         private static Arbitrary<RangeBracketValue> RangeBracketValues()
         {

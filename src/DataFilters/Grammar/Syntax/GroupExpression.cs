@@ -14,19 +14,17 @@
     /// plus a marginal overhead.
     /// </para>
     /// </remarks>
-    public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>, ISimplifiable
+    /// <remarks>
+    /// Builds a new <see cref="GroupExpression"/> that holds the specified <paramref name="expression"/>.
+    /// </remarks>
+    /// <param name="expression">the expression to group</param>
+    /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <c>null</c>.</exception>
+    public sealed class GroupExpression(FilterExpression expression) : FilterExpression, IEquatable<GroupExpression>, ISimplifiable
     {
         /// <summary>
         /// <see cref="FilterExpression"/> that the current instance is applied onto.
         /// </summary>
-        public FilterExpression Expression { get; }
-
-        /// <summary>
-        /// Builds a new <see cref="GroupExpression"/> that holds the specified <paramref name="expression"/>.
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <c>null</c>.</exception>
-        public GroupExpression(FilterExpression expression) => Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+        public FilterExpression Expression { get; } = expression ?? throw new ArgumentNullException(nameof(expression));
 
         ///<inheritdoc/>
         public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);

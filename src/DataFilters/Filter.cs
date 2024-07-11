@@ -1,14 +1,13 @@
 ﻿namespace DataFilters
 {
-    using DataFilters.Converters;
-
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
+    using DataFilters.Converters;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Schema;
     using static Newtonsoft.Json.DefaultValueHandling;
     using static Newtonsoft.Json.Required;
-    using System.Text.RegularExpressions;
 #if !NETSTANDARD1_3
     using System.Text.Json.Serialization;
 #endif
@@ -59,7 +58,7 @@
         /// <summary>
         /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
         /// </summary>
-        public static IEnumerable<FilterOperator> UnaryOperators { get; } = new[]{
+        public static ISet<FilterOperator> UnaryOperators { get; } = new HashSet<FilterOperator>{
             FilterOperator.IsEmpty,
             FilterOperator.IsNotEmpty,
             FilterOperator.IsNotNull,
@@ -73,44 +72,33 @@
         /// <returns></returns>
         public static JSchema Schema(FilterOperator op)
         {
-            JSchema schema;
-            switch (op)
+            JSchema schema = op switch
             {
-                case FilterOperator.Contains:
-                case FilterOperator.StartsWith:
-                case FilterOperator.EndsWith:
-                    schema = new JSchema
-                    {
-                        Type = JSchemaType.Object,
-                        Properties =
+                FilterOperator.Contains or FilterOperator.StartsWith or FilterOperator.EndsWith => new JSchema
+                {
+                    Type = JSchemaType.Object,
+                    Properties =
                         {
                             [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String },
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String },
                             [ValueJsonPropertyName] = new JSchema { Type = JSchemaType.String }
                         },
-                        Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
-                    };
-                    break;
-                case FilterOperator.IsEmpty:
-                case FilterOperator.IsNotEmpty:
-                case FilterOperator.IsNotNull:
-                case FilterOperator.IsNull:
-                    schema = new JSchema
-                    {
-                        Type = JSchemaType.Object,
-                        Properties =
+                    Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
+                },
+                FilterOperator.IsEmpty or FilterOperator.IsNotEmpty or FilterOperator.IsNotNull or FilterOperator.IsNull => new JSchema
+                {
+                    Type = JSchemaType.Object,
+                    Properties =
                         {
                             [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String },
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String }
                         },
-                        Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
-                    };
-                    break;
-                default:
-                    schema = new JSchema
-                    {
-                        Type = JSchemaType.Object,
-                        Properties =
+                    Required = { FieldJsonPropertyName, OperatorJsonPropertyName }
+                },
+                _ => new JSchema
+                {
+                    Type = JSchemaType.Object,
+                    Properties =
                         {
                             [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String,  },
                             [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String },
@@ -118,10 +106,9 @@
                                 Not = new JSchema() { Type = JSchemaType.Null }
                             }
                         },
-                        Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
-                    };
-                    break;
-            }
+                    Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
+                },
+            };
             schema.AllowAdditionalProperties = false;
 
             return schema;

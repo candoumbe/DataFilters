@@ -10,29 +10,27 @@
     /// Allow to sort by multiple <see cref="Order{T}"/> expression
     /// </summary>
     /// <typeparam name="T">Type onto which the sort will be applied</typeparam>
-    public class MultiOrder<T> : IOrder<T>, IEquatable<MultiOrder<T>>
+    /// <remarks>
+    /// Builds a new <see cref="MultiOrder{T}"/> instance.
+    /// </remarks>
+    /// <param name="orders"></param>
+    public class MultiOrder<T>(params Order<T>[] orders) : IOrder<T>, IEquatable<MultiOrder<T>>
     {
         /// <summary>
         /// <see cref="Order{T}"/> items that the current instance carries.
         /// </summary>
         public IEnumerable<Order<T>> Orders => _orders;
 
-        private readonly Order<T>[] _orders;
-
-        private static readonly ArrayEqualityComparer<Order<T>> equalityComparer = new();
-
-        /// <summary>
-        /// Builds a new <see cref="MultiOrder{T}"/> instance.
-        /// </summary>
-        /// <param name="orders"></param>
-        public MultiOrder(params Order<T>[] orders) => _orders = orders.Where(s => s is not null)
+        private readonly Order<T>[] _orders = orders.Where(s => s is not null)
                                                                   .ToArray();
+
+    private static readonly ArrayEqualityComparer<Order<T>> EqualityComparer = new();
+
         /// <inheritdoc/>
         public bool Equals(IOrder<T> other) => Equals(other as MultiOrder<T>);
 
-        /// <inheritdoc/>
-        public bool Equals(MultiOrder<T> other) => other is not null
-                                                  && equalityComparer.Equals(_orders, other._orders);
+    /// <inheritdoc/>
+    public bool Equals(MultiOrder<T> other) => other is not null && EqualityComparer.Equals(_orders, other._orders);
 
         /// <inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as MultiOrder<T>);
@@ -41,8 +39,8 @@
         public bool IsEquivalentTo(IOrder<T> other) => other is MultiOrder<T> otherMultisort
                                                       && Orders.SequenceEqual(otherMultisort.Orders);
 
-        /// <inheritdoc/>
-        public override int GetHashCode() => equalityComparer.GetHashCode(_orders);
+    /// <inheritdoc/>
+    public override int GetHashCode() => EqualityComparer.GetHashCode(_orders);
 
         /// <inheritdoc/>
         public override string ToString() => $"{nameof(Orders)}:[{string.Join(",", Orders.Select(x => x.ToString()))}]";

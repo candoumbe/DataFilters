@@ -76,7 +76,7 @@
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
         public EndsWithExpression(TextExpression text)
 #if !NETSTANDARD1_3
-            : this (Guard.Against.Null(text, nameof(text)).OriginalString)
+            : this(Guard.Against.Null(text, nameof(text)).OriginalString)
         {
             _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}");
         }
@@ -106,11 +106,11 @@
         public override double Complexity => 1.5;
 
         /// <summary>
-        /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/ to a <see cref="EndsWithExpression"/>>.
+        /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.
         /// </summary>
         /// <param name="left">The left operand</param>
         /// <param name="_"></param>
         /// <returns></returns>
-        public static ContainsExpression operator +(EndsWithExpression left, AsteriskExpression _) => new(left.Value);        
+        public static ContainsExpression operator +(EndsWithExpression left, AsteriskExpression _) => new(left.Value);
     }
 }

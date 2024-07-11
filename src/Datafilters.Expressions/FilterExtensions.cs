@@ -1,29 +1,45 @@
 ﻿namespace DataFilters
 {
-#if NET6_0_OR_GREATER
+#if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
+    using System.ComponentModel;
 #endif
-
-    using static Expressions.NullableValueBehavior;
 
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-
-    using static DataFilters.FilterOperator;
-    using static System.Linq.Expressions.Expression;
-
     using DataFilters.Expressions;
+    using static System.Linq.Expressions.Expression;
+    using static DataFilters.FilterOperator;
+    using static Expressions.NullableValueBehavior;
 
     /// <summary>
-    /// Extension methods for <see cref="IFilter"/> type.
+    /// The `FilterExtensions` class provides extension methods for building expression trees from `IFilter` instances.
+    /// It allows for filtering data based on various conditions.
     /// </summary>
+    /// <remarks>
+    /// Example Usage:
+    /// <code>
+    /// // Create a filter
+    /// IFilter filter = new Filter
+    /// {
+    ///     Field = "Name",
+    ///     Operator = FilterOperator.EqualTo,
+    ///     Value = "John"
+    /// };
+    ///
+    /// // Build an expression tree
+    /// Expression&lt;Func&lt;Person, bool&gt;&gt; expression = filter.ToExpression&lt;Person&gt;();
+    ///
+    /// // Use the expression to filter data
+    /// var filteredData = data.Where(expression.Compile());
+    /// </code>
+    /// </remarks>
     public static class FilterExtensions
     {
-#if NET6_0_OR_GREATER
+#if NET6_0
         private readonly static ISet<bool> HackZone = new HashSet<bool>();
 #endif
 
@@ -31,26 +47,39 @@
         /// List of all primitives types
         /// </summary>
         /// <value></value>
-        private static readonly Type[] PrimitiveTypes = {
+        private static readonly Type[] PrimitiveTypes = [
             typeof(string),
-            typeof(Guid), typeof(Guid?),
-            typeof(int), typeof(int?),
-            typeof(long?), typeof(long?),
-            typeof(short?), typeof(short?),
-            typeof(decimal?), typeof(decimal?),
-            typeof(double?), typeof(double?),
-            typeof(ushort?), typeof(ushort?),
-            typeof(uint?), typeof(uint?),
-            typeof(ulong?), typeof(ulong?),
-            typeof(DateTime), typeof(DateTime?),
-            typeof(DateTimeOffset), typeof(DateTimeOffset?),
+            typeof(Guid),
+            typeof(Guid?),
+            typeof(int),
+            typeof(int?),
+            typeof(long?),
+            typeof(long?),
+            typeof(short?),
+            typeof(short?),
+            typeof(decimal?),
+            typeof(decimal?),
+            typeof(double?),
+            typeof(double?),
+            typeof(ushort?),
+            typeof(ushort?),
+            typeof(uint?),
+            typeof(uint?),
+            typeof(ulong?),
+            typeof(ulong?),
+            typeof(DateTime),
+            typeof(DateTime?),
+            typeof(DateTimeOffset),
+            typeof(DateTimeOffset?),
 #if NET6_0_OR_GREATER
             typeof(DateOnly), typeof(DateOnly?),
             typeof(TimeOnly), typeof(TimeOnly?),
 #endif
-            typeof(bool), typeof(bool?),
-            typeof(char), typeof(char?)
-        };
+            typeof(bool),
+            typeof(bool?),
+            typeof(char),
+            typeof(char?)
+        ];
 
         /// <summary>
         /// Builds an <see cref="Expression{TDelegate}"/> tree from a <see cref="IFilter"/> instance.
@@ -70,7 +99,7 @@
                 throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
             }
 
-#if NET6_0_OR_GREATER
+#if NET6_0
             // HACK require to handle DateOnly and TimeOnly types.
             if (HackZone.Add(true))
             {
@@ -94,10 +123,12 @@
                             Type type = typeof(T);
                             ParameterExpression pe = Parameter(type, "item");
 
-                            string[] fields = df.Field.Replace(@"[""", ".")
-                                                      .Replace(@"""]", string.Empty)
-                                                      .Split(new[] { '.' })
-                                                      .ToArray();
+                            string[] fields =
+                            [
+                                .. df.Field.Replace(@"[""", ".")
+                                           .Replace(@"""]", string.Empty)
+                                           .Split(['.'])
+                            ];
 
                             Expression body = nullableValueBehavior switch
                             {
@@ -140,10 +171,6 @@
                 {
                     dateTime = result;
                 }
-                else if (targetType == typeof(DateTime?))
-                {
-                    dateTime = null;
-                }
             }
             else if (targetType == typeof(DateTimeOffset) || targetType == typeof(DateTimeOffset?))
             {
@@ -151,13 +178,9 @@
                 {
                     dateTime = result;
                 }
-                else if (targetType == typeof(DateTimeOffset?))
-                {
-                    dateTime = null;
-                }
             }
 #if NET6_0_OR_GREATER
-            else if (targetType == typeof(DateOnly) || targetType == typeof(DateOnly))
+            else if (targetType == typeof(DateOnly) || targetType == typeof(DateOnly?))
             {
                 if (DateOnly.TryParse(source?.ToString(), out DateOnly result))
                 {
@@ -168,7 +191,6 @@
 
             return dateTime;
         }
-
 
         private static Expression ComputeBodyExpression(MemberExpression property, FilterOperator @operator, object value)
         {
@@ -183,12 +205,19 @@
                 FilterOperator.GreaterThan => GreaterThan(property, constantExpression),
                 FilterOperator.GreaterThanOrEqual => GreaterThanOrEqual(property, constantExpression),
                 LessThanOrEqualTo => LessThanOrEqual(property, constantExpression),
-                StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression),
-                NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
-                EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression),
-                NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression)),
+#if NET6_0_OR_GREATER
+                StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [constantExpression.Value?.GetType() ?? typeof(string)])!, constantExpression),
+                NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [constantExpression.Value?.GetType() ?? typeof(string)])!, constantExpression)),
+                EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression),
+                NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
+#else
+                StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [typeof(string)])!, constantExpression),
+                NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
+                EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression),
+                NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
+#endif
                 Contains => ComputeContains(property, value),
-                NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }), constantExpression)),
+                NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), [value?.GetType() ?? typeof(string)])!, constantExpression)),
                 IsEmpty => ComputeIsEmpty(property),
                 IsNotEmpty => ComputeIsNotEmpty(property),
                 EqualTo => ComputeEquals(property, value),
@@ -210,15 +239,29 @@
                 FilterOperator.GreaterThanOrEqual => GreaterThanOrEqual(property, constantExpression),
                 LessThanOrEqualTo => LessThanOrEqual(property, constantExpression),
                 StartsWith => AndAlso(NotEqual(property, Constant(null)),
-                                      Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression)),
+                                      Call(property,
+                                           typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [typeof(string)])!,
+                                           constantExpression)
+                                      ),
                 NotStartsWith => AndAlso(NotEqual(property, Constant(null)),
-                                         Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), new[] { typeof(string) }), constantExpression))),
-                EndsWith =>AndAlso(NotEqual(property, Constant(null)),
-                                   Call(property,
-                                        typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }),
-                                        constantExpression)),
-                NotEndsWith => AndAlso(NotEqual(property, Constant(null)), 
-                                       Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), new[] { typeof(string) }), constantExpression))),
+                                         Not(
+                                             Call(property,
+                                                  typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [value?.GetType() ?? typeof(string)])!,
+                                                  constantExpression)
+                                             )
+                                         ),
+                EndsWith => AndAlso(NotEqual(property, Constant(null)),
+                                    Call(property,
+                                         typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [typeof(string)])!,
+                                         constantExpression)
+                                    ),
+                NotEndsWith => AndAlso(NotEqual(property, Constant(null)),
+                                       Not(
+                                           Call(property,
+                                                typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [typeof(string)])!,
+                                                constantExpression)
+                                           )
+                                       ),
                 Contains => ComputeNullSafeContains(property, value),
                 NotContains => Not(ComputeNullSafeContains(property, value)),
                 IsEmpty => ComputeNullSafeIsEmpty(property),
@@ -228,6 +271,10 @@
             };
         }
 
+        /// <summary>
+        /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
+        /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, <see cref="DateOnly"/> (for .NET 6.0 or greater), enumerable types, and other types.
+        /// </summary>
         private static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
         {
             ConstantExpression ce;
@@ -249,7 +296,12 @@
             }
             else
             {
-                ce = Constant(value, memberType);
+                Type valueType = value switch
+                {
+                    null => memberType,
+                    _ => value.GetType()
+                };
+                ce = Constant(value, valueType);
             }
 
             return ce;
@@ -280,7 +332,7 @@
                 right = Not(Call(typeof(Enumerable),
                                 nameof(Enumerable.Any),
                                 genericType is not null
-                                    ? new Type[] { genericType }
+                                    ? [genericType]
                                     : null,
                                 property));
 
@@ -304,31 +356,26 @@
                 Type genericArgType = property.Type.GenericTypeArguments[0];
                 ParameterExpression pe = Parameter(genericArgType);
 
-                if (typeof(string).Equals(genericArgType))
-                {
-                    contains = Call(typeof(Enumerable),
+                contains = typeof(string) == genericArgType
+                    ? Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
-                                    new Type[] { typeof(string) },
+                                    [typeof(string)],
                                     property,
                                     Lambda(
                                         Call(pe,
-                                            typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
-                                            constantExpression), new[] { pe }));
-                }
-                else
-                {
-                    contains = Call(typeof(Enumerable),
+                                            typeof(string).GetRuntimeMethod(nameof(string.Contains), [constantExpression.Value?.GetType() ?? typeof(string)])!,
+                                            constantExpression), [pe]))
+                    : Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
-                                    new Type[] { property.Type.GenericTypeArguments[0] },
+                                    [property.Type.GenericTypeArguments[0]],
                                     property,
-                                    Lambda(Equal(pe, constantExpression), new[] { pe }));
-                }
+                                    Lambda(Equal(pe, constantExpression), [pe]));
             }
             else
             {
                 contains = Call(property,
-                              typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
-                              constantExpression);
+                                typeof(string).GetRuntimeMethod(nameof(string.Contains), [constantExpression.Value?.GetType() ?? typeof(string)])!,
+                                constantExpression);
             }
 
             return contains;
@@ -344,31 +391,26 @@
                 Type genericArgType = property.Type.GenericTypeArguments[0];
                 ParameterExpression pe = Parameter(genericArgType);
 
-                if (typeof(string).Equals(genericArgType))
-                {
-                    contains = Call(typeof(Enumerable),
+                contains = typeof(string) == genericArgType
+                    ? Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
-                                    new Type[] { typeof(string) },
+                                    [typeof(string)],
                                     property,
                                     Lambda(
                                         AndAlso(NotEqual(pe, Constant(null)),
                                                 Call(pe,
-                                                     typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
-                                                     constantExpression)), new[] { pe }));
-                }
-                else
-                {
-                    contains = Call(typeof(Enumerable),
-                                    nameof(Enumerable.Any),
-                                    new Type[] { property.Type.GenericTypeArguments[0] },
-                                    property,
-                                    Lambda(Equal(pe, constantExpression), new[] { pe }));
-                }
+                                                     typeof(string).GetRuntimeMethod(nameof(string.Contains), [typeof(string)])!,
+                                                     constantExpression)), [pe]))
+                    : Call(typeof(Enumerable),
+                           nameof(Enumerable.Any),
+                           [property.Type.GenericTypeArguments[0]],
+                           property,
+                           Lambda(Equal(pe, constantExpression), [pe]));
             }
             else
             {
                 contains = Call(property,
-                              typeof(string).GetRuntimeMethod(nameof(string.Contains), new[] { typeof(string) }),
+                              typeof(string).GetRuntimeMethod(nameof(string.Contains), [typeof(string)])!,
                               constantExpression);
             }
 
@@ -385,9 +427,9 @@
                 ParameterExpression pe = Parameter(property.Type.GenericTypeArguments[0]);
                 equals = Call(typeof(Enumerable),
                               nameof(Enumerable.Any),
-                              new Type[] { property.Type.GenericTypeArguments[0] },
+                              [property.Type.GenericTypeArguments[0]],
                               property,
-                              Lambda(Equal(pe, constantExpression), new[] { pe }));
+                              Lambda(Equal(pe, constantExpression), [pe]));
             }
             else
             {
@@ -407,9 +449,9 @@
                 ParameterExpression pe = Parameter(property.Type.GenericTypeArguments[0]);
                 equals = Call(typeof(Enumerable),
                               nameof(Enumerable.Any),
-                              new Type[] { property.Type.GenericTypeArguments[0] },
+                              [property.Type.GenericTypeArguments[0]],
                               property,
-                              Lambda(Equal(pe, constantExpression), new[] { pe }));
+                              Lambda(Equal(pe, constantExpression), [pe]));
             }
             else
             {
@@ -424,9 +466,9 @@
                             : NotEqual(property, Constant(string.Empty));
 
         private static bool IsNotAStringAndIsEnumerable(Type propertyType) => propertyType != typeof(string)
-                                                                                  && propertyType.IsAssignableToGenericType(typeof(IEnumerable<>));
+                                                                              && propertyType.IsAssignableToGenericType(typeof(IEnumerable<>));
 
-        private static Expression ComputeExpression(ParameterExpression pe, IEnumerable<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
+        private static Expression ComputeExpression(ParameterExpression pe, IReadOnlyList<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
         {
             Expression body = null;
             int i = 0;
@@ -446,9 +488,9 @@
                         localBody = ComputeBodyExpression(localProperty, @operator, value);
                         body = Call(typeof(Enumerable),
                                      nameof(Enumerable.Any),
-                                     new[] { enumerableGenericType },
+                                     [enumerableGenericType],
                                      property,
-                                     Lambda(localBody, new[] { localParameter })
+                                     Lambda(localBody, [localParameter])
                         );
                     }
                 }
@@ -460,7 +502,7 @@
             else
             {
                 bool stopComputingExpression = false;
-                while (!stopComputingExpression && i < fields.Count())
+                while (!stopComputingExpression && i < fields.Count)
                 {
                     if (IsNotAStringAndIsEnumerable(targetType))
                     {
@@ -471,20 +513,15 @@
 
                         fields = fields.Skip(i)
                                        .ToArray();
-                        if (fields.Any())
-                        {
-                            localBody = ComputeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property);
-                        }
-                        else
-                        {
-                            localBody = ComputeBodyExpression(property, @operator, value);
-                        }
+                        localBody = fields.Any()
+                            ? ComputeExpression(localParameter, fields, enumerableGenericType, @operator, value, property)
+                            : ComputeBodyExpression(property, @operator, value);
 
                         body = Call(typeof(Enumerable),
                                     nameof(Enumerable.Any),
-                                    new[] { enumerableGenericType },
+                                    [enumerableGenericType],
                                     property,
-                                    Lambda(localBody, new[] { localParameter })
+                                    Lambda(localBody, [localParameter])
                                 );
                     }
                     else
@@ -511,7 +548,7 @@
             return body;
         }
 
-        private static Expression ComputeNullSafeExpression(ParameterExpression pe, IEnumerable<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
+        private static Expression ComputeNullSafeExpression(ParameterExpression pe, IReadOnlyList<string> fields, Type targetType, FilterOperator @operator, object value, MemberExpression property = null)
         {
             Expression body = null;
             int i = 0;
@@ -532,9 +569,9 @@
                         body = AndAlso(NotEqual(property, Constant(null)),
                                        Call(typeof(Enumerable),
                                             nameof(Enumerable.Any),
-                                            new[] { enumerableGenericType },
+                                            [enumerableGenericType],
                                             property,
-                                            Lambda(localBody, new[] { localParameter }))
+                                            Lambda(localBody, [localParameter]))
                         );
                     }
                 }
@@ -557,21 +594,16 @@
 
                         fields = fields.Skip(i)
                                        .ToArray();
-                        if (fields.Any())
-                        {
-                            localBody = ComputeNullSafeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property);
-                        }
-                        else
-                        {
-                            localBody = ComputeNullSafeBodyExpression(property, @operator, value);
-                        }
+                        localBody = fields.Any()
+                            ? ComputeNullSafeExpression(localParameter, fields.ToArray(), enumerableGenericType, @operator, value, property)
+                            : ComputeNullSafeBodyExpression(property, @operator, value);
 
                         body = AndAlso(NotEqual(property, Constant(null)),
                                        Call(typeof(Enumerable),
                                             nameof(Enumerable.Any),
-                                            new[] { enumerableGenericType },
+                                            [enumerableGenericType],
                                             property,
-                                            Lambda(localBody, new[] { localParameter })));
+                                            Lambda(localBody, [localParameter])));
                     }
                     else
                     {
@@ -612,7 +644,8 @@
                                                          || memberType == typeof(DateTimeOffset?);
 
 #if NET6_0_OR_GREATER
-        private static bool IsDateOnly(Type memberType) => memberType == typeof(DateOnly);
+        private static bool IsDateOnly(Type memberType) => memberType == typeof(DateOnly)
+            || memberType == typeof(DateOnly?);
 #endif
     }
 }
