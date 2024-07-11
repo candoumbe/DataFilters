@@ -6,12 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 🚨 Fixes
+
+- Fixed incorrect parsing of numeric values with `E` symbol.
+
 
 ## [0.13.0] / 2024-07-11
 ### 🚀 New features
+
 - Added `net8.0` support
 
 ### ⚠️ Breaking Changes
+
 - Dropped `net7.0` support
 - Dropped `net5.0` support
 - Dropped `netcoreapp3.1` support

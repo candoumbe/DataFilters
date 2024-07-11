@@ -1,6 +1,6 @@
 ﻿namespace DataFilters.Grammar.Parsing
 {
-    using DataFilters.Grammar.Syntax;
+    using Syntax;
 
     using Superpower;
     using Superpower.Model;
@@ -672,11 +672,28 @@
 
         private static TokenListParser<FilterToken, NumericValueExpression> FloatOrDouble
             => (from sign in MinusOrPlusSign.Optional()
-                from digitBeforeDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                from beforeDotDigits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                 from _ in Token.EqualTo(FilterToken.Dot)
-                from digitAfterDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
-                from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "d")
-                select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digitBeforeDot)}.{TokensToString(digitAfterDot)}"))
+                from afterDotDigits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "e")
+                from exponentSign in MinusOrPlusSign.Optional()
+                from afterExponentSignDigits in IntegerOrLong
+                select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(beforeDotDigits)}.{TokensToString(afterDotDigits)}E{ConvertSignToChar(exponentSign, true)}{afterExponentSignDigits.EscapedParseableString}"))
+                .Try()
+                .Or(
+                    from sign in MinusOrPlusSign.Optional()
+                    from beforeDotDigits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                    from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "e")
+                    from exponentSign in MinusOrPlusSign.Optional()
+                    from afterExponentSignDigits in IntegerOrLong
+                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(beforeDotDigits)}E{ConvertSignToChar(exponentSign, true)}{afterExponentSignDigits.EscapedParseableString}"))
+                .Try()
+                .Or(from sign in MinusOrPlusSign.Optional()
+                    from digitBeforeDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                    from _ in Token.EqualTo(FilterToken.Dot)
+                    from digitAfterDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                    from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "d")
+                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digitBeforeDot)}.{TokensToString(digitAfterDot)}"))
                 .Try()
                 .Or(
                      from sign in MinusOrPlusSign.Optional()
@@ -706,6 +723,11 @@
                 from digits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                 from hint in Token.EqualToValueIgnoreCase(FilterToken.Letter, "L")
                 select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digits)}"))
+        .Try()
+            .Or(from sign in MinusOrPlusSign.Optional()
+                from digits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                from hint in Token.EqualToValueIgnoreCase(FilterToken.Letter, "L")
+                select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digits)}"))
                 .Try()
                 .Or(
                     from sign in MinusOrPlusSign.Optional()
@@ -714,10 +736,10 @@
                 )
             ;
 
-        private static string ConvertSignToChar(NumericSign? sign) => sign switch
+        private static string ConvertSignToChar(NumericSign? sign, bool mustOutputSign = false) => sign switch
         {
             NumericSign.Minus => "-",
-            _ => string.Empty,
+            _ => mustOutputSign ? "+" : string.Empty,
         };
 
         /// <summary>

@@ -40,8 +40,7 @@
                 throw new InvalidOperationException($"{nameof(OneOfExpression)} cannot be empty");
             }
 
-            _values = values.Where(x => x is not null)
-                            .ToArray();
+            _values = [.. values.Where(x => x is not null)];
 
             _lazyParseableString = new(() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
         }
