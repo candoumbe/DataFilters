@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added local file to store encrypted secrets needed when running some CI targets locally
 - Replaced property based testing with handwritten test cases to validate `DateTimeExpression.Equals` implementation([#237](https://github.com/candoumbe/datafilters/issues/237))
 - Fixed incorrect casing filename for `IFilter.cs`
+- Dropped `xunit` and `xunit.extensibility.execution` direct dependencies for tests 
 
 ## [0.12.0] / 2022-10-12
 ### 🚀 New features
