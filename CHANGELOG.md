@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.13.0] / 2024-07-11
 ### 🚀 New features
 - Added `net8.0` support
 
@@ -32,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added local file to store encrypted secrets needed when running some CI targets locally
 - Replaced property based testing with handwritten test cases to validate `DateTimeExpression.Equals` implementation([#237](https://github.com/candoumbe/datafilters/issues/237))
 - Fixed incorrect casing filename for `IFilter.cs`
+- Dropped `xunit` and `xunit.extensibility.execution` direct dependencies for tests 
 
 ## [0.12.0] / 2022-10-12
 ### 🚀 New features
@@ -179,7 +182,9 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.13.0
+[0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.12.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/candoumbe/DataFilters/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/candoumbe/DataFilters/compare/0.10.1...0.10.2

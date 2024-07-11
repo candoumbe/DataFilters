@@ -311,7 +311,7 @@
                         }
                         else
                         {
-                            TextSpan remainderAfterBackslah = next.Remainder;
+                            TextSpan remainderAfterBackslash = next.Remainder;
                             next = next.Remainder.ConsumeChar();
                             // Only backslash and double quote need to be escaped when in Escaped mode
                             bool shouldEscape = next.Value == BackSlash || next.Value == DoubleQuote;
@@ -324,12 +324,12 @@
                                 }
                                 else
                                 {
-                                    yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
+                                    yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslash);
                                 }
                             }
                             else
                             {
-                                yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslah);
+                                yield return Result.Value(Escaped, backSlashStart, remainderAfterBackslash);
                             }
                         }
 
