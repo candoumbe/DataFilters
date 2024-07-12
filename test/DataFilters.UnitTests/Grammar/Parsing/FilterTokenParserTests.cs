@@ -522,10 +522,10 @@ I&_Oj
 
             OneOfExpression expected = bracketExpression.Item switch
             {
-                ConstantBracketValue constant => new(constant.Value.Select(chr => new StringValueExpression(chr.ToString())).ToArray()),
-                RangeBracketValue range => new(Enumerable.Range(range.Start, range.End - range.Start + 1)
+                ConstantBracketValue constant => new([.. constant.Value.Select(chr => new StringValueExpression(chr.ToString()))]),
+                RangeBracketValue range => new([.. Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                          .Select(ascii => (char)ascii)
-                                                         .Select(chr => new StringValueExpression(chr.ToString())).ToArray()),
+                                                         .Select(chr => new StringValueExpression(chr.ToString()))]),
                 _ => throw new NotSupportedException()
             };
 
@@ -605,7 +605,7 @@ I&_Oj
                         culture,
                         "]+2E-05 TO 32[",
                         new IntervalExpression(
-                            min: new BoundaryExpression(new NumericValueExpression("+2E-05"), included: false),
+                            min: new BoundaryExpression(new NumericValueExpression("2E-05"), included: false),
                             max: new BoundaryExpression(new NumericValueExpression("32"), included: false))
                     );
                 }
@@ -817,7 +817,7 @@ I&_Oj
                         new PropertyName("Value"),
                         new NotExpression(new NotExpression(new NumericValueExpression("5")))
                     )
-                },
+                }
             };
 
         /// <summary>
@@ -1015,12 +1015,15 @@ I&_Oj
                 {
                     CultureInfo.InvariantCulture,
                     new NumericValueExpression(float.MaxValue.ToString(CultureInfo.InvariantCulture))
+                },
+                {
+                    CultureInfo.InvariantCulture,
+                    new NumericValueExpression("2E-05")
                 }
             };
         
         [Theory]
         [MemberData(nameof(ParseNumberCases))]
-        // [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_Number(CultureInfo culture, NumericValueExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>

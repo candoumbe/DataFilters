@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using System.Diagnostics;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -11,6 +13,7 @@
     /// </remarks>
     /// <param name="expression">an <see cref="IBoundaryExpression"/></param>
     /// <param name="included"><c>true</c> if <paramref name="expression"/> should be included in the interval and <c>false</c> otherwise.</param>
+    [DebuggerDisplay("{Expression.OriginalString}")]
     public sealed class BoundaryExpression(IBoundaryExpression expression, bool included) : IEquatable<BoundaryExpression>
     {
         /// <summary>
