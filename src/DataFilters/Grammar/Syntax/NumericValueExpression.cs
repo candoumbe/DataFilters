@@ -40,6 +40,6 @@ namespace DataFilters.Grammar.Syntax
         public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as NumericValueExpression);
+        public override bool Equals(object obj) => base.Equals(obj);
     }
 }

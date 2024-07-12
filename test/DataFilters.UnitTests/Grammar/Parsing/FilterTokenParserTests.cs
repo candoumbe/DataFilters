@@ -858,8 +858,7 @@ I&_Oj
                 {
                     {
                         "Firstname=Vandal&Lastname=Savage",
-
-                            expressions => expressions.Exactly(2)
+                        expressions => expressions.Exactly(2)
                             && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname")) && expr.expression.Equals(new StringValueExpression("Vandal")))
                             && expressions.Once(expr => expr.prop.Equals(new PropertyName("Lastname")) && expr.expression.Equals(new StringValueExpression("Savage")))
 
