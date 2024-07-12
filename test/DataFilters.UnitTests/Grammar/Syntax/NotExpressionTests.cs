@@ -35,7 +35,7 @@
         public static TheoryData<string, NotExpression> ParsingCases
             => new()
             {
-                { "!!5", new NotExpression(new NotExpression(new StringValueExpression("5"))) }
+                { "!!5", new NotExpression(new NotExpression(new NumericValueExpression("5"))) }
             };
 
         [Theory]
