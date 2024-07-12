@@ -340,8 +340,7 @@
                                                                                                           .Or(Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>())
                                                                                                           .Or(Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>())
                                                                                                           .Or(Text.Cast<FilterToken, TextExpression, FilterExpression>())
-                                                                                                          .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-            ;
+                                                                                                          .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>());
 
         private static TokenListParser<FilterToken, Token<FilterToken>> RangeSeparator => from _ in Whitespace.AtLeastOnce()
                                                                                           from rangeSeparator in Token.EqualToValue(FilterToken.Letter, "T")
@@ -482,65 +481,59 @@
                 return item switch
                 {
                     // *<regex>
-                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))
-                                                                                                                     .ToArray()),
+                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression([ .. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString())) ]),
                     // *<regex><constant>
-                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))
-                                                                                                                                             .ToArray()),
+                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))]),
 
                     // <regex>*
-                    (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))
-                                                                                                                     .ToArray()),
+                    (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]),
 
-                    // <endswith><regex>
-                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))
-                                                                                                                      .ToArray()),
-                    // <endswith><regex><constant>
-                    (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}{constant.Value}"))
-                                                                                                                      .ToArray()),
-                    // <startswith><regex>
-                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head,
-                                                                                                                                                                           new EndsWithExpression(chr.ToString())))
-                                                                                                                  .ToArray()),
-                    // <regex><startwith>*
-                    (null, BracketExpression bracket, StartsWithExpression body) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}")).ToArray()),
+                    // <ends with><regex>
+                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))]),
+                    // <ends with><regex><constant>
+                    (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}{constant.Value}"))]),
+                    // <starts with><regex>
+                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values)
+                        .Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]),
+                    // <regex><starts with>*
+                    (null, BracketExpression bracket, StartsWithExpression body) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))]),
 
                     // <constant><regex><constant>
-                    (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracket.Value}{chr}{tail.Value}")).ToArray()),
+                    (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracket.Value}{chr}{tail.Value}"))]),
                     // <constant><regex>
-                    (ConstantValueExpression head, BracketExpression bracket, null) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{head.Value}{chr}")).ToArray()),
+                    (ConstantValueExpression head, BracketExpression bracket, null) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{head.Value}{chr}"))]),
 
                     // <regex><constant>
-                    (null, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tail.Value}")).ToArray()),
+                    (null, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tail.Value}"))]),
 
                     // <regex>
-                    (null, BracketExpression bracket, null) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString())).ToArray()),
+                    (null, BracketExpression bracket, null) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString()))]),
 
                     // <regex><constant><regex>
-                    (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new(ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
+                    (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new OneOfExpression([ ..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
                                                                             .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                                                             .Select(tuple => new StringValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
-                                                                            .ToArray()),
+                                                                            ]),
                     // <regex><regex>
-                    (BracketExpression head, null, BracketExpression tail) => new(ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
+                    (BracketExpression head, null, BracketExpression tail) => new OneOfExpression([..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
                                                                             .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                                                             .Select(tuple => new StringValueExpression($"{tuple.start}{tuple.end}"))
-                                                                            .ToArray()),
-                    // <regex><endswith>
-                    (null, BracketExpression body, EndsWithExpression tail) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), tail)).ToArray()),
+                                                                            ]),
+                    // <regex><ends with>
+                    (null, BracketExpression body, EndsWithExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), tail))]),
 
-                    // *<oneof>
-                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression(constants.Select(constant => new EndsWithExpression(constant.Value)).ToArray()),
+                    // *<one of>
+                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]),
 
-                    // <oneof>*
-                    (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression(constants.Select(constant => new StartsWithExpression(constant.Value)).ToArray()),
+                    // <one of>*[
+                    (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression([.. constants.Select(constant => new StartsWithExpression(constant.Value))]),
 
-                    // *<oneof>*
-                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression(constants.Select(constant => new ContainsExpression(constant.Value)).ToArray()),
-                    // <oneof><endswith>
-                    (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression(constants.Select(constant => constant + endsWith).ToArray()),
-                    // <oneof>
-                    (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression(constants.ToArray()),
+                    // *<one of>*
+                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression([.. constants.Select(constant => new ContainsExpression(constant.Value))]),
+                    // <one of><ends with>
+                    (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression([..constants.Select(constant => constant + endsWith)]),
+                    // <one of>
+                    (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants]),
 
 #if NET7_0_OR_GREATER
                     _ => throw new UnreachableException($"Unsupported {nameof(OneOf)} expression :  {item}")
@@ -559,10 +552,10 @@
                                                                                        from time in Time
                                                                                        from offset in Offset.OptionalOrDefault()
                                                                                        select new DateTimeExpression(date,
-                                                                                                                     new(hours: time.Hours,
-                                                                                                                         minutes: time.Minutes,
-                                                                                                                         seconds: time.Seconds,
-                                                                                                                         milliseconds: time.Milliseconds),
+                                                                                                                     new TimeExpression(hours: time.Hours,
+                                                                                                                                        minutes: time.Minutes,
+                                                                                                                                        seconds: time.Seconds,
+                                                                                                                                        milliseconds: time.Milliseconds),
                                                                                                                      offset)).Try()
                                                                                       // DATE
                                                                                       .Or(from date in Date
@@ -736,17 +729,19 @@
                 )
             ;
 
-        private static string ConvertSignToChar(NumericSign? sign, bool mustOutputSign = false) => sign switch
-        {
-            NumericSign.Minus => "-",
-            _ => mustOutputSign ? "+" : string.Empty,
-        };
+        private static string ConvertSignToChar(NumericSign? sign, bool mustOutputSign = false)
+            => sign switch
+            {
+                NumericSign.Minus => "-",
+                _ => mustOutputSign ? "+" : string.Empty
+            };
 
         /// <summary>
         /// Parser for many <see cref="Criterion"/> separated by <c>&amp;</c>.
         /// </summary>
-        public static TokenListParser<FilterToken, (PropertyName, FilterExpression)[]> Criteria => from criteria in Criterion.ManyDelimitedBy(Token.EqualTo(FilterToken.Ampersand))
-                                                                                                   select criteria;
+        public static TokenListParser<FilterToken, (PropertyName, FilterExpression)[]> Criteria
+            => from criteria in Criterion.ManyDelimitedBy(Token.EqualTo(FilterToken.Ampersand))
+               select criteria;
 
         private static TokenListParser<FilterToken, StringValueExpression> Punctuation =>
         (
@@ -763,43 +758,44 @@
             select new StringValueExpression(c.ToStringValue())
         );
 
-        private static TokenListParser<FilterToken, GuidValueExpression> GlobalUniqueIdentifier => from chr1 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr2 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr3 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr4 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr5 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr6 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr7 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr8 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from _ in Token.EqualTo(FilterToken.Dash)
-                                                                                                   from chr9 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr10 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr11 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr12 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from __ in Token.EqualTo(FilterToken.Dash)
-                                                                                                   from chr13 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr14 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr15 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr16 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from ___ in Token.EqualTo(FilterToken.Dash)
-                                                                                                   from chr17 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr18 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr19 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr20 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from ____ in Token.EqualTo(FilterToken.Dash)
-                                                                                                   from chr21 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr22 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr23 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr24 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr25 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr26 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr27 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr28 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr29 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr30 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr31 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   from chr32 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-                                                                                                   select new GuidValueExpression($"{TokensToString(new[] { chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8 })}-{TokensToString(new[] { chr9, chr10, chr11, chr12 })}-{TokensToString(new[] { chr13, chr14, chr15, chr16 })}-{TokensToString(new[] { chr17, chr18, chr19, chr20 })}-{TokensToString(new[] { chr21, chr22, chr23, chr24, chr25, chr26, chr27, chr28, chr29, chr30, chr31, chr32 })}");
+        private static TokenListParser<FilterToken, GuidValueExpression> GlobalUniqueIdentifier
+            => from chr1 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr2 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr3 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr4 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr5 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr6 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr7 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr8 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from _ in Token.EqualTo(FilterToken.Dash)
+               from chr9 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr10 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr11 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr12 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from __ in Token.EqualTo(FilterToken.Dash)
+               from chr13 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr14 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr15 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr16 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from ___ in Token.EqualTo(FilterToken.Dash)
+               from chr17 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr18 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr19 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr20 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from ____ in Token.EqualTo(FilterToken.Dash)
+               from chr21 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr22 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr23 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr24 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr25 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr26 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr27 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr28 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr29 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr30 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr31 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               from chr32 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
+               select new GuidValueExpression($"{TokensToString([chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8 ])}-{TokensToString([chr9, chr10, chr11, chr12 ])}-{TokensToString([chr13, chr14, chr15, chr16 ])}-{TokensToString([chr17, chr18, chr19, chr20 ])}-{TokensToString([chr21, chr22, chr23, chr24, chr25, chr26, chr27, chr28, chr29, chr30, chr31, chr32 ])}");
 
         /// <summary>
         /// Parser for duration

@@ -180,7 +180,7 @@
 
             static IFilter ConvertExpressionToFilter(PropertyInfo propInfo, FilterExpression expression, TypeConverter tc)
             {
-                IFilter filter = Filter.True;
+                IFilter filter;
                 switch (expression)
                 {
                     case ConstantValueExpression constant:
@@ -206,22 +206,22 @@
                         filter = new MultiFilter
                         {
                             Logic = FilterLogic.Or,
-                            Filters = new IFilter[]
-                            {
+                            Filters =
+                            [
                                 ConvertExpressionToFilter(propInfo, orExpression.Left, tc),
                                 ConvertExpressionToFilter(propInfo, orExpression.Right, tc)
-                            }
+                            ]
                         };
                         break;
                     case AndExpression andExpression:
                         filter = new MultiFilter
                         {
                             Logic = FilterLogic.And,
-                            Filters = new IFilter[]
-                            {
+                            Filters =
+                            [
                                 ConvertExpressionToFilter(propInfo, andExpression.Left, tc),
                                 ConvertExpressionToFilter(propInfo, andExpression.Right, tc)
-                            }
+                            ]
                         };
                         break;
                     case BracketExpression regex:
@@ -242,18 +242,15 @@
                         }
                         else
                         {
-                            IList<IFilter> filters = new List<IFilter>(possibleValues.Length);
+                            List<IFilter> filters = new(possibleValues.Length);
+                            filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(propInfo, item, tc)));
 
-                            foreach (FilterExpression item in possibleValues)
-                            {
-                                filters.Add(ConvertExpressionToFilter(propInfo, item, tc));
-                            }
                             filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
                         }
                         break;
                     case IntervalExpression range:
 
-                        static (ConstantValueExpression constantExpression, bool included) ConvertBounderyExpressionToConstantExpression(BoundaryExpression input)
+                        static (ConstantValueExpression constantExpression, bool included) ConvertBoundaryExpressionToConstantExpression(BoundaryExpression input)
                             => input?.Expression switch
                             {
                                 StringValueExpression ce => (ce, input.Included),
@@ -272,8 +269,8 @@
 #endif
                             };
 
-                        (ConstantValueExpression constantExpression, bool included) min = ConvertBounderyExpressionToConstantExpression(range.Min);
-                        (ConstantValueExpression constantExpression, bool included) max = ConvertBounderyExpressionToConstantExpression(range.Max);
+                        (ConstantValueExpression constantExpression, bool included) min = ConvertBoundaryExpressionToConstantExpression(range.Min);
+                        (ConstantValueExpression constantExpression, bool included) max = ConvertBoundaryExpressionToConstantExpression(range.Max);
 
                         FilterOperator minOperator = min.included ? GreaterThanOrEqual : GreaterThan;
                         FilterOperator maxOperator = max.included ? LessThanOrEqualTo : LessThan;
@@ -349,7 +346,7 @@
                 }
                 else
                 {
-                    IList<IFilter> filters = new List<IFilter>();
+                    IList<IFilter> filters = [];
 
                     foreach ((PropertyName property, FilterExpression expression) in expressions)
                     {

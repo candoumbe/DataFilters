@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -12,6 +13,7 @@ namespace DataFilters.Grammar.Syntax
     /// <param name="value"></param>
     /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c></exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
+    [DebuggerDisplay("{Value}")]
     public class NumericValueExpression(string value) : ConstantValueExpression(value), IEquatable<NumericValueExpression>, IBoundaryExpression
     {
         ///<inheritdoc/>
@@ -38,6 +40,6 @@ namespace DataFilters.Grammar.Syntax
         public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => base.Equals(obj);
+        public override bool Equals(object obj) => Equals(obj as NumericValueExpression);
     }
 }

@@ -110,4 +110,21 @@ public class NumericValueExpressionTests
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
     public void Equals_should_be_symetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
         => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+
+    public static TheoryData<NumericValueExpression, object, bool, string> EqualsCases
+        => new()
+        {
+            {
+                new NumericValueExpression("0"),
+                new NumericValueExpression("0"),
+                true,
+                $"Left and right are both {nameof(NumericValueExpression)}s with exact same values"
+            },
+            {
+                new NumericValueExpression("+0"),
+                new NumericValueExpression("0"),
+                true,
+                $"Left and right are both {nameof(NumericValueExpression)}s with exact same values"
+            },
+        };
 }

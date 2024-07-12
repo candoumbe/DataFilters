@@ -39,24 +39,16 @@
         /// </remarks>
         public IntervalExpression(BoundaryExpression min = null, BoundaryExpression max = null)
         {
-            if (min?.Expression is AsteriskExpression && max?.Expression is AsteriskExpression expression)
+            switch (min?.Expression)
             {
-                throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)}");
-            }
-
-            if (min?.Expression is AsteriskExpression && max is null)
-            {
-                throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)}");
-            }
-
-            if (min?.Expression is DateExpression && max is not null && !(max.Expression is AsteriskExpression || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression))
-            {
-                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
-            }
-
-            if (min?.Expression is ConstantValueExpression && !(max is null || max.Expression is ConstantValueExpression || max.Expression is AsteriskExpression))
-            {
-                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
+                case AsteriskExpression when max?.Expression is AsteriskExpression expression:
+                    throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)}");
+                case AsteriskExpression when max is null:
+                    throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)}");
+                case DateExpression when max is not null && !(max.Expression is AsteriskExpression || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression):
+                    throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
+                case ConstantValueExpression when !(max is null || max.Expression is ConstantValueExpression || max.Expression is AsteriskExpression):
+                    throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
             }
 
             if (min is null && max is null)
@@ -74,8 +66,8 @@
                 AsteriskExpression or null => null,
                 DateTimeExpression { Date: var date, Time: var time, Offset: var offset } => (date, time, offset) switch
                 {
-                    (null, { }, _) => new BoundaryExpression(time, included: min.Included),
-                    ({ }, null, _) => new BoundaryExpression(date, included: min.Included),
+                    (null, not null, _) => new BoundaryExpression(time, included: min.Included),
+                    (not null, null, _) => new BoundaryExpression(date, included: min.Included),
                     _ => new BoundaryExpression(new DateTimeExpression(date, time, offset), included: min.Included)
                 },
                 _ => min
@@ -86,31 +78,29 @@
                 AsteriskExpression or null => null,
                 DateTimeExpression { Date: var date, Time: var time, Offset: var offset } => (date, time, offset) switch
                 {
-                    (null, { }, _) => new BoundaryExpression(time, included: max.Included),
-                    ({ }, null, _) => new BoundaryExpression(date, included: max.Included),
+                    (null, not null, _) => new BoundaryExpression(time, included: max.Included),
+                    (not null, null, _) => new BoundaryExpression(date, included: max.Included),
                     _ => new BoundaryExpression(new DateTimeExpression(date, time, offset), included: max.Included)
                 },
-                TimeExpression time when Min?.Expression is DateTimeExpression dateTime => new(new DateTimeExpression(dateTime.Date, time, dateTime.Offset), max.Included),
+                TimeExpression time when Min?.Expression is DateTimeExpression dateTime => new BoundaryExpression(new DateTimeExpression(dateTime.Date, time, dateTime.Offset), max.Included),
                 TimeExpression time => new BoundaryExpression(time, included: max.Included),
                 _ => max
             };
 
-            _lazyParseableString = new(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? "*"} TO {Max?.Expression?.EscapedParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
-            _lazyToString = new(() => new
+            _lazyParseableString = new Lazy<string>(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? "*"} TO {Max?.Expression?.EscapedParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
+            _lazyToString = new Lazy<string>(() => new
             {
                 Min = new
                 {
                     Min?.Included,
                     Min?.Expression?.EscapedParseableString,
-                    Type = Min?.Expression?.GetType().Name,
-                    DebugView = Min?.Expression?.ToString()
+                    Type = Min?.Expression?.GetType().Name
                 },
                 Max = new
                 {
                     Max?.Included,
                     Max?.Expression?.EscapedParseableString,
-                    Type = Max?.Expression?.GetType().Name,
-                    DebugView = Max?.Expression?.ToString()
+                    Type = Max?.Expression?.GetType().Name
                 },
                 EscapedParseableString
             }
