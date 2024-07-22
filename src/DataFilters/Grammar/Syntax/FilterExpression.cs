@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using System;
+
+namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
     /// Base class for filter expression
@@ -6,7 +8,7 @@
     /// <para>
     /// <see cref="FilterExpression"/>s can take many forms : from the simplest <see cref="ConstantValueExpression"/> to more complex <see cref="GroupExpression"/>s.
     /// </para>
-    public abstract class FilterExpression : IHaveComplexity, IParseableString
+    public abstract class FilterExpression : IHaveComplexity, IParseableString, IFormattable
     {
         /// <summary>
         /// Tests if <paramref name="other"/> is equivalent to the current instance.
@@ -27,6 +29,19 @@
 
         ///<inheritdoc/>
         public override string ToString() => $"{GetType().Name}: '{OriginalString}'";
+
+        /// <inheritdoc />
+        public virtual string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "d" or "D" => $"@{GetType().Name}",
+                null or "" => $"{ToString()}",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+            };
+
+            return formattable.ToString(formatProvider);
+        }
 
         ///<inheritdoc/>
         public abstract string EscapedParseableString { get; }

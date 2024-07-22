@@ -5,7 +5,7 @@
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-    public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>
+    public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IFormattable
     {
         /// <summary>
         /// Gets the "raw" value hold by the current instance.
@@ -52,9 +52,9 @@
         /// <summary>
         /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <param name="left">a <see cref="ConstantValueExpression"/></param>
+        /// <param name="right">a <see cref="EndsWithExpression"/></param>
+        /// <returns><see cref="AndExpression"/></returns>
         public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => left + AsteriskExpression.Instance + new EndsWithExpression(right.Value);
     }
 }

@@ -23,13 +23,13 @@ namespace DataFilters.Grammar.Syntax
         private readonly Lazy<string> _lazyParseableString = new(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-                // Also we need an extra position for the final '*' that will be append in all cases
+                // Also we need an extra position for the final '*' that will be appended in all cases
                 bool requireEscapingCharacters = value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
                 StringBuilder parseableString;
 
                 if (requireEscapingCharacters)
                 {
-                    parseableString = new((value.Length * 2) + 1);
+                    parseableString = new StringBuilder((value.Length * 2) + 1);
                     foreach (char chr in value)
                     {
                         if (SpecialCharacters.Contains(chr))
@@ -41,7 +41,7 @@ namespace DataFilters.Grammar.Syntax
                 }
                 else
                 {
-                    parseableString = new(value);
+                    parseableString = new StringBuilder(value);
                 }
 
                 return parseableString.ToString();

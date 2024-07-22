@@ -1,11 +1,13 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using System.Linq.Expressions;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
     /// </summary>
-    public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpression>
+    public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpression>, IFormattable
     {
         private readonly Lazy<string> _lazyToString;
         private readonly Lazy<string> _lazyEscapedParseableString;
@@ -26,8 +28,8 @@
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <c>null</c>.</exception>
         public AndExpression(FilterExpression left, FilterExpression right) : base(left, right)
         {
-            _lazyToString = new(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
-            _lazyEscapedParseableString = new(() => $"{Left.EscapedParseableString},{Right.EscapedParseableString}");
+            _lazyToString = new Lazy<string>(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": '{Left}'; ""{nameof(Right)} ({Right.GetType().Name})"": '{Right}']");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString},{Right.EscapedParseableString}");
         }
 
         ///<inheritdoc/>
@@ -54,6 +56,6 @@
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
-        public override string ToString() => _lazyToString.Value;
+        public override string ToString() => $"{base.ToString()}";
     }
 }

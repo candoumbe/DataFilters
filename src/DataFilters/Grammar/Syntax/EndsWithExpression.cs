@@ -41,7 +41,7 @@
             }
             Value = value;
 
-            _lazyEscapedParseableString = new(() =>
+            _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
                 // Also we need an extra position for the final '*' that will be append in all cases
@@ -50,7 +50,7 @@
 
                 if (requireEscapingCharacters)
                 {
-                    parseableString = new((value.Length * 2) + 1);
+                    parseableString = new StringBuilder((value.Length * 2) + 1);
                     foreach (char chr in value)
                     {
                         if (SpecialCharacters.Contains(chr))
@@ -62,7 +62,7 @@
                 }
                 else
                 {
-                    parseableString = new(value, value.Length + 1);
+                    parseableString = new StringBuilder(value, value.Length + 1);
                 }
 
                 return parseableString.Insert(0, '*').ToString();
@@ -101,6 +101,7 @@
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        
 
         ///<inheritdoc/>
         public override double Complexity => 1.5;

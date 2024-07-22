@@ -80,9 +80,9 @@
 
             _lazyEscapedParseableString = new(() => (date, time, offset) switch
            {
-               ({ }, { }, { }) => $"{date.EscapedParseableString}T{time.EscapedParseableString}{offset.EscapedParseableString}",
-               ({ }, { }, null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}",
-               (null, { }, _) => $"T{time.EscapedParseableString}",
+               (not null, not null, not null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}{offset.EscapedParseableString}",
+               (not null, not null, null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}",
+               (null, not null, _) => $"T{time.EscapedParseableString}",
                _ => date.EscapedParseableString
            });
         }

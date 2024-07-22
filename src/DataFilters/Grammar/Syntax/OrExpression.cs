@@ -23,8 +23,8 @@
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <see langword="null"/>.</exception>
         public OrExpression(FilterExpression left, FilterExpression right) : base(left, right)
         {
-            _lazyToString = new(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
-            _lazyEscapedParseableString = new(() => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}");
+            _lazyToString = new Lazy<string>(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}");
         }
 
         ///<inheritdoc/>
@@ -43,6 +43,7 @@
         ///<inheritdoc/>
         public override string ToString() => _lazyToString.Value;
 
+        
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 

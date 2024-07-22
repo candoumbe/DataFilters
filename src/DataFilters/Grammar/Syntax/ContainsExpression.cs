@@ -13,7 +13,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a string value
     /// </summary>
-    public sealed class ContainsExpression : FilterExpression, IEquatable<ContainsExpression>
+    public sealed class ContainsExpression : FilterExpression, IEquatable<ContainsExpression>, IFormattable
     {
         /// <summary>
         /// The value that was between two <see cref="AsteriskExpression"/>
@@ -42,28 +42,29 @@
 
             Value = value;
 
-            _lazyEscapedParseableString = new(() =>
+            _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 // The length of the final parseable string in worst case scenarios will double (1 backlash for each character of the original input)
-                // Also we need an extra position for the final '*' that will be appended in all cases
+                // Also we need two extra positions for '*' that will be prepended and appended in all cases
                 bool requireEscapingCharacters = Value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
                 StringBuilder parseableString;
 
                 if (requireEscapingCharacters)
                 {
-                    parseableString = new((Value.Length * 2) + 2);
+                    parseableString = new StringBuilder(( Value.Length * 2 ) + 2);
                     foreach (char chr in Value)
                     {
                         if (SpecialCharacters.Contains(chr))
                         {
                             parseableString = parseableString.Append('\\');
                         }
+
                         parseableString = parseableString.Append(chr);
                     }
                 }
                 else
                 {
-                    parseableString = new(Value, Value.Length + 2);
+                    parseableString = new StringBuilder(Value, Value.Length + 2);
                 }
 
                 return parseableString.Insert(0, "*").Append('*').ToString();
@@ -77,7 +78,7 @@
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
         public ContainsExpression(TextExpression text)
 #if !NETSTANDARD1_3
-            : this (Guard.Against.Null(text, nameof(text)).OriginalString)
+            : this(Guard.Against.Null(text, nameof(text)).OriginalString)
         {
             _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}*");
         }

@@ -230,6 +230,10 @@
                                                new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                                 new BoundaryExpression(new NumericValueExpression("-1"), true))),
                     new NumericValueExpression("-1")
+                },
+                {
+                    new OneOfExpression(null, new GroupExpression(new AndExpression(new StringValueExpression("a"), new StringValueExpression("b"))), null),
+                    new AndExpression(new StringValueExpression("a"), new StringValueExpression("b"))
                 }
             };
 

@@ -9,18 +9,19 @@
     /// <summary>
     /// a <see cref="FilterExpression"/> that contains multiple <see cref="FilterExpression"/>s as <see cref="Values"/>.
     /// </summary>
-    public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>, ISimplifiable
+    public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>, ISimplifiable, IEnumerable<FilterExpression>
     {
         private static readonly ArrayEqualityComparer<FilterExpression> EqualityComparer = new();
 
         /// <summary>
         /// Collection of <see cref="FilterExpression"/> that the current instance holds.
         /// </summary>
-        public IReadOnlyCollection<FilterExpression> Values => _values.ToList().AsReadOnly();
+        public IReadOnlyCollection<FilterExpression> Values => [ .. _values];
 
         private readonly FilterExpression[] _values;
 
-        private readonly Lazy<string> _lazyParseableString;
+        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<string> _lazyOriginalString;
 
         /// <summary>
         /// Builds a new <see cref="OneOfExpression"/> instance.
@@ -42,7 +43,8 @@
 
             _values = [.. values.Where(x => x is not null)];
 
-            _lazyParseableString = new(() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
+            _lazyOriginalString = new Lazy<string>(() => $"{{{string.Join(",", Values.Select(v => v.OriginalString))}}}");
         }
 
         /// <inheritdoc/>
@@ -99,9 +101,9 @@
             {
                 if (expr.Key)
                 {
-                    OneOfExpression oneOfExpression = new(expr.Select(item => ((OneOfExpression)item).Values)
+                    OneOfExpression oneOfExpression = new([ .. expr.Select(item => ((OneOfExpression)item).Values)
                                                               .SelectMany(x => x)
-                                                              .ToArray());
+                                                              ]);
 
                     curatedExpressions.Add(oneOfExpression.Simplify());
                 }
@@ -141,6 +143,21 @@
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyParseableString.Value;
+        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+
+        /// <inheritdoc />
+        public override string ToString() => _lazyOriginalString.Value;
+
+        /// <inheritdoc />
+        IEnumerator<FilterExpression> IEnumerable<FilterExpression>.GetEnumerator()
+        {
+            foreach (FilterExpression expression in _values)
+            {
+                yield return expression;
+            }
+        }
+
+        /// <inheritdoc />
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _values.GetEnumerator();
     }
 }

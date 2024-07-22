@@ -5,7 +5,7 @@
     /// <summary>
     /// An expression that negate wrapped inside
     /// </summary>
-    public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>, ISimplifiable
+    public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>, ISimplifiable, IFormattable
     {
         /// <summary>
         /// Expression that the NOT logical is applied to
@@ -13,6 +13,7 @@
         public FilterExpression Expression { get; }
 
         private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<string> _lazyOriginalString;
 
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
@@ -28,10 +29,11 @@
             {
                 null => throw new ArgumentNullException(nameof(expression)),
                 BinaryFilterExpression expr => new GroupExpression(expr),
-                FilterExpression expr => expr
+                _ => expression
             };
 
             _lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
+            _lazyOriginalString = new Lazy<string>(() => $"!{Expression.OriginalString}");
         }
 
         ///<inheritdoc/>
@@ -44,12 +46,25 @@
         public override int GetHashCode() => Expression.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => "{NotExpression [" +
+        public override string ToString() => $"{{{nameof(NotExpression)} [" +
             $"Expression = {Expression.GetType().Name}, " +
-            $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
-            $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}']," +
-            $"{nameof(EscapedParseableString)} = {EscapedParseableString}}}" +
-            $"{nameof(Expression)} : {Expression} ]";
+            $"{nameof(Expression)}.{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}',{Environment.NewLine} " +
+            $"{nameof(Expression)}.{nameof(Expression.OriginalString)} = '{Expression.OriginalString}'],{Environment.NewLine}" +
+            $"{nameof(EscapedParseableString)} = {EscapedParseableString}}},{Environment.NewLine}" +
+            $"{nameof(OriginalString)} : {OriginalString} ]";
+
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "d" or "D" => $"@{nameof(NotExpression)}({Expression:d})",
+                null or "" => $"{ToString()}",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+            };
+
+            return formattable.ToString(formatProvider);
+        }
 
         ///<inheritdoc/>
         public FilterExpression Simplify()
@@ -62,6 +77,9 @@
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+
+        ///<inheritdoc/>
+        public override string OriginalString => _lazyOriginalString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
