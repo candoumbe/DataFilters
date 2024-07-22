@@ -78,7 +78,7 @@
 #if !NETSTANDARD1_3
             : this (Guard.Against.Null(text, nameof(text)).OriginalString)
         {
-            _lazyEscapedParseableString = new(() => $"{text.EscapedParseableString}*");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{text.EscapedParseableString}*");
         }
 #else
         {
@@ -100,9 +100,6 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string ToString() => OriginalString;
-
-        ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         /// <summary>
@@ -112,6 +109,7 @@
         /// <param name="right">The right operand</param>
         /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is
         /// <paramref name="right"/></returns>
+        /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <see langword="null"/>.</exception>
         public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new(left, right);
 
         /// <summary>

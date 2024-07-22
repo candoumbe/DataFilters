@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using System.Runtime.CompilerServices;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using Exceptions;
@@ -6,7 +8,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
     /// </summary>
-    public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalExpression>, ISimplifiable
+    public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalExpression>, ISimplifiable, IFormattable
     {
         /// <summary>
         /// Lower bound of the current instance
@@ -35,7 +37,7 @@
         /// </list>
         /// </exception>
         /// <remarks>
-        ///     Either <paramref name="min"/> or <paramref name="max"/> can be null to indicate and unbounded lower (respectivelu upper) bound.
+        ///     Either <paramref name="min"/> or <paramref name="max"/> can be null to indicate and unbounded lower (respectively upper) bound.
         /// </remarks>
         public IntervalExpression(BoundaryExpression min = null, BoundaryExpression max = null)
         {
@@ -205,6 +207,18 @@
             }
 
             return simplified;
+        }
+
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "d" or "D" or null or "" => $"@{nameof(IntervalExpression)}({Min?.Expression:d}:{Min?.Included},{Max?.Expression:d}:{Max?.Included})",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+            };
+
+            return formattable.ToString(formatProvider);
         }
     }
 }

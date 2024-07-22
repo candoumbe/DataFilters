@@ -14,17 +14,25 @@
     /// plus a marginal overhead.
     /// </para>
     /// </remarks>
-    /// <remarks>
-    /// Builds a new <see cref="GroupExpression"/> that holds the specified <paramref name="expression"/>.
-    /// </remarks>
-    /// <param name="expression">the expression to group</param>
-    /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <c>null</c>.</exception>
-    public sealed class GroupExpression(FilterExpression expression) : FilterExpression, IEquatable<GroupExpression>, ISimplifiable
+    public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>, ISimplifiable
     {
+        private readonly Lazy<string> _lazyEscapedString;
+
+        /// <summary>
+        /// Builds a new <see cref="GroupExpression"/> that holds the specified <paramref name="expression"/>.
+        /// </summary>
+        /// <param name="expression">the expression to group</param>
+        /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+        public GroupExpression(FilterExpression expression)
+        {
+            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            _lazyEscapedString = new Lazy<string>(() => $"({Expression.EscapedParseableString})");
+        }
+
         /// <summary>
         /// <see cref="FilterExpression"/> that the current instance is applied onto.
         /// </summary>
-        public FilterExpression Expression { get; } = expression ?? throw new ArgumentNullException(nameof(expression));
+        public FilterExpression Expression { get; }
 
         ///<inheritdoc/>
         public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);
@@ -35,15 +43,21 @@
         ///<inheritdoc/>
         public override int GetHashCode() => Expression.GetHashCode();
 
-        ///<inheritdoc/>
-        public override string ToString() => $"{{{nameof(GroupExpression)} " +
-            $"[Expression = {Expression.GetType().Name}, " +
-            $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
-            $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}'], " +
-            $"{nameof(EscapedParseableString)}='{EscapedParseableString}'}}";
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "d" or "D" => $"@{nameof(GroupExpression)}({Expression:d})",
+                null or "" => $"{ToString()}",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+            };
+
+            return formattable.ToString(formatProvider);
+        }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => $"({Expression.EscapedParseableString})";
+        public override string EscapedParseableString => _lazyEscapedString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => 0.1 + Expression.Complexity;
@@ -59,7 +73,7 @@
         public FilterExpression Simplify()
             => Expression switch
             {
-                ConstantValueExpression constant => constant,
+                //ConstantValueExpression constant => constant,
                 ISimplifiable simplify => simplify.Simplify(),
                 _ => Expression
             };

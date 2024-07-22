@@ -5,7 +5,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that only consists of time part.
     /// </summary>
-    public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression
+    public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression, IFormattable
     {
         /// <summary>
         /// Hours part of the expression

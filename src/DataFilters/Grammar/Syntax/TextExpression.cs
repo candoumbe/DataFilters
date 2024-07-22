@@ -22,7 +22,7 @@
 
                     foreach (char chr in value)
                     {
-                        if (chr == '"' || chr == '\\')
+                        if (chr is '"' or '\\')
                         {
                             escapedParseableString.Append('\\');
                         }
@@ -31,7 +31,7 @@
                 }
                 else
                 {
-                    escapedParseableString = new(value);
+                    escapedParseableString = new StringBuilder(value);
                 }
 
                 return escapedParseableString.Insert(0, '"').Append('"').ToString();
