@@ -155,14 +155,14 @@
                 {
                     "[",
                     results => results.Once()
-                               && results.Once(result => result.Kind == OpenSquaredBracket && result.Span.EqualsValue("["))
+                               && results.Once(result => result.Kind == LeftSquaredBracket && result.Span.EqualsValue("["))
 
                 },
 
                 {
                     "]",
                     results => results.Once()
-                               && results.Once(result => result.Kind == CloseSquaredBracket && result.Span.EqualsValue("]"))
+                               && results.Once(result => result.Kind == RightSquaredBracket && result.Span.EqualsValue("]"))
 
                 },
 
