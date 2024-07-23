@@ -6,9 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### ⚠️ Breaking Changes
+
+- Renamed `FilterToken.OpenParenthese` to `FilterToken.LeftParenthesis`
+- Renamed `FilterToken.CloseParenthese` to `FilterToken.RightParenthesis`
+- Renamed `FilterToken.LeftBrace` to `FilterToken.LeftCurlyBrace`
+- Renamed `FilterToken.RightBrace` to `FilterToken.RightCurlyBrace`
+- Renamed `FilterToken.OpenSquaredBracket` to `FilterToken.LeftSquaredBrace`
+- Renamed `FilterToken.CloseSquaredBracket` to `FilterToken.RightSquaredBrace`
+
 ### 🚨 Fixes
 
-- Fixed incorrect parsing of numeric values with `E` symbol.
+- Fixed incorrect parsing of scientific numeric values (with `E` symbol).
 
 ### 🧹 Housekeeping
 
@@ -90,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `SortExtensions` class to `OrderExtensions` in `DataFilters.Expressions`
 
 ## [0.11.0] / 2022-03-13
-- Added [`FilterOptions`](/src/DataFilters/FilterOptions.cs)
+- Added [`FilterOptions`](./src/DataFilters/FilterOptions.cs)
 - Marked `FilterService` as obsolete.
 
 
@@ -111,7 +120,7 @@ when the only difference is the numeric sign
 - Bumped `Queries.Core` to `0.4.0`
 - Added `DateOnly` support ([#63](https://github.com/candoumbe/datafilters/issues/63))
 - Added `TimeOnly` support ([#64](https://github.com/candoumbe/datafilters/issues/64))
-- Added [`NullableValueBehavior`](/src/Datafilters.Expressions/NullableValueBehavior.cs) ([#68](https://github.com/candoumbe/datafilters/issues/68))
+- Added [`NullableValueBehavior`](./src/Datafilters.Expressions/NullableValueBehavior.cs) ([#68](https://github.com/candoumbe/datafilters/issues/68))
 
 ## [0.8.0] / 2021-10-10
 - Added `ISimplifiable` marker interface which defines a `FilterExpression.Simplify()` method to rewrite a 
@@ -122,8 +131,8 @@ when the only difference is the numeric sign
   - `OriginalString` property that holds the string representation of a filter BEFORE being escaped.
 - Added `Deconstruct` method for `TimeExpression` class.
 - Added `BoolValueExpression`
-- Added [`NumericValueExpression`](/src/DataFilters/Grammar/Syntax/NumericValueExpression.cs) to improve parsing of numeric values ([#29](https://github.com/candoumbe/datafilters/issues/29))
-- Added [`TextExpression`](/src/DataFilters/Grammar/Syntax/TextExpression.cs)
+- Added [`NumericValueExpression`](./src/DataFilters/Grammar/Syntax/NumericValueExpression.cs) to improve parsing of numeric values ([#29](https://github.com/candoumbe/datafilters/issues/29))
+- Added [`TextExpression`](./src/DataFilters/Grammar/Syntax/TextExpression.cs)
 - Made `ConstantValueExpression` abstract [BREAKING]
 
 ## [0.7.0] / 2021-06-29
@@ -153,21 +162,21 @@ when the only difference is the numeric sign
 
 
 ## [0.5.0] / 2021-05-02
-- Introduces [`PropertyNameResolutionStrategy`](/src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) base class as extension point to configure the way to lookup 
+- Introduces [`PropertyNameResolutionStrategy`](./src/DataFilters/Casing/PropertyNameResolutionStrategy.cs) base class as extension point to configure the way to lookup 
 for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issues/8))
 - Added `ToFilter<T>(string, PropertyNameResolutionStrategy)` overload
 - Added `ToSort<T>(string, PropertyNameResolutionStrategy)` overload
 
 ## [0.4.1] / 2021-04-28
-- Fixes `FileNotFoundException` when calling `StringExtensions.ToFilter<T>` method after a fresh install.
+- Fixes `FileNotFoundException` when calling `StringExtensions.ToFilter<T>` method after a fresh installation.
 
 ## [0.4.0] / 2021-04-03
-- Added support for [offset](/src/DataFilters/Grammar/Syntax/TimeOffset.cs) when parsing [`TimeExpression`](/src/DataFilters/Grammar/Syntax/TimeExpression.cs)s
-- Changed [`ConstantValueExpresssion.Value`](/src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs) type from `string` to `object` [BREAKING]
-- Added support for [duration](/src/DataFilters/Grammar/Syntax/DurationExpression.cs) expressions
+- Added support for [offset](./src/DataFilters/Grammar/Syntax/OffsetExpression.cs) when parsing [`TimeExpression`](./src/DataFilters/Grammar/Syntax/TimeExpression.cs)s
+- Changed [`ConstantValueExpresssion.Value`](./src/DataFilters/Grammar/Syntax/ConstantValueExpression.cs) type from `string` to `object` [BREAKING]
+- Added support for [duration](./src/DataFilters/Grammar/Syntax/DurationExpression.cs) expressions
 - Removed runtime dependency to [Candoumbe.MiscUtilities](https://www.nuget.org/packages/Candoumbe.MiscUtilities/) package [BREAKING]
-- Moved classes from `DataFilters.Converters` to DataFilters.Serizalization` namespace. [BREAKING]
-- Added [`Kind`](/src/DataFilters/Grammar/Syntax/DateTimeExpressionKind.cs) property to specify the [`DateTimeExpression`](/src/DataFilters/Grammar/Syntax/DateTimeExpression.cs) [BREAKING]
+- Moved classes from `DataFilters.Converters` to `DataFilters.Serialization` namespace. [BREAKING]
+- Added [`Kind`](./src/DataFilters/Grammar/Syntax/DateTimeExpressionKind.cs) property to specify the [`DateTimeExpression`](./src/DataFilters/Grammar/Syntax/DateTimeExpression.cs) [BREAKING]
 
 ## [0.3.2] / 2021-01-31
 - Fixed parsing of sort expressions where a sub property name was specified.
@@ -180,7 +189,7 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Moved `FilterExtensions.ToFilter<T>(this StringSegment)` method to `StringExtensions.ToFilter<T>(this StringSegment)` [BREAKING]
 - Moved `FilterExtensions.ToFilter<T>(this string)` method to `StringExtensions.ToFilter<T>(this string)` [BREAKING]
 - Changed `ConstantExpression` to `ConstantValueExpression` [BREAKING]
-- Changed subproperty syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
+- Changed sub-property syntax from `property.subproperty` method to `property["subproperty"]` [BREAKING]
 - Fixed parsing [`RangeExpression`](src/DataFilters/Grammar/Syntax/IntervalExpression.cs) with datetime values
 - Enabled Source Link
 
