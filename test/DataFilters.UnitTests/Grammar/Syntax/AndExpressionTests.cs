@@ -1,5 +1,4 @@
-﻿
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +7,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
     using FsCheck;
-    using FsCheck.Fluent;
     using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
@@ -157,8 +155,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void IsEquivalent_should_be_reflexive(AndExpression and)
-            => and.IsEquivalentTo(and).Should().BeTrue();
+        public void IsEquivalent_should_be_reflexive(AndExpression and) => and.IsEquivalentTo(and).Should().BeTrue();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_two_AndExpression_instances_first_and_second_and_firstU002ERight_eq_secondU002Eright_and_firstU002ELeft_eq_secondU002ELeft_Equals_should_returns_true(FilterExpression left, FilterExpression right)
