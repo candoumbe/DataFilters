@@ -91,7 +91,7 @@
                                                                                         );
 
         /// <summary>
-        /// Parser for "starts with" expressions
+        /// Parser for "ends with" expressions
         /// </summary>
         public static TokenListParser<FilterToken, EndsWithExpression> EndsWith => Asterisk.IgnoreThen(AlphaNumeric.AtLeastOnce())
                                                                                            .Select(data => new EndsWithExpression(string.Concat(data.Select(item => item.Value)))).Try()
@@ -104,21 +104,21 @@
         public static TokenListParser<FilterToken, ContainsExpression> Contains => (from _ in Asterisk
                                                                                     from data in (
                                                                                         from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                        from puncBefore in Punctuation.Many()
+                                                                                        from beforePunctuation in Punctuation.Many()
                                                                                         from alpha in AlphaNumeric.Many()
-                                                                                        from puncAfter in Punctuation.Many()
+                                                                                        from afterPunctuation in Punctuation.Many()
                                                                                         from symbolAfter in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
                                                                                         where symbolBefore.AtLeastOnce()
-                                                                                              || puncBefore.AtLeastOnce()
+                                                                                              || beforePunctuation.AtLeastOnce()
                                                                                               || alpha.AtLeastOnce()
-                                                                                              || puncAfter.AtLeastOnce()
+                                                                                              || afterPunctuation.AtLeastOnce()
                                                                                               || symbolAfter.AtLeastOnce()
                                                                                         select new
                                                                                         {
                                                                                             value = string.Concat(string.Concat(symbolBefore.Select(x => x.ToStringValue())),
-                                                                                                                  string.Concat(puncBefore.Select(x => x.Value)),
+                                                                                                                  string.Concat(beforePunctuation.Select(x => x.Value)),
                                                                                                                   string.Concat(alpha.Select(item => item.Value)),
-                                                                                                                  string.Concat(puncAfter.Select(x => x.Value)),
+                                                                                                                  string.Concat(afterPunctuation.Select(x => x.Value)),
                                                                                                                   string.Concat(symbolAfter.Select(x => x.ToStringValue())))
                                                                                         }).AtLeastOnce()
                                                                                     from escaped in Token.EqualTo(FilterToken.Backslash).Many()
@@ -144,27 +144,44 @@
                                                                         .Or(from left in AlphaNumeric
                                                                             from _ in Asterisk
                                                                             from right in AlphaNumeric
+                                                                            from __ in Asterisk
                                                                             select new AndExpression(new StartsWithExpression(left.Value),
-                                                                                                    new EndsWithExpression(right.Value)));
+                                                                                                    new ContainsExpression(right.Value))).Try()
+                                                                        .Or(from left in AlphaNumeric
+                                                                            from _ in Asterisk
+                                                                            from right in AlphaNumeric
+                                                                            select new AndExpression(new StartsWithExpression(left.Value),
+                                                                                                    new EndsWithExpression(right.Value))).Try()
+                                                                        ;
 
         /// <summary>
         /// Parser for NOT expression
         /// </summary>
-        public static TokenListParser<FilterToken, NotExpression> Not => from _ in Token.EqualTo(FilterToken.Bang)
-                                                                         from expression in Parse.Ref(() => UnaryExpression)
-                                                                         select new NotExpression(expression);
+        public static TokenListParser<FilterToken, NotExpression> Not => (from bang in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
+                                                                         from expression in BinaryOrUnaryExpression
+                                                                         select (bang, expression))
+            .Select(tuple =>
+            {
+                NotExpression notExpression = new(tuple.expression);
+
+                for (int i = 1; i < tuple.bang.Length; i++)
+                {
+                    notExpression = new NotExpression(notExpression);
+                }
+                return notExpression;
+            });
 
         private static TokenListParser<FilterToken, BracketExpression> Bracket => (
-                                                                                    from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                                                                                     from rangeValues in BuildRangeBracketValuesParser(Alpha).Or(BuildRangeBracketValuesParser(Digit)).AtLeastOnce()
-                                                                                    from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
                                                                                     select new BracketExpression(rangeValues)
                                                                                 ).Try()
                                                                                 .Or
                                                                                 (
-                                                                                    from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                    from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                                                                                     from alpha in Alpha.Try().Or(Digit).AtLeastOnce()
-                                                                                    from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                    from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
                                                                                     select new BracketExpression(new ConstantBracketValue(alpha.Select(chr => chr.ToStringValue())
                                                                                                                                                      .Aggregate((total, current) => $"{total}{current}"))
                                                                                                                 )
@@ -193,11 +210,11 @@
             {
                 return  // Case [ min TO max ] 
                         (
-                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                             from min in Constant
                             from __ in RangeSeparator
                             from max in Constant
-                            from ___ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.RightSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -225,12 +242,12 @@
                         ).Try()
                       // Case ] min TO max ] : lower bound excluded from the interval
                       .Or(
-                            from _ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.RightSquaredBracket)
                             from min in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
                                                 .Or(Constant)
                             from __ in RangeSeparator
                             from max in Constant
-                            from ___ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.RightSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -259,13 +276,13 @@
                         ).Try()
                       // Case syntax [ min TO max [ : upper bound excluded from the interval
                       .Or(
-                            from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                             from min in Constant
                             from __ in RangeSeparator
                             from max in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
                                                 .Or(Constant)
 
-                            from ___ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.LeftSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -294,14 +311,14 @@
                         ).Try()
                       // Case  ] min TO max [ : lower and upper bounds excluded from the interval
                       .Or(
-                            from _ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                            from _ in Token.EqualTo(FilterToken.RightSquaredBracket)
                             from min in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
                                                 .Or(Constant)
 
                             from __ in RangeSeparator
                             from max in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
                                                 .Or(Constant)
-                            from ___ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                            from ___ in Token.EqualTo(FilterToken.LeftSquaredBracket)
 
                             where min != default || max != default
                             select new IntervalExpression(
@@ -353,25 +370,25 @@
         /// <summary>
         /// Group expression
         /// </summary>
-        public static TokenListParser<FilterToken, GroupExpression> Group => from _ in Token.EqualTo(FilterToken.OpenParenthese)
+        public static TokenListParser<FilterToken, GroupExpression> Group => from _ in Token.EqualTo(FilterToken.LeftParenthesis)
                                                                              from expression in BinaryOrUnaryExpression
-                                                                             from __ in Token.EqualTo(FilterToken.CloseParenthese)
+                                                                             from __ in Token.EqualTo(FilterToken.RightParenthesis)
                                                                              select new GroupExpression(expression);
 
-        private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>())
-                                                                                                      .Or(Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()))
+        private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>())
                                                                                                       .Or(Parse.Ref(() => Or.Try()))
                                                                                                       .Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
-                                                                                                      .Or(Parse.Ref(() => UnaryExpression));
+                                                                                                      .Or(Parse.Ref(() => UnaryExpression.Try()))
+        ;
 
         /// <summary>
         /// Property name parser
         /// </summary>
         public static TokenListParser<FilterToken, PropertyName> Property => from prop in AlphaNumeric
                                                                              from subProps in (
-                                                                                 from _ in Token.EqualTo(FilterToken.OpenSquaredBracket)
+                                                                                 from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                                                                                  from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
-                                                                                 from __ in Token.EqualTo(FilterToken.CloseSquaredBracket)
+                                                                                 from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
                                                                                  select @$"[""{subProp.Value}""]"
                                                                              ).Many()
                                                                              select new PropertyName(string.Concat(prop.Value, string.Concat(subProps)));
@@ -417,7 +434,6 @@
                                         .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
                                         .OptionalOrDefault()
                 from tail in Bracket
-
                 select (head: (FilterExpression)head, (object)body, tail: (FilterExpression)tail)
                 ).Try()
                 .Or(
@@ -436,42 +452,18 @@
                     select (head, body: (object)body, tail)
                 ).Try()
                 .Or(
-                    from head in Group
-                    from body in Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>()
-                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                            .OptionalOrDefault()
-                    from tail in Group
-
-                    select (head: (FilterExpression)head, (object)body, tail: (FilterExpression)tail)
-                ).Try()
-                .Or(
                     from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                             .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                            .Or(Constant.Try())
+                                            .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                             .OptionalOrDefault()
-                    from body in Group
-                    from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                        .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                        .Or(AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                        .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                        .OptionalOrDefault()
-
-                    select (head, body: (object)body, tail)
-                ).Try()
-                .Or(
-                    from head in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
-                                            .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
-                                            .OptionalOrDefault()
-                    from _ in Token.EqualTo(FilterToken.LeftBrace)
+                    from _ in Token.EqualTo(FilterToken.LeftCurlyBrace)
                     from body in Constant.AtLeastOnceDelimitedBy(Token.EqualTo(FilterToken.Or))
-                    from __ in Token.EqualTo(FilterToken.RightBrace)
+                    from __ in Token.EqualTo(FilterToken.RightCurlyBrace)
                     from tail in EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()
                                             .Or(StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>())
-                                            .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>())
-                                            .Or(Asterisk.Cast<FilterToken, AsteriskExpression, FilterExpression>())
+                                            .Or(Constant.Try())
+                                            .Or(Asterisk.Try().Cast<FilterToken, AsteriskExpression, FilterExpression>())
                                             .OptionalOrDefault()
 
                     select (head, body: (object)body.Select(item => item).OfType<ConstantValueExpression>().ToArray(), tail)
@@ -525,7 +517,7 @@
                     // *<one of>
                     (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]),
 
-                    // <one of>*[
+                    // <one of>*
                     (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression([.. constants.Select(constant => new StartsWithExpression(constant.Value))]),
 
                     // *<one of>*
@@ -534,7 +526,6 @@
                     (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression([..constants.Select(constant => constant + endsWith)]),
                     // <one of>
                     (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants]),
-
 #if NET7_0_OR_GREATER
                     _ => throw new UnreachableException($"Unsupported {nameof(OneOf)} expression :  {item}")
 #else
@@ -569,7 +560,7 @@
         private static TokenListParser<FilterToken, OffsetExpression> Offset => (from _ in Token.EqualToValue(FilterToken.Letter, "Z")
                                                                                  select OffsetExpression.Zero).Try()
                                                                           .Or(
-                                                                                from sign in MinusOrPlusSign.OptionalOrDefault(NumericSign.Plus)
+                                                                                from sign in MinusOrPlusSign.OptionalOrDefault()
                                                                                 from hourDigits in IntDigits(2)
                                                                                 from _ in Colon
                                                                                 from minuteDigits in IntDigits(2)
@@ -635,7 +626,6 @@
         /// </summary>
         private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>())
                                                                                               .Or(Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>()))
@@ -649,6 +639,7 @@
                                                                                               .Or(Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
             ;
         /// <summary>
         /// Parser for <c>property=value</c> pair.
@@ -835,9 +826,9 @@
 
         private static string TokensToString(IEnumerable<Token<FilterToken>> tokens)
         {
-            static string TokenToString(Token<FilterToken> token) => token.ToStringValue();
-
             return string.Concat(tokens.Select(TokenToString));
+
+            static string TokenToString(Token<FilterToken> token) => token.ToStringValue();
         }
     }
 }
