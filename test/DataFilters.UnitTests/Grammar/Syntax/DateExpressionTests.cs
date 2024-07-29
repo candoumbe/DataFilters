@@ -107,7 +107,7 @@
             // Assert
             object __ = (years, months, days) switch
             {
-                (int y, int m, int d) when y < 1 || m < 1 || d < 1 => invokingConstructor.Should().Throw<ArgumentOutOfRangeException>("because years, months and days must be greater than or equal to 1"),
+                var (y, m, d) when y < 1 || m < 1 || d < 1 => invokingConstructor.Should().Throw<ArgumentOutOfRangeException>("because years, months and days must be greater than or equal to 1"),
                 _ => invokingConstructor.Should().NotThrow("because years, months and days are greater than or equal to 1")
             };
         }

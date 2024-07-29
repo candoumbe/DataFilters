@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Text;
 
-    using static DataFilters.Grammar.Parsing.FilterTokenizer;
+    using static Parsing.FilterTokenizer;
 
 #if !NETSTANDARD1_3
     using Ardalis.GuardClauses;
@@ -44,7 +44,7 @@
             _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-                // Also we need an extra position for the final '*' that will be append in all cases
+                // Also we need an extra position for the final '*' that will be appended in all cases
                 bool requireEscapingCharacters = value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
                 StringBuilder parseableString;
 
@@ -101,7 +101,6 @@
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
-        
 
         ///<inheritdoc/>
         public override double Complexity => 1.5;
