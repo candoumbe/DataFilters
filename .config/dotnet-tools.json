@@ -6,13 +6,22 @@
       "version": "8.0.0",
       "commands": [
         "nuke"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-stryker": {
       "version": "4.1.0",
       "commands": [
         "dotnet-stryker"
-      ]
+      ],
+      "rollForward": false
+    },
+    "dotnet-trx": {
+      "version": "0.4.5",
+      "commands": [
+        "trx"
+      ],
+      "rollForward": false
     }
   }
 }

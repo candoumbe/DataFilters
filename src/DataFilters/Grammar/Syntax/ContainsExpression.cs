@@ -26,7 +26,7 @@
         /// Builds a new <see cref="ContainsExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value"></param>
-        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <c>null</c></exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <see langword="null"/></exception>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <c>empty</c></exception>
         public ContainsExpression(string value)
         {
@@ -72,10 +72,10 @@
         }
 
         /// <summary>
-        /// Builds a new <see cref="StartsWithExpression"/> that holds the specified <paramref name="text"/>.
+        /// Builds a new <see cref="ContainsExpression"/> that holds the specified <paramref name="text"/>.
         /// </summary>
         /// <param name="text"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
         public ContainsExpression(TextExpression text)
 #if !NETSTANDARD1_3
             : this(Guard.Against.Null(text, nameof(text)).OriginalString)
@@ -106,5 +106,15 @@
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
+            => other switch
+            {
+                ContainsExpression contains => Equals(contains),
+                GroupExpression { Expression: var innerExpression } => innerExpression.IsEquivalentTo(this),
+                ISimplifiable simplifiable => simplifiable.Simplify().IsEquivalentTo(this),
+                _ => false
+            };
     }
 }

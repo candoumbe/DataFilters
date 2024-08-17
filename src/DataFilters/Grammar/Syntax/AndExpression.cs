@@ -47,8 +47,8 @@ namespace DataFilters.Grammar.Syntax
                 || other switch
                 {
                     AndExpression and => Equals(and) || (Left.IsEquivalentTo(and.Left) && Right.IsEquivalentTo(and.Right)) || (Left.IsEquivalentTo(and.Right) && Right.IsEquivalentTo(and.Left)),
-                    ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
-                    ISimplifiable simplifiable => IsEquivalentTo(simplifiable.Simplify()),
+                    ConstantValueExpression constant => (Left.Equals(Right) || Left.IsEquivalentTo(Right)) && (Left.IsEquivalentTo(constant) || Right.IsEquivalentTo(constant)),
+                    ISimplifiable simplifiable => simplifiable.Simplify().IsEquivalentTo(this),
                     _ => false
                 };
 
@@ -56,6 +56,30 @@ namespace DataFilters.Grammar.Syntax
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
-        public override string ToString() => $"{base.ToString()}";
+        public override string ToString() => _lazyToString.Value;
+
+        /// <inheritdoc />
+        public override FilterExpression Simplify()
+        {
+            FilterExpression simplified;
+            if (ReferenceEquals(Left, Right) || Left.Equals(Right) || Left.IsEquivalentTo(Right))
+            {
+                simplified = Left.Complexity < Right.Complexity
+                    ? Left.As<ISimplifiable>()?.Simplify() ?? Left
+                    : Right.As<ISimplifiable>()?.Simplify() ?? Right;
+            }
+            else
+            {
+                simplified = ( Left, Right ) switch
+                {
+                    (ISimplifiable left, ISimplifiable right) => new AndExpression(left.Simplify(), right.Simplify()),
+                    (ISimplifiable left, not ISimplifiable) => new AndExpression(left.Simplify(), Right),
+                    (not ISimplifiable, ISimplifiable right) => new AndExpression(Left, right.Simplify()),
+                    (not ISimplifiable, not ISimplifiable) => this
+                };
+            }
+
+            return simplified;
+        }
     }
 }

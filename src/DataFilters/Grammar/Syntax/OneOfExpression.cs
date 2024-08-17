@@ -16,7 +16,7 @@
         /// <summary>
         /// Collection of <see cref="FilterExpression"/> that the current instance holds.
         /// </summary>
-        public IReadOnlyCollection<FilterExpression> Values => [ .. _values];
+        public IReadOnlyList<FilterExpression> Values => [ .. _values];
 
         private readonly FilterExpression[] _values;
 
@@ -43,8 +43,8 @@
 
             _values = [.. values.Where(x => x is not null)];
 
-            _lazyEscapedParseableString = new Lazy<string>(() => $"{{{string.Join(",", Values.Select(v => v.EscapedParseableString))}}}");
-            _lazyOriginalString = new Lazy<string>(() => $"{{{string.Join(",", Values.Select(v => v.OriginalString))}}}");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{{{string.Join("|", Values.Select(v => v.EscapedParseableString))}}}");
+            _lazyOriginalString = new Lazy<string>(() => $"{{{string.Join("|", Values.Select(v => v.OriginalString))}}}");
         }
 
         /// <inheritdoc/>
@@ -62,11 +62,12 @@
                                     || !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any())
                     : other switch
                     {
-                        AsteriskExpression asterisk => Simplify().IsEquivalentTo(asterisk),
-                        ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
-                        DateExpression date => Simplify().IsEquivalentTo(date),
-                        DateTimeExpression dateTime => Simplify().IsEquivalentTo(dateTime),
-                        ISimplifiable simplifiable => Simplify().IsEquivalentTo(simplifiable.Simplify()),
+                        AsteriskExpression asterisk => Values.All(x => x is AsteriskExpression),
+                        ConstantValueExpression constant => Values.All(value => value.IsEquivalentTo(constant)),
+                        DateExpression date => Values.All(value => value.IsEquivalentTo(date)),
+                        DateTimeExpression dateTime => Values.All(value => value.Equals(dateTime) || value.IsEquivalentTo(dateTime)),
+                        OrExpression or => Values.All(value => value.Equals(or.Left) || value.Equals(or.Right) || value.IsEquivalentTo(or.Left) || value.IsEquivalentTo(or.Right)),
+                        ISimplifiable simplifiable => Values.All(value => value.IsEquivalentTo(simplifiable.Simplify())),
                         _ => false
                     };
             }
@@ -96,32 +97,18 @@
         public FilterExpression Simplify()
         {
             HashSet<FilterExpression> curatedExpressions = [];
-
-            foreach (IGrouping<bool, FilterExpression> expr in _values.ToLookup(x => x is OneOfExpression))
+            
+            foreach (FilterExpression expression in Values)
             {
-                if (expr.Key)
-                {
-                    OneOfExpression oneOfExpression = new([ .. expr.Select(item => ((OneOfExpression)item).Values)
-                                                              .SelectMany(x => x)
-                                                              ]);
+                FilterExpression simplified = expression.As<ISimplifiable>()?.Simplify() ?? expression;
 
-                    curatedExpressions.Add(oneOfExpression.Simplify());
-                }
-                else
-                {
-                    foreach (FilterExpression expression in expr)
-                    {
-                        FilterExpression simplifiedExpression = (expression as ISimplifiable)?.Simplify() ?? expression;
-                        if (!curatedExpressions.Contains(simplifiedExpression) && !curatedExpressions.Any(existing => existing.IsEquivalentTo(simplifiedExpression)))
-                        {
-                            curatedExpressions.Add(simplifiedExpression);
-                        }
-                    }
-                }
+                curatedExpressions.RemoveWhere(val => val.Equals(simplified) || (val.IsEquivalentTo(simplified) 
+                                                      && val.Complexity > simplified.Complexity)); 
+                curatedExpressions.Add(simplified);
+
             }
 
             FilterExpression simplifiedResult;
-
             switch (curatedExpressions.Count)
             {
                 case 1:
@@ -130,9 +117,7 @@
                 case 2:
                     FilterExpression first = curatedExpressions.First();
                     FilterExpression other = curatedExpressions.Last();
-                    simplifiedResult = first is OneOfExpression oneOfFirst && other is OneOfExpression oneOfSecond
-                        ? new OneOfExpression([.. oneOfFirst.Values, .. oneOfSecond.Values])
-                        : new OrExpression(first, other);
+                    simplifiedResult = new OrExpression(first, other);
                     break;
                 default:
                     simplifiedResult = new OneOfExpression([.. curatedExpressions]);
@@ -159,5 +144,17 @@
 
         /// <inheritdoc />
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _values.GetEnumerator();
+
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "D" or "d" => $"{{{string.Join(", ", Values.Select(expression => $"{expression:d}"))}}}",
+                _ => $"{_lazyOriginalString.Value}"
+            };
+
+            return formattable.ToString(formatProvider);
+        }
     }
 }

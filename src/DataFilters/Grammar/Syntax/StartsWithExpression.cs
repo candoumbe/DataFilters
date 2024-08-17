@@ -24,48 +24,47 @@
         /// <summary>
         /// Builds a new <see cref="StartsWithExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">The value associated with the expression</param>
         /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <c>null</c></exception>
         /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <see cref="string.Empty"/>.</exception>
+        /// <remarks>
+        /// The constructor will take care of escaping all specific characters of <paramref name="value"/>
+        /// </remarks>
         public StartsWithExpression(string value)
         {
-            if (value is null)
+            Value = value switch
             {
-                throw new ArgumentNullException(nameof(value));
-            }
+                null => throw new ArgumentNullException(nameof(value)),
+                {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+                _ => value
+            };
 
-            if (value.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
-            }
-
-            Value = value;
-
-            _lazyEscapedParseableString = new(() =>
+            _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
                 // Also we need an extra position for the final '*' that will be append in all cases
                 bool requireEscapingCharacters = Value.AtLeastOnce(chr => FilterTokenizer.SpecialCharacters.Contains(chr));
-                StringBuilder parseableString;
+                StringBuilder escapedParseableString;
 
                 if (requireEscapingCharacters)
                 {
-                    parseableString = new((Value.Length * 2) + 1);
+                    escapedParseableString = new StringBuilder((Value.Length * 2) + 1);
                     foreach (char chr in Value)
                     {
                         if (FilterTokenizer.SpecialCharacters.Contains(chr))
                         {
-                            parseableString = parseableString.Append('\\');
+                            escapedParseableString = escapedParseableString.Append('\\');
                         }
-                        parseableString = parseableString.Append(chr);
+
+                        escapedParseableString = escapedParseableString.Append(chr);
                     }
                 }
                 else
                 {
-                    parseableString = new(Value, Value.Length + 1);
+                    escapedParseableString = new StringBuilder(Value, Value.Length + 1);
                 }
 
-                return parseableString.Append('*').ToString();
+                return escapedParseableString.Append('*').ToString();
             });
         }
 
@@ -110,7 +109,7 @@
         /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is
         /// <paramref name="right"/></returns>
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <see langword="null"/>.</exception>
-        public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new(left, right);
+        public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new AndExpression(left, right);
 
         /// <summary>
         /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
@@ -118,16 +117,14 @@
         /// <param name="left">the left operand</param>
         /// <param name="right">the right operand</param>
         /// <returns>
-        ///     A <see cref="OneOfExpression"/> that can either :
+        /// A <see cref="OneOfExpression"/> that can either :
         /// <list type="bullet">
         ///     <item>exactly matches the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
         ///     <item>exactly starts with the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
         ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
         /// </list>
         /// </returns>
-        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new(new StringValueExpression(left.Value + right.Value),
-                                                                                                                new StartsWithExpression(left.Value + right.Value),
-                                                                                                                new AndExpression(left, new ContainsExpression(right.Value)));
+        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new OneOfExpression(new StringValueExpression(left.Value + right.Value), new StartsWithExpression(left.Value + right.Value), new AndExpression(left, new ContainsExpression(right.Value)));
 
         /// <summary>
         /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
@@ -135,14 +132,22 @@
         /// <param name="left">the left operand</param>
         /// <param name="right">the right operand</param>
         /// <returns>
-        ///     A <see cref="OneOfExpression"/> that can either :
+        /// A <see cref="OneOfExpression"/> that can either :
         /// <list type="bullet">
         ///     <item>exactly matches the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
         ///     <item>exactly starts with the concatenation of <paramref name="left"/>'s value and <paramref name="right"/>'s value.</item>
         ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
         /// </list>
         /// </returns>
-        public static OneOfExpression operator +(StartsWithExpression left, ContainsExpression right) => left + new StartsWithExpression(right.Value);
+        /// <example>
+        /// bat*,*man* &lt;==&gt; batman* | bat*man* | batman
+        /// </example>
+        public static OneOfExpression operator +(StartsWithExpression left, ContainsExpression right)
+        {
+            string value = $"{left.Value}{right.Value}";
+
+            return new OneOfExpression(new StartsWithExpression(value), new AndExpression(left, right), new StringValueExpression(value));
+        }
 
         /// <summary>
         /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
@@ -150,8 +155,32 @@
         /// <param name="left">the left operand</param>
         /// <param name="right">the right operand</param>
         /// <returns>
-        ///     A <see cref="AndExpression"/> that can match any <see langword="string"/> that starts with <paramref name="left"/> and end
+        /// A <see cref="AndExpression"/> that can match any <see langword="string"/> that starts with <paramref name="left"/>
+        /// and ends with <paramref name="right"/>.
         /// </returns>
         public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) => left + new EndsWithExpression(right.Value);
+
+        /// <summary>
+        /// Combines the specified <paramref name="left"/> and <paramref name="right"/> into and <see cref="AndExpression"/> expression
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static AndExpression operator &(StartsWithExpression left, StringValueExpression right) => left + right;
+
+        /// <summary>
+        /// Combines the specified <paramref name="left"/> and <paramref name="right"/> into and <see cref="AndExpression"/> expression
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static AndExpression operator &(StartsWithExpression left, EndsWithExpression right) => left + right;
+
+        /// <summary>
+        /// Negates the specified <paramref name="expression"/>
+        /// </summary>
+        /// <param name="expression">The start expression</param>
+        /// <returns></returns>
+        public static NotExpression operator !(StartsWithExpression expression) => new (expression);
     }
 }

@@ -253,8 +253,7 @@
                         static (ConstantValueExpression constantExpression, bool included) ConvertBoundaryExpressionToConstantExpression(BoundaryExpression input)
                             => input?.Expression switch
                             {
-                                StringValueExpression ce => (ce, input.Included),
-                                NumericValueExpression numeric => (new(numeric.Value), input.Included),
+                                NumericValueExpression numeric => (new StringValueExpression(numeric.Value), input.Included),
                                 DateTimeExpression { Date: not null, Time: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"), input.Included),
                                 DateExpression date => (new StringValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"), input.Included),
                                 DateTimeExpression { Date: null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"0001-01-01T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),

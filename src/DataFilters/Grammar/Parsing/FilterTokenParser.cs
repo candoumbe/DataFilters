@@ -103,23 +103,23 @@
         /// </summary>
         public static TokenListParser<FilterToken, ContainsExpression> Contains => (from _ in Asterisk
                                                                                     from data in (
-                                                                                        from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                        from beforeSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
                                                                                         from beforePunctuation in Punctuation.Many()
                                                                                         from alpha in AlphaNumeric.Many()
                                                                                         from afterPunctuation in Punctuation.Many()
-                                                                                        from symbolAfter in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                        where symbolBefore.AtLeastOnce()
+                                                                                        from afterSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                        where beforeSymbol.AtLeastOnce()
                                                                                               || beforePunctuation.AtLeastOnce()
                                                                                               || alpha.AtLeastOnce()
                                                                                               || afterPunctuation.AtLeastOnce()
-                                                                                              || symbolAfter.AtLeastOnce()
+                                                                                              || afterSymbol.AtLeastOnce()
                                                                                         select new
                                                                                         {
-                                                                                            value = string.Concat(string.Concat(symbolBefore.Select(x => x.ToStringValue())),
+                                                                                            value = string.Concat(string.Concat(beforeSymbol.Select(x => x.ToStringValue())),
                                                                                                                   string.Concat(beforePunctuation.Select(x => x.Value)),
                                                                                                                   string.Concat(alpha.Select(item => item.Value)),
                                                                                                                   string.Concat(afterPunctuation.Select(x => x.Value)),
-                                                                                                                  string.Concat(symbolAfter.Select(x => x.ToStringValue())))
+                                                                                                                  string.Concat(afterSymbol.Select(x => x.ToStringValue())))
                                                                                         }).AtLeastOnce()
                                                                                     from escaped in Token.EqualTo(FilterToken.Backslash).Many()
                                                                                     from __ in Asterisk
@@ -131,15 +131,15 @@
         /// Parser for logical OR expression.
         /// </summary>
         public static TokenListParser<FilterToken, FilterExpression> Or => Parse.Chain(Token.EqualTo(FilterToken.Or),
-                                                                                       UnaryExpression,
+                                                                                       Parse.Ref(() => UnaryExpression),
                                                                                        (_, left, right) => new OrExpression(left, right));
 
         /// <summary>
         /// Parser for logical AND expression
         /// </summary>
-        public static TokenListParser<FilterToken, AndExpression> And => (from left in UnaryExpression
+        public static TokenListParser<FilterToken, AndExpression> And => (from left in Parse.Ref(() => UnaryExpression)
                                                                           from _ in Token.EqualTo(FilterToken.And)
-                                                                          from right in UnaryExpression
+                                                                          from right in Parse.Ref(() => UnaryExpression)
                                                                           select new AndExpression(left, right)).Try()
                                                                         .Or(from left in AlphaNumeric
                                                                             from _ in Asterisk
@@ -151,14 +151,14 @@
                                                                             from _ in Asterisk
                                                                             from right in AlphaNumeric
                                                                             select new AndExpression(new StartsWithExpression(left.Value),
-                                                                                                    new EndsWithExpression(right.Value))).Try()
+                                                                                                    new EndsWithExpression(right.Value)))
                                                                         ;
 
         /// <summary>
         /// Parser for NOT expression
         /// </summary>
         public static TokenListParser<FilterToken, NotExpression> Not => (from bang in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
-                                                                         from expression in BinaryOrUnaryExpression
+                                                                         from expression in Parse.Ref(() => BinaryOrUnaryExpression)
                                                                          select (bang, expression))
             .Select(tuple =>
             {
@@ -414,7 +414,7 @@
                     value switch
                     {
                         RangeBracketValue rangeValue => Enumerable.Range(rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
-                                                                    .Select(ascii => (char)ascii),
+                                                                  .Select(ascii => (char)ascii),
                         ConstantBracketValue constantValue => constantValue.Value.ToCharArray(),
 #if NET7_0_OR_GREATER
                         _ => throw new UnreachableException("Unexpected regex value")
@@ -422,7 +422,8 @@
                         _ => throw new NotSupportedException("Unexpected regex value")
 #endif
                     })
-                .SelectMany(x => x);
+                // Flatten collections
+                .SelectMany(chr => chr);
 
         /// <summary>
         /// Parser for expressions that contains one or more regex parts.
@@ -472,46 +473,50 @@
             {
                 return item switch
                 {
-                    // *<regex>
-                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression([ .. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString())) ]),
-                    // *<regex><constant>
-                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression($"{chr}{tail.Value}"))]),
+                    // *<bracket>
+                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression([ .. (ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))) ]),
 
-                    // <regex>*
+                    // *<bracket><constant>
+                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => (FilterExpression) new EndsWithExpression($"{chr}{tail.Value}")).ToArray()),
+
+                    // <bracket>*
                     (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]),
 
-                    // <ends with><regex>
-                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}"))]),
-                    // <ends with><regex><constant>
+                    // <ends with><bracket>
+                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression) new EndsWithExpression($"{head.Value}{chr}")).ToArray()),
+
+                    // <ends with><bracket><constant>
                     (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}{constant.Value}"))]),
-                    // <starts with><regex>
-                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values)
-                        .Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]),
-                    // <regex><starts with>*
+
+                    // <starts with><bracket>
+                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]),
+
+                    // <bracket><starts with>*
                     (null, BracketExpression bracket, StartsWithExpression body) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))]),
 
-                    // <constant><regex><constant>
+                    // <constant><bracket><constant>
                     (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracket.Value}{chr}{tail.Value}"))]),
-                    // <constant><regex>
+
+                    // <constant><bracket>
                     (ConstantValueExpression head, BracketExpression bracket, null) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{head.Value}{chr}"))]),
 
-                    // <regex><constant>
+                    // <bracket><constant>
                     (null, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tail.Value}"))]),
 
-                    // <regex>
+                    // <bracket>
                     (null, BracketExpression bracket, null) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString()))]),
 
-                    // <regex><constant><regex>
+                    // <bracket><constant><bracket>
                     (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new OneOfExpression([ ..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
                                                                             .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                                                             .Select(tuple => new StringValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
                                                                             ]),
-                    // <regex><regex>
+                    // <bracket><bracket>
                     (BracketExpression head, null, BracketExpression tail) => new OneOfExpression([..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
                                                                             .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                                                             .Select(tuple => new StringValueExpression($"{tuple.start}{tuple.end}"))
                                                                             ]),
-                    // <regex><ends with>
+                    // <bracket><ends with>
                     (null, BracketExpression body, EndsWithExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), tail))]),
 
                     // *<one of>
@@ -522,8 +527,10 @@
 
                     // *<one of>*
                     (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression([.. constants.Select(constant => new ContainsExpression(constant.Value))]),
+
                     // <one of><ends with>
                     (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression([..constants.Select(constant => constant + endsWith)]),
+
                     // <one of>
                     (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants]),
 #if NET7_0_OR_GREATER
@@ -537,6 +544,7 @@
         /// <summary>
         /// Parser for Date and Time
         /// </summary>
+        /// <returns>a <see cref="DateTimeExpression"/></returns>
         public static TokenListParser<FilterToken, DateTimeExpression> DateAndTime => (from date in Date
                                                                                        from separator in Token.EqualToValue(FilterToken.Letter, "T")
                                                                                                               .Or(Token.EqualTo(FilterToken.Whitespace))
@@ -622,16 +630,21 @@
                                                                                                          int.Parse(TokensToString(secondDigits), CultureInfo.InvariantCulture)));
 
         /// <summary>
-        /// Parses all supported expressions
+        /// Parses all supported unary expressions
         /// </summary>
-        private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>())
-                                                                                              .Or(Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
+        private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>())
+                                                                                              .Or(Parse.Ref(() =>  Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Date.Try().Cast<FilterToken, DateExpression, FilterExpression>()))
+                                                                                              // Special case of <constant>*<constant> which should be turned into an AndExpression
+                                                                                              // even though from a user perspective it's just a text filter with no specific logic in it
+                                                                                              .Or((from alphaBeforeAsterisk in AlphaNumeric
+                                                                                                   from __ in Asterisk
+                                                                                                   from alphaAfterAsterisk in AlphaNumeric
+                                                                                                   select (FilterExpression)(new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value))).Try())
                                                                                               .Or(Parse.Ref(() => Contains.Try().Cast<FilterToken, ContainsExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()))
@@ -639,10 +652,11 @@
                                                                                               .Or(Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()))
             ;
         /// <summary>
-        /// Parser for <c>property=value</c> pair.
+        /// Parser for a <c>property=&lt;expression&gt;</c> pair.
         /// </summary>
         public static TokenListParser<FilterToken, (PropertyName, FilterExpression)> Criterion => from property in Property
                                                                                                   from _ in Token.EqualTo(FilterToken.Equal)
@@ -746,6 +760,9 @@
             select new StringValueExpression(c.ToStringValue())
         ).Or(
             from c in Token.EqualTo(FilterToken.Underscore)
+            select new StringValueExpression(c.ToStringValue())
+        ).Or(
+            from c in Token.EqualTo(FilterToken.And)
             select new StringValueExpression(c.ToStringValue())
         );
 

@@ -72,7 +72,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 .QuickCheckThrowOnFailure(outputHelper);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<TextExpression> expression, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<TextExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

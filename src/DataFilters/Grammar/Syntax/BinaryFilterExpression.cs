@@ -41,8 +41,8 @@ public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
     ///<inheritdoc/>
     public virtual FilterExpression Simplify()
     {
-        FilterExpression simplifiedLeft = SimplifyLocal((Left as ISimplifiable)?.Simplify() ?? Left);
-        FilterExpression simplifiedRight = SimplifyLocal((Right as ISimplifiable)?.Simplify() ?? Right);
+        FilterExpression simplifiedLeft = SimplifyLocal(Left);
+        FilterExpression simplifiedRight = SimplifyLocal(Right);
 
         FilterExpression simplifiedExpression = this;
 
@@ -54,18 +54,6 @@ public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
         }
 
         return simplifiedExpression;
-
-        static FilterExpression SimplifyLocal(FilterExpression expression)
-        {
-            FilterExpression current = expression;
-
-            while (current is ISimplifiable simplifiable && !simplifiable.Equals(current))
-            {
-                current = SimplifyLocal(simplifiable.Simplify());
-            }
-
-            return current;
-        }
     }
 
     /// <inheritdoc />
@@ -74,7 +62,7 @@ public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
         FormattableString formattable = format switch
         {
             "d" or "D" => $"@{GetType().Name}({Left:d},{Right:d})",
-            null or "" => $"{EscapedParseableString}", 
+            null or "" => $"{EscapedParseableString}",
             _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
         };
 

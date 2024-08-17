@@ -128,7 +128,7 @@
             ':',
             Hyphen,
             Dot,
-            ' '
+            Space
         ];
 
         /// <summary>
