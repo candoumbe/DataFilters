@@ -22,7 +22,7 @@
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => new GroupExpression(null);
+            Action action = () => _ = new GroupExpression(null);
 
             // Assert
             action.Should()
@@ -45,7 +45,7 @@
             => group.Item.Equals(group.Item).Should().BeTrue();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<GroupExpression> group, NonNull<FilterExpression> otherExpression)
             => group.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(group.Item));
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -171,7 +171,7 @@
             => group.IsEquivalentTo(group).Should().BeTrue();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void IsEquivalent_should_be_symetric(GroupExpression group, NonNull<FilterExpression> other)
+        public void IsEquivalent_should_be_symmetric(GroupExpression group, NonNull<FilterExpression> other)
         {
             outputHelper.WriteLine($"Group : {group}");
             outputHelper.WriteLine($"Other : {other}");
@@ -179,7 +179,7 @@
             group.IsEquivalentTo(other.Item).Should().Be(other.Item.IsEquivalentTo(group));
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)]/*, Replay = "(1500570200792655435,5263687413201141279)"*/)]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalent_should_be_transitive(GroupExpression group, NonNull<FilterExpression> other, NonNull<FilterExpression> third)
         {
             // Arrange
@@ -210,7 +210,7 @@
 
             for (int i = 0; i < depth; i++)
             {
-                otherGroup = new(otherGroup);
+                otherGroup = new GroupExpression(otherGroup);
             }
 
             // Act
@@ -218,6 +218,46 @@
 
             // Assert
             isEquivalent.Should().BeTrue();
+        }
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_a_non_null_FilterExpression_that_is_wrapped_inside_a_GroupExpression_instance_When_calling_Simplify_Then_the_resulting_FilterExpression_should_be_equivalent_to_the_starting_FilterExpression(NonNull<FilterExpression> filterExpressionGenerator)
+        {
+            // Arrange
+            FilterExpression expected = filterExpressionGenerator.Item;
+            GroupExpression group = new(expected);
+
+            // Act
+            FilterExpression actual = group.Simplify();
+
+            // Assert
+            actual.Should().NotBeOfType<GroupExpression>();
+            actual.IsEquivalentTo(expected).Should().BeTrue();
+        }
+
+
+        public static TheoryData<GroupExpression, FilterExpression> SimplifyCases
+            => new TheoryData<GroupExpression, FilterExpression>()
+            {
+                {
+                    new GroupExpression(new StringValueExpression("prop")),
+                    new StringValueExpression("prop")
+                },
+                {
+                    new GroupExpression(new OrExpression(new StringValueExpression("prop"), new StringValueExpression("prop"))),
+                    new StringValueExpression("prop")
+                }
+            };
+        
+        [Theory]
+        [MemberData(nameof(SimplifyCases))]
+        public void Given_GroupExpression_When_calling_Simplify_Then_should_return_expected_outcome(GroupExpression input, FilterExpression expected)
+        {
+            // Act
+            FilterExpression actual = input.Simplify();
+            
+            // Assert
+            actual.Should().Be(expected);
         }
     }
 }

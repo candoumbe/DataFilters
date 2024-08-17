@@ -65,7 +65,7 @@
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
-            GroupExpression group => Expression.IsEquivalentTo(group.Simplify()),
+            GroupExpression {Expression: var innerExpression } group => Expression.IsEquivalentTo(innerExpression),
             _ => Expression.IsEquivalentTo(other)
         };
 

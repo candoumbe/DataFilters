@@ -21,8 +21,7 @@ namespace DataFilters.Grammar.Syntax
         /// <returns>
         /// <c>true</c> if <paramref name="other"/> is "equivalent" to the current instance.
         /// </returns>
-        public virtual bool IsEquivalentTo(FilterExpression other)
-            => Equals(other) || Equals((other as ISimplifiable)?.Simplify());
+        public virtual bool IsEquivalentTo(FilterExpression other) => Equals(other) || Equals(other.As<ISimplifiable>()?.Simplify());
 
         ///<inheritdoc/>
         public virtual double Complexity => 1;
@@ -53,5 +52,27 @@ namespace DataFilters.Grammar.Syntax
         /// Returns a <see cref="FilterExpression"/> that is the result of applying the NOT logical operator to the specified <paramref name="expression"/>.
         /// </summary>
         public static NotExpression operator !(FilterExpression expression) => new(expression);
+
+        /// <summary>
+        /// This utility method will simplify the given <paramref name="expression"/>
+        /// </summary>
+        /// <param name="expression">The expression to "simplify"</param>
+        /// <returns>The simplified version of <paramref name="expression"/> if it implements <see cref="ISimplifiable"/> or <paramref name="expression"/> if it cannot be simplified </returns>
+        /// <remarks>
+        /// The method will try to recursively simplify <paramref name="expression"/>
+        /// </remarks>
+        protected static FilterExpression SimplifyLocal(FilterExpression expression)
+        {
+            FilterExpression current = expression;
+            FilterExpression previous;
+
+            do
+            {
+                previous = current;
+                current = current.As<ISimplifiable>()?.Simplify() ?? current;
+            } while (current.Complexity < previous.Complexity && current is ISimplifiable);
+
+            return current;
+        }
     }
 }

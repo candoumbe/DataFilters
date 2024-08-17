@@ -74,6 +74,11 @@
                     new StringValueExpression("True"),
                     new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
                     false
+                },
+                {
+                    new StringValueExpression("True"),
+                    new StringValueExpression("True"),
+                    true
                 }
             };
 
@@ -115,7 +120,7 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
+        public void Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (Math.Abs(constant.Complexity - 1) < float.Epsilon).ToProperty();
 
         [Property]
         public void Given_StringValueExpression_and_TextExpression_are_based_on_same_value_IsEquivalentTo_should_be_true(NonWhiteSpaceString input)
