@@ -74,5 +74,23 @@ namespace DataFilters.Grammar.Syntax
 
             return current;
         }
+
+        /// <summary>
+        /// Creates an <see cref="OrExpression"/>.
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="right">The right operand</param>
+        /// <returns>An <see cref="OrExpression"/> which <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/>
+        /// and <see cref="BinaryFilterExpression.Right"/> is <paramref name="right"/>.</returns>
+        public static OrExpression operator |(FilterExpression left, FilterExpression right) => new (left, right);
+
+        /// <summary>
+        /// Creates an <see cref="AndExpression"/>.
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="right">The right operand</param>
+        /// <returns>An <see cref="AndExpression"/> which <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/>
+        /// and <see cref="BinaryFilterExpression.Right"/> is <paramref name="right"/>.</returns>
+        public static AndExpression operator &(FilterExpression left, FilterExpression right) => new (left, right);
     }
 }

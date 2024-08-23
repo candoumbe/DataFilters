@@ -130,9 +130,11 @@
         /// <summary>
         /// Parser for logical OR expression.
         /// </summary>
-        public static TokenListParser<FilterToken, FilterExpression> Or => Parse.Chain(Token.EqualTo(FilterToken.Or),
-                                                                                       Parse.Ref(() => UnaryExpression),
-                                                                                       (_, left, right) => new OrExpression(left, right));
+        public static TokenListParser<FilterToken, OrExpression> Or
+            => from left in Parse.Ref(() => UnaryExpression)
+               from _ in Token.EqualTo(FilterToken.Or)
+               from right in Parse.Ref(() => UnaryExpression)
+               select left | right;
 
         /// <summary>
         /// Parser for logical AND expression
@@ -157,16 +159,16 @@
         /// <summary>
         /// Parser for NOT expression
         /// </summary>
-        public static TokenListParser<FilterToken, NotExpression> Not => (from bang in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
+        public static TokenListParser<FilterToken, NotExpression> Not => (from bangs in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
                                                                          from expression in Parse.Ref(() => BinaryOrUnaryExpression)
-                                                                         select (bang, expression))
+                                                                         select (bangs, expression))
             .Select(tuple =>
             {
-                NotExpression notExpression = new(tuple.expression);
+                NotExpression notExpression = !tuple.expression;
 
-                for (int i = 1; i < tuple.bang.Length; i++)
+                for (int i = 1; i < tuple.bangs.Length; i++)
                 {
-                    notExpression = new NotExpression(notExpression);
+                    notExpression = !notExpression;
                 }
                 return notExpression;
             });
@@ -189,7 +191,7 @@
         /// <summary>
         /// Builds a parser that can extract bracket expression values
         /// </summary>
-        /// <param name="token">The parser that can parse values inside a <c>[</c> qnd <c>]</c></param>
+        /// <param name="token">The parser that can parse values inside a <c>[</c> and <c>]</c></param>
         /// <returns></returns>
         private static TokenListParser<FilterToken, BracketValue> BuildRangeBracketValuesParser(TokenListParser<FilterToken, Token<FilterToken>> token)
             => (from rangeStart in token
@@ -376,9 +378,9 @@
                                                                              select new GroupExpression(expression);
 
         private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>())
-                                                                                                      .Or(Parse.Ref(() => Or.Try()))
-                                                                                                      .Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
-                                                                                                      .Or(Parse.Ref(() => UnaryExpression.Try()))
+                                                                                                      .Or(Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()))
+                                                                                                      //.Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
+                                                                                                      .Or(Parse.Ref(() => UnaryExpression.Try() ))
         ;
 
         /// <summary>
@@ -633,7 +635,9 @@
         /// Parses all supported unary expressions
         /// </summary>
         private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>())
-                                                                                              .Or(Parse.Ref(() =>  Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()))
@@ -649,11 +653,9 @@
                                                                                               .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>()))
             ;
         /// <summary>
         /// Parser for a <c>property=&lt;expression&gt;</c> pair.

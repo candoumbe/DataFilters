@@ -306,7 +306,7 @@
             => or.IsEquivalentTo(or).Should()
                                     .BeTrue();
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 29, Replay = "(13491603076039698518,4353680872529758371)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public Property IsEquivalentTo_should_be_symmetric(OrExpression or)
         {
             // Arrange

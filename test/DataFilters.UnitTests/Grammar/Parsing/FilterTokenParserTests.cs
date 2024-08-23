@@ -31,6 +31,7 @@
         private readonly FilterTokenizer _tokenizer;
         private readonly ITestOutputHelper _outputHelper;
         private readonly CultureSwitcher _cultureSwitcher;
+        private static readonly Bogus.Faker Faker = new();
 
         public FilterTokenParserTests(ITestOutputHelper outputHelper, CultureSwitcher cultureSwitcher)
         {
@@ -61,7 +62,7 @@
                                                            .HaveProperty<TokenListParser<FilterToken, NotExpression>>("Not").And
                                                            .HaveProperty<TokenListParser<FilterToken, NumericValueExpression>>("Number").And
                                                            .HaveProperty<TokenListParser<FilterToken, GuidValueExpression>>("GlobalUniqueIdentifier").And
-                                                           .HaveProperty<TokenListParser<FilterToken, FilterExpression>>("Or");
+                                                           .HaveProperty<TokenListParser<FilterToken, OrExpression>>("Or");
 
         public static TheoryData<string, ConstantValueExpression> AlphaNumericCases
             => new()
@@ -104,6 +105,16 @@ I&_Oj
                         "39.95173047301258862",
                         new NumericValueExpression("39.95173047301258862")
                     },
+
+                    {
+                        "5aa8f391",
+                        new StringValueExpression("5aa8f391")
+                    },
+
+                    {
+                        "6P%",
+                        new StringValueExpression("6P%")
+                    }
                 };
 
         [Theory]
@@ -206,7 +217,7 @@ I&_Oj
         }
 
         private static string StringifyTokens(TokenList<FilterToken> tokens)
-            => tokens.Select(token => new { token.Kind, Value = token.ToStringValue() }).Jsonify();
+            => tokens.Select(token => new { Kind = token.Kind.ToString(), Value = token.ToStringValue() }).Jsonify();
 
         public static TheoryData<string, ContainsExpression> ContainsCases
         {
@@ -278,10 +289,28 @@ I&_Oj
                     )
                 },
                 {
-                    "Bat|Wonder|Sup",
+                    "(Bat|Wonder)|Sup",
                     new OrExpression(new OrExpression(new StringValueExpression("Bat"),
                                                       new StringValueExpression("Wonder")),
                                     new StringValueExpression("Sup"))
+                },
+
+                {
+                    (new StringValueExpression("5aa8f391") | new GroupExpression(new GroupExpression(new GroupExpression(new StringValueExpression("6P%"))))).EscapedParseableString,
+                    new OrExpression(
+                        new StringValueExpression("5aa8f391"),
+                        new GroupExpression(new GroupExpression(new GroupExpression(new StringValueExpression("6P%"))))
+                    )
+                },
+
+                {
+                    (new StringValueExpression("5aa8f391") | new StringValueExpression("6P%")).EscapedParseableString,
+                    new StringValueExpression("5aa8f391") | new StringValueExpression("6P%")
+                },
+                
+                {
+                    (new StringValueExpression("AB") | new StringValueExpression("6P%")).EscapedParseableString,
+                    new StringValueExpression("AB") | new StringValueExpression("6P%")
                 }
             };
 
@@ -292,6 +321,8 @@ I&_Oj
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            
+            _outputHelper.WriteLine(string.Join(",",tokens.Select(token => $"pos:{token.Position.Column};kind:{token.Kind}")));
 
             // Act
             FilterExpression expression = FilterTokenParser.Or.Parse(tokens);
@@ -350,7 +381,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 30, Replay = "(1170445099959976008,8009754300446241913)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "15065352233795521037,11280662582861461867)")]
         public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
@@ -420,8 +451,17 @@ I&_Oj
                                 )
                         )
                     )
+                },
+                {
+                    (! (new StringValueExpression("5aa8f391") | new GroupExpression(new GroupExpression(new GroupExpression(new StringValueExpression("6P%")))))).EscapedParseableString,
+                    ! (new StringValueExpression("5aa8f391") | new GroupExpression(new GroupExpression(new GroupExpression(new StringValueExpression("6P%")))))
                 }
-                
+                ,
+                {
+                    (! (new StringValueExpression("5aa8f391") | new StringValueExpression("6P%"))).EscapedParseableString,
+                    ! (new StringValueExpression("5aa8f391") | new StringValueExpression("6P%"))
+                }
+
             };
 
         [Theory]
@@ -430,6 +470,7 @@ I&_Oj
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
+            _outputHelper.WriteLine($"expected : {expected:d}");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
@@ -1024,6 +1065,7 @@ I&_Oj
             {
                 TheoryData<GroupExpression, string> cases = [];
                 string[] cultures = ["fr-FR", "en-GB", "en-US"];
+                
                 foreach (string culture in cultures)
                 {
                     cases.Add
@@ -1037,6 +1079,7 @@ I&_Oj
                         new GroupExpression(new DateTimeExpression(new DateExpression(2010, 06, 02), new TimeExpression(23, 45, 54, 331), OffsetExpression.Zero)),
                         culture
                     );
+                    
                     
                 }
                 return cases;
