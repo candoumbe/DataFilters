@@ -252,7 +252,7 @@
             actual.Should().Be(expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 35, Replay = "11575163478896581570,10044340834025988095")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_equivalent_to_the_inner_expression(NonNull<FilterExpression> expression)
         {
             // Arrange
@@ -289,7 +289,7 @@
                                  .BeLessThan(complexityBeforeFirstSimplification, "The expression must be simpler");
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 3, Replay = "450114574715742681,209788484421714749")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_OneExpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> oneOfExpressionGenerator)
         {
             // Arrange

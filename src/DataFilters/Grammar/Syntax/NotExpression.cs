@@ -12,28 +12,27 @@
         /// </summary>
         public FilterExpression Expression { get; }
 
-        private readonly Lazy<string> _lazyEscapedParseableString;
-        private readonly Lazy<string> _lazyOriginalString;
+        private readonly string _lazyEscapedParseableString;
+        private readonly string _lazyOriginalString;
 
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="expression">The expression onto which the <c>not</c> operator will be applied</param>
         /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
         /// <remarks>
-        /// <paramref name="expression"/> will be automatically wrapped inside a <see cref="GroupExpression"/> when it's a <see cref="BinaryFilterExpression"/>.
+        /// <paramref name="expression"/> will be automatically wrapped inside a <see cref="GroupExpression"/> if it's a <see cref="BinaryFilterExpression"/>
+        /// in order to keep the semantic
+        /// .
         /// </remarks>
         public NotExpression(FilterExpression expression)
         {
-            Expression = expression switch
+            (_lazyEscapedParseableString,_lazyOriginalString, Expression) = expression switch
             {
                 null => throw new ArgumentNullException(nameof(expression)),
-                BinaryFilterExpression expr => new GroupExpression(expr),
-                _ => expression
+                BinaryFilterExpression expr => ($"!({expr.EscapedParseableString})", $"!({expr.OriginalString})", new GroupExpression(expr)),
+                _ => ($"!{expression.EscapedParseableString}", $"!{expression.OriginalString}", expression)
             };
-
-            _lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
-            _lazyOriginalString = new Lazy<string>(() => $"!{Expression.OriginalString}");
         }
 
         ///<inheritdoc/>
@@ -45,21 +44,13 @@
         ///<inheritdoc/>
         public override int GetHashCode() => Expression.GetHashCode();
 
-        ///<inheritdoc/>
-        public override string ToString() => $"{{{nameof(NotExpression)} [" +
-            $"Expression = {Expression.GetType().Name}, " +
-            $"{nameof(Expression)}.{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}',{Environment.NewLine} " +
-            $"{nameof(Expression)}.{nameof(Expression.OriginalString)} = '{Expression.OriginalString}'],{Environment.NewLine}" +
-            $"{nameof(EscapedParseableString)} = {EscapedParseableString}}},{Environment.NewLine}" +
-            $"{nameof(OriginalString)} : {OriginalString} ]";
-
         /// <inheritdoc />
         public override string ToString(string format, IFormatProvider formatProvider)
         {
             FormattableString formattable = format switch
             {
                 "d" or "D" => $"@{nameof(NotExpression)}({Expression:d})",
-                null or "" => $"{ToString()}",
+                null or "" => $"{EscapedParseableString}",
                 _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
             };
 
@@ -71,15 +62,15 @@
             => Expression switch
             {
                 NotExpression innerNotExpression => innerNotExpression.Expression,
-                ISimplifiable simplifiable => new NotExpression(simplifiable.Simplify()),
+                ISimplifiable simplifiable => !simplifiable.Simplify(),
                 _ => this
             };
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override string EscapedParseableString => _lazyEscapedParseableString;
 
         ///<inheritdoc/>
-        public override string OriginalString => _lazyOriginalString.Value;
+        public override string OriginalString => _lazyOriginalString;
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;

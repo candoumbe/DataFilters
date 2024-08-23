@@ -182,7 +182,7 @@
                   .BeFalse();
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 6, Replay = "754176832753712606,4801072031011788033)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AndExpression_instance_where_instanceU002ELeft_is_equivalent_to_instanceU002ERight_Simplify_should_return_the_expression_with_the_lowest_Complexity(FilterExpression expression, PositiveInt count)
         {
             // Arrange

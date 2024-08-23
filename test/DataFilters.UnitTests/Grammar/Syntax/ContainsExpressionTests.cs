@@ -106,7 +106,7 @@
             actual.Should().Be(1.5);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(2791644706892947277,1858349339597832959)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_reflexive(ContainsExpression contains)
             => contains.IsEquivalentTo(contains).Should().BeTrue();
 
