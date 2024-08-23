@@ -1,10 +1,10 @@
 # Datafilters <!-- omit in toc -->
 
-![GitHub Main branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/delivery.yml?branch=main&label=main)
-![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop)
-[![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/DataFilters)
+![GitHub Main branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/delivery.yml?branch=main&label=main "GitHub Main branch status")
+![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop "GitHub Develop branch status")
+[![Unit test code coverage percentage](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3 "Unit tests code coverage")](https://codecov.io/gh/candoumbe/DataFilters)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
-[![DataFilters](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters)](https://nuget.org/packages/datafilters)
+[![](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters "DataFilters latest nuget package version (including beta)")](https://nuget.org/packages/datafilters)
 
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
