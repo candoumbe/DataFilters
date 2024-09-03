@@ -31,7 +31,15 @@
         public override string EscapedParseableString => "*";
 
         /// <summary>
-        /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="ConstantValueExpression"/>.
+        /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="StringValueExpression"/>.
+        /// </summary>
+        /// <param name="_"></param>
+        /// <param name="right"></param>
+        /// <returns><see cref="EndsWithExpression"/></returns>
+        public static EndsWithExpression operator +(AsteriskExpression _, TextExpression right) => new (right);
+
+        /// <summary>
+        /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="StringValueExpression"/>.
         /// </summary>
         /// <param name="_"></param>
         /// <param name="right"></param>
