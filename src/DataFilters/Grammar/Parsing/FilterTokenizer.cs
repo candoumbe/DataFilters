@@ -107,6 +107,11 @@
         private const char Space = ' ';
 
         /// <summary>
+        /// The character to use to escape a special character.
+        /// </summary>
+        public const char EscapedCharacter = BackSlash;
+
+        /// <summary>
         /// List of characters that have a special meaning and should be escaped
         /// </summary>
         public static readonly char[] SpecialCharacters =

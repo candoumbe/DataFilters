@@ -49,7 +49,8 @@
             FormattableString formattable = format switch
             {
                 "d" or "D" => $"@{nameof(GroupExpression)}({Expression:d})",
-                null or "" => $"{ToString()}",
+                "f" or "F" => $"@{nameof(GroupExpression)}({Expression:d})",
+                null or "" => $"{EscapedParseableString}",
                 _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
             };
 

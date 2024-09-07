@@ -15,10 +15,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
         {
             return GetArbitraryFor<DateTime>()
-                                .Filter(dateTime => dateTime.Hour >= 0
-                                                    && dateTime.Minute >= 0
-                                                    && dateTime.Second >= 0
-                                                    && dateTime.Millisecond >= 0)
+                                .Filter(dateTime => dateTime is { Hour: >= 0, Minute: >= 0, Second: >= 0, Millisecond: >= 0 })
                                 .Generator
                                 .Zip(TimeExpressions().Generator)
                                 .Select(val => (date: val.Item1, time: val.Item2))
@@ -34,7 +31,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<TimeExpression> TimeExpressions()
         {
             return GetArbitraryFor<TimeSpan>()
-                        .Filter(timespan => timespan.Hours >= 0 && timespan.Minutes >= 0 && timespan.Seconds >= 0 && timespan.Milliseconds >= 0)
+                        .Filter(timespan => timespan is { Hours: >= 0, Minutes: >= 0, Seconds: >= 0, Milliseconds: >= 0 })
                         .Generator
                         .Select(timespan => new TimeExpression(hours: timespan.Hours,
                                                                minutes: timespan.Minutes,

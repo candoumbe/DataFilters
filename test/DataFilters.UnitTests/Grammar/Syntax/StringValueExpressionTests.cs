@@ -1,4 +1,8 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using System.Linq;
+using System.Text;
+using DataFilters.Grammar.Parsing;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Syntax;
@@ -150,6 +154,32 @@
             // Assert
             actual.Should()
                   .BeTrue();
+        }
+
+        [Property]
+        public void Given_input_as_string_Then_EscapedParseableString_should_be_correct(NonWhiteSpaceString inputGenerator)
+        {
+            // Arrange
+            string input = inputGenerator.Item;
+            StringValueExpression expression = new(input);
+            StringBuilder sbExpected = new (input.Length * 2);
+
+            foreach (char c in input)
+            {
+                if (FilterTokenizer.SpecialCharacters.Contains(c))
+                {
+                    sbExpected.Append('\\');
+                }
+                sbExpected.Append(c);
+            }
+
+            string expected = sbExpected.ToString();
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should().Be(expected);
         }
     }
 }

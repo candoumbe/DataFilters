@@ -214,8 +214,10 @@ namespace DataFilters.Grammar.Syntax
         {
             FormattableString formattable = format switch
             {
-                "d" or "D" or null or "" => $"@{nameof(IntervalExpression)}({Min?.Expression:d}:{Min?.Included},{Max?.Expression:d}:{Max?.Included})",
-                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+                "d" or "D" => $"@{nameof(IntervalExpression)}({Min?.Expression:d}:{Min?.Included},{Max?.Expression:d}:{Max?.Included})",
+                "f" or "F" => $"@{nameof(IntervalExpression)}({Min?.Expression:d}:{Min?.Included},{Max?.Expression:d}:{Max?.Included})",
+                null or "" => $"{ToString()}",
+                _ => throw new NotSupportedException($"Unknown '{format}' format")
             };
 
             return formattable.ToString(formatProvider);

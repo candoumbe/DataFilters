@@ -18,6 +18,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     {
         [Theory]
         [InlineData(@"<\\Y!A", @"""<\\\\Y!A""")]
+        [InlineData("1.\"Foo!", @"""1.\""Foo!""")]
         public void Given_input_EscapedParseableString_should_be_correct(string input, string expected)
         {
             // Arrange
@@ -76,19 +77,24 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_non_null_TextExpression_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+        public void Given_non_null_TextExpression_EscapedParseableString_should_be_correct(NonWhiteSpaceString textGenerator)
         {
             // Arrange
-            TextExpression textExpression = text.Item;
-            string expected = $@"""{textExpression.OriginalString.Replace("\\", @"\\").Replace(@"""", @"\""")}""";
+            string value = textGenerator.Item;
+            string expected = $@"""{value.Replace(@"\", @"\\").Replace(@"""", @"\""")}""";
+
+            TextExpression textExpression = new(value);
+
             // Act
-            string escapedParseableString = textExpression.EscapedParseableString;
+            string actual = textExpression.EscapedParseableString;
+
+            outputHelper.WriteLine($"expected: '{expected}', actual: '{actual}'");
 
             // Assert
-            escapedParseableString.Should()
-                                  .StartWith(@"""").And
-                                  .EndWith(@"""").And
-                                  .Be(expected);
+            actual.Should()
+                  .StartWith(@"""").And
+                  .EndWith(@"""").And
+                  .Be(expected);
         }
     }
 }

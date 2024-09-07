@@ -1,12 +1,13 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using DataFilters.Grammar.Parsing;
+
 namespace DataFilters.Grammar.Syntax
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-
-    using static DataFilters.Grammar.Parsing.FilterTokenizer;
+    using static FilterTokenizer;
 
     /// <summary>
     /// Wraps a string that represents a constant string value
@@ -23,13 +24,12 @@ namespace DataFilters.Grammar.Syntax
         private readonly Lazy<string> _lazyParseableString = new(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-                // Also we need an extra position for the final '*' that will be appended in all cases
                 bool requireEscapingCharacters = value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
                 StringBuilder parseableString;
 
                 if (requireEscapingCharacters)
                 {
-                    parseableString = new StringBuilder((value.Length * 2) + 1);
+                    parseableString = new StringBuilder(value.Length * 2);
                     foreach (char chr in value)
                     {
                         if (SpecialCharacters.Contains(chr))

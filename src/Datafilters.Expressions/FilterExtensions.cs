@@ -30,8 +30,10 @@
     ///     Value = "John"
     /// };
     ///
+    ///
     /// // Build an expression tree
     /// Expression&lt;Func&lt;Person, bool&gt;&gt; expression = filter.ToExpression&lt;Person&gt;();
+    ///
     ///
     /// // Use the expression to filter data
     /// var filteredData = data.Where(expression.Compile());

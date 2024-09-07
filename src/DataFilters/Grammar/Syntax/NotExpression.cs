@@ -3,17 +3,14 @@
     using System;
 
     /// <summary>
-    /// An expression that negate wrapped inside
+    /// An expression that negate whatever <see cref="FilterExpression"/> wrapped inside.
     /// </summary>
-    public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>, ISimplifiable, IFormattable
+    public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>, ISimplifiable
     {
         /// <summary>
         /// Expression that the NOT logical is applied to
         /// </summary>
         public FilterExpression Expression { get; }
-
-        private readonly string _lazyEscapedParseableString;
-        private readonly string _lazyOriginalString;
 
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
@@ -27,11 +24,11 @@
         /// </remarks>
         public NotExpression(FilterExpression expression)
         {
-            (_lazyEscapedParseableString,_lazyOriginalString, Expression) = expression switch
+            (EscapedParseableString, Expression) = expression switch
             {
                 null => throw new ArgumentNullException(nameof(expression)),
-                BinaryFilterExpression expr => ($"!({expr.EscapedParseableString})", $"!({expr.OriginalString})", new GroupExpression(expr)),
-                _ => ($"!{expression.EscapedParseableString}", $"!{expression.OriginalString}", expression)
+                BinaryFilterExpression expr => ($"!({expr.EscapedParseableString})", new GroupExpression(expr)),
+                _ => ($"!{expression.EscapedParseableString}", expression)
             };
         }
 
@@ -50,6 +47,7 @@
             FormattableString formattable = format switch
             {
                 "d" or "D" => $"@{nameof(NotExpression)}({Expression:d})",
+                "f" or "F" => $"@{nameof(NotExpression)}[{Expression:f}]",
                 null or "" => $"{EscapedParseableString}",
                 _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
             };
@@ -67,10 +65,7 @@
             };
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString;
-
-        ///<inheritdoc/>
-        public override string OriginalString => _lazyOriginalString;
+        public override string EscapedParseableString { get; }
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
@@ -84,6 +79,5 @@
 
         ///<inheritdoc/>
         public static bool operator !=(NotExpression left, NotExpression right) => !(left == right);
-
     }
 }

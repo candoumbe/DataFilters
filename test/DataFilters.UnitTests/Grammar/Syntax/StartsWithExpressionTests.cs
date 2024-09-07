@@ -1,4 +1,8 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using System.Linq;
+using System.Text;
+using DataFilters.Grammar.Parsing;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Syntax;
@@ -76,7 +80,7 @@
             => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<StartsWithExpression> expression, NonNull<FilterExpression> otherExpression)
             => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -95,11 +99,21 @@
         }
 
         [Property]
-        public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
+        public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString textGenerator)
         {
             // Arrange
-            StartsWithExpression expression = new(text.Item);
-            StringValueExpression stringValueExpression = new(text.Item);
+            string text = textGenerator.Item;
+            StartsWithExpression expression = new(text);
+            StringValueExpression stringValueExpression = new(text);
+            StringBuilder sb = new (text.Length * 2);
+            foreach (char chr in text)
+            {
+                if (FilterTokenizer.SpecialCharacters.Contains(chr))
+                {
+                    sb = sb.Append(FilterTokenizer.EscapedCharacter);
+                }
+                sb = sb.Append(chr);
+            }
             string expected = $"{stringValueExpression.EscapedParseableString}*";
 
             // Act
