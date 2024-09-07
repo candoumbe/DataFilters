@@ -5,7 +5,7 @@
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>
-    public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>, IFormattable
+    public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>
     {
         /// <summary>
         /// Gets the "raw" value hold by the current instance.
@@ -15,8 +15,8 @@
         /// <summary>
         /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
-        /// <param name="value"></param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported
+        /// <param name="value">raw unescaped value.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported.
         /// </exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         protected ConstantValueExpression(string value)
@@ -55,6 +55,6 @@
         /// <param name="left">a <see cref="ConstantValueExpression"/></param>
         /// <param name="right">a <see cref="EndsWithExpression"/></param>
         /// <returns><see cref="AndExpression"/></returns>
-        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => left + AsteriskExpression.Instance + new EndsWithExpression(right.Value);
+        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => new StartsWithExpression(left.Value) & right;
     }
 }

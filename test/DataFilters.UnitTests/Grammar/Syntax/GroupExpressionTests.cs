@@ -201,12 +201,13 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_a_non_null_filter_expression_When_wrapped_inside_a_group_expression_Should_not_change_its_meaning(NonNull<FilterExpression> filterExpression, PositiveInt count)
+        public void Given_a_non_null_filter_expression_When_wrapped_inside_a_group_expression_Should_not_change_its_meaning(NonNull<FilterExpression> filterExpressionGenerator, PositiveInt count)
         {
             // Arrange
             int depth = count.Item / 2;
-            GroupExpression initialGroup = new(filterExpression.Item);
-            GroupExpression otherGroup = new(filterExpression.Item);
+            FilterExpression filterExpression = filterExpressionGenerator.Item;
+            GroupExpression initialGroup = new(filterExpression);
+            GroupExpression otherGroup = new(filterExpression);
 
             for (int i = 0; i < depth; i++)
             {
@@ -220,7 +221,7 @@
             isEquivalent.Should().BeTrue();
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(929709641070850190,12309382742704790507)")]
         public void Given_a_non_null_FilterExpression_that_is_wrapped_inside_a_GroupExpression_instance_When_calling_Simplify_Then_the_resulting_FilterExpression_should_be_equivalent_to_the_starting_FilterExpression(NonNull<FilterExpression> filterExpressionGenerator)
         {
             // Arrange

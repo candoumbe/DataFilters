@@ -32,10 +32,11 @@ namespace DataFilters.Grammar.Syntax
         /// <inheritdoc />
         public virtual string ToString(string format, IFormatProvider formatProvider)
         {
-            FormattableString formattable = format switch
+            FormattableString formattable = (format ?? "d") switch
             {
                 "d" or "D" => $"@{GetType().Name}",
-                null or "" => $"{ToString()}",
+                "f" or "F" => $"@{GetType().Name}(value : {EscapedParseableString})",
+                //null or "" => $"{ToString()}",
                 _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
             };
 

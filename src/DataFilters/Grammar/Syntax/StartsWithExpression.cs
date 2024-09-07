@@ -42,7 +42,7 @@
             _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-                // Also we need an extra position for the final '*' that will be append in all cases
+                // Also we need an extra position for the final '*' that will be appended in all cases
                 bool requireEscapingCharacters = Value.AtLeastOnce(chr => FilterTokenizer.SpecialCharacters.Contains(chr));
                 StringBuilder escapedParseableString;
 
@@ -124,7 +124,7 @@
         ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
         /// </list>
         /// </returns>
-        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new OneOfExpression(new StringValueExpression(left.Value + right.Value), new StartsWithExpression(left.Value + right.Value), new AndExpression(left, new ContainsExpression(right.Value)));
+        public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new (new StringValueExpression(left.Value + right.Value), new StartsWithExpression(left.Value + right.Value), new AndExpression(left, new ContainsExpression(right.Value)));
 
         /// <summary>
         /// Combines the specified <paramref name="left"/> and <paramref name="right"/>

@@ -28,6 +28,7 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other) => other switch
         {
+            NumericValueExpression numericValue => Equals(numericValue),
             ConstantValueExpression constant => base.Equals(constant),
             ISimplifiable simplifiable => Equals(simplifiable.Simplify()),
             _ => false
@@ -40,6 +41,6 @@ namespace DataFilters.Grammar.Syntax
         public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => base.Equals(obj);
+        public override bool Equals(object obj) => Equals(obj as NumericValueExpression);
     }
 }

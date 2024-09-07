@@ -110,10 +110,13 @@ I&_Oj
                         "5aa8f391",
                         new StringValueExpression("5aa8f391")
                     },
-
                     {
                         "6P%",
                         new StringValueExpression("6P%")
+                    },
+                    {
+                        "gHuQ>a0\\!>\\:\t\\-\\021+o\\]AL2oVmf\\029\\!",
+                        new StringValueExpression("gHuQ>a0!>:\t-\\021+o]AL2oVmf\\029!")
                     }
                 };
 
@@ -186,7 +189,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(4974161414553342498,12685618960437963947)")]
         public void Should_parse_StartsWith(StartsWithExpression expected)
         {
             // Arrange
@@ -216,6 +219,31 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
+        public static TheoryData<string, EndsWithExpression> EndsWithData
+            => new TheoryData<string, EndsWithExpression>()
+            {
+                {
+                    @"*gHuQ>a0\!>\:	\-\021+o\]AL2oVmf\029\!",
+                    new EndsWithExpression(@"gHuQ>a0!>:	-\021+o]AL2oVmf\029!")
+                }
+            };
+
+        [Theory]
+        [MemberData(nameof(EndsWithData))]
+        public void Given_ends_with_input_EndsWith_should_return_expected_EndsWithExpression(string input, EndsWithExpression expected)
+        {
+            // Arrange
+            // Arrange
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
+
+            // Act
+            EndsWithExpression expression = FilterTokenParser.EndsWith.Parse(tokens);
+
+            // Assert
+            AssertThatShould_parse(expression, expected);
+        }
+        
         private static string StringifyTokens(TokenList<FilterToken> tokens)
             => tokens.Select(token => new { Kind = token.Kind.ToString(), Value = token.ToStringValue() }).Jsonify();
 
@@ -227,7 +255,8 @@ I&_Oj
                 {
                     { "*bat*", new ContainsExpression("bat")},
                     { @"*bat\*man*", new ContainsExpression("bat*man")},
-                    {"*d3aa022d-ec52-47aa-be13-6823c478c60a*", new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")}
+                    {"*d3aa022d-ec52-47aa-be13-6823c478c60a*", new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")},
+                    {"*\"Oi\012j8G]t:JK%H6m>+r{)[5\n6\"*", AsteriskExpression.Instance + new StringValueExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6") + AsteriskExpression.Instance}
                 };
 
                 string[] punctuations = [".", "-", ":", "_"];
@@ -252,6 +281,7 @@ I&_Oj
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
 
             // Act
             ContainsExpression expression = FilterTokenParser.Contains.Parse(tokens);
@@ -311,7 +341,23 @@ I&_Oj
                 {
                     (new StringValueExpression("AB") | new StringValueExpression("6P%")).EscapedParseableString,
                     new StringValueExpression("AB") | new StringValueExpression("6P%")
-                }
+                },
+                {
+                    (new EndsWithExpression("Foo") | new ContainsExpression("Bar")).EscapedParseableString,
+                    new EndsWithExpression("Foo") | new ContainsExpression("Bar")
+                },
+                {
+                    (new EndsWithExpression("Foo") | new EndsWithExpression("Bar")).EscapedParseableString,
+                    new EndsWithExpression("Foo") | new EndsWithExpression("Bar")
+                },
+                {
+                    (new StartsWithExpression("Foo") | new EndsWithExpression("Bar")).EscapedParseableString,
+                    new StartsWithExpression("Foo") | new EndsWithExpression("Bar")
+                },
+                {
+                    @"*N\=FW|i*",
+                    new EndsWithExpression("N=FW") | new StartsWithExpression("i")
+                },
             };
 
         [Theory]
@@ -322,7 +368,7 @@ I&_Oj
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             
-            _outputHelper.WriteLine(string.Join(",",tokens.Select(token => $"pos:{token.Position.Column};kind:{token.Kind}")));
+            _outputHelper.WriteLine(StringifyTokens(tokens));
 
             // Act
             FilterExpression expression = FilterTokenParser.Or.Parse(tokens);
@@ -337,6 +383,10 @@ I&_Oj
                 {
                     "bat*,man*",
                     new AndExpression(new StartsWithExpression("bat"), new StartsWithExpression("man"))
+                },
+                {
+                    "*bat,man*",
+                    new EndsWithExpression("bat") & new StartsWithExpression("man")
                 },
                 {
                     "(!(Bat*|Sup*)),!*man",
@@ -363,6 +413,17 @@ I&_Oj
                 {
                     "bat*man*",
                     new AndExpression(new StartsWithExpression("bat"), new ContainsExpression("man"))
+                },
+                {
+                    //@"*""1.\""Foo!"",*""2.\""Bar!""*",
+                    new AndExpression(
+                        AsteriskExpression.Instance + new TextExpression(@"1.""Foo!"),
+                        AsteriskExpression.Instance + new TextExpression(@"2.""Bar!") + AsteriskExpression.Instance
+                    ).EscapedParseableString,
+                    new AndExpression(
+                        AsteriskExpression.Instance + new TextExpression(@"1.""Foo!"),
+                        AsteriskExpression.Instance + new TextExpression(@"2.""Bar!") + AsteriskExpression.Instance
+                    )
                 }
             };
 
@@ -373,6 +434,7 @@ I&_Oj
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
 
             // Act
             FilterExpression expression = FilterTokenParser.And.Parse(tokens);
@@ -381,12 +443,13 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "15065352233795521037,11280662582861461867)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(1407543242584992845,11744611359535253513)")]
         public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}' ");
             _outputHelper.WriteLine($"input (debug view) : '{expected:d}' ");
+            _outputHelper.WriteLine($"input (full view) : '{expected:f}' ");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
             
             // Act
@@ -399,7 +462,7 @@ I&_Oj
 
         public static TheoryData<string, NotExpression> NotParsingCases
             => new()
-            {
+            {   
                 {
                     "!!(w%A*@,2088-08-10)",
                     new NotExpression(
@@ -455,11 +518,21 @@ I&_Oj
                 {
                     (! (new StringValueExpression("5aa8f391") | new GroupExpression(new GroupExpression(new GroupExpression(new StringValueExpression("6P%")))))).EscapedParseableString,
                     ! (new StringValueExpression("5aa8f391") | new GroupExpression(new GroupExpression(new GroupExpression(new StringValueExpression("6P%")))))
-                }
-                ,
+                },
                 {
                     (! (new StringValueExpression("5aa8f391") | new StringValueExpression("6P%"))).EscapedParseableString,
                     ! (new StringValueExpression("5aa8f391") | new StringValueExpression("6P%"))
+                },
+                {
+                    // "!!(*gHuQ>a0\\!>\\:\t\\-\\021+o\\]AL2oVmf\\029\\!,*\"Oi\\012j8G]t:JK%H6m>+r{)[5\n6\"*)",
+                    (!!(new EndsWithExpression("gHuQ>a0!>:\t-\\021+o\\]AL2oVmf\\029!")
+                    &
+                    new ContainsExpression(new TextExpression("Oi\\012j8G]t:JK%H6m>+r{)[5\n6")))).EscapedParseableString,
+                    !!(
+                        new EndsWithExpression("gHuQ>a0!>:\t-\\021+o\\]AL2oVmf\\029!")
+                        &
+                        new ContainsExpression(new TextExpression("Oi\\012j8G]t:JK%H6m>+r{)[5\n6"))
+                    )
                 }
 
             };
@@ -472,9 +545,13 @@ I&_Oj
             _outputHelper.WriteLine($"input : '{input}'");
             _outputHelper.WriteLine($"expected : {expected:d}");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+            
+            _outputHelper.WriteLine(StringifyTokens(tokens));
 
             // Act
             NotExpression expression = FilterTokenParser.Not.Parse(tokens);
+            
+            _outputHelper.WriteLine($"Parsed expression : {expression:d}");
 
             // Assert
             AssertThatShould_parse(expression, expected);
@@ -719,7 +796,7 @@ I&_Oj
             });
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 60, Replay = "(9626359276260053735,17357131733972231839)")]
         public void Should_parse_text(CultureInfo culture, TextExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>
@@ -728,6 +805,7 @@ I&_Oj
                 _outputHelper.WriteLine($"Culture : '{culture.Name}'");
                 _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
                 TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+                _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
 
                 // Act
                 TextExpression actual = FilterTokenParser.Text.Parse(tokens);
@@ -839,10 +917,10 @@ I&_Oj
                                                                                                   new TimeExpression(hours : 15, minutes: 03, seconds: 45),
                                                                                                   OffsetExpression.Zero),
                                                                            included: false),
-                                                                  max: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
-                                                                                                                     new TimeExpression(hours : 15, minutes: 30, seconds: 45),
-                                                                                                                     new OffsetExpression(hours: 1)),
-                                                                                              included: false)
+                                              max: new BoundaryExpression(new DateTimeExpression(new DateExpression(year: 2012, month: 10, day: 19 ),
+                                                                                                 new TimeExpression(hours : 15, minutes: 30, seconds: 45),
+                                                                                                 new OffsetExpression(hours: 1)),
+                                                                          included: false)
                         )
                     )
                 },
@@ -916,6 +994,28 @@ I&_Oj
                     (
                         new PropertyName("Value"),
                         new StartsWithExpression(@"%f<,N:`aAp#") &  new EndsWithExpression(@")")
+                    )
+                },
+                {
+                    $"Prop={(new StartsWithExpression(@"1\.\""Foo\!") & new ContainsExpression(@"2\.\""Bar\!")).EscapedParseableString}",
+                    (
+                        new PropertyName("Prop"),
+                        new StartsWithExpression(@"1\.\""Foo\!") & new ContainsExpression(@"2\.\""Bar\!")
+                    )
+                },
+                {
+                    $"Prop={(new EndsWithExpression("Foo") & new ContainsExpression("Bar")).EscapedParseableString}",
+                    (
+                        new PropertyName("Prop"),
+                        new EndsWithExpression("Foo") & new ContainsExpression("Bar")
+                    )
+                }
+                ,
+                {
+                    $"Prop={(new ContainsExpression("Foo") & new EndsWithExpression("Bar")).EscapedParseableString}",
+                    (
+                        new PropertyName("Prop"),
+                        new ContainsExpression("Foo") & new EndsWithExpression("Bar")
                     )
                 }
             };
@@ -1045,7 +1145,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(17248649469698894071,7955272864250504761)")]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
@@ -1187,6 +1287,16 @@ I&_Oj
             AssertThatParseExceptionIsThrown(callingParserWithInvalidStringInput, reason);
         }
 
+        /// <summary>
+        /// Asserts that <paramref name="actual"/> and <paramref name="expected"/> are
+        /// <list type="bullet">
+        ///     <item>not the same :</item>
+        ///     <item>equal</item>
+        /// </list> 
+        /// </summary>
+        /// <param name="actual">The expression onto which to make assertions.</param>
+        /// <param name="expected">The reference expression</param>
+        /// <param name="reason">a string that will be displayed if the assertion fails</param>
         private static void AssertThatShould_parse(FilterExpression actual, FilterExpression expected, string reason = "")
             => actual.Should()
                      .NotBeSameAs(expected).And

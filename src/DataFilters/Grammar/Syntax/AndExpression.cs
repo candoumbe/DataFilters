@@ -7,7 +7,7 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
     /// </summary>
-    public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpression>, IFormattable
+    public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpression>
     {
         private readonly Lazy<string> _lazyToString;
         private readonly Lazy<string> _lazyEscapedParseableString;
@@ -56,7 +56,7 @@ namespace DataFilters.Grammar.Syntax
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
-        public override string ToString() => _lazyToString.Value;
+        public override string ToString() => _lazyEscapedParseableString.Value;
 
         /// <inheritdoc />
         public override FilterExpression Simplify()

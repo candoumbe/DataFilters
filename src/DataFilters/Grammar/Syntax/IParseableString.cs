@@ -6,7 +6,7 @@
     public interface IParseableString
     {
         /// <summary>
-        /// The string that, if parsed, will give the current expression
+        /// The string that, if parsed, will give the current expression.
         /// </summary>
         string EscapedParseableString { get; }
 

@@ -20,7 +20,7 @@
     public static class FilterTokenParser
     {
         /// <summary>
-        /// Parser for many <see cref="FilterToken.Letter"/>
+        /// Parser for many <see cref="FilterToken.Letter"/>s or <see cref="FilterToken.Digit"/>s.
         /// </summary>
         public static TokenListParser<FilterToken, ConstantValueExpression> AlphaNumeric => from data in (
                                                                                                from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try()
@@ -81,51 +81,52 @@
         /// <summary>
         /// Parser for "starts with" expressions
         /// </summary>
-        public static TokenListParser<FilterToken, StartsWithExpression> StartsWith => (from data in AlphaNumeric.AtLeastOnce()
+        public static TokenListParser<FilterToken, StartsWithExpression> StartsWith => (from text in Text
                                                                                         from _ in Asterisk
-                                                                                        select new StartsWithExpression(string.Concat(data.Select(x => x.Value)))).Try()
+                                                                                        select new StartsWithExpression(text)).Try()
                                                                                         .Or(
-                                                                                            from text in Text
+                                                                                            from data in AlphaNumeric.AtLeastOnce()
                                                                                             from _ in Asterisk
-                                                                                            select new StartsWithExpression(text)
+                                                                                            select new StartsWithExpression(string.Concat(data.Select(x => x.Value)))
                                                                                         );
 
         /// <summary>
         /// Parser for "ends with" expressions
         /// </summary>
-        public static TokenListParser<FilterToken, EndsWithExpression> EndsWith => Asterisk.IgnoreThen(AlphaNumeric.AtLeastOnce())
-                                                                                           .Select(data => new EndsWithExpression(string.Concat(data.Select(item => item.Value)))).Try()
-                                                                                   .Or(Asterisk.IgnoreThen(Text)
-                                                                                       .Select(text => new EndsWithExpression(text)));
+        public static TokenListParser<FilterToken, EndsWithExpression> EndsWith => Asterisk.IgnoreThen(Text)
+                                                                                           .Select(text => new EndsWithExpression(text)).Try()
+                                                                                   .Or(Asterisk.IgnoreThen(AlphaNumeric.AtLeastOnce())
+                                                                                       .Select(data => new EndsWithExpression(string.Concat(data.Select(item => item.Value)))));
 
         /// <summary>
         /// Parser for "contains" expression
         /// </summary>
-        public static TokenListParser<FilterToken, ContainsExpression> Contains => (from _ in Asterisk
-                                                                                    from data in (
-                                                                                        from beforeSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                        from beforePunctuation in Punctuation.Many()
-                                                                                        from alpha in AlphaNumeric.Many()
-                                                                                        from afterPunctuation in Punctuation.Many()
-                                                                                        from afterSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                        where beforeSymbol.AtLeastOnce()
-                                                                                              || beforePunctuation.AtLeastOnce()
-                                                                                              || alpha.AtLeastOnce()
-                                                                                              || afterPunctuation.AtLeastOnce()
-                                                                                              || afterSymbol.AtLeastOnce()
-                                                                                        select new
-                                                                                        {
-                                                                                            value = string.Concat(string.Concat(beforeSymbol.Select(x => x.ToStringValue())),
-                                                                                                                  string.Concat(beforePunctuation.Select(x => x.Value)),
-                                                                                                                  string.Concat(alpha.Select(item => item.Value)),
-                                                                                                                  string.Concat(afterPunctuation.Select(x => x.Value)),
-                                                                                                                  string.Concat(afterSymbol.Select(x => x.ToStringValue())))
-                                                                                        }).AtLeastOnce()
+        public static TokenListParser<FilterToken, ContainsExpression> Contains => Text.Between(Asterisk, Asterisk)
+                                                                                       .Select(text => new ContainsExpression(text)).Try()
+                                                                                       .Or(
+                                                                                           from _ in Asterisk
+                                                                                           from data in (
+                                                                                               from beforeSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                               from beforePunctuation in Punctuation.Many()
+                                                                                               from alpha in AlphaNumeric.Many()
+                                                                                               from afterPunctuation in Punctuation.Many()
+                                                                                               from afterSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                               where beforeSymbol.AtLeastOnce()
+                                                                                                     || beforePunctuation.AtLeastOnce()
+                                                                                                     || alpha.AtLeastOnce()
+                                                                                                     || afterPunctuation.AtLeastOnce()
+                                                                                                     || afterSymbol.AtLeastOnce()
+                                                                                               select new
+                                                                                               {
+                                                                                                   value = string.Concat(string.Concat(beforeSymbol.Select(x => x.ToStringValue())),
+                                                                                                                         string.Concat(beforePunctuation.Select(x => x.Value)),
+                                                                                                                         string.Concat(alpha.Select(item => item.Value)),
+                                                                                                                         string.Concat(afterPunctuation.Select(x => x.Value)),
+                                                                                                                         string.Concat(afterSymbol.Select(x => x.ToStringValue())))
+                                                                                               }).AtLeastOnce()
                                                                                     from escaped in Token.EqualTo(FilterToken.Backslash).Many()
                                                                                     from __ in Asterisk
-                                                                                    select new ContainsExpression(string.Concat(data.Select(x => x.value)))).Try()
-                                                                                   .Or(Text.Between(Asterisk, Asterisk)
-                                                                                            .Select(text => new ContainsExpression(text)));
+                                                                                    select new ContainsExpression(string.Concat(data.Select(x => x.value))));
 
         /// <summary>
         /// Parser for logical OR expression.
@@ -160,7 +161,7 @@
         /// Parser for NOT expression
         /// </summary>
         public static TokenListParser<FilterToken, NotExpression> Not => (from bangs in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
-                                                                         from expression in Parse.Ref(() => BinaryOrUnaryExpression)
+                                                                         from expression in Parse.Ref(() => UnaryExpression)
                                                                          select (bangs, expression))
             .Select(tuple =>
             {
@@ -373,7 +374,7 @@
         /// Group expression
         /// </summary>
         public static TokenListParser<FilterToken, GroupExpression> Group => from _ in Token.EqualTo(FilterToken.LeftParenthesis)
-                                                                             from expression in BinaryOrUnaryExpression
+                                                                             from expression in Parse.Ref(() => BinaryOrUnaryExpression)
                                                                              from __ in Token.EqualTo(FilterToken.RightParenthesis)
                                                                              select new GroupExpression(expression);
 
@@ -650,12 +651,12 @@
                                                                                                    from alphaAfterAsterisk in AlphaNumeric
                                                                                                    select (FilterExpression)(new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value))).Try())
                                                                                               .Or(Parse.Ref(() => Contains.Try().Cast<FilterToken, ContainsExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()))
                                                                                               .Or(Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>()))
+                                                                                              .Or(Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
             ;
         /// <summary>
         /// Parser for a <c>property=&lt;expression&gt;</c> pair.
@@ -762,9 +763,6 @@
             select new StringValueExpression(c.ToStringValue())
         ).Or(
             from c in Token.EqualTo(FilterToken.Underscore)
-            select new StringValueExpression(c.ToStringValue())
-        ).Or(
-            from c in Token.EqualTo(FilterToken.And)
             select new StringValueExpression(c.ToStringValue())
         );
 
