@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
+    using Helpers;
     using FluentAssertions;
     using FsCheck;
     using FsCheck.Fluent;
@@ -44,7 +44,7 @@
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null(FilterExpression left, FilterExpression right)
         {
             // Act
-            Action action = () => new OrExpression(left, right);
+            Action action = () => _ = new OrExpression(left, right);
 
             // Assert
             action.Should()
