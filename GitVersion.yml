@@ -1,5 +1,14 @@
 mode: ContinuousDelivery
-branches: {}
+branches:
+  master:
+    tag: ""
+    regex: ^master$|^main$
+  feature:
+    regex: ^feature?[/-]
+  hotfix:
+    tag: fix
+    increment: Patch
+    regex: ^(hot)?fix(es)?[/-]
 ignore:
-  sha: []
-merge-message-formats: {}
+  sha: [ ]
+merge-message-formats: { }
