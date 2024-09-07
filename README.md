@@ -294,9 +294,13 @@ are equivalent
 
 The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported.
 A bracket expression. Matches a single character that is contained within the brackets.
-For example, `[abc]` matches `a`, `b`, or `c`. `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
 
-`BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
+For example:
+
+- `[abc]` matches `a`, `b`, or `c`
+- `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
+
+[`BracketExpression`](src/DataFilters/Grammar/Syntax/BracketExpression.cs)s can be, as any other expressions, combined with any other expressions to build more complex expressions.
 
 ## Logical operators
 
@@ -422,11 +426,25 @@ a special character.
 | ------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
 
-💡 For longer texts, just wrap it between quotes and you're good to go
+💡 Escaping special characters can be a tedious task when working with longer texts. Just use a text expression instead by wrapping 
+the text between double quotes (`"`).
 
 | Query string   | JSON                                                | C#                                                                              |
 | -------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
+
+Example : 
+
+```
+I'm a long text with some \"special characters\"  in it and each one must be escaped properly`
+```
+can be rewritten
+
+```
+"I'm a long text with some \"special characters\"  in it and each one must be escaped properly !`
+```
+
+When using text expressions, only `\` and `"` characters need to be escaped.
 
 ## Sorting
 
