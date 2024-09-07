@@ -65,10 +65,12 @@
                     case OneOfExpression oneOf:
                     {
                         FilterExpression simplifiedOneOf = oneOf.Simplify();
-                        if (simplifiedOneOf is OrExpression orExpression)
+                        isEquivalent = simplifiedOneOf switch
                         {
-                            isEquivalent = IsEquivalentTo(orExpression);
-                        }
+                            OrExpression orExpression => IsEquivalentTo(orExpression),
+                            OneOfExpression _ => false,
+                            _ => Left.IsEquivalentTo(Right) && ( Left.IsEquivalentTo(simplifiedOneOf) || Right.IsEquivalentTo(simplifiedOneOf) )
+                        };
 
                         break;
                     }
