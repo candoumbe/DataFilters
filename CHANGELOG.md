@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚨 Fixes
 
 - Fixed incorrect parsing of scientific numeric values (with `E` symbol).
+- Fixed incorrect parsing of some expressions that uses `*` character
+- Fixed incorrect parsing of text expression
 
 ### 🧹 Housekeeping
 
