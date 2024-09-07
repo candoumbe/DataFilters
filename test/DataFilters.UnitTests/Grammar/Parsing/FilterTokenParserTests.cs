@@ -189,7 +189,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(4974161414553342498,12685618960437963947)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_StartsWith(StartsWithExpression expected)
         {
             // Arrange
@@ -443,7 +443,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(1407543242584992845,11744611359535253513)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_NotExpression(NotExpression expected)
         {
             // Arrange
@@ -796,7 +796,7 @@ I&_Oj
             });
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 60, Replay = "(9626359276260053735,17357131733972231839)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_text(CultureInfo culture, TextExpression expected)
         {
             _cultureSwitcher.Run(culture, () =>
@@ -1145,7 +1145,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(17248649469698894071,7955272864250504761)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
