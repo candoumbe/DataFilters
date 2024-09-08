@@ -14,6 +14,10 @@ branches:
     is-release-branch: false
     is-mainline: false
     pre-release-weight: 30000
+  hotfix:
+    regex: "^(hot)?fix(es)?[/-]"
+    mode: ContinuousDelivery
+    tag: "fix"
   release:
     regex: "^release(s)?[/-]"
     tag: "rc"
