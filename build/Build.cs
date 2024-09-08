@@ -146,7 +146,7 @@ public class Build : NukeBuild,
                 () => NugetApiKey is not null),
             new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
                 source: new Uri(
-                    $"https://nuget.kpg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
+                    $"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
                 () => this.Get<IHaveGitHubRepository>().GitHubToken is not null)
         };
 }
