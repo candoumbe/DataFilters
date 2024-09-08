@@ -10,14 +10,16 @@ branches:
     prevent-increment:
       of-merged-branch: false
     track-merge-target: false
+    increment: Inherit
     source-branches: [ 'develop', 'feature', 'support', 'hotfix' ]
     tracks-release-branches: false
     is-release-branch: false
     pre-release-weight: 30000
   hotfix:
-    regex: "^(hot)?fix(es)?[/-]"
     mode: ContinuousDelivery
-    tag: "fix"
+    regex: "^(hot)?fix(es)?[/-]"
+    increment: Patch
+    label: "fix"
   release:
     regex: "^release(s)?[/-]"
     label: "rc"
