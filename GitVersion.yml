@@ -1,14 +1,24 @@
-mode: ContinuousDelivery
+mode: ContinuousDeployment
 branches:
-  master:
-    tag: ""
-    regex: ^master$|^main$
   feature:
-    regex: ^feature?[/-]
-  hotfix:
-    tag: fix
-    increment: Patch
-    regex: ^(hot)?fix(es)?[/-]
+    regex: "^feature(s)?[/-]"
+  coldfix:
+    regex: "^coldfix(es)?[/-]"
+    mode: ContinuousDelivery
+    tag: useBranchName
+    increment: Inherit
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: false
+    source-branches: [ 'develop', 'feature', 'support', 'hotfix' ]
+    tracks-release-branches: false
+    is-release-branch: false
+    is-mainline: false
+    pre-release-weight: 30000
+  release:
+    regex: "^release(s)?[/-]"
+    tag: "rc"
+  develop:
+    tag: "alpha"
 ignore:
-  sha: [ ]
-merge-message-formats: { }
+  sha: []
+merge-message-formats: {}
