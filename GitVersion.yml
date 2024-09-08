@@ -5,24 +5,22 @@ branches:
   coldfix:
     regex: "^coldfix(es)?[/-]"
     mode: ContinuousDelivery
-    tag: useBranchName
-    increment: Inherit
-    prevent-increment-of-merged-branch-version: false
     track-merge-target: false
+    increment: Inherit
     source-branches: [ 'develop', 'feature', 'support', 'hotfix' ]
     tracks-release-branches: false
     is-release-branch: false
-    is-mainline: false
     pre-release-weight: 30000
   hotfix:
-    regex: "^(hot)?fix(es)?[/-]"
     mode: ContinuousDelivery
-    tag: "fix"
+    regex: "^(hot)?fix(es)?[/-]"
+    increment: Patch
+    label: "fix"
   release:
     regex: "^release(s)?[/-]"
-    tag: "rc"
+    label: "rc"
   develop:
-    tag: "alpha"
+    label: "alpha"
 ignore:
   sha: []
 merge-message-formats: {}

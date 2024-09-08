@@ -22,6 +22,13 @@
         "trx"
       ],
       "rollForward": false
+    },
+    "gitversion.tool": {
+      "version": "6.0.2",
+      "commands": [
+        "dotnet-gitversion"
+      ],
+      "rollForward": false
     }
   }
 }
