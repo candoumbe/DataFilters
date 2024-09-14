@@ -18,6 +18,7 @@ using Nuke.Common.Tools.GitHub;
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
+    EnableGitHubToken = true,
     PublishArtifacts = true,
     InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack)],
     CacheKeyFiles = ["global.json", "src/**/*.csproj"],
