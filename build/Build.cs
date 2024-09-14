@@ -78,7 +78,7 @@ using Nuke.Common.Tools.GitHub;
     PublishArtifacts = true
 )]
 [DotNetVerbosityMapping]
-public class Build : NukeBuild,
+public class Build : EnhancedNukeBuild,
     IHaveSolution,
     IHaveSourceDirectory,
     IHaveTestDirectory,
@@ -145,8 +145,7 @@ public class Build : NukeBuild,
                 source: new Uri("https://api.nuget.org/v3/index.json"),
                 () => NugetApiKey is not null),
             new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
-                source: new Uri(
-                    $"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
+                source: new Uri($"https://nuget.pkg.github.com/{ this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner() }/index.json"),
                 () => this.Get<IHaveGitHubRepository>().GitHubToken is not null)
         };
 }

@@ -1,105 +1,154 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "$ref": "#/definitions/build",
-  "title": "Build Schema",
+  "properties": {
+    "AutoStash": {
+      "type": "boolean",
+      "description": "Indicates if any changes should be stashed automatically prior to switching branch (Default : true)"
+    },
+    "CodecovToken": {
+      "type": "string",
+      "description": "The API key used to push code coverage to CodeCov",
+      "default": "Secrets must be entered via 'nuke :secrets [profile]'"
+    },
+    "ConfigName": {
+      "type": "string",
+      "description": "Defines the name of the configuration to use to publish packages"
+    },
+    "Configuration": {
+      "type": "string",
+      "description": "Defines the configuration to use when building the application",
+      "enum": [
+        "Debug",
+        "Release"
+      ]
+    },
+    "DeleteLocalOnSuccess": {
+      "type": "boolean",
+      "description": "Should the local branch be deleted after the pull request was created successfully ?"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the pull request"
+    },
+    "Draft": {
+      "type": "boolean",
+      "description": "Indicates to open the pull request as 'draft'"
+    },
+    "GitHubToken": {
+      "type": "string",
+      "description": "Token used to create a new release in GitHub",
+      "default": "Secrets must be entered via 'nuke :secrets [profile]'"
+    },
+    "IgnoreFailedSources": {
+      "type": "boolean",
+      "description": "Ignore unreachable sources during Restore"
+    },
+    "Issues": {
+      "type": "array",
+      "description": "Issues that will be closed once the pull request is completed",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "Major": {
+      "type": "boolean",
+      "description": "Hint to create a major release"
+    },
+    "Name": {
+      "type": "string",
+      "description": "Name of the branch to create"
+    },
+    "NugetApiKey": {
+      "type": "string",
+      "description": "API key used to publish artifacts to Nuget.org",
+      "default": "Secrets must be entered via 'nuke :secrets [profile]'"
+    },
+    "SkipConfirmation": {
+      "type": "boolean",
+      "description": "Set to true to not ask any confirmation to the end user (default: false)"
+    },
+    "Solution": {
+      "type": "string",
+      "description": "Path to a solution file that is automatically loaded"
+    },
+    "StrykerDashboardApiKey": {
+      "type": "string",
+      "description": "API KEY used to submit mutation report to a stryker dashboard",
+      "default": "Secrets must be entered via 'nuke :secrets [profile]'"
+    },
+    "Title": {
+      "type": "string",
+      "description": "Title that will be used when creating a PR"
+    }
+  },
   "definitions": {
-    "build": {
-      "type": "object",
+    "Host": {
+      "type": "string",
+      "enum": [
+        "AppVeyor",
+        "AzurePipelines",
+        "Bamboo",
+        "Bitbucket",
+        "Bitrise",
+        "GitHubActions",
+        "GitLab",
+        "Jenkins",
+        "Rider",
+        "SpaceAutomation",
+        "TeamCity",
+        "Terminal",
+        "TravisCI",
+        "VisualStudio",
+        "VSCode"
+      ]
+    },
+    "ExecutableTarget": {
+      "type": "string",
+      "enum": [
+        "AddGithubRelease",
+        "Benchmarks",
+        "Changelog",
+        "Clean",
+        "Coldfix",
+        "Compile",
+        "Feature",
+        "Hotfix",
+        "MutationTests",
+        "Pack",
+        "Publish",
+        "Release",
+        "ReportCoverage",
+        "Restore",
+        "UnitTests"
+      ]
+    },
+    "Verbosity": {
+      "type": "string",
+      "description": "",
+      "enum": [
+        "Verbose",
+        "Normal",
+        "Minimal",
+        "Quiet"
+      ]
+    },
+    "NukeBuild": {
       "properties": {
-        "AutoStash": {
-          "type": "boolean",
-          "description": "Indicates if any changes should be stashed automatically prior to switching branch (Default : true)"
-        },
-        "CodecovToken": {
-          "type": "string",
-          "description": "The API key used to push code coverage to CodeCov",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
-        },
-        "ConfigName": {
-          "type": "string",
-          "description": "Defines the name of the configuration to use to publish packages"
-        },
-        "Configuration": {
-          "type": "string",
-          "description": "Defines the configuratoin to use when building the application",
-          "enum": [
-            "Debug",
-            "Release"
-          ]
-        },
         "Continue": {
           "type": "boolean",
           "description": "Indicates to continue a previously failed build attempt"
-        },
-        "DeleteLocalOnSuccess": {
-          "type": "boolean",
-          "description": "Should the local branch be deleted after the pull request was created successfully ?"
-        },
-        "Description": {
-          "type": "string",
-          "description": "Description of the pull request"
-        },
-        "Draft": {
-          "type": "boolean",
-          "description": "Indicates to open the pull request as 'draft'"
-        },
-        "GitHubToken": {
-          "type": "string",
-          "description": "Token used to create a new release in GitHub",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Help": {
           "type": "boolean",
           "description": "Shows the help text for this build assembly"
         },
         "Host": {
-          "type": "string",
           "description": "Host for execution. Default is 'automatic'",
-          "enum": [
-            "AppVeyor",
-            "AzurePipelines",
-            "Bamboo",
-            "Bitbucket",
-            "Bitrise",
-            "GitHubActions",
-            "GitLab",
-            "Jenkins",
-            "Rider",
-            "SpaceAutomation",
-            "TeamCity",
-            "Terminal",
-            "TravisCI",
-            "VisualStudio",
-            "VSCode"
-          ]
-        },
-        "IgnoreFailedSources": {
-          "type": "boolean",
-          "description": "Ignore unreachable sources during Restore"
-        },
-        "Issues": {
-          "type": "array",
-          "description": "Issues that will be closed once the pull request is completed",
-          "items": {
-            "type": "string"
-          }
-        },
-        "Major": {
-          "type": "boolean",
-          "description": "Hint to create a major release"
-        },
-        "Name": {
-          "type": "string",
-          "description": "Name of the branch to create"
+          "$ref": "#/definitions/Host"
         },
         "NoLogo": {
           "type": "boolean",
           "description": "Disables displaying the NUKE logo"
-        },
-        "NugetApiKey": {
-          "type": "string",
-          "description": "API key used to publish artifacts to Nuget.org",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Partition": {
           "type": "string",
@@ -124,74 +173,22 @@
           "type": "array",
           "description": "List of targets to be skipped. Empty list skips all dependencies",
           "items": {
-            "type": "string",
-            "enum": [
-              "AddGithubRelease",
-              "Benchmarks",
-              "Changelog",
-              "Clean",
-              "Coldfix",
-              "Compile",
-              "Feature",
-              "Hotfix",
-              "MutationTests",
-              "Pack",
-              "Publish",
-              "Release",
-              "ReportCoverage",
-              "Restore",
-              "UnitTests"
-            ]
+            "$ref": "#/definitions/ExecutableTarget"
           }
-        },
-        "Solution": {
-          "type": "string",
-          "description": "Path to a solution file that is automatically loaded"
-        },
-        "StrykerDashboardApiKey": {
-          "type": "string",
-          "description": "API KEY used to submit mutation report to a stryker dashboard",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Target": {
           "type": "array",
           "description": "List of targets to be invoked. Default is '{default_target}'",
           "items": {
-            "type": "string",
-            "enum": [
-              "AddGithubRelease",
-              "Benchmarks",
-              "Changelog",
-              "Clean",
-              "Coldfix",
-              "Compile",
-              "Feature",
-              "Hotfix",
-              "MutationTests",
-              "Pack",
-              "Publish",
-              "Release",
-              "ReportCoverage",
-              "Restore",
-              "UnitTests"
-            ]
+            "$ref": "#/definitions/ExecutableTarget"
           }
         },
-        "Title": {
-          "type": "string",
-          "description": "Title that will be used when creating a PR"
-        },
         "Verbosity": {
-          "type": "string",
           "description": "Logging verbosity during build execution. Default is 'Normal'",
-          "enum": [
-            "Minimal",
-            "Normal",
-            "Quiet",
-            "Verbose"
-          ]
+          "$ref": "#/definitions/Verbosity"
         }
       }
     }
-  }
+  },
+  "$ref": "#/definitions/NukeBuild"
 }
