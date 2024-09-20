@@ -378,10 +378,9 @@
                                                                              from __ in Token.EqualTo(FilterToken.RightParenthesis)
                                                                              select new GroupExpression(expression);
 
-        private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>())
-                                                                                                      .Or(Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()))
-                                                                                                      //.Or(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()))
-                                                                                                      .Or(Parse.Ref(() => UnaryExpression.Try() ))
+        private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.OneOf(Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()),
+                                                                                                             Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()),
+                                                                                                             Parse.Ref(() => UnaryExpression ))
         ;
 
         /// <summary>
@@ -635,29 +634,37 @@
         /// <summary>
         /// Parses all supported unary expressions
         /// </summary>
-        private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>())
-                                                                                              .Or(Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Date.Try().Cast<FilterToken, DateExpression, FilterExpression>()))
+        private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.OneOf(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>()),
+                                                                                                     Parse.Ref(() => Date.Try().Cast<FilterToken, DateExpression, FilterExpression>()),
                                                                                               // Special case of <constant>*<constant> which should be turned into an AndExpression
                                                                                               // even though from a user perspective it's just a text filter with no specific logic in it
-                                                                                              .Or((from alphaBeforeAsterisk in AlphaNumeric
-                                                                                                   from __ in Asterisk
-                                                                                                   from alphaAfterAsterisk in AlphaNumeric
-                                                                                                   select (FilterExpression)(new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value))).Try())
-                                                                                              .Or(Parse.Ref(() => Contains.Try().Cast<FilterToken, ContainsExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()))
-                                                                                              .Or(Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
+                                                                                                    Parse.Ref(() => StartsAndEndsWith.Try().Cast<FilterToken, AndExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => Contains.Try().Cast<FilterToken, ContainsExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => EndsWith.Try().Cast<FilterToken, EndsWithExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => StartsWith.Try().Cast<FilterToken, StartsWithExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => Text.Try().Cast<FilterToken, TextExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => AlphaNumeric.Try().Cast<FilterToken, ConstantValueExpression, FilterExpression>()),
+                                                                                                    Parse.Ref(() => Number.Cast<FilterToken, NumericValueExpression, FilterExpression>()))
             ;
+
+        /// <summary>
+        /// Handles special case of &lt;constant&gt;*&lt;constant&gt; which should be turned into a <see cref="AndExpression"/>
+        /// even though from user's perspective, it's just a text filter with no specific logic in it.
+        /// </summary>
+        private static TokenListParser<FilterToken, AndExpression> StartsAndEndsWith
+            => from alphaBeforeAsterisk in AlphaNumeric
+                from __ in Asterisk
+                from alphaAfterAsterisk in AlphaNumeric
+                select ( new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value) );
+
         /// <summary>
         /// Parser for a <c>property=&lt;expression&gt;</c> pair.
         /// </summary>
