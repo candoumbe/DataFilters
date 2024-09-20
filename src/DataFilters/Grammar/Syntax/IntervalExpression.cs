@@ -132,16 +132,12 @@ namespace DataFilters.Grammar.Syntax
                 {
                     if (other.Min is null)
                     {
-                        equals = Max is null
-                            ? other.Max is null
-                            : Max.Equals(other.Max);
+                        equals = Max?.Equals(other.Max) ?? other.Max is null;
                     }
                 }
                 else if (Min.Equals(other.Min))
                 {
-                    equals = Max is null
-                        ? other.Max is null
-                        : Max.Equals(other.Max);
+                    equals = Max?.Equals(other.Max) ?? other.Max is null;
                 }
             }
 
@@ -167,13 +163,17 @@ namespace DataFilters.Grammar.Syntax
                 {
                     equivalent = true;
                 }
-                else if (((other as ISimplifiable)?.Simplify() ?? other) is IntervalExpression range)
+                else if (other is IntervalExpression range)
                 {
                     equivalent = Equals(range);
                 }
-                else if (Min?.Included == true && Max?.Included == true && Min.Equals(Max))
+                else if (other is ISimplifiable simplifiable)
                 {
-                    equivalent = other.Equals(Min.Expression.As(other.GetType()));
+                    equivalent = Simplify().Equals(simplifiable.Simplify());
+                }
+                else
+                {
+                    equivalent = Min?.Included == true && Max?.Included == true && Min.Equals(Max) && Min.Expression.Equals(other);
                 }
             }
 

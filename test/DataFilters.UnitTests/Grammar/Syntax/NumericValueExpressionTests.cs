@@ -121,6 +121,12 @@ public class NumericValueExpressionTests
                 $"Left and right are both {nameof(NumericValueExpression)}s with exact same values"
             },
             {
+                new NumericValueExpression("0"),
+                new StringValueExpression("0"),
+                true,
+                $"Right is {nameof(StringValueExpression)} and hold the same value as current instance"
+            },
+            {
                 new NumericValueExpression("+0"),
                 new NumericValueExpression("0"),
                 false,

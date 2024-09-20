@@ -124,6 +124,12 @@
                     new GroupExpression(new DateTimeExpression(new(2090, 10, 10), new (03,00,40, 583), OffsetExpression.Zero)),
                     true,
                     "Two instances with inner expressions that are equal"
+                },
+                {
+                    new GroupExpression(new NumericValueExpression("0")),
+                    new GroupExpression(new StringValueExpression("0")),
+                    true,
+                    "Two instances with inner expressions that are equal"
                 }
             };
 
@@ -200,7 +206,7 @@
             }
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(13485810522331674394,9508666507375819251")]
         public void Given_a_non_null_filter_expression_When_wrapped_inside_a_group_expression_Should_not_change_its_meaning(NonNull<FilterExpression> filterExpressionGenerator, PositiveInt count)
         {
             // Arrange
@@ -211,6 +217,30 @@
 
             for (int i = 0; i < depth; i++)
             {
+                otherGroup = new GroupExpression(otherGroup);
+            }
+
+            // Act
+            bool isEquivalent = initialGroup.IsEquivalentTo(otherGroup);
+
+            // Assert
+            outputHelper.WriteLine($"{nameof(initialGroup)}: {initialGroup:d}");
+            outputHelper.WriteLine($"{nameof(otherGroup)}: {otherGroup:d}");
+            isEquivalent.Should().BeTrue();
+        }
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_a_two_groups_that_wraps_the_same_expression_Then_they_should_be_equal(NonNull<FilterExpression> filterExpressionGenerator, PositiveInt count)
+        {
+            // Arrange
+            int depth = count.Item / 2;
+            FilterExpression filterExpression = filterExpressionGenerator.Item;
+            GroupExpression initialGroup = new(filterExpression);
+            GroupExpression otherGroup = new(filterExpression);
+
+            for (int i = 0; i < depth; i++)
+            {
+                initialGroup = new GroupExpression(initialGroup);
                 otherGroup = new GroupExpression(otherGroup);
             }
 
@@ -236,7 +266,6 @@
             actual.IsEquivalentTo(expected).Should().BeTrue();
         }
 
-
         public static TheoryData<GroupExpression, FilterExpression> SimplifyCases
             => new TheoryData<GroupExpression, FilterExpression>()
             {
@@ -249,7 +278,7 @@
                     new StringValueExpression("prop")
                 }
             };
-        
+
         [Theory]
         [MemberData(nameof(SimplifyCases))]
         public void Given_GroupExpression_When_calling_Simplify_Then_should_return_expected_outcome(GroupExpression input, FilterExpression expected)
@@ -259,6 +288,28 @@
             
             // Assert
             actual.Should().Be(expected);
+        }
+
+        public static TheoryData<GroupExpression, FilterExpression, bool, string> IsEquivalentToCases
+            => new()
+            {
+                {
+                    new GroupExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true), new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    new GroupExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true), new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                    true,
+                    "left and right are expressions with exactly same values"
+                }
+            };
+        
+        [Theory]
+        [MemberData(nameof(IsEquivalentToCases))]
+        public void Given_left_is_a_GroupExpression_and_right_is_an_expression_Then_IsEquivalent_should_returns_expected_result(GroupExpression left, FilterExpression right, bool expected, string reason)
+        {
+            // Act
+            bool actual = left.IsEquivalentTo(right);
+ 
+            // Assert
+            actual.Should().Be(expected, reason);
         }
     }
 }

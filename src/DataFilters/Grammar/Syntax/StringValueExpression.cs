@@ -57,7 +57,13 @@ namespace DataFilters.Grammar.Syntax
         public virtual bool Equals(StringValueExpression other) => Equals(Value, other?.Value);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression);
+        public override bool Equals(object obj) =>
+            obj switch
+            {
+                NumericValueExpression numericValue => Value.Equals(numericValue.Value),
+                not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
+                _ => false
+            };
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
