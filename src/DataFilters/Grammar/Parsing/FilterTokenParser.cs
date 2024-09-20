@@ -33,11 +33,11 @@
                                                                                                                         .Or(Token.EqualTo(FilterToken.None).Try())
                                                                                                                         .Or(Token.EqualTo(FilterToken.Dot).Try())
                                                                                                                         .Many()
-                                                                                               where symbolBefore.AtLeastOnce()
-                                                                                                     || digitsBefore.AtLeastOnce()
-                                                                                                     || alpha.AtLeastOnce()
-                                                                                                     || digitsAfter.AtLeastOnce()
-                                                                                                     || symbolAfter.AtLeastOnce()
+                                                                                               where symbolBefore.Length > 0
+                                                                                                     || digitsBefore.Length > 0
+                                                                                                     || alpha.Length > 0
+                                                                                                     || digitsAfter.Length > 0
+                                                                                                     || symbolAfter.Length > 0
 
                                                                                                let value = string.Concat(string.Concat(symbolBefore.Select(x => x.ToStringValue())),
                                                                                                                          string.Concat(digitsBefore.Select(x => x.ToStringValue())),
@@ -352,15 +352,15 @@
             }
         }
 
-        private static TokenListParser<FilterToken, FilterExpression> Constant => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()
-                                                                                                          .Or(DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>())
-                                                                                                          .Or(Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>())
-                                                                                                          .Or(Date.Try().Cast<FilterToken, DateExpression, FilterExpression>())
-                                                                                                          .Or(Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>())
-                                                                                                          .Or(Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>())
-                                                                                                          .Or(Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>())
-                                                                                                          .Or(Text.Cast<FilterToken, TextExpression, FilterExpression>())
-                                                                                                          .Or(AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>());
+        private static TokenListParser<FilterToken, FilterExpression> Constant => Parse.OneOf(GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>(),
+                                                                                              DateAndTime.Try().Cast<FilterToken, DateTimeExpression, FilterExpression>(),
+                                                                                              Time.Try().Cast<FilterToken, TimeExpression, FilterExpression>(),
+                                                                                              Date.Try().Cast<FilterToken, DateExpression, FilterExpression>(),
+                                                                                              Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>(),
+                                                                                              Number.Try().Cast<FilterToken, NumericValueExpression, FilterExpression>(),
+                                                                                              Bool.Try().Cast<FilterToken, StringValueExpression, FilterExpression>(),
+                                                                                              Text.Cast<FilterToken, TextExpression, FilterExpression>(),
+                                                                                              AlphaNumeric.Cast<FilterToken, ConstantValueExpression, FilterExpression>());
 
         private static TokenListParser<FilterToken, Token<FilterToken>> RangeSeparator => from _ in Whitespace.AtLeastOnce()
                                                                                           from rangeSeparator in Token.EqualToValue(FilterToken.Letter, "T")
