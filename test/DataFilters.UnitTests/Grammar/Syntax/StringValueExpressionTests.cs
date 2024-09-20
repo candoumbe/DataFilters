@@ -57,7 +57,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property]
-        public void Given_two_instances_that_hold_values_that_are_equals_Equals_shoud_return_true(NonEmptyString value)
+        public void Given_two_instances_that_hold_values_that_are_equals_Equals_should_return_true(NonEmptyString value)
         {
             // Arrange
             StringValueExpression first = new(value.Item);
@@ -78,6 +78,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     new StringValueExpression("True"),
                     new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
                     false
+                },
+                {
+                    new StringValueExpression("0"),
+                    new NumericValueExpression("0"),
+                    true
                 },
                 {
                     new StringValueExpression("True"),

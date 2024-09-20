@@ -259,7 +259,6 @@
         public void Given_Min_boundary_is_a_DateTimeExpression_with_only_date_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_DateExpression(NonNull<DateExpression> date, bool included)
         {
             // Arrange
-            // Arrange
             DateTimeExpression dateTimeExpression = new(date.Item);
 
             // Act
