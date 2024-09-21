@@ -54,7 +54,7 @@
         };
 
         ///<inheritdoc/>
-        public override int GetHashCode() => EqualityComparer.GetHashCode(Values.ToArray());
+        public override int GetHashCode() => EqualityComparer.GetHashCode([.. Values]);
 
         ///<inheritdoc/>
         public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Values)}]";
@@ -80,7 +80,7 @@
                 else if (other is OneOfExpression oneOf)
                 {
                     equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<StringValueExpression>().Count())
-                        && oneOf.Values.All(x => x is StringValueExpression constant)
+                        && oneOf.Values.All(x => x is StringValueExpression)
                         && Values.All(value => value switch
                         {
                             ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),

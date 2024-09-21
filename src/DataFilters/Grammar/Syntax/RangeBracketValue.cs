@@ -33,12 +33,12 @@
             switch (obj)
             {
                 case ConstantBracketValue constantBracketValue:
-                    char[] chrs = constantBracketValue.Value.ToCharArray();
-                    char head = chrs[0];
+                    char[] chars = [.. constantBracketValue.Value];
+                    char head = chars[0];
 #if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
-                    char tail = chrs[^1];
+                    char tail = chars[^1];
 #else
-                    char tail = chrs[chrs.Length - 1];
+                    char tail = chars[chars.Length - 1];
 #endif
                     equals = (Start, End).Equals((head, tail));
                     break;

@@ -74,20 +74,10 @@
         /// <param name="text"></param>
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
         public StartsWithExpression(TextExpression text)
-#if !NETSTANDARD1_3
             : this (Guard.Against.Null(text, nameof(text)).OriginalString)
         {
             _lazyEscapedParseableString = new Lazy<string>(() => $"{text.EscapedParseableString}*");
         }
-#else
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-            _lazyEscapedParseableString = new(() => $"{text.EscapedParseableString}*");
-        }
-#endif
 
         ///<inheritdoc/>
         public bool Equals(StartsWithExpression other) => Value == other?.Value;
