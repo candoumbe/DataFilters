@@ -1,4 +1,4 @@
-﻿namespace DataFilters.PerfomanceTests
+﻿namespace DataFilters.PerformanceTests
 {
     using System;
     using BenchmarkDotNet.Attributes;
