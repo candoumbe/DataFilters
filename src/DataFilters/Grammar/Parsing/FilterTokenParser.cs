@@ -417,7 +417,7 @@
                     {
                         RangeBracketValue rangeValue => Enumerable.Range(rangeValue.Start, rangeValue.End - rangeValue.Start + 1)
                                                                   .Select(ascii => (char)ascii),
-                        ConstantBracketValue constantValue => constantValue.Value.ToCharArray(),
+                        ConstantBracketValue constantValue => [.. constantValue.Value],
 #if NET7_0_OR_GREATER
                         _ => throw new UnreachableException("Unexpected regex value")
 #else
@@ -476,10 +476,10 @@
                 return item switch
                 {
                     // *<bracket>
-                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression([ .. (ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))) ]),
+                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression([ .. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString())) ]),
 
                     // *<bracket><constant>
-                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(chr => (FilterExpression) new EndsWithExpression($"{chr}{tail.Value}")).ToArray()),
+                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(FilterExpression (chr) => new EndsWithExpression($"{chr}{tail.Value}")).ToArray()),
 
                     // <bracket>*
                     (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]),
@@ -663,7 +663,7 @@
             => from alphaBeforeAsterisk in AlphaNumeric
                 from __ in Asterisk
                 from alphaAfterAsterisk in AlphaNumeric
-                select ( new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value) );
+                select new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value);
 
         /// <summary>
         /// Parser for a <c>property=&lt;expression&gt;</c> pair.
