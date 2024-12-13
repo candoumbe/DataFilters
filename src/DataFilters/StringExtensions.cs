@@ -184,20 +184,20 @@
                 switch (expression)
                 {
                     case ConstantValueExpression constant:
-                        string constantValue = constant.Value;
+                        string constantValue = constant.Value.ToStringValue();
 
                         filter = new Filter(propInfo.Name,
                                             EqualTo,
                                             tc.ConvertFromInvariantString(constantValue));
                         break;
                     case StartsWithExpression startsWith:
-                        filter = new Filter(propInfo.Name, StartsWith, startsWith.Value);
+                        filter = new Filter(propInfo.Name, StartsWith, startsWith.Value.ToStringValue());
                         break;
                     case EndsWithExpression endsWith:
-                        filter = new Filter(propInfo.Name, EndsWith, endsWith.Value);
+                        filter = new Filter(propInfo.Name, EndsWith, endsWith.Value.ToStringValue());
                         break;
-                    case ContainsExpression endsWith:
-                        filter = new Filter(propInfo.Name, Contains, endsWith.Value);
+                    case ContainsExpression contains:
+                        filter = new Filter(propInfo.Name, Contains, contains.Value.ToStringValue());
                         break;
                     case NotExpression not:
                         filter = ConvertExpressionToFilter(propInfo, not.Expression, tc).Negate();
@@ -261,7 +261,7 @@
                                 DateTimeExpression { Date: not null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"), input.Included),
                                 DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (new StringValueExpression(dateTime.EscapedParseableString), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
                                 _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
 #else
                                 _ => throw new NotSupportedException($"Unsupported boundary type {input.Expression.GetType()}")
@@ -274,32 +274,32 @@
                         FilterOperator minOperator = min.included ? GreaterThanOrEqual : GreaterThan;
                         FilterOperator maxOperator = max.included ? LessThanOrEqualTo : LessThan;
 
-                        if (min.constantExpression?.Value != default && max.constantExpression?.Value != default)
+                        if (min.constantExpression?.Value is not null && max.constantExpression?.Value is not null)
                         {
-                            object minValue = min.constantExpression.Value;
-                            object maxValue = max.constantExpression.Value;
+                            object minValue = min.constantExpression.Value.ToStringValue();
+                            object maxValue = max.constantExpression.Value.ToStringValue();
                             filter = new MultiFilter
                             {
                                 Logic = FilterLogic.And,
-                                Filters = new IFilter[]
-                                {
+                                Filters =
+                                [
                                     new Filter(propInfo.Name,
                                                minOperator,
                                                tc.ConvertFrom(minValue)),
                                     new Filter(propInfo.Name,
                                                maxOperator,
                                                tc.ConvertFrom(maxValue))
-                                }
+                                ]
                             };
                         }
-                        else if (min.constantExpression?.Value != default)
+                        else if (min.constantExpression?.Value is not null)
                         {
-                            object minValue = min.constantExpression.Value;
+                            object minValue = min.constantExpression.Value.ToStringValue();
                             filter = new Filter(propInfo.Name, minOperator, tc.ConvertFrom(minValue));
                         }
                         else
                         {
-                            object maxValue = max.constantExpression.Value;
+                            object maxValue = max.constantExpression.Value.ToStringValue();
                             filter = new Filter(propInfo.Name, maxOperator, tc.ConvertFrom(maxValue));
                         }
                         break;

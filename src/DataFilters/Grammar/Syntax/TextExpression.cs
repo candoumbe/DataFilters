@@ -1,4 +1,8 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using Candoumbe.Types.Strings;
+using DataFilters.Grammar.Parsing;
+using Microsoft.Extensions.Primitives;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +14,8 @@
     public class TextExpression : StringValueExpression, IEquatable<TextExpression>
     {
         private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly StringSegmentLinkedList _stringSegments;
+        private readonly Lazy<string> _lazyOriginalString;
 
         /// <summary>
         /// Builds a new <see cref="TextExpression"/> instance.
@@ -84,31 +90,24 @@
         /// </list>
         /// </remarks>
         /// <param name="value">Value of the expression.</param>
-        public TextExpression(string value) : base(value)
+        public TextExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
         {
+        }
+
+        internal TextExpression(StringSegmentLinkedList value) : base(value)
+        {
+            _lazyOriginalString = new Lazy<string>(value.ToStringValue);
             _lazyEscapedParseableString = new Lazy<string>(() =>
             {
-                StringBuilder escapedParseableString;
-                if (value.AtLeastOnce(chr => chr == '"' || chr == '\\'))
-                {
-                    escapedParseableString = new StringBuilder(( value.Length * 2 ) + 2);
-
-                    foreach (char chr in value)
+                StringBuilder sb = new (value: FilterTokenizer.DoubleQuote.ToString());
+                sb.Append(value.Replace(chr => chr is FilterTokenizer.BackSlash or FilterTokenizer.DoubleQuote, new Dictionary<char, ReadOnlyMemory<char>>
                     {
-                        if (chr is '"' or '\\')
-                        {
-                            escapedParseableString = escapedParseableString.Append('\\');
-                        }
+                        [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash],
+                        [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote]
+                    })
+                    .ToStringValue());
 
-                        escapedParseableString = escapedParseableString.Append(chr);
-                    }
-                }
-                else
-                {
-                    escapedParseableString = new StringBuilder(value);
-                }
-
-                return escapedParseableString.Insert(0, '"').Append('"').ToString();
+                return sb.Append(FilterTokenizer.DoubleQuote).ToString();
             });
         }
 
@@ -116,15 +115,15 @@
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
-        public override string OriginalString => Value;
+        public override string OriginalString => _lazyOriginalString.Value;
 
         ///<inheritdoc/>
-        public virtual bool Equals(TextExpression other) => Value.Equals(other?.Value);
+        public virtual bool Equals(TextExpression other) => _lazyOriginalString.Value.Equals(other?._lazyOriginalString.Value);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as TextExpression);
 
         ///<inheritdoc/>
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => _lazyOriginalString.GetHashCode();
     }
 }

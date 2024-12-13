@@ -1,15 +1,16 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using System;
+using DataFilters.Grammar.Syntax;
+using DataFilters.UnitTests.Helpers;
+using FluentAssertions;
+using FsCheck;
+using FsCheck.Fluent;
+using FsCheck.Xunit;
+using Xunit;
+using Xunit.Abstractions;
+using Xunit.Categories;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
-    using System;
-    using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
-    using FluentAssertions;
-    using FsCheck;
-    using FsCheck.Fluent;
-    using FsCheck.Xunit;
-    using Xunit;
-    using Xunit.Abstractions;
-    using Xunit.Categories;
 
     [UnitTest]
     public class TimeExpressionTests(ITestOutputHelper outputHelper)

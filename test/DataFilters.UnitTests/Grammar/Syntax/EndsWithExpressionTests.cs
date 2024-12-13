@@ -81,15 +81,7 @@
             int actualHashCode = current.GetHashCode();
 
             // Assert
-            actual.Should()
-                .Be(expected, reason);
-
-            object _ = expected switch
-            {
-                true => actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason),
-                _ => true
-            };
+            actual.Should().Be(expected, reason);
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

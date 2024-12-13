@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Text;
+using Candoumbe.MiscUtilities.Comparers;
 using DataFilters.Grammar.Parsing;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
@@ -27,7 +28,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => _ = new StringValueExpression(null);
+            Action action = () => _ = new StringValueExpression((string)null);
 
             // Assert
             action.Should()
@@ -123,7 +124,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             StringValueExpression second = new(input.Get);
 
             // Act
-            (first.Equals(second) == Equals(first.Value, second.Value))
+            (first.Equals(second) == first.Value.IsEquivalentTo(second.Value, CharComparer.Ordinal))
                 .ToProperty()
                 .QuickCheckThrowOnFailure(outputHelper);
         }

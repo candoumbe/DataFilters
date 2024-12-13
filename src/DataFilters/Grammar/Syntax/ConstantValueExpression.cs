@@ -1,4 +1,9 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using Candoumbe.MiscUtilities.Comparers;
+using Candoumbe.Types.Strings;
+using Microsoft.Extensions.Primitives;
+using Superpower.Model;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -8,9 +13,9 @@
     public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>
     {
         /// <summary>
-        /// Gets the "raw" value hold by the current instance.
+        /// An optimized storage of the current value holds by this instance
         /// </summary>
-        public string Value { get; }
+        public StringSegmentLinkedList Value { get; }
 
         /// <summary>
         /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
@@ -19,18 +24,17 @@
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported.
         /// </exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
-        protected ConstantValueExpression(string value)
+        internal ConstantValueExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
+        {}
+
+        internal ConstantValueExpression(StringSegmentLinkedList value)
         {
-            Value = value switch
-            {
-                null => throw new ArgumentNullException(nameof(value)),
-                { Length: 0 } => throw new ArgumentOutOfRangeException(nameof(value)),
-                _ => value
-            };
+            Value = value;
         }
 
         ///<inheritdoc/>
-        public virtual bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
+        public virtual bool Equals(ConstantValueExpression other)
+            => other is not null && Value.IsEquivalentTo(other.Value, CharComparer.Ordinal);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => ReferenceEquals(this, obj) || Equals(obj as ConstantValueExpression);

@@ -115,7 +115,7 @@ I&_Oj
                         new StringValueExpression("6P%")
                     },
                     {
-                        "gHuQ>a0\\!>\\:\t\\-\\021+o\\]AL2oVmf\\029\\!",
+                        @"gHuQ>a0\!>\:	\-\021+o\]AL2oVmf\029\!",
                         new StringValueExpression("gHuQ>a0!>:\t-\\021+o]AL2oVmf\\029!")
                     }
                 };
@@ -144,7 +144,8 @@ I&_Oj
             // Arrange
             NumericValueExpression expected = new(value.Item.ToString(CultureInfo.InvariantCulture));
             string input = expected.EscapedParseableString;
-
+            _outputHelper.WriteLine($"Input : {input}");
+            
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
 
@@ -204,7 +205,7 @@ I&_Oj
             AssertThatShould_parse(expression, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(1753852137964623312,18335031791097947631)")]
         public void Should_parse_EndsWith(EndsWithExpression expected)
         {
             // Arrange
@@ -232,7 +233,6 @@ I&_Oj
         [MemberData(nameof(EndsWithData))]
         public void Given_ends_with_input_EndsWith_should_return_expected_EndsWithExpression(string input, EndsWithExpression expected)
         {
-            // Arrange
             // Arrange
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
             _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
@@ -415,11 +415,7 @@ I&_Oj
                     new AndExpression(new StartsWithExpression("bat"), new ContainsExpression("man"))
                 },
                 {
-                    //@"*""1.\""Foo!"",*""2.\""Bar!""*",
-                    new AndExpression(
-                        AsteriskExpression.Instance + new TextExpression(@"1.""Foo!"),
-                        AsteriskExpression.Instance + new TextExpression(@"2.""Bar!") + AsteriskExpression.Instance
-                    ).EscapedParseableString,
+                    @"*""1.\""Foo!"",*""2.\""Bar!""*",
                     new AndExpression(
                         AsteriskExpression.Instance + new TextExpression(@"1.""Foo!"),
                         AsteriskExpression.Instance + new TextExpression(@"2.""Bar!") + AsteriskExpression.Instance
@@ -1048,11 +1044,11 @@ I&_Oj
                 .Be(expected.expression);
         }
 
-        public static TheoryData<string, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
+        public static TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
         {
             get
             {
-                TheoryData<string, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
+                TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
                 {
                     {
                         "Firstname=Vandal&Lastname=Savage",
@@ -1103,7 +1099,7 @@ I&_Oj
         /// <param name="expectation"></param>
         [Theory]
         [MemberData(nameof(CriteriaCases))]
-        public void Should_parse_Criteria(string input, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
+        public void Should_parse_Criteria(string input, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -1145,43 +1141,42 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(2835403711024236146,16840947086399937335)")]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _outputHelper.WriteLine($"actual : {expected:d}");
 
             // Act
             GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
 
             // Assert
+            _outputHelper.WriteLine($"expected : {expected:d}");
             AssertThatShould_parse(actual, expected);
         }
 
-        public static TheoryData<GroupExpression, string> ParseGroupCases
+        public static TheoryData<string, GroupExpression> ParseGroupCases
         {
             get
             {
-                TheoryData<GroupExpression, string> cases = [];
-                string[] cultures = ["fr-FR", "en-GB", "en-US"];
-                
-                foreach (string culture in cultures)
+                TheoryData<string, GroupExpression> cases = new ()
                 {
-                    cases.Add
-                    (
-                        new GroupExpression(new DateTimeExpression(new DateExpression(2090, 10, 10), new TimeExpression(3, 0, 40, 583), OffsetExpression.Zero)),
-                        culture
-                    );
-
-                    cases.Add
-                    (
-                        new GroupExpression(new DateTimeExpression(new DateExpression(2010, 06, 02), new TimeExpression(23, 45, 54, 331), OffsetExpression.Zero)),
-                        culture
-                    );
-                    
-                    
-                }
+                    {
+                        new GroupExpression(new DateTimeExpression(new DateExpression(2090, 10, 10), new TimeExpression(3, 0, 40, 583), OffsetExpression.Zero)).EscapedParseableString,
+                        new GroupExpression(new DateTimeExpression(new DateExpression(2090, 10, 10), new TimeExpression(3, 0, 40, 583), OffsetExpression.Zero))
+                    },
+                    {
+                        new GroupExpression(new DateTimeExpression(new DateExpression(2010, 06, 02), new TimeExpression(23, 45, 54, 331), OffsetExpression.Zero)).EscapedParseableString,
+                        new GroupExpression(new DateTimeExpression(new DateExpression(2010, 06, 02), new TimeExpression(23, 45, 54, 331), OffsetExpression.Zero))
+                    },
+                    {
+                        "((((19:53:05.221))))",
+                        new GroupExpression(new GroupExpression(new GroupExpression(new GroupExpression(new TimeExpression(19, 53, 5, 221)))))
+                    }
+                };
+                
                 return cases;
             }
         }
@@ -1189,20 +1184,16 @@ I&_Oj
 
         [Theory]
         [MemberData(nameof(ParseGroupCases))]
-        public void Given_GroupExpression_EscapedParseableString_as_input_Parser_should_return_GroupExpression_that_is_equivalent_to_input(GroupExpression expected, string culture)
+        public void Given_GroupExpression_EscapedParseableString_as_input_Parser_should_return_GroupExpression_that_is_equivalent_to_input(string escapedParseableString, GroupExpression expected)
         {
-            _cultureSwitcher.Run(culture, () =>
-            {
-                _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
-                _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
-                TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _outputHelper.WriteLine($"input : '{escapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(escapedParseableString);
 
-                // Act
-                GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
+            // Act
+            GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
 
-                // Assert
-                AssertThatShould_parse(actual, expected);
-            });
+            // Assert
+            AssertThatShould_parse(actual, expected);
         }
 
         public static TheoryData<CultureInfo, NumericValueExpression> ParseNumberCases

@@ -9,8 +9,9 @@ using Superpower.Model;
 namespace DataFilters.PerformanceTests
 {
     [MemoryDiagnoser]
-    [SimpleJob(RuntimeMoniker.Net60)]
+    //[SimpleJob(RuntimeMoniker.Net60)]
     [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net90)]
     [SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
     public class GroupParserPerformanceTests
     {

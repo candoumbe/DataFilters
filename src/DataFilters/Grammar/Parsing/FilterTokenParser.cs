@@ -1,4 +1,8 @@
-﻿namespace DataFilters.Grammar.Parsing
+﻿using System.Text;
+using Candoumbe.Types.Strings;
+using Microsoft.Extensions.Primitives;
+
+namespace DataFilters.Grammar.Parsing
 {
     using Syntax;
 
@@ -39,14 +43,14 @@
                                                                                                      || digitsAfter.Length > 0
                                                                                                      || symbolAfter.Length > 0
 
-                                                                                               let value = string.Concat(string.Concat(symbolBefore.Select(x => x.ToStringValue())),
-                                                                                                                         string.Concat(digitsBefore.Select(x => x.ToStringValue())),
-                                                                                                                         string.Concat(alpha.Select(item => item.ToStringValue())),
-                                                                                                                         string.Concat(digitsAfter.Select(x => x.ToStringValue())),
-                                                                                                                         string.Concat(symbolAfter.Select(x => x.ToStringValue())))
+                                                                                               let value = new StringSegmentLinkedList(StringSegment.Empty, [ .. symbolBefore.Select(x => x.Span.ToStringSegment()).ToArray(),
+                                                                                                                        .. digitsBefore.Select(x => x.Span.ToStringSegment()).ToArray(),
+                                                                                                                         .. alpha.Select(item => item.Span.ToStringSegment()).ToArray(),
+                                                                                                                         .. digitsAfter.Select(x => x.Span.ToStringSegment()).ToArray(),
+                                                                                                                         .. symbolAfter.Select(x => x.Span.ToStringSegment()).ToArray() ])
                                                                                                select value).AtLeastOnce()
 
-                                                                                            let alphaNumericValue = string.Concat(data)
+                                                                                            let alphaNumericValue = data.Aggregate(new StringSegmentLinkedList(), (mainList , list) => mainList.Append(list)).ToStringValue()
                                                                                             let textSpan = new TextSpan(alphaNumericValue)
                                                                                             select Numerics.Decimal.IsMatch(textSpan) || Numerics.Integer.IsMatch(textSpan)
                                                                                                   ? new NumericValueExpression(alphaNumericValue)
@@ -87,7 +91,9 @@
                                                                                         .Or(
                                                                                             from data in AlphaNumeric.AtLeastOnce()
                                                                                             from _ in Asterisk
-                                                                                            select new StartsWithExpression(string.Concat(data.Select(x => x.Value)))
+                                                                                            select new StartsWithExpression(data.Select(x => x.Value)
+                                                                                                                                .Aggregate(new StringSegmentLinkedList(),
+                                                                                                                                           (current, other) => current.Append(other)))
                                                                                         );
 
         /// <summary>
@@ -96,7 +102,8 @@
         public static TokenListParser<FilterToken, EndsWithExpression> EndsWith => Asterisk.IgnoreThen(Text)
                                                                                            .Select(text => new EndsWithExpression(text)).Try()
                                                                                    .Or(Asterisk.IgnoreThen(AlphaNumeric.AtLeastOnce())
-                                                                                       .Select(data => new EndsWithExpression(string.Concat(data.Select(item => item.Value)))));
+                                                                                       .Select(data => new EndsWithExpression(data.Select(item => item.Value)
+                                                                                           .Aggregate(new StringSegmentLinkedList(), (current, other) => current.Append(other)))));
 
         /// <summary>
         /// Parser for "contains" expression
@@ -116,17 +123,31 @@
                                                                                                      || alpha.AtLeastOnce()
                                                                                                      || afterPunctuation.AtLeastOnce()
                                                                                                      || afterSymbol.AtLeastOnce()
+                                                                                               
+                                                                                               let result = new StringSegmentLinkedList()
+
                                                                                                select new
                                                                                                {
-                                                                                                   value = string.Concat(string.Concat(beforeSymbol.Select(x => x.ToStringValue())),
-                                                                                                                         string.Concat(beforePunctuation.Select(x => x.Value)),
-                                                                                                                         string.Concat(alpha.Select(item => item.Value)),
-                                                                                                                         string.Concat(afterPunctuation.Select(x => x.Value)),
-                                                                                                                         string.Concat(afterSymbol.Select(x => x.ToStringValue())))
+                                                                                                   value = result.Append(beforeSymbol.Select(x => x.Span.ToStringSegment())
+                                                                                                                                     .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(afterSymbol.Select(x => x.Span.ToStringSegment())
+                                                                                                                          .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(beforePunctuation.Select(x => x.Value)
+                                                                                                                                .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(alpha.Select(item => item.Value)
+                                                                                                                    .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(afterPunctuation.Select(x => x.Value)
+                                                                                                            .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(afterSymbol.Select(x => x.Span.ToStringSegment())
+                                                                                                                         .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
                                                                                                }).AtLeastOnce()
                                                                                     from escaped in Token.EqualTo(FilterToken.Backslash).Many()
                                                                                     from __ in Asterisk
-                                                                                    select new ContainsExpression(string.Concat(data.Select(x => x.value))));
+                                                                                    let result = new StringSegmentLinkedList()
+    
+                                                                                    select new ContainsExpression(data.Select(x => x.value)
+                                                                                        .Aggregate(result, (current, other) => current.Append(other))) 
+                                                                                    );
 
         /// <summary>
         /// Parser for logical OR expression.
@@ -391,23 +412,16 @@
                                                                                  from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                                                                                  from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                  from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
-                                                                                 select @$"[""{subProp.Value}""]"
+                                                                                 select $"""["{subProp.Value.ToStringValue()}"]"""
                                                                              ).Many()
-                                                                             select new PropertyName(string.Concat(prop.Value, string.Concat(subProps)));
+                                                                             select new PropertyName(string.Concat(prop.Value.ToStringValue(), string.Concat(subProps)));
 
         /// <summary>
         /// Parser for any text between double quotes <c>"</c>
         /// </summary>
         public static TokenListParser<FilterToken, TextExpression> Text => from _ in Token.EqualTo(FilterToken.DoubleQuote)
-#if NETSTANDARD1_3
-                                                                           from text in (Token.EqualTo(FilterToken.Letter)
-                                                                                             .Or(Token.EqualTo(FilterToken.Digit))
-                                                                                             .Or(Token.EqualTo(FilterToken.Escaped))
-                                                                                             .Or(Token.EqualTo(FilterToken.None))).AtLeastOnce()
-#else
                                                                            from text in Token.Matching<FilterToken>(token => token != FilterToken.DoubleQuote, "Any character or symbol except double quote character")
                                                                                                                                                                 .AtLeastOnce()
-#endif
                                                                            from __ in Token.EqualTo(FilterToken.DoubleQuote)
                                                                            select new TextExpression(TokensToString(text));
 
@@ -472,76 +486,135 @@
                     select (head, body: (object)body.Select(item => item).OfType<ConstantValueExpression>().ToArray(), tail)
                 )
             .Select(item =>
-            {
-                return item switch
                 {
-                    // *<bracket>
-                    (AsteriskExpression, BracketExpression bracket, null) => new OneOfExpression([ .. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString())) ]),
-
-                    // *<bracket><constant>
-                    (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression(ConvertRegexToCharArray(bracket.Values).Select(FilterExpression (chr) => new EndsWithExpression($"{chr}{tail.Value}")).ToArray()),
-
-                    // <bracket>*
-                    (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]),
-
-                    // <ends with><bracket>
-                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression) new EndsWithExpression($"{head.Value}{chr}")).ToArray()),
-
-                    // <ends with><bracket><constant>
-                    (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}{constant.Value}"))]),
-
-                    // <starts with><bracket>
-                    (StartsWithExpression head, BracketExpression body, null) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]),
-
-                    // <bracket><starts with>*
-                    (null, BracketExpression bracket, StartsWithExpression body) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression($"{chr}{body.Value}"))]),
-
-                    // <constant><bracket><constant>
-                    (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracket.Value}{chr}{tail.Value}"))]),
+                    switch (item)
+                    {
+                        // *<bracket>
+                        case (AsteriskExpression, BracketExpression bracket, null):
+                        {
+                            return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))]);
+                        }
+                        // *<bracket><constant>
+                        case (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail):
+                        {
+                            StringSegmentLinkedList tailValue = tail.Value;
+                            return new OneOfExpression([..ConvertRegexToCharArray(bracket.Values)
+                                .Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList(chr.ToString()).Append(tailValue)))]);
+                        }
+                        // <bracket>*
+                        case (null, BracketExpression bracket, AsteriskExpression):
+                        {
+                            return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]);
+                        }
+                        // <ends with><bracket>
+                        case (EndsWithExpression head, BracketExpression body, null):
+                        {
+                            return new OneOfExpression([ .. ConvertRegexToCharArray(body.Values).Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()))) ]);
+                        }
+                        // <ends with><bracket><constant>
+                        case (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant):
+                        {
+                            return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()).Append(constant.Value)))]);
+                        }
+                        // <starts with><bracket>
+                        case (StartsWithExpression head, BracketExpression body, null):
+                        {
+                            return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]);
+                        }
+                        // <bracket><starts with>*
+                        case (null, BracketExpression bracket, StartsWithExpression body):
+                        {
+                            return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(new StringSegmentLinkedList(new StringSegment($"{chr}")).Append(body.Value)))]);
+                        }
+                        // <constant><bracket><constant>
+                        case (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail):
+                        {
+                            string bracketValueAsString = bracket.Value.ToStringValue();
+                                string tailValueAsString = tail.Value.ToStringValue();
+                            return new OneOfExpression([
+                                .. ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracketValueAsString}{chr}{tailValueAsString}"))
+                            ]);
+                        }
 
                     // <constant><bracket>
-                    (ConstantValueExpression head, BracketExpression bracket, null) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{head.Value}{chr}"))]),
-
-                    // <bracket><constant>
-                    (null, BracketExpression bracket, ConstantValueExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tail.Value}"))]),
-
-                    // <bracket>
-                    (null, BracketExpression bracket, null) => new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString()))]),
-
-                    // <bracket><constant><bracket>
-                    (BracketExpression head, ConstantValueExpression body, BracketExpression tail) => new OneOfExpression([ ..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
-                                                                            .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
-                                                                            .Select(tuple => new StringValueExpression($"{tuple.start}{body.Value}{tuple.end}"))
-                                                                            ]),
-                    // <bracket><bracket>
-                    (BracketExpression head, null, BracketExpression tail) => new OneOfExpression([..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
-                                                                            .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
-                                                                            .Select(tuple => new StringValueExpression($"{tuple.start}{tuple.end}"))
-                                                                            ]),
-                    // <bracket><ends with>
-                    (null, BracketExpression body, EndsWithExpression tail) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()), tail))]),
-
-                    // *<one of>
-                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]),
-
-                    // <one of>*
-                    (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression([.. constants.Select(constant => new StartsWithExpression(constant.Value))]),
-
-                    // *<one of>*
-                    (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression) => new OneOfExpression([.. constants.Select(constant => new ContainsExpression(constant.Value))]),
-
-                    // <one of><ends with>
-                    (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith) => new OneOfExpression([..constants.Select(constant => constant + endsWith)]),
-
-                    // <one of>
-                    (null, IEnumerable<ConstantValueExpression> constants, null) => new OneOfExpression([.. constants]),
-#if NET7_0_OR_GREATER
-                    _ => throw new UnreachableException($"Unsupported {nameof(OneOf)} expression :  {item}")
-#else
-                    _ => throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}")
-#endif
-                };
-            });
+                        case (ConstantValueExpression head, BracketExpression bracket, null):
+                        {
+                            string bracketValueAsString = head.Value.ToStringValue();
+                            return new OneOfExpression([
+                                ..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{bracketValueAsString}{chr}"))
+                            ]);
+                        }
+                        // <bracket><constant>
+                        case (null, BracketExpression bracket, ConstantValueExpression tail):
+                        {
+                            string tailValueAsString = tail.Value.ToStringValue();
+                            return new OneOfExpression([
+                                .. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tailValueAsString}"))
+                            ]);
+                        }
+                        // <bracket>
+                        case (null, BracketExpression bracket, null):
+                        {
+                            return new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString()))]);
+                        }
+                        // <bracket><constant><bracket>
+                        case (BracketExpression head, ConstantValueExpression body, BracketExpression tail):
+                        {
+                            string bodyValueAsString = body.Value.ToStringValue();
+                            return new OneOfExpression([..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
+                                .Select(tuple => ( start: tuple.Item1, end: tuple.Item2 ))
+                                .Select(tuple => new StringValueExpression($"{tuple.start}{bodyValueAsString}{tuple.end}"))]);
+                        }
+                        // <bracket><bracket>
+                        case (BracketExpression head, null, BracketExpression tail):
+                        {
+                            return new OneOfExpression([
+                                ..ConvertRegexToCharArray(head.Values)
+                                    .CrossJoin(ConvertRegexToCharArray(tail.Values))
+                                    .Select(tuple => ( start: tuple.Item1, end: tuple.Item2 ))
+                                    .Select(tuple => new StringValueExpression($"{tuple.start}{tuple.end}"))
+                            ]);
+                        }
+                        // <bracket><ends with>
+                        case (null, BracketExpression body, EndsWithExpression tail):
+                        {
+                            return new OneOfExpression([
+                                .. ConvertRegexToCharArray(body.Values)
+                                    .Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()),
+                                        tail))
+                            ]);
+                        }
+                        // *<one of>
+                        case (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null):
+                        {
+                            return new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]);
+                        }
+                        // <one of>*
+                        case (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression):
+                        {
+                            return new OneOfExpression([.. constants.Select(constant => new StartsWithExpression(constant.Value))]);
+                        }
+                        // *<one of>*
+                        case (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression):
+                        {
+                            return new OneOfExpression([.. constants.Select(constant => new ContainsExpression(constant.Value))]);
+                        }
+                        // <one of><ends with>
+                        case (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith):
+                        {
+                            return new OneOfExpression([..constants.Select(constant => constant + endsWith)]);
+                        }
+                        // <one of>
+                        case (null, IEnumerable<ConstantValueExpression> constants, null):
+                        {
+                            return new OneOfExpression([.. constants]);
+                        }
+                        default:
+                        {
+                            throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}");
+                        }
+                    }
+                });
 
         /// <summary>
         /// Parser for Date and Time
@@ -575,8 +648,8 @@
                                                                                 from _ in Colon
                                                                                 from minuteDigits in IntDigits(2)
                                                                                 select new OffsetExpression(sign,
-                                                                                                            uint.Parse(TokensToString(hourDigits), CultureInfo.InvariantCulture),
-                                                                                                            uint.Parse(TokensToString(minuteDigits), CultureInfo.InvariantCulture)));
+                                                                                                            uint.Parse(TokensToString(hourDigits).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                            uint.Parse(TokensToString(minuteDigits).ToStringValue(), CultureInfo.InvariantCulture)));
 
         private static TokenListParser<FilterToken, Token<FilterToken>[]> IntDigits(int count) => Token.EqualTo(FilterToken.Digit).Repeat(count);
 
@@ -588,9 +661,9 @@
                                                                            from month in IntDigits(2)
                                                                            from __ in Dash
                                                                            from day in IntDigits(2)
-                                                                           select new DateExpression(int.Parse(TokensToString(year), CultureInfo.InvariantCulture),
-                                                                                                     int.Parse(TokensToString(month), CultureInfo.InvariantCulture),
-                                                                                                     int.Parse(TokensToString(day), CultureInfo.InvariantCulture));
+                                                                           select new DateExpression(int.Parse(TokensToString(year).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                     int.Parse(TokensToString(month).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                     int.Parse(TokensToString(day).ToStringValue(), CultureInfo.InvariantCulture));
 
         private static TokenListParser<FilterToken, Token<FilterToken>> Colon => Token.EqualTo(FilterToken.Colon);
 
@@ -617,19 +690,19 @@
                                                                             from secondDigits in IntDigits(2)
                                                                             from ___ in Token.EqualTo(FilterToken.Dot)
                                                                             from milliseconds in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
-                                                                            select new TimeExpression(int.Parse(TokensToString(hourDigits), CultureInfo.InvariantCulture),
-                                                                                                      int.Parse(TokensToString(minuteDigits), CultureInfo.InvariantCulture),
-                                                                                                      int.Parse(TokensToString(secondDigits), CultureInfo.InvariantCulture),
-                                                                                                      int.Parse(TokensToString(milliseconds), CultureInfo.InvariantCulture)))
+                                                                            select new TimeExpression(int.Parse(TokensToString(hourDigits).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                      int.Parse(TokensToString(minuteDigits).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                      int.Parse(TokensToString(secondDigits).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                      int.Parse(TokensToString(milliseconds).ToStringValue(), CultureInfo.InvariantCulture)))
                                                                            .Try()
                                                                            .Or(from hourDigits in IntDigits(2)
                                                                                from _ in Colon
                                                                                from minuteDigits in IntDigits(2)
                                                                                from __ in Colon
                                                                                from secondDigits in IntDigits(2)
-                                                                               select new TimeExpression(int.Parse(TokensToString(hourDigits), CultureInfo.InvariantCulture),
-                                                                                                         int.Parse(TokensToString(minuteDigits), CultureInfo.InvariantCulture),
-                                                                                                         int.Parse(TokensToString(secondDigits), CultureInfo.InvariantCulture)));
+                                                                               select new TimeExpression(int.Parse(TokensToString(hourDigits).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                         int.Parse(TokensToString(minuteDigits).ToStringValue(), CultureInfo.InvariantCulture),
+                                                                                                         int.Parse(TokensToString(secondDigits).ToStringValue(), CultureInfo.InvariantCulture)));
 
         /// <summary>
         /// Parses all supported unary expressions
@@ -686,7 +759,16 @@
                 from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "e")
                 from exponentSign in MinusOrPlusSign.Optional()
                 from afterExponentSignDigits in IntegerOrLong
-                select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(beforeDotDigits)}.{TokensToString(afterDotDigits)}E{ConvertSignToChar(exponentSign, true)}{afterExponentSignDigits.EscapedParseableString}"))
+                
+                let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                    .Append(TokensToString(beforeDotDigits))
+                    .Append(".")
+                    .Append(TokensToString(afterDotDigits))
+                    .Append("E")
+                    .Append(ConvertSignToChar(exponentSign, true))
+                    .Append(afterExponentSignDigits.EscapedParseableString)
+
+                select new NumericValueExpression(value))
                 .Try()
                 .Or(
                     from sign in MinusOrPlusSign.Optional()
@@ -694,14 +776,27 @@
                     from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "e")
                     from exponentSign in MinusOrPlusSign.Optional()
                     from afterExponentSignDigits in IntegerOrLong
-                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(beforeDotDigits)}E{ConvertSignToChar(exponentSign, true)}{afterExponentSignDigits.EscapedParseableString}"))
+
+                    let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                        .Append(TokensToString(beforeDotDigits))
+                        .Append("E")
+                        .Append(ConvertSignToChar(exponentSign, true))
+                        .Append(afterExponentSignDigits.EscapedParseableString)
+
+                    select new NumericValueExpression(value))
                 .Try()
                 .Or(from sign in MinusOrPlusSign.Optional()
                     from digitBeforeDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                     from _ in Token.EqualTo(FilterToken.Dot)
                     from digitAfterDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                     from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "d")
-                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digitBeforeDot)}.{TokensToString(digitAfterDot)}"))
+
+                    let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                        .Append(TokensToString(digitBeforeDot))
+                        .Append(".")
+                        .Append(TokensToString(digitAfterDot))
+
+                    select new NumericValueExpression(value))
                 .Try()
                 .Or(
                      from sign in MinusOrPlusSign.Optional()
@@ -709,38 +804,65 @@
                      from _ in Token.EqualTo(FilterToken.Dot)
                      from digitAfterDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                      from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "f")
-                     select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digitBeforeDot)}.{TokensToString(digitAfterDot)}"))
+
+                     let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                         .Append(TokensToString(digitBeforeDot))
+                         .Append(".")
+                         .Append(TokensToString(digitAfterDot))
+                     
+                     select new NumericValueExpression(value))
                 .Try()
                 .Or(
                     from sign in MinusOrPlusSign.Optional()
                     from digitBeforeDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                     from _ in Token.EqualTo(FilterToken.Dot)
                     from digitAfterDot in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
-                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digitBeforeDot)}.{TokensToString(digitAfterDot)}")
+
+                    let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                        .Append(TokensToString(digitBeforeDot))
+                        .Append(".")
+                        .Append(TokensToString(digitAfterDot))
+
+                    select new NumericValueExpression(value)
                 )
                 .Try()
                 .Or(
                     from sign in MinusOrPlusSign.Optional()
-                    from value in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
+                    from digits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                     from __ in Token.EqualToValueIgnoreCase(FilterToken.Letter, "d")
-                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{value}")
+
+                    let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                        .Append(TokensToString(digits))
+                    
+                    select new NumericValueExpression(value)
                 );
 
         private static TokenListParser<FilterToken, NumericValueExpression> IntegerOrLong
             => (from sign in MinusOrPlusSign.Optional()
                 from digits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                 from hint in Token.EqualToValueIgnoreCase(FilterToken.Letter, "L")
-                select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digits)}"))
+
+                let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                    .Append(TokensToString(digits))
+
+                select new NumericValueExpression(value))
         .Try()
             .Or(from sign in MinusOrPlusSign.Optional()
                 from digits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
                 from hint in Token.EqualToValueIgnoreCase(FilterToken.Letter, "L")
-                select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digits)}"))
+
+                let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                    .Append(TokensToString(digits))
+
+                select new NumericValueExpression(value))
                 .Try()
                 .Or(
                     from sign in MinusOrPlusSign.Optional()
                     from digits in Token.EqualTo(FilterToken.Digit).AtLeastOnce()
-                    select new NumericValueExpression($"{ConvertSignToChar(sign)}{TokensToString(digits)}")
+                    let value = new StringSegmentLinkedList(ConvertSignToChar(sign))
+                        .Append(TokensToString(digits))
+
+                    select new NumericValueExpression(value)
                 )
             ;
 
@@ -810,7 +932,19 @@
                from chr30 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
                from chr31 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
                from chr32 in Token.EqualTo(FilterToken.Letter).Try().Or(Token.EqualTo(FilterToken.Digit))
-               select new GuidValueExpression($"{TokensToString([chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8 ])}-{TokensToString([chr9, chr10, chr11, chr12 ])}-{TokensToString([chr13, chr14, chr15, chr16 ])}-{TokensToString([chr17, chr18, chr19, chr20 ])}-{TokensToString([chr21, chr22, chr23, chr24, chr25, chr26, chr27, chr28, chr29, chr30, chr31, chr32 ])}");
+
+               let value = new StringSegmentLinkedList( StringSegment.Empty)
+                   .Append(TokensToString([chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8]))
+                   .Append("-")
+                   .Append(TokensToString([chr9, chr10, chr11, chr12 ]))
+                   .Append("-")
+                   .Append(TokensToString([chr13, chr14, chr15, chr16 ]))
+                   .Append("-")
+                   .Append(TokensToString([chr17, chr18, chr19, chr20 ]))
+                   .Append("-")
+                   .Append(TokensToString([chr21, chr22, chr23, chr24, chr25, chr26, chr27, chr28, chr29, chr30, chr31, chr32 ]))
+
+               select new GuidValueExpression(value);
 
         /// <summary>
         /// Parser for duration
@@ -836,23 +970,23 @@
                                                                                          || minutes is not null
                                                                                          || seconds is not null
 
-                                                                                   select new DurationExpression(years: years is not null ? int.Parse(years.Value, CultureInfo.InvariantCulture) : 0,
-                                                                                                                 months: months is not null ? int.Parse(months.Value, CultureInfo.InvariantCulture) : 0,
-                                                                                                                 weeks: weeks is not null ? int.Parse(weeks.Value, CultureInfo.InvariantCulture) : 0,
-                                                                                                                 days: days is not null ? int.Parse(days.Value, CultureInfo.InvariantCulture) : 0,
-                                                                                                                 hours: hours is not null ? int.Parse(hours.Value, CultureInfo.InvariantCulture) : 0,
-                                                                                                                 minutes: minutes is not null ? int.Parse(minutes.Value, CultureInfo.InvariantCulture) : 0,
-                                                                                                                 seconds: seconds is not null ? int.Parse(seconds.Value, CultureInfo.InvariantCulture) : 0);
+                                                                                   select new DurationExpression(years: years is not null ? int.Parse(years.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0,
+                                                                                                                 months: months is not null ? int.Parse(months.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0,
+                                                                                                                 weeks: weeks is not null ? int.Parse(weeks.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0,
+                                                                                                                 days: days is not null ? int.Parse(days.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0,
+                                                                                                                 hours: hours is not null ? int.Parse(hours.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0,
+                                                                                                                 minutes: minutes is not null ? int.Parse(minutes.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0,
+                                                                                                                 seconds: seconds is not null ? int.Parse(seconds.Value.ToStringValue(), CultureInfo.InvariantCulture) : 0);
 
         private static TokenListParser<FilterToken, NumericValueExpression> DurationPart(string designator) => from n in IntegerOrLong
                                                                                                                from _ in Token.EqualToValue(FilterToken.Letter, designator).Try()
                                                                                                                select n;
 
-        private static string TokensToString(IEnumerable<Token<FilterToken>> tokens)
+        private static StringSegmentLinkedList TokensToString(IReadOnlyList<Token<FilterToken>> tokens)
         {
-            return string.Concat(tokens.Select(TokenToString));
-
-            static string TokenToString(Token<FilterToken> token) => token.ToStringValue();
+            return new StringSegmentLinkedList(tokens[0].Span.ToStringSegment(), [.. tokens.Skip(1).Select(TokenToStringSegment)]);
+            
+            static StringSegment TokenToStringSegment(Token<FilterToken> token) => token.Span.ToStringSegment();
         }
     }
 }

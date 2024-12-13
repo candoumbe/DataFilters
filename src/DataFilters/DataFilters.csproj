@@ -2,7 +2,7 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
@@ -15,14 +15,9 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Miscutilities" Version="0.13.0"/>
+    <PackageReference Include="Candoumbe.Types" Version="0.2.1-fix.4" />
   </ItemGroup>
   <Choose>
-    <When Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard2.0'">
-      <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-      </ItemGroup>
-    </When>
     <When Condition="'$(TargetFramework)' == 'net6.0'">
       <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
@@ -38,20 +33,7 @@
 
   <ItemGroup>
     <PackageReference Include="OneOf.Extended" Version="3.0.271" />
+    <PackageReference Include="Superpower" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="3.*" />
   </ItemGroup>
-  <Choose>
-    <When Condition="'$(TargetFramework)'=='netstandard1.3'">
-      <ItemGroup>
-        <PackageReference Include="Superpower" Version="2.*" />
-        <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1" />
-        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="Superpower" Version="3.*" />
-        <PackageReference Include="Newtonsoft.Json.Schema" Version="3.*" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-</Project>
+  </Project>

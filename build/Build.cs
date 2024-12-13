@@ -9,6 +9,7 @@ using Nuke.Common;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitHub;
 
@@ -113,12 +114,6 @@ public class Build : EnhancedNukeBuild,
         .Concat(this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj"));
 
     ///<inheritdoc/>
-    AbsolutePath IHaveSourceDirectory.SourceDirectory => RootDirectory / "src";
-
-    ///<inheritdoc/>
-    AbsolutePath IHaveTestDirectory.TestDirectory => RootDirectory / "test";
-
-    ///<inheritdoc/>
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");
 
     ///<inheritdoc/>
@@ -131,6 +126,10 @@ public class Build : EnhancedNukeBuild,
 
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
+
+    ///<inheritdoc/>
+    Configure<DotNetTestSettings> IUnitTest.UnitTestSettings => settings => settings.SetBlameHangTimeout("2min")
+        .EnableBlameHang();
 
     ///<inheritdoc/>
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;

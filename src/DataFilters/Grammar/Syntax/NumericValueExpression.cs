@@ -1,6 +1,8 @@
 ﻿
 using System;
 using System.Diagnostics;
+using Ardalis.GuardClauses;
+using Candoumbe.Types.Strings;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -10,14 +12,35 @@ namespace DataFilters.Grammar.Syntax
     /// <remarks>
     /// Builds a new <see cref="NumericValueExpression"/> instance that can wrap a numeric value of some sort
     /// </remarks>
-    /// <param name="value"></param>
     /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c></exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
     [DebuggerDisplay("{Value}")]
-    public class NumericValueExpression(string value) : ConstantValueExpression(value), IEquatable<NumericValueExpression>, IBoundaryExpression
+    public class NumericValueExpression : ConstantValueExpression, IEquatable<NumericValueExpression>, IBoundaryExpression
     {
+        internal NumericValueExpression(StringSegmentLinkedList value) : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Wraps a string that represents a numeric value of some sort
+        /// </summary>
+        /// <remarks>
+        /// Builds a new <see cref="NumericValueExpression"/> instance that can wrap a numeric value of some sort
+        /// </remarks>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c></exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
+        public NumericValueExpression(string value) : base(value switch
+        {
+            null => throw new ArgumentNullException(nameof(value)),
+            {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+            _ => value
+        })
+        {
+        }
+
         ///<inheritdoc/>
-        public override string EscapedParseableString => Value;
+        public override string EscapedParseableString => Value.ToStringValue();
 
         ///<inheritdoc/>
         public virtual bool Equals(NumericValueExpression other) => Value.Equals(other?.Value);

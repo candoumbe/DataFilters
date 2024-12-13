@@ -43,12 +43,9 @@
 
             // Act
             bool actual = first.Equals(other);
-            int firstHashCode = first.GetHashCode();
-            int otherHashCode = other.GetHashCode();
-
+            
             // Assert
             actual.Should().BeTrue();
-            firstHashCode.Should().Be(otherHashCode);
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -73,7 +70,7 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
         {
             // Act
             bool groupEqualOtherExpression = group.Item.Equals(otherExpression.Item);

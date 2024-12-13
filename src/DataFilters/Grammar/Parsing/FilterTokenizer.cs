@@ -1,4 +1,9 @@
-﻿namespace DataFilters.Grammar.Parsing
+﻿using System;
+#if NET8_0_OR_GREATER
+using System.Collections.Frozen;
+#endif
+
+namespace DataFilters.Grammar.Parsing
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -92,6 +97,11 @@
         public const char DoubleQuote = '"';
 
         /// <summary>
+        /// The <c>"</c> character as a string value
+        /// </summary>
+        internal const string DoubleQuoteString = @"\""";
+
+        /// <summary>
         /// The <c>&#38;</c> character
         /// </summary>
         private const char Ampersand = '&';
@@ -135,6 +145,13 @@
             Dot,
             Space
         ];
+
+        internal static readonly IReadOnlyDictionary<char, ReadOnlyMemory<char>> EscapedSpecialCharacters = SpecialCharacters
+            .ToDictionary(chr => chr, chr => $"{BackSlash}{chr}".AsMemory())
+#if NET8_0_OR_GREATER
+            .ToFrozenDictionary()
+#endif
+            ;
 
         /// <summary>
         /// Custom <see cref="Tokenizer{TKind}"/> implementation that serves as the foundation of parsing text.

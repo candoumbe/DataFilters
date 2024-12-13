@@ -45,7 +45,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Fact]
-        public void Given_TextExpression_argument_is_null_Constructor_should_thros_ArgumentNullException()
+        public void Given_argument_is_an_empty_string_Constructor_should_thros_ArgumentNullException()
         {
             // Act
             Action action = () => _ = new ContainsExpression(string.Empty);
@@ -202,7 +202,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         {
             // Arrange
             TextExpression textExpression = textExpressionGenerator.Item;
-            outputHelper.WriteLine($"TextExpression : {textExpression.EscapedParseableString}");
+            outputHelper.WriteLine($"TextExpression : '{textExpression.EscapedParseableString}'");
 
             // Act
             ContainsExpression containsExpression = new (textExpression);

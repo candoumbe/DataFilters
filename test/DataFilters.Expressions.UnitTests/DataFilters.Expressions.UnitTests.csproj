@@ -25,11 +25,6 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.26"/>
       </ItemGroup>
     </When>
-   <When Condition="'$(TargetFramework)' == 'net7.0'">
-      <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.15"/>
-      </ItemGroup>
-    </When>
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1"/>

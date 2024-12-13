@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Text;
+using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
@@ -48,14 +49,14 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Fact]
-        public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
+        public void Ctor_DoesNot_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
         {
             // Act
             Action action = () => _ = new StartsWithExpression(string.Empty);
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentOutOfRangeException>("The parameter of the constructor cannot be empty");
+                .NotThrow("The parameter of the constructor can be empty");
         }
 
         [Fact]
@@ -148,9 +149,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             StartsWithExpression rightStartsWith = rightOperandGen.Item;
 
             // bat*man*
-            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+            OneOfExpression expected = new(new StringValueExpression(new StringSegmentLinkedList().Append(leftStartsWith.Value).Append(rightStartsWith.Value)),
                                            new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-                                           new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+                                           new StartsWithExpression(new StringSegmentLinkedList().Append(leftStartsWith.Value).Append(rightStartsWith.Value)));
 
             // Act
             OneOfExpression actual = leftStartsWith + rightStartsWith;
@@ -166,9 +167,9 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             StartsWithExpression leftStartsWith = leftOperandGen.Item;
             ContainsExpression rightStartsWith = rightOperandGen.Item;
 
-            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value.Append(rightStartsWith.Value)),
                                            new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-                                           new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+                                           new StartsWithExpression(leftStartsWith.Value.Append(rightStartsWith.Value)));
 
             // Act
             OneOfExpression actual = leftStartsWith + rightStartsWith;

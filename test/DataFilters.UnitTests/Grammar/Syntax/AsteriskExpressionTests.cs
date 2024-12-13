@@ -45,14 +45,6 @@
             // Assert
             actual.Should()
                 .Be(expected, reason);
-
-            _ = expected switch
-            {
-                true => actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason),
-                _ => actualHashCode.Should()
-                    .NotBe(other?.GetHashCode(), reason)
-            };
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

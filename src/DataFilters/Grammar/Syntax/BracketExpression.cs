@@ -83,10 +83,11 @@
                         && oneOf.Values.All(x => x is StringValueExpression)
                         && Values.All(value => value switch
                         {
-                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
+                            // TODO replace call to .ToStringValue with instanciation of new StringSegmentLinkedList([chr])
+                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.ToStringValue().Equals(chr.ToString()))),
                             RangeBracketValue range => Enumerable.Range(range.Start, range.End - range.Start + 1)
                                                                  .Select(ascii => (char)ascii)
-                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
+                                                                 .All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.ToStringValue().Equals(chr.ToString()))),
                             _ => throw new NotSupportedException("Unsupported value")
                         });
                 }

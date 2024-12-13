@@ -1,15 +1,13 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Candoumbe.Types.Strings;
+using DataFilters.Grammar.Parsing;
+using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Syntax
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-
-
-    using static Parsing.FilterTokenizer;
-
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a string value
     /// </summary>
@@ -18,52 +16,24 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// The value that was between two <see cref="AsteriskExpression"/>
         /// </summary>
-        public string Value { get; }
+        public StringSegmentLinkedList Value { get; }
 
         private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
-        /// Builds a new <see cref="ContainsExpression"/> that holds the specified <paramref name="value"/>.
+        /// Builds a new <see cref="ContainsExpression"/> instance which holds the specified <paramref name="value"/>.
         /// </summary>
-        /// <param name="value"></param>
-        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <see langword="null"/></exception>
-        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="value"/> is <c>empty</c></exception>
-        public ContainsExpression(string value)
+        /// <param name="value">The desired value</param>
+        public ContainsExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
         {
-            Value = value switch
+            if (value.Value is null)
             {
-                null => throw new ArgumentNullException(nameof(value)),
-                {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
-                _ => value
-            };
-
-            _lazyEscapedParseableString = new Lazy<string>(() =>
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (value.Length is 0)
             {
-                // The length of the final parseable string in worst case scenarios will double (1 backlash for each special character from the original input)
-                // Also we need two extra positions for '*' that will be prepended and appended in all cases
-                bool requireEscapingCharacters = Value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
-                StringBuilder parseableString;
-
-                if (requireEscapingCharacters)
-                {
-                    parseableString = new StringBuilder(( Value.Length * 2 ) + 2);
-                    foreach (char chr in Value)
-                    {
-                        if (SpecialCharacters.Contains(chr))
-                        {
-                            parseableString = parseableString.Append('\\');
-                        }
-
-                        parseableString = parseableString.Append(chr);
-                    }
-                }
-                else
-                {
-                    parseableString = new StringBuilder(Value, Value.Length + 2);
-                }
-
-                return parseableString.Insert(0, "*").Append('*').ToString();
-            });
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
         }
 
         /// <summary>
@@ -75,24 +45,37 @@ namespace DataFilters.Grammar.Syntax
             : this(text switch
             {
                 null => throw new ArgumentNullException(nameof(text)),
-                _ =>  text.OriginalString,
+                _ =>   text.OriginalString
             })
         {
             _lazyEscapedParseableString = new Lazy<string>(() =>
             {
-                StringBuilder sb = new StringBuilder((text.OriginalString.Length *  2) + 2);
+                string escapedValue = text.Value.Replace(chr => chr is FilterTokenizer.BackSlash or FilterTokenizer.DoubleQuote,
+                        new Dictionary<char, ReadOnlyMemory<char>> { [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash], [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote] })
+                    .ToStringValue();
 
-                foreach (char chr in text.OriginalString)
-                {
-                    if (chr is '\\' or '\"')
-                    {
-                        sb = sb.Append('\\');
-                    }
-                    sb.Append(chr);
-                }
-
-                return sb.Insert(0, "*\"").Append('\"').Append('*').ToString();
+                return $@"*""{escapedValue}""*";
             });
+        }
+
+        private static Lazy<string> BuildLazyEscapedParseableString(StringSegmentLinkedList value)
+            => new Lazy<string>(() =>
+            {
+                string escapedValue = value.Replace(chr => FilterTokenizer.SpecialCharacters.Contains(chr),
+                        FilterTokenizer.EscapedSpecialCharacters)
+                    .ToStringValue();
+
+                return $"*{escapedValue}*";
+            });
+
+        /// <summary>
+        /// Builds a new <see cref="ContainsExpression"/> that holds the specified <paramref name="segmentList"/>.
+        /// </summary>
+        /// <param name="segmentList">An optimized representation of the value to hold</param>
+        public ContainsExpression(StringSegmentLinkedList segmentList)
+        {
+            Value = segmentList;
+            _lazyEscapedParseableString = BuildLazyEscapedParseableString(Value);
         }
 
         ///<inheritdoc/>
@@ -102,7 +85,7 @@ namespace DataFilters.Grammar.Syntax
         public override bool Equals(object obj) => Equals(obj as ContainsExpression);
 
         ///<inheritdoc/>
-        public bool Equals(ContainsExpression other) => Value == other?.Value;
+        public bool Equals(ContainsExpression other) => other is not null && Value.Equals(other.Value);
 
         ///<inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode();

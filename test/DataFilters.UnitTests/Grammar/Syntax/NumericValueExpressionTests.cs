@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
+﻿using Candoumbe.MiscUtilities.Comparers;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 using System;
 using DataFilters.Grammar.Syntax;
@@ -77,7 +79,7 @@ public class NumericValueExpressionTests
         NumericValueExpression second = new(input.Get);
 
         // Act
-        first.Equals(second).Should().Be(Equals(first.Value, second.Value));
+        first.Equals(second).Should().Be(first.Value.IsEquivalentTo(second.Value, CharComparer.Ordinal));
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
