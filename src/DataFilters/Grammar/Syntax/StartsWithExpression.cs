@@ -52,7 +52,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
 
         _lazyEscapedParseableString = new Lazy<string>(() =>
             {
-                string escapedValue = Value.Replace(chr => FilterTokenizer.SpecialCharacters.Contains(chr), FilterTokenizer.EscapedSpecialCharacters)
+                string escapedValue = new StringSegmentLinkedList().Append(Value.Replace(chr => FilterTokenizer.SpecialCharacters.Contains(chr), FilterTokenizer.EscapedSpecialCharacters))
                     .ToStringValue();
 
                 return $"{escapedValue}*";
@@ -107,7 +107,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// </returns>
     public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right)
     {
-        StringSegmentLinkedList leftConcatRight = left.Value.Append(right.Value);
+        StringSegmentLinkedList leftConcatRight = new StringSegmentLinkedList().Append(left.Value).Append(right.Value);
 
         return new OneOfExpression(new StringValueExpression(leftConcatRight), new StartsWithExpression(leftConcatRight), new AndExpression(left, new ContainsExpression(right.Value)));
     }
@@ -130,7 +130,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// </example>
     public static OneOfExpression operator +(StartsWithExpression left, ContainsExpression right)
     {
-        StringSegmentLinkedList value = left.Value.Append(right.Value);
+        StringSegmentLinkedList value = new StringSegmentLinkedList().Append(left.Value).Append(right.Value);
         return new OneOfExpression(new StartsWithExpression(value), new AndExpression(left, right), new StringValueExpression(value));
     }
 

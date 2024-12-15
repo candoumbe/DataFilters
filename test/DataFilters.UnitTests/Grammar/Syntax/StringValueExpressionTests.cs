@@ -105,8 +105,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_commutative(StringValueExpression first, FilterExpression second)
-            => (first.Equals(second) == second.Equals(first)).ToProperty().QuickCheckThrowOnFailure();
+        public Property Equals_should_be_commutative(StringValueExpression first, FilterExpression second)
+            => (first.Equals(second) == second.Equals(first)).ToProperty();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<StringValueExpression> expression)

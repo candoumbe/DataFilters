@@ -311,5 +311,32 @@
             // Assert
             actual.Should().Be(expected, reason);
         }
+
+        public static TheoryData<FilterExpression, string> EscapedParseableStringCases
+            => new()
+            {
+                {
+                    new StringValueExpression("("),
+                    "(\\()"
+                },
+                {
+                    new ContainsExpression("("),
+                    "(*\\(*)"
+                }
+            };
+
+        [Theory]
+        [MemberData(nameof(EscapedParseableStringCases))]
+        public void Given_Expression_is_not_null_When_instantiating_GroupExpression_Then_its_EscapedParseableString_should_match_expectation(FilterExpression filterExpression, string expected)
+        {
+            // Arrange
+            GroupExpression groupExpression = new(filterExpression);
+
+            // Act
+            string actual = groupExpression.EscapedParseableString;
+
+            // Assert
+            actual.Should().Be(expected);
+        }
     }
 }

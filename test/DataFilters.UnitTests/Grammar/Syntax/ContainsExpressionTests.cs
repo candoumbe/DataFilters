@@ -45,14 +45,13 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Fact]
-        public void Given_argument_is_an_empty_string_Constructor_should_thros_ArgumentNullException()
+        public void Given_argument_is_an_empty_string_Constructor_should_not_throw()
         {
             // Act
             Action action = () => _ = new ContainsExpression(string.Empty);
 
             // Assert
-            action.Should()
-                .ThrowExactly<ArgumentOutOfRangeException>("The parameter of the constructor cannot be empty");
+            action.Should().NotThrow();
         }
 
         [Fact]
@@ -62,8 +61,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             Action action = () => _ = new ContainsExpression("  ");
 
             // Assert
-            action.Should()
-                .NotThrow<ArgumentOutOfRangeException>("The parameter of the constructor can be whitespace only");
             action.Should()
                 .NotThrow("The parameter of the constructor can be whitespace only");
         }

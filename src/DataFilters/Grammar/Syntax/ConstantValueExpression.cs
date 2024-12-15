@@ -1,12 +1,10 @@
-﻿using Candoumbe.MiscUtilities.Comparers;
+﻿using System;
+using Candoumbe.MiscUtilities.Comparers;
 using Candoumbe.Types.Strings;
 using Microsoft.Extensions.Primitives;
-using Superpower.Model;
 
 namespace DataFilters.Grammar.Syntax
 {
-    using System;
-
     /// <summary>
     /// An expression that holds a constant value
     /// </summary>

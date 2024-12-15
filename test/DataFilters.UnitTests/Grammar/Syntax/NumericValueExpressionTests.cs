@@ -1,4 +1,5 @@
 ﻿using Candoumbe.MiscUtilities.Comparers;
+using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
 
@@ -12,7 +13,7 @@ using Xunit;
 using Xunit.Categories;
 
 [UnitTest]
-public class NumericValueExpressionTests
+public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
 {
     [Fact]
     public void IsFilterExpression() => typeof(NumericValueExpression).Should()
@@ -109,9 +110,17 @@ public class NumericValueExpressionTests
     public void Equals_should_be_reflexive(NonNull<NumericValueExpression> expression)
         => expression.Item.Should().Be(expression.Item);
 
-    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(3679525986206733834,16447159927694483267)")]
     public void Equals_should_be_symmetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
-        => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+    {
+        // Arrange
+        FilterExpression other = otherExpression.Item;
+        outputHelper.WriteLine($"{nameof(expression)}: '{expression:d}'");
+        outputHelper.WriteLine($"{nameof(other)}: '{other:d}'");
+        
+        // Act & Assert
+        expression.Item.Equals(other).Should().Be(otherExpression.Item.Equals(expression.Item));
+    }
 
     public static TheoryData<NumericValueExpression, object, bool, string> EqualsCases
         => new()

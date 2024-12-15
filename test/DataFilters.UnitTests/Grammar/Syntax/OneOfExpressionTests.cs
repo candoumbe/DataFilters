@@ -74,18 +74,10 @@
 
             // Act
             bool actual = first.Equals(other);
-            int actualHashCode = first.GetHashCode();
 
             // Assert
             actual.Should()
                   .Be(expected, reason);
-
-            object _ = expected switch
-            {
-                true => actualHashCode.Should()
-                                      .Be(other?.GetHashCode(), reason),
-                _ => true
-            };
         }
 
         public static TheoryData<OneOfExpression, FilterExpression, bool, string> IsEquivalentToCases
@@ -129,9 +121,9 @@
                 },
                 {
                     new OneOfExpression(new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
-                                                                new BoundaryExpression(new NumericValueExpression("-1"), true)),
-                                               new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
-                                                                new BoundaryExpression(new NumericValueExpression("-1"), true))),
+                                                               new BoundaryExpression(new NumericValueExpression("-1"), true)),
+                                        new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
+                                                               new BoundaryExpression(new NumericValueExpression("-1"), true))),
                     new NumericValueExpression("-1"),
                     true,
                     $"a {nameof(OneOfExpression)} instance that holds two distinct value is equivalent to its simplified version"

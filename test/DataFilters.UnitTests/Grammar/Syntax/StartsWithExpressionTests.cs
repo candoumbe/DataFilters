@@ -2,6 +2,7 @@
 using System.Text;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
+using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -16,7 +17,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using Xunit.Categories;
 
     [UnitTest("StartsWith")]
-    public class StartsWithExpressionTests
+    public class StartsWithExpressionTests(ITestOutputHelper outputHelper)
     {
         [Fact]
         public void IsFilterExpression() => typeof(StartsWithExpression).Should()
@@ -165,14 +166,17 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         {
             // Arrange
             StartsWithExpression leftStartsWith = leftOperandGen.Item;
-            ContainsExpression rightStartsWith = rightOperandGen.Item;
+            ContainsExpression rightContains = rightOperandGen.Item;
 
-            OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value.Append(rightStartsWith.Value)),
-                                           new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-                                           new StartsWithExpression(leftStartsWith.Value.Append(rightStartsWith.Value)));
+            OneOfExpression expected = new(new StringValueExpression(new StringSegmentLinkedList().Append(leftStartsWith.Value).Append(rightContains.Value)),
+                                           new AndExpression(leftStartsWith, rightContains),
+                                           new StartsWithExpression(new StringSegmentLinkedList().Append(leftStartsWith.Value).Append(rightContains.Value)));
+
+            outputHelper.WriteLine($"expected: {expected}");
 
             // Act
-            OneOfExpression actual = leftStartsWith + rightStartsWith;
+            OneOfExpression actual = leftStartsWith + rightContains;
+            outputHelper.WriteLine($"actual: {actual}");
 
             // Assert
             actual.IsEquivalentTo(expected).Should().BeTrue();

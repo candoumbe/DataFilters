@@ -73,20 +73,10 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="text"></param>
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
         public EndsWithExpression(TextExpression text)
-#if !NETSTANDARD1_3
             : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
         {
             _lazyEscapedParseableString = new Lazy<string>(() => $"*{text.EscapedParseableString}");
         }
-#else
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-            _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}");
-        }
-#endif
 
         ///<inheritdoc/>
         public bool Equals(EndsWithExpression other) => Value.Equals(other?.Value);

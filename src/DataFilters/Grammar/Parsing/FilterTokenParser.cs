@@ -146,7 +146,7 @@ namespace DataFilters.Grammar.Parsing
                                                                                     let result = new StringSegmentLinkedList()
     
                                                                                     select new ContainsExpression(data.Select(x => x.value)
-                                                                                        .Aggregate(result, (current, other) => current.Append(other))) 
+                                                                                        .Aggregate(result, (current, other) => current.Append(other)))
                                                                                     );
 
         /// <summary>

@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
-    /// A <see cref="FilterExpression"/> that holds a string value
+    /// A <see cref="FilterExpression"/> that can be used to check if a property contains a <see langword="string"/> value.
     /// </summary>
     public sealed class ContainsExpression : FilterExpression, IEquatable<ContainsExpression>
     {
@@ -23,16 +24,31 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// Builds a new <see cref="ContainsExpression"/> instance which holds the specified <paramref name="value"/>.
         /// </summary>
-        /// <param name="value">The desired value</param>
+        /// <param name="value">The desired value.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
+        /// <remarks>Here the value is already "escaped" and is considered safe to use without any further computation</remarks>
+        public ContainsExpression(EscapedString value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            Value = new StringSegmentLinkedList(value.Value);
+
+            _lazyEscapedParseableString = new Lazy<string>(() => value.Value);
+        }
+
+        /// <summary>
+        /// Builds a new <see cref="ContainsExpression"/> instance which holds the specified <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">The desired value.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> was created with an buffer that is <see langword="null"/>.</exception>
         public ContainsExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
         {
             if (value.Value is null)
             {
                 throw new ArgumentNullException(nameof(value));
-            }
-            if (value.Length is 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
             }
         }
 
@@ -102,5 +118,19 @@ namespace DataFilters.Grammar.Syntax
                 ISimplifiable simplifiable => simplifiable.Simplify().IsEquivalentTo(this),
                 _ => false
             };
+
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "d" or "D" => $"@{nameof(ContainsExpression)}'{OriginalString}'",
+                "f" or "F" => $"@{nameof(ContainsExpression)}",
+                null or "" => $"{EscapedParseableString}",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+            };
+
+            return formattable.ToString(formatProvider);
+        }
     }
 }

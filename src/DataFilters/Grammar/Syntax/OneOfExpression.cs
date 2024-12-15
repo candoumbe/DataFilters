@@ -57,16 +57,19 @@
             }
             else
             {
-                equivalent = other is OneOfExpression oneOfExpression
-                    ? EqualityComparer.Equals([.. oneOfExpression._values], [.. _values])
-                                    || !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any())
-                    : other switch
+                equivalent = other switch
                     {
                         AsteriskExpression asterisk => Values.All(x => x is AsteriskExpression),
                         ConstantValueExpression constant => Values.All(value => value.IsEquivalentTo(constant)),
                         DateExpression date => Values.All(value => value.IsEquivalentTo(date)),
                         DateTimeExpression dateTime => Values.All(value => value.Equals(dateTime) || value.IsEquivalentTo(dateTime)),
                         OrExpression or => Values.All(value => value.Equals(or.Left) || value.Equals(or.Right) || value.IsEquivalentTo(or.Left) || value.IsEquivalentTo(or.Right)),
+                        OneOfExpression oneOf => oneOf.Values switch
+                        {
+                            [{ } single] => IsEquivalentTo(single),
+                            [{ } left, { } right] => IsEquivalentTo(new OrExpression(left, right).Simplify()),
+                             _ => Values.All(value => oneOf.Values.Any(value.IsEquivalentTo)) && oneOf.Values.All(otherValue => Values.Any(otherValue.IsEquivalentTo)),
+                        },
                         ISimplifiable simplifiable => Values.All(value => value.IsEquivalentTo(simplifiable.Simplify())),
                         _ => false
                     };

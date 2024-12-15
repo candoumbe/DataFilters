@@ -35,7 +35,7 @@
         public FilterExpression Expression { get; }
 
         ///<inheritdoc/>
-        public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression);
+        public bool Equals(GroupExpression other) => Expression.Equals(other?.Expression) || Expression.IsEquivalentTo(other?.Expression);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as GroupExpression);
@@ -74,7 +74,6 @@
         public FilterExpression Simplify()
             => Expression switch
             {
-                //ConstantValueExpression constant => constant,
                 ISimplifiable simplify => simplify.Simplify(),
                 _ => Expression
             };

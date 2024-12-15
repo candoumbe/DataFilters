@@ -67,7 +67,8 @@
 
         ///<inheritdoc/>
         public bool Equals(TimeExpression other) => other is not null
-            && (Hours, Minutes, Seconds, Milliseconds).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds));
+                                                    && ( ( Hours, Minutes, Seconds, Milliseconds ) == ( other.Hours, other.Minutes, other.Seconds, other.Milliseconds )
+                                                         || new TimeSpan(0, hours: Hours, minutes: Minutes, seconds: Seconds, milliseconds: Milliseconds) - new TimeSpan(0, hours: other.Hours, minutes: other.Minutes, seconds: other.Seconds, milliseconds: other.Milliseconds) == TimeSpan.Zero);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as TimeExpression);

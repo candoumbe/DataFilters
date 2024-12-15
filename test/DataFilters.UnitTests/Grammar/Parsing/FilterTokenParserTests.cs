@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Parsing
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.UnitTests.Grammar.Parsing
 {
     using System;
     using System.Collections.Generic;
@@ -269,7 +271,6 @@ I&_Oj
                         new ContainsExpression(punctuation)
                     );
                 }
-
                 return cases;
             }
         }
@@ -399,7 +400,7 @@ I&_Oj
                                 )
                             )
                         ),
-                        right: new NotExpression(new EndsWithExpression("man"))
+                        right: ! new EndsWithExpression("man")
                     )
                 },
                 {
@@ -1145,15 +1146,17 @@ I&_Oj
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
+            _outputHelper.WriteLine($"expected : {expected:f}");
             _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
-            _outputHelper.WriteLine($"actual : {expected:d}");
+            _outputHelper.WriteLine($"Tokens : {StringifyTokens(tokens)}");
 
             // Act
             GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
 
             // Assert
-            _outputHelper.WriteLine($"expected : {expected:d}");
+            _outputHelper.WriteLine($"actual : {actual:d}");
+            _outputHelper.WriteLine($"actual : {actual.EscapedParseableString}");
             AssertThatShould_parse(actual, expected);
         }
 

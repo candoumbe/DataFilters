@@ -30,13 +30,11 @@
 
         ///<inheritdoc/>
         public override bool Equals(object obj)
-        {
-            return obj switch
+            => obj switch
             {
                 RangeBracketValue rangeBracket => rangeBracket.Equals(this),
                 _ => Equals(obj as ConstantBracketValue),
             };
-        }
 
         ///<inheritdoc />
         public static bool operator ==(ConstantBracketValue left, ConstantBracketValue right) => EqualityComparer<ConstantBracketValue>.Default.Equals(left, right);

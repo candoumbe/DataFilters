@@ -17,13 +17,13 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     {
         [Fact]
         public void IsFilterExpression() => typeof(TimeExpression).Should()
-                                            .BeAssignableTo<FilterExpression>().And
-                                            .Implement<IEquatable<TimeExpression>>().And
-                                            .HaveConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }).And
-                                            .HaveProperty<int>("Hours").And
-                                            .HaveProperty<int>("Minutes").And
-                                            .HaveProperty<int>("Seconds").And
-                                            .HaveProperty<int>("Milliseconds");
+            .BeAssignableTo<FilterExpression>().And
+            .Implement<IEquatable<TimeExpression>>().And
+            .HaveConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int) }).And
+            .HaveProperty<int>("Hours").And
+            .HaveProperty<int>("Minutes").And
+            .HaveProperty<int>("Seconds").And
+            .HaveProperty<int>("Milliseconds");
 
         [Property]
         public void Ctor_should_build_valid_instance(IntWithMinMax hours,
@@ -38,19 +38,19 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Arrange
             Lazy<TimeExpression> timeExpressionBuilder = new(() => new TimeExpression(hours.Item, minutes.Item,
-                                                                                      seconds.Item, milliseconds.Item));
+                seconds.Item, milliseconds.Item));
 
             Action invokingCtor = () => { TimeExpression value = timeExpressionBuilder.Value; };
 
-            ((Action)(() => invokingCtor.Should().ThrowExactly<ArgumentOutOfRangeException>())).When(hours.Item < 0
-                                                                                                 || minutes.Item < 0 || 59 < minutes.Item
-                                                                                                 || seconds.Item < 0 || 60 < seconds.Item
-                                                                                                 || (seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23)
-                                                                                                 )
-                    .Label("Invalid TimeExpression").Trivial(hours.Item < 0
-                                                             || minutes.Item < 0 || 59 < minutes.Item
-                                                             || seconds.Item < 0 || 60 < seconds.Item
-                                                             || (seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23))
+            ( (Action)( () => invokingCtor.Should().ThrowExactly<ArgumentOutOfRangeException>() ) ).When(hours.Item < 0
+                                                                                                         || minutes.Item < 0 || 59 < minutes.Item
+                                                                                                         || seconds.Item < 0 || 60 < seconds.Item
+                                                                                                         || ( seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23 )
+                )
+                .Label("Invalid TimeExpression").Trivial(hours.Item < 0
+                                                         || minutes.Item < 0 || 59 < minutes.Item
+                                                         || seconds.Item < 0 || 60 < seconds.Item
+                                                         || ( seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23 ))
                 .And(() =>
                 {
                     TimeExpression timeExpression = timeExpressionBuilder.Value;
@@ -71,8 +71,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             => expression.Item.Equals(expression.Item).ToProperty().QuickCheckThrowOnFailure(outputHelper);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
-            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item)).ToProperty().QuickCheckThrowOnFailure(outputHelper);
+        public void Equals_should_be_symmetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
+            => (expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item) ).ToProperty().QuickCheckThrowOnFailure(outputHelper);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_non_null_TimeExpression_instance_should_never_be_equal_to_null(TimeExpression instance)
@@ -141,5 +141,20 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void IsEquivalentTo_should_be_symetric(NonNull<TimeExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.IsEquivalentTo(otherExpression.Item).Should().Be(otherExpression.Item.IsEquivalentTo(expression.Item));
+
+        public static TheoryData<TimeExpression, object, bool> EqualsCases
+            => new() { { new TimeExpression(minutes: 60), new TimeExpression(hours: 1), true } };
+
+        [Theory]
+        [MemberData(nameof(EqualsCases))]
+        public void Equals_should_behave_as_expected(TimeExpression current, object other, bool expected)
+        {
+            // Act
+            bool actual = current.Equals(other);
+            
+            // Assert
+            actual.Should().Be(expected);
+            
+        }
     }
 }

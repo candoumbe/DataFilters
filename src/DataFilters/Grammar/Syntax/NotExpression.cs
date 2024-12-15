@@ -70,14 +70,24 @@
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
 
-        ///<inheritdoc/>
+        /// <summary>
+        /// Checks if two <see cref="NotExpression"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The expression to compare to <paramref name="right"/>.</param>
+        /// <param name="right">The expression to compare to <paramref name="left"/>.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> is equal to <paramref name="right"/> and <see langword="false"/> otherwise.</returns>
         public static bool operator ==(NotExpression left, NotExpression right) => left switch
         {
             null => right is null,
             _ => left.Equals(right)
         };
 
-        ///<inheritdoc/>
+        /// <summary>
+        /// Checks if two <see cref="NotExpression"/> instances are not equal.
+        /// </summary>
+        /// <param name="left">The expression to compare to <paramref name="right"/>.</param>
+        /// <param name="right">The expression to compare to <paramref name="left"/>.</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/> and <see langword="false"/> otherwise.</returns>
         public static bool operator !=(NotExpression left, NotExpression right) => !(left == right);
     }
 }
