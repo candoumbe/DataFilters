@@ -1,6 +1,7 @@
 ﻿
 using System;
 using Candoumbe.Types.Strings;
+using DataFilters.ValueObjects;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Syntax
@@ -10,7 +11,7 @@ namespace DataFilters.Grammar.Syntax
     /// </summary>
     public class GuidValueExpression : ConstantValueExpression
     {
-        private readonly Lazy<string> _lazyParseableString;
+        private readonly Lazy<EscapedString> _lazyParseableString;
 
         /// <summary>
         /// Builds a new <see cref="GuidValueExpression"/> instance that can wrap a <see cref="System.Guid"/>
@@ -18,18 +19,18 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="value"></param>
         public GuidValueExpression(StringSegment value): base(value)
         {
-            _lazyParseableString = new Lazy<string>(value.Value);
+            _lazyParseableString = new Lazy<EscapedString>(() => EscapedString.From(value.Value));
         }
 
         internal GuidValueExpression(StringSegmentLinkedList value): base(value)
         {
-            _lazyParseableString = new Lazy<string>(value.ToStringValue);
+            _lazyParseableString = new Lazy<EscapedString>(() => EscapedString.From(value.ToStringValue()));
         }
 
         /// <inheritdoc />
-        public override string EscapedParseableString => _lazyParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyParseableString.Value;
 
         /// <inheritdoc />
-        public override string ToString() => EscapedParseableString;
+        public override string ToString() => EscapedParseableString.Value;
     }
 }

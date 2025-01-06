@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -97,6 +99,6 @@
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => $"[{string.Join(",", Values)}]";
+        public override EscapedString EscapedParseableString => EscapedString.From($"[{string.Join(",", Values)}]");
     }
 }

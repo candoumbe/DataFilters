@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -10,7 +12,7 @@
     /// </remarks>
     public sealed class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
     {
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
         /// <summary>
         /// Date part of the expression.
@@ -83,10 +85,10 @@
 
             _lazyEscapedParseableString = new(() => (date, time, offset) switch
            {
-               (not null, not null, not null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}{offset.EscapedParseableString}",
-               (not null, not null, null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}",
-               (null, not null, _) => $"T{time.EscapedParseableString}",
-               _ => date.EscapedParseableString
+               (not null, not null, not null) => EscapedString.From($"{date.EscapedParseableString}T{time.EscapedParseableString}{offset.EscapedParseableString}"),
+               (not null, not null, null) => EscapedString.From($"{date.EscapedParseableString}T{time.EscapedParseableString}"),
+               (null, not null, _) => EscapedString.From($"T{time.EscapedParseableString}"),
+               (not null, _, _) => date.EscapedParseableString
            });
         }
 
@@ -129,7 +131,7 @@
         public override int GetHashCode() => (Date, Time, Offset).GetHashCode();
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => (Date?.Complexity ?? 1) + (Time?.Complexity ?? 1) + (Offset?.Complexity ?? 1);

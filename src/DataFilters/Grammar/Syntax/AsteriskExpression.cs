@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using DataFilters.ValueObjects;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -30,7 +31,7 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => 1;
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => "*";
+        public override EscapedString EscapedParseableString => EscapedString.From("*");
 
         /// <summary>
         /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="StringValueExpression"/>.
@@ -46,7 +47,7 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="_"></param>
         /// <param name="right"></param>
         /// <returns><see cref="EndsWithExpression"/></returns>
-        public static EndsWithExpression operator +(AsteriskExpression _, ConstantValueExpression right) => new(right.Value);
+        public static EndsWithExpression operator +(AsteriskExpression _, ConstantValueExpression right) => new(right.Value, true);
 
         /// <summary>
         /// Computes a <see cref="StartsWithExpression"/> by adding a <see cref="ConstantValueExpression"/> to a <see cref="AsteriskExpression"/>.

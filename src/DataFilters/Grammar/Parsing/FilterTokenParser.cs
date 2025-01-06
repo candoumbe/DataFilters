@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Candoumbe.Types.Strings;
+using DataFilters.ValueObjects;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Parsing
@@ -103,7 +104,7 @@ namespace DataFilters.Grammar.Parsing
                                                                                            .Select(text => new EndsWithExpression(text)).Try()
                                                                                    .Or(Asterisk.IgnoreThen(AlphaNumeric.AtLeastOnce())
                                                                                        .Select(data => new EndsWithExpression(data.Select(item => item.Value)
-                                                                                           .Aggregate(new StringSegmentLinkedList(), (current, other) => current.Append(other)))));
+                                                                                           .Aggregate(new StringSegmentLinkedList(), (current, other) => current.Append(other)), true)));
 
         /// <summary>
         /// Parser for "contains" expression
@@ -175,7 +176,7 @@ namespace DataFilters.Grammar.Parsing
                                                                             from _ in Asterisk
                                                                             from right in AlphaNumeric
                                                                             select new AndExpression(new StartsWithExpression(left.Value),
-                                                                                                    new EndsWithExpression(right.Value)))
+                                                                                                    new EndsWithExpression(right.Value, true)))
                                                                         ;
 
         /// <summary>
@@ -492,14 +493,14 @@ namespace DataFilters.Grammar.Parsing
                         // *<bracket>
                         case (AsteriskExpression, BracketExpression bracket, null):
                         {
-                            return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))]);
+                            return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(EscapedString.From(chr.ToString())))]);
                         }
                         // *<bracket><constant>
                         case (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail):
                         {
                             StringSegmentLinkedList tailValue = tail.Value;
                             return new OneOfExpression([..ConvertRegexToCharArray(bracket.Values)
-                                .Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList(chr.ToString()).Append(tailValue)))]);
+                                .Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList(chr.ToString()).Append(tailValue), true))]);
                         }
                         // <bracket>*
                         case (null, BracketExpression bracket, AsteriskExpression):
@@ -509,17 +510,17 @@ namespace DataFilters.Grammar.Parsing
                         // <ends with><bracket>
                         case (EndsWithExpression head, BracketExpression body, null):
                         {
-                            return new OneOfExpression([ .. ConvertRegexToCharArray(body.Values).Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()))) ]);
+                            return new OneOfExpression([ .. ConvertRegexToCharArray(body.Values).Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()), true)) ]);
                         }
                         // <ends with><bracket><constant>
                         case (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant):
                         {
-                            return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()).Append(constant.Value)))]);
+                            return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()).Append(constant.Value), true))]);
                         }
                         // <starts with><bracket>
                         case (StartsWithExpression head, BracketExpression body, null):
                         {
-                            return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]);
+                            return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(EscapedString.From(chr.ToString()))))]);
                         }
                         // <bracket><starts with>*
                         case (null, BracketExpression bracket, StartsWithExpression body):
@@ -587,7 +588,7 @@ namespace DataFilters.Grammar.Parsing
                         // *<one of>
                         case (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null):
                         {
-                            return new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]);
+                            return new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value, true))]);
                         }
                         // <one of>*
                         case (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression):
@@ -736,7 +737,7 @@ namespace DataFilters.Grammar.Parsing
             => from alphaBeforeAsterisk in AlphaNumeric
                 from __ in Asterisk
                 from alphaAfterAsterisk in AlphaNumeric
-                select new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value);
+                select new StartsWithExpression(alphaBeforeAsterisk.Value) & new EndsWithExpression(alphaAfterAsterisk.Value, true);
 
         /// <summary>
         /// Parser for a <c>property=&lt;expression&gt;</c> pair.
@@ -766,7 +767,7 @@ namespace DataFilters.Grammar.Parsing
                     .Append(TokensToString(afterDotDigits))
                     .Append("E")
                     .Append(ConvertSignToChar(exponentSign, true))
-                    .Append(afterExponentSignDigits.EscapedParseableString)
+                    .Append(afterExponentSignDigits.EscapedParseableString.Value)
 
                 select new NumericValueExpression(value))
                 .Try()
@@ -781,7 +782,7 @@ namespace DataFilters.Grammar.Parsing
                         .Append(TokensToString(beforeDotDigits))
                         .Append("E")
                         .Append(ConvertSignToChar(exponentSign, true))
-                        .Append(afterExponentSignDigits.EscapedParseableString)
+                        .Append(afterExponentSignDigits.EscapedParseableString.Value)
 
                     select new NumericValueExpression(value))
                 .Try()

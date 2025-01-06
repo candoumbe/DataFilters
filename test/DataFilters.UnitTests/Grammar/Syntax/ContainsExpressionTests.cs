@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -20,7 +21,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                                                                       .BeAssignableTo<FilterExpression>().And
                                                                       .Implement<IEquatable<ContainsExpression>>().And
                                                                       .Implement<IHaveComplexity>().And
-                                                                      .Implement<IParseableString>();
+                                                                      .Implement<IProvideParseableString>();
 
         [Fact]
         public void Given_string_argument_is_null_Constructor_should_thros_ArgumentNullException()
@@ -118,18 +119,17 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             TextExpression textExpression = textExpressionGenerator.Item;
             ContainsExpression expression = new(textExpression);
 
-            string expected = $"*{textExpression.EscapedParseableString}*";
+            EscapedString expected = EscapedString.From($"*{textExpression.EscapedParseableString}*");
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
-            actual.Should()
-                  .Be(expected);
+            actual.Should().Be(expected);
         }
 
         [Property]
-        public void Given_non_whitespace_string_as_input_Then_EscapedParseableString_should_be_correct(NonWhiteSpaceString textGenerator)
+        public void Given_non_null_string_as_input_Then_EscapedParseableString_should_be_correct(NonNull<string> textGenerator)
         {
             // Arrange
             string text = textGenerator.Item;
@@ -144,14 +144,13 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 }
                 sb = sb.Append(chr);
             }
-            string expected = $"*{sb}*";
+            EscapedString expected = EscapedString.From($"*{sb}*");
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
-            actual.Should()
-                  .Be(expected);
+            actual.Should().Be(expected);
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -206,24 +205,24 @@ namespace DataFilters.UnitTests.Grammar.Syntax
 
             // Assert
             containsExpression.EscapedParseableString.Should()
-                .Be($"*{textExpression.EscapedParseableString}*");
+                .Be(EscapedString.From($"*{textExpression.EscapedParseableString}*"));
         }
 
-        public static TheoryData<string, string> EscapedParseableStringCases
+        public static TheoryData<string, EscapedString> EscapedParseableStringCases
             => new()
             {
-                { "Oi\fj8G]t:JK%H6m>+r{)[5\n6", "*Oi\fj8G\\]t\\:JK%H6m>+r\\{\\)\\[5\n6*" }
+                { "Oi\fj8G]t:JK%H6m>+r{)[5\n6", EscapedString.From("*Oi\fj8G\\]t\\:JK%H6m>+r\\{\\)\\[5\n6*") }
             };
 
         [Theory]
         [MemberData(nameof(EscapedParseableStringCases))]
-        public void Given_input_as_string_Then_the_constructor_should_properly_escape_it(string input, string expected)
+        public void Given_input_as_string_Then_the_constructor_should_properly_escape_it(string input, EscapedString expected)
         {
             // Arrange
             ContainsExpression expression = new(input);
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
             actual.Should().Be(expected);

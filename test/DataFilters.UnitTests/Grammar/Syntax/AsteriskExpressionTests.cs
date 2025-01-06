@@ -51,24 +51,25 @@
         public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpression)
+        public void Given_AsteriskExpression_When_adding_ConstantValueExpression_Should_returns_EndsWithExpression(NonNull<ConstantValueExpression> constantExpressionGenerator)
         {
             // Arrange
             AsteriskExpression asterisk = AsteriskExpression.Instance;
-            EndsWithExpression expected = new(constantExpression.Item.Value);
+            ConstantValueExpression constantValueExpression = constantExpressionGenerator.Item;
+            EndsWithExpression expected = new(constantValueExpression);
 
             // Act
-            EndsWithExpression actual = asterisk + constantExpression.Item;
+            EndsWithExpression actual = asterisk + constantValueExpression;
 
             actual.Should().Be(expected);
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_ConstantValueExpresion_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
+        public void Given_ConstantValueExpression_When_adding_AsteriskExpression_Should_returns_StartsWithWithExpression(NonNull<ConstantValueExpression> constantExpression)
         {
             // Arrange
             AsteriskExpression asterisk = AsteriskExpression.Instance;
-            StartsWithExpression expected = new(constantExpression.Item.Value);
+            StartsWithExpression expected = new(constantExpression.Item);
 
             // Act
             StartsWithExpression actual = constantExpression.Item + asterisk;

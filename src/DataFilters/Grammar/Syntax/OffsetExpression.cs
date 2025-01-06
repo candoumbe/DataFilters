@@ -1,3 +1,5 @@
+using DataFilters.ValueObjects;
+
 namespace DataFilters.Grammar.Syntax
 {
     using System;
@@ -27,7 +29,7 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         public static OffsetExpression Zero => new();
 
-        private readonly Lazy<string> _lazyParseableString;
+        private readonly Lazy<EscapedString> _lazyParseableString;
 
         /// <summary>
         /// Builds a new <see cref="OffsetExpression"/> instance
@@ -55,14 +57,14 @@ namespace DataFilters.Grammar.Syntax
 
             _lazyParseableString = new(() => ( Hours, Minutes, Sign ) switch
             {
-                (0, 0, _) => "Z",
-                (_, _, NumericSign.Minus) => $"-{Hours:D2}:{Minutes:D2}",
-                _ => $"+{Hours:D2}:{Minutes:D2}",
+                (0, 0, _) => EscapedString.From("Z"),
+                (_, _, NumericSign.Minus) => EscapedString.From($"-{Hours:D2}:{Minutes:D2}"),
+                _ => EscapedString.From($"+{Hours:D2}:{Minutes:D2}"),
             });
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyParseableString.Value;
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OffsetExpression);
@@ -89,14 +91,12 @@ namespace DataFilters.Grammar.Syntax
 #endif
 
         ///<inheritdoc/>
-        public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString,
-            out string originalString)
+        public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out EscapedString escapedParseableString)
         {
             sign = Sign;
             hours = Hours;
             minutes = Minutes;
             escapedParseableString = EscapedParseableString;
-            originalString = OriginalString;
         }
 
         /// <inheritdoc />

@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using Ardalis.GuardClauses;
 using Candoumbe.Types.Strings;
+using DataFilters.ValueObjects;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -40,7 +41,7 @@ namespace DataFilters.Grammar.Syntax
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => Value.ToStringValue();
+        public override EscapedString EscapedParseableString => EscapedString.From(Value.ToStringValue());
 
         ///<inheritdoc/>
         public virtual bool Equals(NumericValueExpression other) => Value.Equals(other?.Value);

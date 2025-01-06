@@ -2,6 +2,8 @@
 using System.Text;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
+using FluentAssertions.Execution;
 using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
@@ -24,7 +26,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                                                                         .NotBeAbstract().And
                                                                         .BeAssignableTo<FilterExpression>().And
                                                                         .Implement<IEquatable<StartsWithExpression>>().And
-                                                                        .Implement<IParseableString>().And
+                                                                        .Implement<IProvideParseableString>().And
                                                                         .NotImplement<IBoundaryExpression>();
 
         [Fact]
@@ -90,10 +92,10 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         {
             // Arrange
             StartsWithExpression expression = new(text.Item);
-            string expected = $"{text.Item.EscapedParseableString}*";
+            EscapedString expected = EscapedString.From($"{text.Item.EscapedParseableString}*");
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
             actual.Should()
@@ -116,10 +118,10 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 }
                 sb = sb.Append(chr);
             }
-            string expected = $"{stringValueExpression.EscapedParseableString}*";
+            EscapedString expected = EscapedString.From($"{stringValueExpression.EscapedParseableString}*");
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
             actual.Should()
@@ -189,12 +191,16 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             StartsWithExpression leftStartsWith = leftOperandGen.Item;
             StringValueExpression rightStartsWith = rightOperandGen.Item;
 
-            AndExpression expected = leftStartsWith + new EndsWithExpression(rightStartsWith.Value);
+            AndExpression expected = leftStartsWith + new EndsWithExpression(rightStartsWith.EscapedParseableString);
+            outputHelper.WriteLine($"expected: {expected}");
 
             // Act
             AndExpression actual = leftStartsWith + rightStartsWith;
+            outputHelper.WriteLine($"actual: {actual}");
 
             // Assert
+            using AssertionScope assertionScope = new ();
+            actual.EscapedParseableString.Should().Be(expected.EscapedParseableString);
             actual.IsEquivalentTo(expected).Should().BeTrue();
         }
     }

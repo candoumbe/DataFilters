@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Ardalis.GuardClauses;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
 using DataFilters.ValueObjects;
@@ -19,7 +20,7 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         public StringSegmentLinkedList Value { get; }
 
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="ContainsExpression"/> instance which holds the specified <paramref name="value"/>.
@@ -36,7 +37,7 @@ namespace DataFilters.Grammar.Syntax
 
             Value = new StringSegmentLinkedList(value.Value);
 
-            _lazyEscapedParseableString = new Lazy<string>(() => value.Value);
+            _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"*{value}*"));
         }
 
         /// <summary>
@@ -57,31 +58,18 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="text"></param>
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
-        public ContainsExpression(TextExpression text)
-            : this(text switch
-            {
-                null => throw new ArgumentNullException(nameof(text)),
-                _ =>   text.OriginalString
-            })
+        public ContainsExpression(TextExpression text) : this(Guard.Against.Null(text).EscapedParseableString)
         {
-            _lazyEscapedParseableString = new Lazy<string>(() =>
-            {
-                string escapedValue = text.Value.Replace(chr => chr is FilterTokenizer.BackSlash or FilterTokenizer.DoubleQuote,
-                        new Dictionary<char, ReadOnlyMemory<char>> { [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash], [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote] })
-                    .ToStringValue();
-
-                return $@"*""{escapedValue}""*";
-            });
         }
 
-        private static Lazy<string> BuildLazyEscapedParseableString(StringSegmentLinkedList value)
-            => new Lazy<string>(() =>
+        private static Lazy<EscapedString> BuildLazyEscapedParseableString(StringSegmentLinkedList value)
+            => new Lazy<EscapedString>(() =>
             {
                 string escapedValue = value.Replace(chr => FilterTokenizer.SpecialCharacters.Contains(chr),
                         FilterTokenizer.EscapedSpecialCharacters)
                     .ToStringValue();
 
-                return $"*{escapedValue}*";
+                return EscapedString.From($"*{escapedValue}*");
             });
 
         /// <summary>
@@ -107,7 +95,7 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
@@ -124,7 +112,7 @@ namespace DataFilters.Grammar.Syntax
         {
             FormattableString formattable = format switch
             {
-                "d" or "D" => $"@{nameof(ContainsExpression)}'{OriginalString}'",
+                "d" or "D" => $"@{nameof(ContainsExpression)}'{EscapedParseableString}'",
                 "f" or "F" => $"@{nameof(ContainsExpression)}",
                 null or "" => $"{EscapedParseableString}",
                 _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")

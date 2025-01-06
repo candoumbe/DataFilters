@@ -5,6 +5,7 @@ using DataFilters.Grammar.Parsing;
 using System;
 using System.Linq;
 using Ardalis.GuardClauses;
+using DataFilters.ValueObjects;
 
 namespace DataFilters.Grammar.Syntax;
 
@@ -19,7 +20,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// </summary>
     public StringSegmentLinkedList Value { get; }
 
-    private readonly Lazy<string> _lazyEscapedParseableString;
+    private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
     /// <summary>
     /// Builds a new <see cref="StartsWithExpression"/> instance which holds the specified <paramref name="value"/>.
@@ -32,6 +33,21 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
         {
             throw new ArgumentNullException(nameof(value));
         }
+    }
+
+    /// <summary>
+    /// Builds a new <see cref="StartsWithExpression"/> which <see cref="Value"/> is initialized from <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/></exception>
+    public StartsWithExpression(ConstantValueExpression value)
+    {
+        (_lazyEscapedParseableString, Value) = value switch
+        {
+            null => throw new ArgumentNullException(nameof(value)),
+            TextExpression text => (new Lazy<EscapedString>(() => EscapedString.From($"{text.EscapedParseableString}*")), text.Value),
+            _ => (new Lazy<EscapedString>(() => EscapedString.From($"{value.EscapedParseableString}*" )), value.Value )
+        };
     }
 
     /// <summary>
@@ -50,12 +66,12 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
             _ => value
         };
 
-        _lazyEscapedParseableString = new Lazy<string>(() =>
+        _lazyEscapedParseableString = new Lazy<EscapedString>(() =>
             {
                 string escapedValue = new StringSegmentLinkedList().Append(Value.Replace(chr => FilterTokenizer.SpecialCharacters.Contains(chr), FilterTokenizer.EscapedSpecialCharacters))
                     .ToStringValue();
 
-                return $"{escapedValue}*";
+                return EscapedString.From($"{escapedValue}*");
         });
     }
 
@@ -67,7 +83,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     public StartsWithExpression(TextExpression text)
         : this(Guard.Against.Null(text).Value)
     {
-        _lazyEscapedParseableString = new Lazy<string>(() => $"{text.EscapedParseableString}*");
+        _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"{text.EscapedParseableString}*"));
     }
 
     ///<inheritdoc/>
@@ -80,7 +96,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     public override int GetHashCode() => Value.GetHashCode();
 
     ///<inheritdoc/>
-    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+    public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
     /// <summary>
     /// Combines the specified <paramref name="left"/> and <paramref name="right"/> <see cref="StartsWithExpression"/>s into a new <see cref="AndExpression"/>.
@@ -143,7 +159,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// A <see cref="AndExpression"/> that can match any <see langword="string"/> that starts with <paramref name="left"/>
     /// and ends with <paramref name="right"/>.
     /// </returns>
-    public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) => left + new EndsWithExpression(right.Value);
+    public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) => left + new EndsWithExpression(right.EscapedParseableString);
 
     /// <summary>
     /// Combines the specified <paramref name="left"/> and <paramref name="right"/> into and <see cref="AndExpression"/> expression

@@ -1,6 +1,7 @@
 ﻿using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
+using DataFilters.ValueObjects;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Fluent;
@@ -116,11 +117,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             TimeExpression timeExpression = new(hours, minutes, seconds, milliseconds);
 
             // Act
-            string actual = timeExpression.EscapedParseableString;
+            EscapedString actual = timeExpression.EscapedParseableString;
 
             // Assert
             actual.Should()
-                  .Be(expected);
+                  .Be(EscapedString.From(expected));
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

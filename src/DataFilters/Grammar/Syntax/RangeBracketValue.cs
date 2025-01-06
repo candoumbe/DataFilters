@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -82,7 +84,7 @@
 #endif
 
         ///<inheritdoc />
-        public override string EscapedParseableString => $"[{Start}-{End}]";
+        public override EscapedString EscapedParseableString => EscapedString.From($"[{Start}-{End}]");
 
         ///<inheritdoc />
         public override string OriginalString => $"[{Start}-{End}]";

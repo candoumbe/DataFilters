@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Parsing;
@@ -93,7 +95,7 @@
                           .BeOfType<GroupExpression>("the parameter is a BinaryFilterExpression");
         }
 
-        public static TheoryData<NotExpression, string> EscapedParseableStringCases
+        public static TheoryData<NotExpression, EscapedString> EscapedParseableStringCases
             => new()
             {
                 {
@@ -104,7 +106,7 @@
                                                                          OffsetExpression.Zero))
                         ),
 
-                    "!(T02:53:39.827|1901-06-17T09:13:44.17Z)"
+                    EscapedString.From("!(T02:53:39.827|1901-06-17T09:13:44.17Z)")
                 },
                 {
                     new NotExpression(
@@ -114,16 +116,16 @@
                                                                          OffsetExpression.Zero))
                         ),
 
-                    "!(02:53:39.827|1901-06-17T09:13:44.17Z)"
+                    EscapedString.From("!(02:53:39.827|1901-06-17T09:13:44.17Z)")
                 }
             };
 
         [Theory]
         [MemberData(nameof(EscapedParseableStringCases))]
-        public void Given_NotExpression_EscapedParseableString_should_match_expected(NotExpression expression, string expected)
+        public void Given_NotExpression_EscapedParseableString_should_match_expected(NotExpression expression, EscapedString expected)
         {
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
             actual.Should()

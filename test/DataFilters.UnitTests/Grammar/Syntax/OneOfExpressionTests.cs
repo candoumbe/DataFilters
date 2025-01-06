@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -309,10 +311,10 @@
             // Arrange
             FilterExpression[] innerExpressions = [.. expressionGenerators.Item];
             OneOfExpression expression = new(innerExpressions);
-            string expected = $"{{{string.Join("|", innerExpressions.Select(expr => expr.EscapedParseableString))}}}";
+            EscapedString expected = EscapedString.From($"{{{string.Join("|", innerExpressions.Select(expr => expr.EscapedParseableString))}}}");
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
             actual.Should().Be(expected);

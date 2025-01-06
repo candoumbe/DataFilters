@@ -1,11 +1,9 @@
-﻿using System.Runtime.CompilerServices;
+﻿using DataFilters.ValueObjects;
 
 namespace DataFilters.Grammar.Syntax;
 
 using System;
 using Exceptions;
-using System.Text.Json;
-
 
 /// <summary>
 /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
@@ -23,7 +21,9 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
     public BoundaryExpression Max { get; }
 
     private readonly Lazy<string> _lazyToString;
-    private readonly Lazy<string> _lazyParseableString;
+    private readonly Lazy<EscapedString> _lazyParseableString;
+
+    private static readonly EscapedString Unbounded = EscapedString.From("*");
 
     /// <summary>
     /// Builds a new <see cref="IntervalExpression"/> instance
@@ -50,7 +50,7 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
             case AsteriskExpression when max is null:
                 throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)}");
             case DateExpression when max is not null && !(max.Expression is AsteriskExpression || max.Expression is DateExpression || max.Expression is TimeExpression || max.Expression is DateTimeExpression):
-                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
+                throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max.Expression?.GetType()}] types are not compatible", nameof(max));
             case ConstantValueExpression when !(max is null || max.Expression is ConstantValueExpression || max.Expression is AsteriskExpression):
                 throw new BoundariesTypeMismatchException($"{nameof(min)}[{min?.Expression?.GetType()}] and {nameof(max)}[{max?.Expression?.GetType()}] types are not compatible", nameof(max));
         }
@@ -91,7 +91,7 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
             _ => max
         };
 
-        _lazyParseableString = new Lazy<string>(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? "*"} TO {Max?.Expression?.EscapedParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
+        _lazyParseableString = new Lazy<EscapedString>(() => EscapedString.From($"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? Unbounded} TO {Max?.Expression?.EscapedParseableString ?? Unbounded}{GetMaxBracket(Max?.Included)}"));
         _lazyToString = new Lazy<string>(() => new
                     {
                         Min = new
@@ -116,8 +116,8 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
             )
             ;
 
-        static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
-        static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";
+        static string GetMinBracket(bool? included) => included is true ? "[" : "]";
+        static string GetMaxBracket(bool? included) => included is true ? "]" : "[";
     }
 
     ///<inheritdoc/>
@@ -153,7 +153,7 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
     public override string ToString() => _lazyToString.Value;
 
     ///<inheritdoc/>
-    public override string EscapedParseableString => _lazyParseableString.Value;
+    public override EscapedString EscapedParseableString => _lazyParseableString.Value;
 
     ///<inheritdoc/>
     public override bool IsEquivalentTo(FilterExpression other)

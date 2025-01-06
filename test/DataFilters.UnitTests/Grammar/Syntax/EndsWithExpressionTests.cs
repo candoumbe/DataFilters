@@ -1,4 +1,8 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using System.Linq;
+using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Syntax;
@@ -17,13 +21,13 @@
         public void IsFilterExpression() => typeof(EndsWithExpression).Should()
                                                                       .BeAssignableTo<FilterExpression>().And
                                                                       .Implement<IEquatable<EndsWithExpression>>().And
-                                                                      .Implement<IParseableString>();
+                                                                      .Implement<IProvideParseableString>();
 
         [Fact]
         public void Given_string_input_is_null_Constructor_should_throws_ArgumentNullException()
         {
             // Act
-            Action action = () => new EndsWithExpression((string)null);
+            Action action = () => new EndsWithExpression((EscapedString)null);
 
             // Assert
             action.Should()
@@ -42,28 +46,28 @@
         }
 
         [Fact]
-        public void Given_string_input_is_an_empty_Constructor_should_throws_ArgumentOutOfRangeException()
+        public void Given_string_input_is_empty_Constructor_should_not_throw()
         {
             // Act
-            Action action = () => new EndsWithExpression(string.Empty);
+            Action action = () => _ = new EndsWithExpression(EscapedString.From(string.Empty));
 
             // Assert
             action.Should()
-                .ThrowExactly<ArgumentOutOfRangeException>($"The value of {nameof(EndsWithExpression)}'s constructor cannot be empty");
+                .NotThrow($"The value of {nameof(EndsWithExpression)}'s constructor can be empty");
         }
 
         public static TheoryData<EndsWithExpression, object, bool, string> EqualsCases
             => new()
             {
                 {
-                    new EndsWithExpression("prop1"),
-                    new EndsWithExpression("prop1"),
+                    new EndsWithExpression(EscapedString.From("prop1")),
+                    new EndsWithExpression(EscapedString.From("prop1")),
                     true,
                     "comparing two different instances with same property name"
                 },
                 {
-                    new EndsWithExpression("prop1"),
-                    new EndsWithExpression("prop2"),
+                    new EndsWithExpression(EscapedString.From("prop1")),
+                    new EndsWithExpression(EscapedString.From("prop2")),
                     false,
                     "comparing two different instances with different property name"
                 }
@@ -89,33 +93,45 @@
             => endsWith.Complexity.Should().Be(1.5);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> textExpressionGenerator)
         {
             // Arrange
-            EndsWithExpression expression = new(text.Item);
-            string expected = $"*{text.Item.EscapedParseableString}";
+            TextExpression textExpression = textExpressionGenerator.Item;
+            EndsWithExpression expression = new(textExpression);
+
+            EscapedString expected = EscapedString.From($"*{textExpression.EscapedParseableString}");
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
-            actual.Should()
-                  .Be(expected);
+            actual.Should().Be(expected);
         }
 
         [Property]
         public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
         {
             // Arrange
-            EndsWithExpression expression = new(text.Item);
+            string inputAsString = text.Get;
+            IString input = inputAsString.Any( FilterTokenizer.SpecialCharacters.Contains)
+                ? RawString.From(inputAsString)
+                : EscapedString.From(inputAsString);
+
+            EndsWithExpression expression = input switch
+            {
+                RawString value => new(value),
+                EscapedString value => new(value),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
             StringValueExpression stringValueExpression = new(text.Item);
             string expected = $"*{stringValueExpression.EscapedParseableString}";
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
-            actual.Should()
+            actual.Value.Should()
                   .Be(expected);
         }
 

@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Syntax;
@@ -16,7 +18,7 @@
                                                                    .BeAssignableTo<FilterExpression>().And
                                                                    .Implement<IEquatable<GroupExpression>>().And
                                                                    .Implement<IHaveComplexity>().And
-                                                                   .Implement<IParseableString>();
+                                                                   .Implement<IProvideParseableString>();
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -312,28 +314,28 @@
             actual.Should().Be(expected, reason);
         }
 
-        public static TheoryData<FilterExpression, string> EscapedParseableStringCases
+        public static TheoryData<FilterExpression, EscapedString> EscapedParseableStringCases
             => new()
             {
                 {
                     new StringValueExpression("("),
-                    "(\\()"
+                    EscapedString.From("(\\()")
                 },
                 {
                     new ContainsExpression("("),
-                    "(*\\(*)"
+                    EscapedString.From("(*\\(*)")
                 }
             };
 
         [Theory]
         [MemberData(nameof(EscapedParseableStringCases))]
-        public void Given_Expression_is_not_null_When_instantiating_GroupExpression_Then_its_EscapedParseableString_should_match_expectation(FilterExpression filterExpression, string expected)
+        public void Given_Expression_is_not_null_When_instantiating_GroupExpression_Then_its_EscapedParseableString_should_match_expectation(FilterExpression filterExpression, EscapedString expected)
         {
             // Arrange
             GroupExpression groupExpression = new(filterExpression);
 
             // Act
-            string actual = groupExpression.EscapedParseableString;
+            EscapedString actual = groupExpression.EscapedParseableString;
 
             // Assert
             actual.Should().Be(expected);

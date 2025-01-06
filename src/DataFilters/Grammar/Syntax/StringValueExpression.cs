@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Syntax
@@ -22,7 +23,7 @@ namespace DataFilters.Grammar.Syntax
     /// </remarks>
     public class StringValueExpression : ConstantValueExpression, IEquatable<StringValueExpression>
     {
-        private readonly Lazy<string> _lazyParseableString;
+        private readonly Lazy<EscapedString> _lazyParseableString;
         private readonly Lazy<string> _lazyOriginalString;
 
         /// <summary>
@@ -49,15 +50,12 @@ namespace DataFilters.Grammar.Syntax
         public StringValueExpression(StringSegmentLinkedList value) : base(value)
         {
             _lazyOriginalString = new Lazy<string>(value.ToStringValue);
-            _lazyParseableString = new Lazy<string>(() => Value.Replace(chr => SpecialCharacters.Contains(chr),
-                                          EscapedSpecialCharacters).ToStringValue());
+            _lazyParseableString = new Lazy<EscapedString>(() => EscapedString.From(Value.Replace(chr => SpecialCharacters.Contains(chr),
+                                          EscapedSpecialCharacters).ToStringValue()));
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyParseableString.Value;
-
-        ///<inheritdoc/>
-        public override string OriginalString => _lazyOriginalString.Value;
+        public override EscapedString EscapedParseableString => _lazyParseableString.Value;
 
         ///<inheritdoc/>
         public virtual bool Equals(StringValueExpression other) => Equals(_lazyOriginalString.Value, other?._lazyOriginalString.Value);
@@ -66,7 +64,7 @@ namespace DataFilters.Grammar.Syntax
         public override bool Equals(object obj) =>
             obj switch
             {
-                NumericValueExpression numericValue => _lazyOriginalString.Value.Equals(numericValue.OriginalString),
+                NumericValueExpression numericValue => EscapedParseableString.Equals(numericValue.EscapedParseableString),
                 not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
                 _ => false
             };

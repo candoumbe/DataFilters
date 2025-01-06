@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -20,7 +22,7 @@
 
         private readonly FilterExpression[] _values;
 
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
         private readonly Lazy<string> _lazyOriginalString;
 
         /// <summary>
@@ -43,8 +45,8 @@
 
             _values = [.. values.Where(x => x is not null)];
 
-            _lazyEscapedParseableString = new Lazy<string>(() => $"{{{string.Join("|", Values.Select(v => v.EscapedParseableString))}}}");
-            _lazyOriginalString = new Lazy<string>(() => $"{{{string.Join("|", Values.Select(v => v.OriginalString))}}}");
+            _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"{{{string.Join("|", Values.Select(v => v.EscapedParseableString))}}}"));
+            _lazyOriginalString = new Lazy<string>(() => $"{{{string.Join("|", Values.Select(v => v.EscapedParseableString))}}}");
         }
 
         /// <inheritdoc/>
@@ -131,7 +133,7 @@
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         /// <inheritdoc />
         public override string ToString() => _lazyOriginalString.Value;

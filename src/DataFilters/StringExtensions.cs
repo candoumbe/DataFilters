@@ -45,7 +45,7 @@
     {
         private static char Separator => ',';
 #if NET6_0
-        private readonly static ConcurrentDictionary<bool, byte> HackZone = new();
+        private static readonly ConcurrentDictionary<bool, byte> HackZone = new();
 #endif
 
         /// <summary>
@@ -178,6 +178,61 @@
         {
             string localQueryString = queryString;
 
+            if (localQueryString is null)
+            {
+                throw new ArgumentNullException(nameof(queryString));
+            }
+
+            IFilter filter = Filter.True;
+            bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
+
+            if (!isEmptyQueryString)
+            {
+                FilterTokenizer tokenizer = new();
+                TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
+
+                (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
+#if NET6_0
+                if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
+                {
+                    TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
+                }
+#endif
+                if (expressions.Once())
+                {
+                    (PropertyName property, FilterExpression expression) = expressions[0];
+
+                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                                               .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
+
+                    if (pi is not null)
+                    {
+                        TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
+                        filter = ConvertExpressionToFilter(pi, expression, tc);
+                    }
+                }
+                else
+                {
+                    IList<IFilter> filters = [];
+
+                    foreach ((PropertyName property, FilterExpression expression) in expressions)
+                    {
+                        PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                                                   .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
+
+                        if (pi is not null)
+                        {
+                            TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
+                            filters.Add(ConvertExpressionToFilter(pi, expression, tc));
+                        }
+                    }
+
+                    filter = new MultiFilter { Logic = options.Logic, Filters = filters };
+                }
+            }
+
+            return filter;
+            
             static IFilter ConvertExpressionToFilter(PropertyInfo propInfo, FilterExpression expression, TypeConverter tc)
             {
                 IFilter filter;
@@ -259,7 +314,7 @@
                                 DateTimeExpression { Date: null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"0001-01-01T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"), input.Included),
                                 TimeExpression time => (new StringValueExpression($"0001-01-01T{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"), input.Included),
                                 DateTimeExpression { Date: not null, Time: not null, Offset: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"), input.Included),
-                                DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (new StringValueExpression(dateTime.EscapedParseableString), input.Included),
+                                DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (new StringValueExpression(dateTime.EscapedParseableString.Value), input.Included),
                                 AsteriskExpression or null => default, // because this is equivalent to an unbounded range
 #if NET8_0_OR_GREATER
                                 _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
@@ -276,8 +331,8 @@
 
                         if (min.constantExpression?.Value is not null && max.constantExpression?.Value is not null)
                         {
-                            object minValue = min.constantExpression.Value.ToStringValue();
-                            object maxValue = max.constantExpression.Value.ToStringValue();
+                            string minValue = min.constantExpression.Value.ToStringValue();
+                            string maxValue = max.constantExpression.Value.ToStringValue();
                             filter = new MultiFilter
                             {
                                 Logic = FilterLogic.And,
@@ -294,12 +349,12 @@
                         }
                         else if (min.constantExpression?.Value is not null)
                         {
-                            object minValue = min.constantExpression.Value.ToStringValue();
+                            string minValue = min.constantExpression.Value.ToStringValue();
                             filter = new Filter(propInfo.Name, minOperator, tc.ConvertFrom(minValue));
                         }
                         else
                         {
-                            object maxValue = max.constantExpression.Value.ToStringValue();
+                            string maxValue = max.constantExpression?.Value?.ToStringValue();
                             filter = new Filter(propInfo.Name, maxOperator, tc.ConvertFrom(maxValue));
                         }
                         break;
@@ -309,61 +364,6 @@
 
                 return filter;
             }
-
-            if (localQueryString == default)
-            {
-                throw new ArgumentNullException(nameof(queryString));
-            }
-
-            IFilter filter = Filter.True;
-            bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
-
-            if (!isEmptyQueryString)
-            {
-                FilterTokenizer tokenizer = new();
-                TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
-
-                (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
-#if NET6_0
-                if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
-                {
-                    TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
-                }
-#endif
-                if (expressions.Once())
-                {
-                    (PropertyName property, FilterExpression expression) = expressions[0];
-
-                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                               .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
-
-                    if (pi is not null)
-                    {
-                        TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                        filter = ConvertExpressionToFilter(pi, expression, tc);
-                    }
-                }
-                else
-                {
-                    IList<IFilter> filters = [];
-
-                    foreach ((PropertyName property, FilterExpression expression) in expressions)
-                    {
-                        PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                                   .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
-
-                        if (pi is not null)
-                        {
-                            TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                            filters.Add(ConvertExpressionToFilter(pi, expression, tc));
-                        }
-                    }
-
-                    filter = new MultiFilter { Logic = options.Logic, Filters = filters };
-                }
-            }
-
-            return filter;
         }
 
         /// <summary>

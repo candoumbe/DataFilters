@@ -1,12 +1,14 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     /// <summary>
     /// Building block for <see cref="BracketExpression"/>.
     /// </summary>
-    public abstract class BracketValue : IParseableString, IHaveComplexity
+    public abstract class BracketValue : IProvideParseableString, IHaveComplexity
     {
         ///<inheritdoc/>
-        public abstract string EscapedParseableString { get; }
+        public abstract EscapedString EscapedParseableString { get; }
 
         ///<inheritdoc/>
         public abstract string OriginalString { get; }
@@ -15,6 +17,6 @@
         public abstract double Complexity { get; }
 
         ///<inheritdoc/>
-        public override string ToString() => EscapedParseableString;
+        public override string ToString() => EscapedParseableString.Value;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using DataFilters.ValueObjects;
 
 namespace DataFilters.Grammar.Syntax
 {
@@ -8,7 +9,7 @@ namespace DataFilters.Grammar.Syntax
     /// <para>
     /// <see cref="FilterExpression"/>s can take many forms : from the simplest <see cref="ConstantValueExpression"/> to more complex <see cref="GroupExpression"/>s.
     /// </para>
-    public abstract class FilterExpression : IHaveComplexity, IParseableString, IFormattable
+    public abstract class FilterExpression : IHaveComplexity, IFormattable, IProvideParseableString
     {
         /// <summary>
         /// Tests if <paramref name="other"/> is equivalent to the current instance.
@@ -27,7 +28,7 @@ namespace DataFilters.Grammar.Syntax
         public virtual double Complexity => 1;
 
         ///<inheritdoc/>
-        public override string ToString() => $"{GetType().Name}: '{OriginalString}'";
+        public override string ToString() => $"{GetType().Name}: '{EscapedParseableString}'";
 
         /// <inheritdoc />
         public virtual string ToString(string format, IFormatProvider formatProvider)
@@ -43,12 +44,8 @@ namespace DataFilters.Grammar.Syntax
             return formattable.ToString(formatProvider);
         }
 
-        ///<inheritdoc/>
-        public abstract string EscapedParseableString { get; }
-
-        ///<inheritdoc/>
-        public virtual string OriginalString => EscapedParseableString;
-
+        /// <inheritdoc/>
+        public abstract EscapedString EscapedParseableString { get; }
         /// <summary>
         /// Returns a <see cref="FilterExpression"/> that is the result of applying the NOT logical operator to the specified <paramref name="expression"/>.
         /// </summary>

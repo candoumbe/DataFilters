@@ -6,7 +6,7 @@ namespace DataFilters.ValueObjects
     /// <summary>
     /// A value object that wraps a string that has <strong>NOT</strong> been properly escaped.
     /// </summary>
-    public record RawString
+    public record RawString : IString
 
     {
         /// <summary>

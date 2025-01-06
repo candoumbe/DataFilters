@@ -2,6 +2,7 @@
 using System.Text;
 using Candoumbe.MiscUtilities.Comparers;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
 
 namespace DataFilters.UnitTests.Grammar.Syntax
 {
@@ -179,10 +180,10 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                 sbExpected.Append(c);
             }
 
-            string expected = sbExpected.ToString();
+            EscapedString expected = EscapedString.From(sbExpected.ToString());
 
             // Act
-            string actual = expression.EscapedParseableString;
+            EscapedString actual = expression.EscapedParseableString;
 
             // Assert
             actual.Should().Be(expected);

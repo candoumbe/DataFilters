@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax;
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax;
 
 using System;
 
@@ -8,7 +10,7 @@ using System;
 public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpression>
 {
     private readonly Lazy<string> _lazyToString;
-    private readonly Lazy<string> _lazyEscapedParseableString;
+    private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
     /// <inheritdoc/>
     public override double Complexity => Right.Complexity * Left.Complexity;
@@ -27,7 +29,7 @@ public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpres
     public AndExpression(FilterExpression left, FilterExpression right) : base(left, right)
     {
         _lazyToString = new Lazy<string>(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": '{Left}'; ""{nameof(Right)} ({Right.GetType().Name})"": '{Right}']");
-        _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString},{Right.EscapedParseableString}");
+        _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"{Left.EscapedParseableString},{Right.EscapedParseableString}"));
     }
 
         ///<inheritdoc/>
@@ -51,10 +53,10 @@ public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpres
            };
 
     ///<inheritdoc/>
-    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+    public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
     ///<inheritdoc/>
-    public override string ToString() => _lazyEscapedParseableString.Value;
+    public override string ToString() => _lazyEscapedParseableString.Value.Value;
 
     /// <inheritdoc />
     public override FilterExpression Simplify()

@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -16,7 +18,7 @@
     /// </remarks>
     public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpression>, ISimplifiable
     {
-        private readonly Lazy<string> _lazyEscapedString;
+        private readonly Lazy<EscapedString> _lazyEscapedString;
 
         /// <summary>
         /// Builds a new <see cref="GroupExpression"/> that holds the specified <paramref name="expression"/>.
@@ -26,7 +28,7 @@
         public GroupExpression(FilterExpression expression)
         {
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            _lazyEscapedString = new Lazy<string>(() => $"({Expression.EscapedParseableString})");
+            _lazyEscapedString = new Lazy<EscapedString>(() => EscapedString.From($"({Expression.EscapedParseableString})"));
         }
 
         /// <summary>
@@ -58,7 +60,7 @@
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => 0.1 + Expression.Complexity;

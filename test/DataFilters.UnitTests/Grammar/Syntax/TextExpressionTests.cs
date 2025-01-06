@@ -1,6 +1,6 @@
 ﻿using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-
+using DataFilters.ValueObjects;
 using FluentAssertions;
 
 using FsCheck;
@@ -25,11 +25,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             TextExpression text = new(input);
 
             // Act
-            string actual = text.EscapedParseableString;
+            EscapedString actual = text.EscapedParseableString;
 
             // Assert
             actual.Should()
-                  .Be(expected);
+                  .Be(EscapedString.From(expected));
         }
 
         [Property]
@@ -86,12 +86,12 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             TextExpression textExpression = new(value);
 
             // Act
-            string actual = textExpression.EscapedParseableString;
+            EscapedString actual = textExpression.EscapedParseableString;
 
             outputHelper.WriteLine($"expected: '{expected}', actual: '{actual}'");
 
             // Assert
-            actual.Should()
+            actual.Value.Should()
                   .StartWith(@"""").And
                   .EndWith(@"""").And
                   .Be(expected);

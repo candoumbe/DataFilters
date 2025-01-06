@@ -1,5 +1,6 @@
 ﻿using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Syntax
@@ -13,7 +14,7 @@ namespace DataFilters.Grammar.Syntax
     /// </summary>
     public class TextExpression : StringValueExpression, IEquatable<TextExpression>
     {
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
         private readonly StringSegmentLinkedList _stringSegments;
         private readonly Lazy<string> _lazyOriginalString;
 
@@ -97,7 +98,7 @@ namespace DataFilters.Grammar.Syntax
         internal TextExpression(StringSegmentLinkedList value) : base(value)
         {
             _lazyOriginalString = new Lazy<string>(value.ToStringValue);
-            _lazyEscapedParseableString = new Lazy<string>(() =>
+            _lazyEscapedParseableString = new Lazy<EscapedString>(() =>
             {
                 StringBuilder sb = new (value: FilterTokenizer.DoubleQuote.ToString());
                 sb.Append(value.Replace(chr => chr is FilterTokenizer.BackSlash or FilterTokenizer.DoubleQuote, new Dictionary<char, ReadOnlyMemory<char>>
@@ -107,15 +108,12 @@ namespace DataFilters.Grammar.Syntax
                     })
                     .ToStringValue());
 
-                return sb.Append(FilterTokenizer.DoubleQuote).ToString();
+                return EscapedString.From(sb.Append(FilterTokenizer.DoubleQuote).ToString());
             });
         }
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
-
-        ///<inheritdoc/>
-        public override string OriginalString => _lazyOriginalString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public virtual bool Equals(TextExpression other) => _lazyOriginalString.Value.Equals(other?._lazyOriginalString.Value);

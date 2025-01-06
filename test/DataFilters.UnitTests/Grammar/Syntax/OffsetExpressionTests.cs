@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using DataFilters.Grammar.Syntax;
     using DataFilters.UnitTests.Helpers;
@@ -27,11 +29,11 @@
             OffsetExpression offset = new(sign, hours, minutes);
 
             // Act
-            string actual = offset.EscapedParseableString;
+            EscapedString actual = offset.EscapedParseableString;
 
             // Assert
             actual.Should()
-                  .Be(expected);
+                  .Be(EscapedString.From(expected));
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

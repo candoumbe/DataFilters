@@ -1,3 +1,5 @@
+using DataFilters.ValueObjects;
+
 namespace DataFilters.UnitTests.Helpers
 {
     using System;
@@ -131,7 +133,14 @@ namespace DataFilters.UnitTests.Helpers
 
         public static Arbitrary<EndsWithExpression> EndsWithExpressions()
             => Gen.OneOf(GetArbitraryFor<NonEmptyString>().Generator
-                                                          .Select(nonWhiteSpaceString => new EndsWithExpression(nonWhiteSpaceString.Item)),
+                                                          .Select(nonWhiteSpaceString =>
+                                                          {
+                                                              string input = nonWhiteSpaceString.Item;
+                                                              
+                                                              return input.Any(FilterTokenizer.SpecialCharacters.Contains)
+                                                                      ? new EndsWithExpression(RawString.From(input))
+                                                                    : new EndsWithExpression(EscapedString.From(input));
+                                                          }),
                          TextExpressions().Generator.Select(text => new EndsWithExpression(text))
                         )
                         .ToArbitrary();

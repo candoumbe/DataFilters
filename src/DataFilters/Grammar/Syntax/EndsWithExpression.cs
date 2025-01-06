@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
+using DataFilters.ValueObjects;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Syntax
@@ -18,7 +19,7 @@ namespace DataFilters.Grammar.Syntax
     /// </summary>
     public sealed class EndsWithExpression : FilterExpression, IEquatable<EndsWithExpression>
     {
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
         /// <summary>
         /// A memory optimized representation of the value hold by the current instance.
@@ -30,27 +31,43 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="value">The desired value</param>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> contains <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="StringSegment.Empty"/>.</exception>
-        public EndsWithExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
+        public EndsWithExpression(EscapedString value)
         {
-            if (!value.HasValue)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (StringSegment.IsNullOrEmpty(value))
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
-            }
+            Value = new StringSegmentLinkedList(Guard.Against.Null(value, nameof(value)).Value);
+            _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"*{value}"));
         }
+
+        /// <summary>
+        /// Builds a new <see cref="EndsWithExpression"/> which value is based on specified <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is <see langword="null"/>.</exception>
+        public EndsWithExpression(ConstantValueExpression value)
+        {
+            (_lazyEscapedParseableString, Value) = value switch
+            {
+                TextExpression text => ( new Lazy<EscapedString>(() => EscapedString.From($@"*""{text.EscapedParseableString}""")), text.Value ),
+                not null => ( new Lazy<EscapedString>(() => value.EscapedParseableString), value.Value ),
+                _ => throw new ArgumentNullException(nameof(value))
+            };
+        }
+
+        /// <summary>
+        /// Builds a new <see cref="ContainsExpression"/> instance which holds the specified <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">The desired value</param>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> contains <see langword="null"/>.</exception>
+        public EndsWithExpression(RawString value): this(new StringSegmentLinkedList(Guard.Against.Null(value, nameof(value)).Value), false)
+        {}
 
         /// <summary>
         /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="escaped"></param>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/>'s length is <c>0</c>.</exception>
-        public EndsWithExpression(StringSegmentLinkedList value)
+        internal EndsWithExpression(StringSegmentLinkedList value, bool escaped)
         {
             Value = value switch
             {
@@ -58,13 +75,15 @@ namespace DataFilters.Grammar.Syntax
                 _ => value
             };
 
-            _lazyEscapedParseableString = new Lazy<string>(() =>
-            {
-                string escapedValue = Value.Replace(chr => SpecialCharacters.Contains(chr), EscapedSpecialCharacters)
-                    .ToStringValue();
+            _lazyEscapedParseableString = escaped
+                ? new Lazy<EscapedString>(() => EscapedString.From($"*{Value.ToStringValue()}"))
+                : new Lazy<EscapedString>(() =>
+                {
+                    string escapedValue = Value.Replace(chr => SpecialCharacters.Contains(chr), EscapedSpecialCharacters)
+                        .ToStringValue();
 
-                return $"*{escapedValue}";
-            });
+                    return EscapedString.From($"*{escapedValue}");
+                });
         }
 
         /// <summary>
@@ -73,9 +92,9 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="text"></param>
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
         public EndsWithExpression(TextExpression text)
-            : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
+            : this(Guard.Against.Null(text, nameof(text)).EscapedParseableString)
         {
-            _lazyEscapedParseableString = new Lazy<string>(() => $"*{text.EscapedParseableString}");
+            _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"*{text.EscapedParseableString}"));
         }
 
         ///<inheritdoc/>
@@ -88,7 +107,7 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override double Complexity => 1.5;

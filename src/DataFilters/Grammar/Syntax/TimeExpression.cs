@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -85,7 +87,7 @@
         public override int GetHashCode() => (Hours, Minutes, Seconds, Milliseconds).GetHashCode();
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => $"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{(Milliseconds > 0 ? $".{Milliseconds}" : string.Empty)}";
+        public override EscapedString EscapedParseableString => EscapedString.From($"{Hours:D2}:{Minutes:D2}:{Seconds:D2}{(Milliseconds > 0 ? $".{Milliseconds}" : string.Empty)}");
 
         ///<inheritdoc/>
         public void Deconstruct(out int hours, out int minutes, out int seconds, out int milliseconds)

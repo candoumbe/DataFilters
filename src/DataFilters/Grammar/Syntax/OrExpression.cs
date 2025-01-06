@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -8,7 +10,7 @@
     public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpression>
     {
         private readonly Lazy<string> _lazyToString;
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="OrExpression"/> that combines <paramref name="left"/> and <paramref name="right"/> using the logical
@@ -24,7 +26,7 @@
         public OrExpression(FilterExpression left, FilterExpression right) : base(left, right)
         {
             _lazyToString = new Lazy<string>(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
-            _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}");
+            _lazyEscapedParseableString = new Lazy<EscapedString>(() => EscapedString.From($"{Left.EscapedParseableString}|{Right.EscapedParseableString}"));
         }
 
         ///<inheritdoc/>
@@ -45,7 +47,7 @@
 
         
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)

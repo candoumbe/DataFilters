@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -27,8 +29,8 @@
             (EscapedParseableString, Expression) = expression switch
             {
                 null => throw new ArgumentNullException(nameof(expression)),
-                BinaryFilterExpression expr => ($"!({expr.EscapedParseableString})", new GroupExpression(expr)),
-                _ => ($"!{expression.EscapedParseableString}", expression)
+                BinaryFilterExpression expr => (EscapedString.From($"!({expr.EscapedParseableString})"), new GroupExpression(expr)),
+                _ => (EscapedString.From($"!{expression.EscapedParseableString}"), expression)
             };
         }
 
@@ -65,7 +67,7 @@
             };
 
         ///<inheritdoc/>
-        public override string EscapedParseableString { get; }
+        public override EscapedString EscapedParseableString { get; }
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;

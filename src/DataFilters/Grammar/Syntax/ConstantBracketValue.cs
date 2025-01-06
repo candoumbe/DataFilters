@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.ValueObjects;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +10,7 @@
     /// </summary>
     public sealed class ConstantBracketValue : BracketValue, IEquatable<ConstantBracketValue>
     {
-        private readonly Lazy<string> _lazyEscapedParseableString;
+        private readonly Lazy<EscapedString> _lazyEscapedParseableString;
 
         /// <summary>
         /// Builds a new <see cref="ConstantBracketValue"/> instance.
@@ -17,7 +19,7 @@
         public ConstantBracketValue(string value)
         {
             Value = value;
-            _lazyEscapedParseableString = new(() => $"[{Value}]");
+            _lazyEscapedParseableString = new(() => EscapedString.From($"[{Value}]"));
         }
 
         /// <summary>
@@ -46,7 +48,7 @@
         public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc />
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override EscapedString EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
         public override string OriginalString => $"[{Value}]";
