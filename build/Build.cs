@@ -108,7 +108,7 @@ namespace DataFilters.ContinuousIntegration
         PublishArtifacts = true
     )]
     [DotNetVerbosityMapping]
-    public class Build : NukeBuild,
+    public class Build : EnhancedNukeBuild,
         IHaveSolution,
         IHaveSourceDirectory,
         IHaveTestDirectory,
@@ -135,12 +135,17 @@ namespace DataFilters.ContinuousIntegration
         ///<inheritdoc/>
         Solution IHaveSolution.Solution => Solution;
 
-        ///<inheritdoc/>
         public static int Main() => Execute<Build>(x => ((ICompile)x).Compile);
 
         ///<inheritdoc/>
-        IEnumerable<AbsolutePath> IClean.DirectoriesToDelete => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj")
-            .Concat(this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj"));
+        IEnumerable<AbsolutePath> IClean.DirectoriesToDelete =>
+        [
+            .. this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj"),
+            .. this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj")
+        ];
+
+        /// <inheritdoc />
+        Configure<DotNetToolRestoreSettings> IRestore.RestoreToolSettings => _ => _.SetDisableParallel(true);
 
         ///<inheritdoc/>
         AbsolutePath IHaveSourceDirectory.SourceDirectory => RootDirectory / "src";
@@ -151,16 +156,18 @@ namespace DataFilters.ContinuousIntegration
         ///<inheritdoc/>
         IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");
 
+        private static IReadOnlyList<string> Projects => ["DataFilters", "DataFilters.Expressions", "DataFilters.Queries"];
+
         ///<inheritdoc/>
         IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects
-            => new[] { "DataFilters", "DataFilters.Expressions", "DataFilters.Queries" }
+            => Projects
                 .Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
                                                                         testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
                                                                         configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
                 .ToArray();
 
         ///<inheritdoc/>
-        IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerfomanceTests");
+        IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 
         ///<inheritdoc/>
         bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
@@ -169,15 +176,15 @@ namespace DataFilters.ContinuousIntegration
         IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
 
         ///<inheritdoc/>
-        IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations => new PushNugetPackageConfiguration[]
-        {
+        IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations =>
+        [
             new NugetPushConfiguration(apiKey: NugetApiKey,
                                           source: new Uri("https://api.nuget.org/v3/index.json"),
                                           () => NugetApiKey is not null),
             new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
                                            source: new Uri("https://nukpg.github.com/"),
                                            () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
-        };
+        ];
 
         protected override void OnBuildCreated()
         {
