@@ -2,7 +2,7 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.Expressions.xml</DocumentationFile>
   </PropertyGroup>

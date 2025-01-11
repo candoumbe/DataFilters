@@ -15,11 +15,6 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// Wraps a string that represents a constant string value
     /// </summary>
-    /// <remarks>
-    /// </remarks>
-    /// <remarks>
-    /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
-    /// </remarks>
     public class StringValueExpression : ConstantValueExpression, IEquatable<StringValueExpression>
     {
         private readonly Lazy<string> _lazyParseableString;
@@ -28,6 +23,9 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
         /// </summary>
+        /// <remarks>
+        /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
+        /// </remarks>
         /// <param name="value">value of the expression.</param>
         public StringValueExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
         {

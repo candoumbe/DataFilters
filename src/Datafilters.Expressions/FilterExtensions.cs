@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-
-namespace DataFilters.Expressions
+﻿namespace DataFilters
 {
 #if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
     using System.ComponentModel;
 #endif
 
-    using static Expression;
-    using static FilterOperator;
-    using static NullableValueBehavior;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using System.Reflection;
+    using DataFilters.Expressions;
+    using static System.Linq.Expressions.Expression;
+    using static DataFilters.FilterOperator;
+    using static Expressions.NullableValueBehavior;
 
     /// <summary>
     /// The `FilterExtensions` class provides extension methods for building expression trees from `IFilter` instances.
@@ -30,10 +30,8 @@ namespace DataFilters.Expressions
     ///     Value = "John"
     /// };
     ///
-    ///
     /// // Build an expression tree
     /// Expression&lt;Func&lt;Person, bool&gt;&gt; expression = filter.ToExpression&lt;Person&gt;();
-    ///
     ///
     /// // Use the expression to filter data
     /// var filteredData = data.Where(expression.Compile());
@@ -273,17 +271,10 @@ namespace DataFilters.Expressions
             };
         }
 
-#if NET6_0_OR_GREATER
         /// <summary>
         /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
-        /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, <see cref="DateOnly"/> (for .NET 6.0 or greater), enumerable and other types. 
+        /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, <see cref="DateOnly"/> (for .NET 6.0 or greater), enumerable types, and other types.
         /// </summary>
-#else
-        /// <summary>
-        /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
-        /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, enumerable and other types.
-        /// </summary>
-#endif
         private static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
         {
             ConstantExpression ce;
@@ -319,7 +310,7 @@ namespace DataFilters.Expressions
         private static Expression ComputeIsEmpty(MemberExpression property) => IsNotAStringAndIsEnumerable(property.Type)
                             ? Not(Call(typeof(Enumerable),
                                   nameof(Enumerable.Any),
-                                  new[] { property.Type.GenericTypeArguments[0] },
+                                  [property.Type.GenericTypeArguments[0]],
                                   property))
                             : Equal(property, Constant(string.Empty));
 

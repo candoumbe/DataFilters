@@ -14,7 +14,6 @@ namespace DataFilters.Grammar.Syntax
     public class TextExpression : StringValueExpression, IEquatable<TextExpression>
     {
         private readonly Lazy<string> _lazyEscapedParseableString;
-        private readonly StringSegmentLinkedList _stringSegments;
         private readonly Lazy<string> _lazyOriginalString;
 
         /// <summary>

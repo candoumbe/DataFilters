@@ -1,7 +1,10 @@
+namespace DataFilters.ContinuousIntegration;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Candoumbe.Pipelines.Components;
+using Candoumbe.Pipelines.Components.Formatting;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
@@ -15,7 +18,7 @@ using Nuke.Common.Tools.GitHub;
 
 [GitHubActions(
     "integration",
-    GitHubActionsImage.UbuntuLatest,
+    GitHubActionsImage.Ubuntu2404,
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
@@ -38,11 +41,16 @@ using Nuke.Common.Tools.GitHub;
 )]
 [GitHubActions(
     "delivery",
-    GitHubActionsImage.UbuntuLatest,
+    GitHubActionsImage.Ubuntu2404,
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
-    InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
+    InvokedTargets =
+    [
+        nameof(IUnitTest.UnitTests),
+        nameof(IPushNugetPackages.Publish),
+        nameof(ICreateGithubRelease.AddGithubRelease)
+    ],
     EnableGitHubToken = true,
     CacheKeyFiles = ["global.json", "src/**/*.csproj"],
     PublishArtifacts = true,
@@ -60,16 +68,41 @@ using Nuke.Common.Tools.GitHub;
     ]
 )]
 
-[GitHubActions("nightly-manual", GitHubActionsImage.UbuntuLatest,
+// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2404,
+//     AutoGenerate = false,
+//     FetchDepth = 0,
+//     OnCronSchedule = "0 0 * * *",
+//     InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+//     OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
+//
+//     CacheKeyFiles =
+//     [
+//         "src/**/*.csproj",
+//         "test/**/*.csproj",
+//         "stryker-config.json",
+//         "test/**/*/xunit.runner.json"
+//     ],
+//     EnableGitHubToken = true,
+//     ImportSecrets =
+//     [
+//         nameof(NugetApiKey),
+//         nameof(IReportCoverage.CodecovToken),
+//         nameof(IMutationTest.StrykerDashboardApiKey)
+//     ],
+//     PublishArtifacts = true
+// )]
+[GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2404,
     AutoGenerate = false,
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
     InvokedTargets = [nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
-    CacheKeyFiles = [
+    CacheKeyFiles =
+    [
         "src/**/*.csproj",
         "test/**/*.csproj",
         "stryker-config.json",
-        "test/**/*/xunit.runner.json"],
+        "test/**/*/xunit.runner.json"
+    ],
     EnableGitHubToken = true,
     ImportSecrets =
     [
@@ -110,19 +143,35 @@ public class Build : EnhancedNukeBuild,
     public static int Main() => Execute<Build>(x => ((ICompile)x).Compile);
 
     ///<inheritdoc/>
-    IEnumerable<AbsolutePath> IClean.DirectoriesToDelete => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj")
-        .Concat(this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj"));
+    IEnumerable<AbsolutePath> IClean.DirectoriesToDelete =>
+        [
+            .. this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj"),
+            .. this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj")
+        ];
+
+    ///<inheritdoc/>
+    AbsolutePath IHaveSourceDirectory.SourceDirectory => RootDirectory / "src";
+
+    ///<inheritdoc/>
+    AbsolutePath IHaveTestDirectory.TestDirectory => RootDirectory / "test";
 
     ///<inheritdoc/>
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");
 
+    private static IReadOnlyList<string> Projects => ["DataFilters", "DataFilters.Expressions", "DataFilters.Queries"];
+
     ///<inheritdoc/>
     IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects
-        => new[] { "DataFilters", "DataFilters.Expressions", "DataFilters.Queries" }
-            .Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
-                configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
-            .ToArray();
+        =>
+        [
+            ..Projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                                                              testProjects: projectName switch
+                                                                              {
+                                                                                  "DataFilters" => Solution.AllProjects.Where(csproj => csproj.Name.EndsWith(".UnitTests")),
+                                                                                  _ => Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests"))
+                                                                              },
+                                                                              configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
+        ];
 
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
@@ -139,13 +188,12 @@ public class Build : EnhancedNukeBuild,
 
     ///<inheritdoc/>
     IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations =>
-        new PushNugetPackageConfiguration[]
-        {
-            new NugetPushConfiguration(apiKey: NugetApiKey,
-                source: new Uri("https://api.nuget.org/v3/index.json"),
-                () => NugetApiKey is not null),
-            new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
-                source: new Uri($"https://nuget.pkg.github.com/{ this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner() }/index.json"),
-                () => this.Get<IHaveGitHubRepository>().GitHubToken is not null)
-        };
+    [
+        new NugetPushConfiguration(apiKey: NugetApiKey,
+            source: new Uri("https://api.nuget.org/v3/index.json"),
+            canBeUsed: () => NugetApiKey is not null),
+        new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
+            source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
+            canBeUsed: () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
+    ];
 }

@@ -269,3 +269,6 @@ output/
 
 # Stryker output
 [Ss]tryker[Oo]utput/
+
+# Ignore .qodo
+/.qodo

@@ -399,9 +399,11 @@ namespace DataFilters.Grammar.Parsing
                                                                              from __ in Token.EqualTo(FilterToken.RightParenthesis)
                                                                              select new GroupExpression(expression);
 
-        private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.OneOf(Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()),
-                                                                                                             Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()),
-                                                                                                             Parse.Ref(() => UnaryExpression ))
+        private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.OneOf(
+                         Parse.Ref(() => UnaryExpression.AtEnd() ),
+            Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()),
+                         Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>())
+                                                                                                             )
         ;
 
         /// <summary>

@@ -9,11 +9,6 @@ namespace DataFilters.Grammar.Syntax
     /// <summary>
     /// Wraps a string that represents a numeric value of some sort
     /// </summary>
-    /// <remarks>
-    /// Builds a new <see cref="NumericValueExpression"/> instance that can wrap a numeric value of some sort
-    /// </remarks>
-    /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c></exception>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
     [DebuggerDisplay("{Value}")]
     public class NumericValueExpression : ConstantValueExpression, IEquatable<NumericValueExpression>, IBoundaryExpression
     {
@@ -28,7 +23,7 @@ namespace DataFilters.Grammar.Syntax
         /// Builds a new <see cref="NumericValueExpression"/> instance that can wrap a numeric value of some sort
         /// </remarks>
         /// <param name="value"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c></exception>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
         public NumericValueExpression(string value) : base(value switch
         {
