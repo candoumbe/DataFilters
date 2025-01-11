@@ -15,7 +15,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Miscutilities" Version="0.13.0"/>
+    <PackageReference Include="Candoumbe.Miscutilities" Version="0.14.0"/>
   </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard2.0'">
