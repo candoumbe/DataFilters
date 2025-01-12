@@ -721,7 +721,7 @@ I&_Oj
             get
             {
                 TheoryData<string, string, IntervalExpression> cases = [];
-                string[] cultures = ["fr-FR", "en-GB", "en-US"];
+                string[] cultures = [string.Empty, "fr-FR", "en-GB", "en-US"];
                 foreach (string culture in cultures)
                 {
                     cases.Add
@@ -769,6 +769,15 @@ I&_Oj
                         new IntervalExpression(
                             min: new BoundaryExpression(new NumericValueExpression("2E-05"), included: false),
                             max: new BoundaryExpression(new NumericValueExpression("32"), included: false))
+                    );
+                    
+                    cases.Add
+                    (
+                        culture,
+                        "[-9.867877565428173625E-05 TO -1[",
+                        new IntervalExpression(
+                            min: new BoundaryExpression(new NumericValueExpression("-9.867877565428173625E-05"), included: true),
+                            max: new BoundaryExpression(new NumericValueExpression("-1"), included: false))
                     );
                 }
 
