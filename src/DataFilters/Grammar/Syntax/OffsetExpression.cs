@@ -39,19 +39,21 @@ namespace DataFilters.Grammar.Syntax
         {
             if (hours > 23)
             {
-                throw new ArgumentOutOfRangeException(nameof(hours), $"{nameof(hours)} must be between 0 and 23 inclusive");
+                throw new ArgumentOutOfRangeException(nameof(hours),
+                    $"{nameof(hours)} must be between 0 and 23 inclusive");
             }
 
             if (minutes > 59)
             {
-                throw new ArgumentOutOfRangeException(nameof(minutes), $"{nameof(minutes)} must be between 0 and 59 inclusive");
+                throw new ArgumentOutOfRangeException(nameof(minutes),
+                    $"{nameof(minutes)} must be between 0 and 59 inclusive");
             }
 
             Hours = (int)hours;
             Minutes = (int)minutes;
             Sign = sign;
 
-            _lazyParseableString = new(() => (Hours, Minutes, Sign) switch
+            _lazyParseableString = new(() => ( Hours, Minutes, Sign ) switch
             {
                 (0, 0, _) => "Z",
                 (_, _, NumericSign.Minus) => $"-{Hours:D2}:{Minutes:D2}",
@@ -66,10 +68,10 @@ namespace DataFilters.Grammar.Syntax
         public override bool Equals(object obj) => Equals(obj as OffsetExpression);
 
         ///<inheritdoc/>
-        public bool Equals(OffsetExpression other) => (Hours, Minutes, Sign) switch
+        public bool Equals(OffsetExpression other) => ( Hours, Minutes, Sign ) switch
         {
             (0, 0, _) => other?.Hours == 0 && other?.Minutes == 0,
-            _ => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign)
+            _ => ( Hours, Minutes, Sign ) == ( other?.Hours, other?.Minutes, other?.Sign )
         };
 
         ///<inheritdoc/>
@@ -79,15 +81,16 @@ namespace DataFilters.Grammar.Syntax
         public override int GetHashCode()
         {
             int hashCode = -793696894;
-            hashCode = (hashCode * -1521134295) + Hours.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Minutes.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Sign.GetHashCode();
+            hashCode = ( hashCode * -1521134295 ) + Hours.GetHashCode();
+            hashCode = ( hashCode * -1521134295 ) + Minutes.GetHashCode();
+            hashCode = ( hashCode * -1521134295 ) + Sign.GetHashCode();
             return hashCode;
         }
 #endif
 
         ///<inheritdoc/>
-        public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString, out string originalString)
+        public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString,
+            out string originalString)
         {
             sign = Sign;
             hours = Hours;
@@ -104,6 +107,6 @@ namespace DataFilters.Grammar.Syntax
         };
 
         /// <inheritdoc />
-        public static bool operator !=(OffsetExpression left, OffsetExpression right) => !(left == right);
+        public static bool operator !=(OffsetExpression left, OffsetExpression right) => !( left == right );
     }
 }

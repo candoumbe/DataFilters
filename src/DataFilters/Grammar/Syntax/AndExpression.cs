@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using System.Linq.Expressions;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 
@@ -26,8 +28,8 @@
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <c>null</c>.</exception>
         public AndExpression(FilterExpression left, FilterExpression right) : base(left, right)
         {
-            _lazyToString = new(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
-            _lazyEscapedParseableString = new(() => $"{Left.EscapedParseableString},{Right.EscapedParseableString}");
+            _lazyToString = new Lazy<string>(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": '{Left}'; ""{nameof(Right)} ({Right.GetType().Name})"": '{Right}']");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString},{Right.EscapedParseableString}");
         }
 
         ///<inheritdoc/>
@@ -45,8 +47,8 @@
                 || other switch
                 {
                     AndExpression and => Equals(and) || (Left.IsEquivalentTo(and.Left) && Right.IsEquivalentTo(and.Right)) || (Left.IsEquivalentTo(and.Right) && Right.IsEquivalentTo(and.Left)),
-                    ConstantValueExpression constant => Simplify().IsEquivalentTo(constant),
-                    ISimplifiable simplifiable => IsEquivalentTo(simplifiable.Simplify()),
+                    ConstantValueExpression constant => (Left.Equals(Right) || Left.IsEquivalentTo(Right)) && (Left.IsEquivalentTo(constant) || Right.IsEquivalentTo(constant)),
+                    ISimplifiable simplifiable => simplifiable.Simplify().IsEquivalentTo(this),
                     _ => false
                 };
 
@@ -54,6 +56,30 @@
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         ///<inheritdoc/>
-        public override string ToString() => _lazyToString.Value;
+        public override string ToString() => _lazyEscapedParseableString.Value;
+
+        /// <inheritdoc />
+        public override FilterExpression Simplify()
+        {
+            FilterExpression simplified;
+            if (ReferenceEquals(Left, Right) || Left.Equals(Right) || Left.IsEquivalentTo(Right))
+            {
+                simplified = Left.Complexity < Right.Complexity
+                    ? Left.As<ISimplifiable>()?.Simplify() ?? Left
+                    : Right.As<ISimplifiable>()?.Simplify() ?? Right;
+            }
+            else
+            {
+                simplified = ( Left, Right ) switch
+                {
+                    (ISimplifiable left, ISimplifiable right) => new AndExpression(left.Simplify(), right.Simplify()),
+                    (ISimplifiable left, not ISimplifiable) => new AndExpression(left.Simplify(), Right),
+                    (not ISimplifiable, ISimplifiable right) => new AndExpression(Left, right.Simplify()),
+                    (not ISimplifiable, not ISimplifiable) => this
+                };
+            }
+
+            return simplified;
+        }
     }
 }

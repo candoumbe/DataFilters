@@ -15,10 +15,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<DateTimeExpression> DateTimeExpressions()
         {
             return GetArbitraryFor<DateTime>()
-                                .Filter(dateTime => dateTime.Hour >= 0
-                                                    && dateTime.Minute >= 0
-                                                    && dateTime.Second >= 0
-                                                    && dateTime.Millisecond >= 0)
+                                .Filter(dateTime => dateTime is { Hour: >= 0, Minute: >= 0, Second: >= 0, Millisecond: >= 0 })
                                 .Generator
                                 .Zip(TimeExpressions().Generator)
                                 .Select(val => (date: val.Item1, time: val.Item2))
@@ -34,7 +31,7 @@ namespace DataFilters.UnitTests.Helpers
         public static Arbitrary<TimeExpression> TimeExpressions()
         {
             return GetArbitraryFor<TimeSpan>()
-                        .Filter(timespan => timespan.Hours >= 0 && timespan.Minutes >= 0 && timespan.Seconds >= 0 && timespan.Milliseconds >= 0)
+                        .Filter(timespan => timespan is { Hours: >= 0, Minutes: >= 0, Seconds: >= 0, Milliseconds: >= 0 })
                         .Generator
                         .Select(timespan => new TimeExpression(hours: timespan.Hours,
                                                                minutes: timespan.Minutes,
@@ -49,8 +46,8 @@ namespace DataFilters.UnitTests.Helpers
             Gen<int> minutes = Gen.Choose(0, 59);
             Gen<NumericSign> sign = Gen.OneOf(Gen.Constant(NumericSign.Plus), Gen.Constant(NumericSign.Minus));
 
-            return hours.Zip(minutes, (hours, minutes) => (hours, minutes))
-                        .Zip(sign, (offset, sign) => (offset.hours, offset.minutes, sign))
+            return hours.Zip(minutes, (hh, mm) => (hours: hh, minutes: mm))
+                        .Zip(sign, (offset, s) => (offset.hours, offset.minutes, sign: s))
                         .Select(val => (val.hours, val.minutes, val.sign))
                         .Select(val => new OffsetExpression(val.sign, (uint)val.hours, (uint)val.minutes))
                                                .OrNull()
@@ -66,13 +63,12 @@ namespace DataFilters.UnitTests.Helpers
 #if NET6_0_OR_GREATER
             Gen<DateExpression> dateOnlyGenerator = GetArbitraryFor<DateTime>()
                 .Generator
-                .Select(dateTime => DateOnly.FromDateTime(dateTime))
+                .Select(DateOnly.FromDateTime)
                 .Select(date => new DateExpression(year: date.Year, month: date.Month, day: date.Day));
 #endif
 
 #if !NET6_0_OR_GREATER
-            return dateTimeGenerator
-                                .ToArbitrary();
+            return dateTimeGenerator.ToArbitrary();
 #else
             return Gen.OneOf(dateTimeGenerator, dateOnlyGenerator)
                 .ToArbitrary();
@@ -100,7 +96,7 @@ namespace DataFilters.UnitTests.Helpers
             {
                 GetArbitraryFor<int>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
                 GetArbitraryFor<long>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
-                GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture)))
+                GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString(CultureInfo.InvariantCulture)))
             };
 
             return Gen.OneOf(generators)
@@ -372,8 +368,8 @@ namespace DataFilters.UnitTests.Helpers
             return CreateBoundaryGenerator(genMin.boundaryGenerator, genMin.includedGenerator)
                     .Zip(CreateBoundaryGenerator(genMax.boundaryGenerator, genMax.includedGenerator))
                     .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
-                    .Select(tuple => new IntervalExpression(min: new(tuple.min.Expression, tuple.min.Included),
-                                                            max: new(tuple.max.Expression, tuple.max.Included)));
+                    .Select(tuple => new IntervalExpression(min: new BoundaryExpression(tuple.min.Expression, tuple.min.Included),
+                                                            max: new BoundaryExpression(tuple.max.Expression, tuple.max.Included)));
         }
 
         private static Gen<BoundaryExpression> CreateBoundaryGenerator(Gen<IBoundaryExpression> boundaryGenerator, Gen<bool> includedGenerator)
@@ -405,7 +401,7 @@ namespace DataFilters.UnitTests.Helpers
         private static Arbitrary<ConstantBracketValue> ConstantBracketValues()
             => GetArbitraryFor<string>().Filter(input => !string.IsNullOrWhiteSpace(input)
                                                         && input.Length > 1
-                                                        && input.All(chr => char.IsLetterOrDigit(chr)))
+                                                        && input.All(char.IsLetterOrDigit))
                                         .Generator
                                         .Select(item => new ConstantBracketValue(item))
                                         .ToArbitrary();
@@ -413,7 +409,7 @@ namespace DataFilters.UnitTests.Helpers
         private static Arbitrary<RangeBracketValue> RangeBracketValues()
         {
             return GetArbitraryFor<char>()
-                              .Filter(chr => char.IsLetterOrDigit(chr)).Generator
+                              .Filter(char.IsLetterOrDigit).Generator
                               .Two()
                               .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                               .Where(tuple => (tuple.start < tuple.end) && (TupleContainsLetter(tuple) || TupleContainsDigits(tuple)))

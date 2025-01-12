@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using DataFilters.Grammar.Syntax;
-    using DataFilters.UnitTests.Helpers;
+    using Helpers;
     using FluentAssertions;
     using FsCheck;
     using FsCheck.Fluent;
@@ -44,7 +44,7 @@
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null(FilterExpression left, FilterExpression right)
         {
             // Act
-            Action action = () => new OrExpression(left, right);
+            Action action = () => _ = new OrExpression(left, right);
 
             // Assert
             action.Should()
@@ -183,9 +183,11 @@
             // Arrange
             OrExpression orExpression = new(filterExpression, filterExpression);
             FilterExpression expected = filterExpression.Simplify();
+            outputHelper.WriteLine($"Expected expression: {expected:d}");
 
             // Act
             FilterExpression actual = orExpression.Simplify();
+            outputHelper.WriteLine($"Actual expression: {actual:d}");
 
             // Assert
             actual.Should().Be(expected);
@@ -205,7 +207,7 @@
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_OrExpression_GetComplexity_should_return_sum_of_left_and_right_complexity(OrExpression orExpression)
-            => (orExpression.Complexity == orExpression.Left.Complexity + orExpression.Right.Complexity).ToProperty();
+            => (Math.Abs(orExpression.Complexity - (orExpression.Left.Complexity + orExpression.Right.Complexity)) < float.Epsilon).ToProperty();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_left_eq_right_Simplify_should_return_left(FilterExpression expected)
@@ -216,7 +218,7 @@
             // Act
             FilterExpression actual = orExpression.Simplify();
 
-            outputHelper.WriteLine($"Simplifiied expression : {actual}");
+            outputHelper.WriteLine($"Simplified expression : {actual}");
 
             bool isEquivalent = actual.IsEquivalentTo(expected);
 
@@ -224,6 +226,29 @@
             isEquivalent.Should()
                         .BeTrue("the meaning of the expression should remain the same even after being simplified");
         }
+
+        // [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        // public void Given_multiple_expressions_as_OrExpression_parameters_When_simplify(NonNull<OrExpression> firstGenerator, NonNull<OrExpression> secondGenerator, NonNull<OrExpression> thirdGenerator )
+        // {
+        //     // Arrange
+        //     FilterExpression first = firstGenerator.Item;
+        //     FilterExpression second = secondGenerator.Item;
+        //     FilterExpression third = thirdGenerator.Item;
+        //     BinaryFilterExpression right = new OrExpression(second, third);
+        //     OrExpression orExpression = new(first, right);
+        //     FilterExpression expected = new OneOfExpression(orExpression.Left, right.Left, right.Right).Simplify();
+        //     
+        //     // Act
+        //     FilterExpression actual = orExpression.Simplify();
+        //
+        //     outputHelper.WriteLine($"Simplified expression : {actual}");
+        //
+        //     bool isEquivalent = actual.IsEquivalentTo(expected);
+        //
+        //     // Assert
+        //     isEquivalent.Should()
+        //         .BeTrue("the meaning of the expression should remain the same even after being simplified");
+        // }
 
         public static TheoryData<OrExpression, FilterExpression> SimplifyCases
             => new()
@@ -235,6 +260,15 @@
                 {
                     new OrExpression(new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1")), new OrExpression(new StringValueExpression("prop1"), new StringValueExpression("prop1"))),
                     new StringValueExpression("prop1")
+                },
+                {
+                    new OrExpression(new OrExpression(new StringValueExpression("1"), new StringValueExpression("2")),
+                                new OrExpression(new StringValueExpression("3"), new StringValueExpression("4"))),
+                    new OneOfExpression(new StringValueExpression("1"),
+                                        new StringValueExpression("2"),
+                                        new StringValueExpression("3"),
+                                        new StringValueExpression("4")
+                    )
                 }
             };
 
@@ -244,6 +278,8 @@
         {
             // Act
             FilterExpression actual = orExpression.Simplify();
+            outputHelper.WriteLine($"Actual expression : {actual:d}");
+            outputHelper.WriteLine($"Expected expression : {expected:d}");
 
             // Assert
             actual.Should()
@@ -271,18 +307,13 @@
                                     .BeTrue();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void IsEquivalentTo_should_be_symetric(OrExpression or)
+        public Property IsEquivalentTo_should_be_symmetric(OrExpression or)
         {
             // Arrange
             OrExpression other = new(or.Left, or.Right);
 
             // Act
-            bool actual = or.IsEquivalentTo(other);
-            bool expected = other.IsEquivalentTo(or);
-
-            // Assert
-            actual.Should()
-                  .Be(expected);
+            return ( or.IsEquivalentTo(other) == other.IsEquivalentTo(or) ).ToProperty();
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -332,15 +363,20 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_commutative(NonNull<OrExpression> first, FilterExpression second)
-            => first.Item.Equals(second).Should().Be(second.Equals(first.Item));
+        public void Equals_should_be_commutative(NonNull<OrExpression> first, FilterExpression rightOperand)
+        {
+            OrExpression leftOperand = first.Item;
+            outputHelper.WriteLine($"Left: {leftOperand:d}");
+            outputHelper.WriteLine($"Right: {rightOperand:d}");
+            leftOperand.Equals(rightOperand).Should().Be(rightOperand.Equals(leftOperand));
+        }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Equals_should_be_reflexive(NonNull<OrExpression> expression)
             => expression.Item.Should().Be(expression.Item);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<OrExpression> expression, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<OrExpression> expression, NonNull<FilterExpression> otherExpression)
             => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
     }
 }

@@ -31,25 +31,35 @@
         public override string EscapedParseableString => "*";
 
         /// <summary>
-        /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="ConstantValueExpression"/>.
+        /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="StringValueExpression"/>.
+        /// </summary>
+        /// <param name="_"></param>
+        /// <param name="right"></param>
+        /// <returns><see cref="EndsWithExpression"/></returns>
+        public static EndsWithExpression operator +(AsteriskExpression _, TextExpression right) => new (right);
+
+        /// <summary>
+        /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="StringValueExpression"/>.
         /// </summary>
         /// <param name="_"></param>
         /// <param name="right"></param>
         /// <returns><see cref="EndsWithExpression"/></returns>
         public static EndsWithExpression operator +(AsteriskExpression _, ConstantValueExpression right) => new(right.Value);
 
-#if !NET6_0_OR_GREATER
         /// <summary>
         /// Computes a <see cref="StartsWithExpression"/> by adding a <see cref="ConstantValueExpression"/> to a <see cref="AsteriskExpression"/>.
         /// </summary>
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         /// <returns><see cref="StartsWithExpression"/></returns>
-#else
-        ///<inheritdoc />
-#endif
-#pragma warning disable IDE0060, RCS1163
         public static StartsWithExpression operator +(ConstantValueExpression left, AsteriskExpression right) => new(left.Value);
-#pragma warning restore IDE0060, RCS1163
+
+        /// <summary>
+        /// Computes a <see cref="StartsWithExpression"/> by adding a <see cref="TextExpression"/> to a <see cref="AsteriskExpression"/>.
+        /// </summary>
+        /// <param name="left">Left operand</param>
+        /// <param name="right">Right operand</param>
+        /// <returns><see cref="StartsWithExpression"/></returns>
+        public static StartsWithExpression operator +(TextExpression left, AsteriskExpression right) => new(left);
     }
 }

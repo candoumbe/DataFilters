@@ -3,7 +3,7 @@
     using System;
 
     /// <summary>
-    /// An expression that negate wrapped inside
+    /// An expression that negate whatever <see cref="FilterExpression"/> wrapped inside.
     /// </summary>
     public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>, ISimplifiable
     {
@@ -12,26 +12,24 @@
         /// </summary>
         public FilterExpression Expression { get; }
 
-        private readonly Lazy<string> _lazyEscapedParseableString;
-
         /// <summary>
         /// Builds a new <see cref="NotExpression"/> that holds the specified <paramref name="expression"/>.
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="expression">The expression onto which the <c>not</c> operator will be applied</param>
         /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
         /// <remarks>
-        /// <paramref name="expression"/> will be automatically wrapped inside a <see cref="GroupExpression"/> when it's a <see cref="BinaryFilterExpression"/>.
+        /// <paramref name="expression"/> will be automatically wrapped inside a <see cref="GroupExpression"/> if it's a <see cref="BinaryFilterExpression"/>
+        /// in order to keep the semantic
+        /// .
         /// </remarks>
         public NotExpression(FilterExpression expression)
         {
-            Expression = expression switch
+            (EscapedParseableString, Expression) = expression switch
             {
                 null => throw new ArgumentNullException(nameof(expression)),
-                BinaryFilterExpression expr => new GroupExpression(expr),
-                FilterExpression expr => expr
+                BinaryFilterExpression expr => ($"!({expr.EscapedParseableString})", new GroupExpression(expr)),
+                _ => ($"!{expression.EscapedParseableString}", expression)
             };
-
-            _lazyEscapedParseableString = new Lazy<string>(() => $"!{Expression.EscapedParseableString}");
         }
 
         ///<inheritdoc/>
@@ -43,25 +41,31 @@
         ///<inheritdoc/>
         public override int GetHashCode() => Expression.GetHashCode();
 
-        ///<inheritdoc/>
-        public override string ToString() => "{NotExpression [" +
-            $"Expression = {Expression.GetType().Name}, " +
-            $"{nameof(Expression.EscapedParseableString)} = '{Expression.EscapedParseableString}', " +
-            $"{nameof(Expression.OriginalString)} = '{Expression.OriginalString}']," +
-            $"{nameof(EscapedParseableString)} = {EscapedParseableString}}}" +
-            $"{nameof(Expression)} : {Expression} ]";
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            FormattableString formattable = format switch
+            {
+                "d" or "D" => $"@{nameof(NotExpression)}({Expression:d})",
+                "f" or "F" => $"@{nameof(NotExpression)}[{Expression:f}]",
+                null or "" => $"{EscapedParseableString}",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+            };
+
+            return formattable.ToString(formatProvider);
+        }
 
         ///<inheritdoc/>
         public FilterExpression Simplify()
             => Expression switch
             {
                 NotExpression innerNotExpression => innerNotExpression.Expression,
-                ISimplifiable simplifiable => new NotExpression(simplifiable.Simplify()),
+                ISimplifiable simplifiable => !simplifiable.Simplify(),
                 _ => this
             };
 
         ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        public override string EscapedParseableString { get; }
 
         ///<inheritdoc/>
         public override double Complexity => Expression.Complexity;
@@ -75,6 +79,5 @@
 
         ///<inheritdoc/>
         public static bool operator !=(NotExpression left, NotExpression right) => !(left == right);
-
     }
 }

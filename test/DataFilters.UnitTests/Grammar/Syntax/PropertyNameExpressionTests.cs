@@ -17,7 +17,7 @@
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
         {
             // Act
-            Action action = () => new PropertyName(null);
+            Action action = () => _ = new PropertyName(null);
 
             // Assert
             action.Should()
@@ -30,7 +30,7 @@
         public void Ctor_Throws_ArgumentOutyException_When_Argument_Is_Null(string name)
         {
             // Act
-            Action action = () => new PropertyName(name);
+            Action action = () => _ = new PropertyName(name);
 
             // Assert
             action.Should()

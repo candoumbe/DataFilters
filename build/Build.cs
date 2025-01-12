@@ -1,3 +1,5 @@
+using Nuke.Common.Tools.GitHub;
+
 namespace DataFilters.ContinuousIntegration
 {
     using System;
@@ -137,8 +139,9 @@ namespace DataFilters.ContinuousIntegration
 
         public static int Main() => Execute<Build>(x => ((ICompile)x).Compile);
 
-        ///<inheritdoc/>
-        IEnumerable<AbsolutePath> IClean.DirectoriesToDelete =>
+    ///<inheritdoc/>
+    IEnumerable<AbsolutePath> IClean.DirectoriesToDelete
+        =>
         [
             .. this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj"),
             .. this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj")
@@ -160,11 +163,10 @@ namespace DataFilters.ContinuousIntegration
 
         ///<inheritdoc/>
         IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects
-            => Projects
-                .Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                                                                        testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
-                                                                        configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
-                .ToArray();
+            => Projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
+                configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
+            .ToArray();
 
         ///<inheritdoc/>
         IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
@@ -175,16 +177,16 @@ namespace DataFilters.ContinuousIntegration
         ///<inheritdoc/>
         IEnumerable<AbsolutePath> IPack.PackableProjects => this.Get<IHaveSourceDirectory>().SourceDirectory.GlobFiles("**/*.csproj");
 
-        ///<inheritdoc/>
-        IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations =>
-        [
-            new NugetPushConfiguration(apiKey: NugetApiKey,
-                                          source: new Uri("https://api.nuget.org/v3/index.json"),
-                                          () => NugetApiKey is not null),
-            new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
-                                           source: new Uri("https://nukpg.github.com/"),
-                                           () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
-        ];
+    ///<inheritdoc/>
+    IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations =>
+    [
+        new NugetPushConfiguration(apiKey: NugetApiKey,
+                                  source: new Uri("https://api.nuget.org/v3/index.json"),
+                                  canBeUsed: () => NugetApiKey is not null),
+        new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
+                                         source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
+                                         canBeUsed: () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
+    ];
 
         protected override void OnBuildCreated()
         {

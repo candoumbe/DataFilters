@@ -138,7 +138,7 @@
 
         [Theory]
         [MemberData(nameof(CtorLogicCases))]
-        public void Given_min_and_max_bounds_Constructor_logic_shoud_work_as_expected(BoundaryExpression min, BoundaryExpression max, IntervalExpression expected, string reason)
+        public void Given_min_and_max_bounds_Constructor_logic_should_work_as_expected(BoundaryExpression min, BoundaryExpression max, IntervalExpression expected, string reason)
         {
             // Act
             IntervalExpression actual = new(min, max);
@@ -258,7 +258,6 @@
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_Min_boundary_is_a_DateTimeExpression_with_only_date_specified_Ctor_should_convert_min_boundary_to_only_holds_the_specified_DateExpression(NonNull<DateExpression> date, bool included)
         {
-            // Arrange
             // Arrange
             DateTimeExpression dateTimeExpression = new(date.Item);
 

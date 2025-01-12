@@ -108,6 +108,40 @@ public class NumericValueExpressionTests
         => expression.Item.Should().Be(expression.Item);
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-    public void Equals_should_be_symetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
+    public void Equals_should_be_symmetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
         => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+
+    public static TheoryData<NumericValueExpression, object, bool, string> EqualsCases
+        => new()
+        {
+            {
+                new NumericValueExpression("0"),
+                new NumericValueExpression("0"),
+                true,
+                $"Left and right are both {nameof(NumericValueExpression)}s with exact same values"
+            },
+            {
+                new NumericValueExpression("0"),
+                new StringValueExpression("0"),
+                true,
+                $"Right is {nameof(StringValueExpression)} and hold the same value as current instance"
+            },
+            {
+                new NumericValueExpression("+0"),
+                new NumericValueExpression("0"),
+                false,
+                $"Left and right values are not the same numbers"
+            },
+        };
+
+    [Theory]
+    [MemberData(nameof(EqualsCases))]
+    public void Given_Left_operand_and_Right_operand_When_calling_Equals_Then_should_have_the_expected_result(NumericValueExpression left, object right, bool expected, string reason)
+    {
+        // Act
+        bool actual = left.Equals(right);
+
+        // Assert
+        actual.Should().Be(expected, reason);
+    }
 }

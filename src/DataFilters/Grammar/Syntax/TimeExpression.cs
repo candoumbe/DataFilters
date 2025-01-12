@@ -5,7 +5,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that only consists of time part.
     /// </summary>
-    public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression
+    public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression>, IBoundaryExpression, IFormattable
     {
         /// <summary>
         /// Hours part of the expression
@@ -67,8 +67,8 @@
 
         ///<inheritdoc/>
         public bool Equals(TimeExpression other) => other is not null
-            && ((Hours, Minutes, Seconds, Milliseconds) == (other.Hours, other.Minutes, other.Seconds, other.Milliseconds)
-            || new TimeSpan(Hours, Minutes, Seconds).Add(TimeSpan.FromMilliseconds(Milliseconds)) == new TimeSpan(other.Hours, other.Minutes, other.Seconds).Add(TimeSpan.FromMilliseconds(other.Milliseconds)));
+            && (((Hours, Minutes, Seconds, Milliseconds) == (other.Hours, other.Minutes, other.Seconds, other.Milliseconds))
+              || new TimeSpan(0, Hours, Minutes, Seconds, Milliseconds).Equals(new TimeSpan(0, other.Hours, other.Minutes, other.Seconds, other.Milliseconds)));
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as TimeExpression);

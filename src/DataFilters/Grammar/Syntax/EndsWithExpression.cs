@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Text;
 
-    using static DataFilters.Grammar.Parsing.FilterTokenizer;
+    using static Parsing.FilterTokenizer;
 
 #if !NETSTANDARD1_3
     using Ardalis.GuardClauses;
@@ -31,26 +31,23 @@
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/>'s length is <c>0</c>.</exception>
         public EndsWithExpression(string value)
         {
-            if (value is null)
+            Value = value switch
             {
-                throw new ArgumentNullException(nameof(value));
-            }
-            if (value.Length == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
-            }
-            Value = value;
+                null => throw new ArgumentNullException(nameof(value)),
+                {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+                _ => value
+            };
 
-            _lazyEscapedParseableString = new(() =>
+            _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-                // Also we need an extra position for the final '*' that will be append in all cases
+                // Also we need an extra position for the final '*' that will be appended in all cases
                 bool requireEscapingCharacters = value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
                 StringBuilder parseableString;
 
                 if (requireEscapingCharacters)
                 {
-                    parseableString = new((value.Length * 2) + 1);
+                    parseableString = new StringBuilder((value.Length * 2) + 1);
                     foreach (char chr in value)
                     {
                         if (SpecialCharacters.Contains(chr))
@@ -62,7 +59,7 @@
                 }
                 else
                 {
-                    parseableString = new(value, value.Length + 1);
+                    parseableString = new StringBuilder(value, value.Length + 1);
                 }
 
                 return parseableString.Insert(0, '*').ToString();

@@ -6,7 +6,7 @@
     /// Enumeration of token used throughout the parsing process.
     /// </summary>
     /// <remarks>
-    /// <see cref="FilterToken"/>s acts as "markers" with special meaning. They can be combined to created a syntax tree with a higher meaning.
+    /// <see cref="FilterToken"/>s acts as "markers" with special meaning. They can be combined to create a syntax tree with a higher meaning.
     /// </remarks>
     public enum FilterToken
     {
@@ -16,17 +16,17 @@
         None,
 
         /// <summary>
-        /// Start of a group
+        /// Token that indicates the start of a group of token
         /// </summary>
-        [Token(Example = "(")]
-        OpenParenthese,
+        [Token(Example = "(", Description = "left parenthesis")]
+        LeftParenthesis,
 
         /// <summary>
-        /// Token that indicates the end of a group of token.
+        /// Token that indicates the end of a group of tokens.
         /// </summary>
-        /// <see cref="OpenParenthese"/>
-        [Token(Example = ")")]
-        CloseParenthese,
+        /// <see cref="LeftParenthesis"/>
+        [Token(Example = ")", Description = "right parenthesis")]
+        RightParenthesis,
 
         /// <summary>
         /// Letter
@@ -43,14 +43,14 @@
         /// <summary>
         /// <c>[</c> character
         /// </summary>
-        [Token(Example = "(", Description = "right parenthesis")]
-        OpenSquaredBracket,
+        [Token(Example = "[", Description = "left squared bracket")]
+        LeftSquaredBracket,
 
         /// <summary>
         /// <c>]</c> character
         /// </summary>
-        [Token(Example = ")", Description = "left parenthesis")]
-        CloseSquaredBracket,
+        [Token(Example = "]", Description = "right squared bracket")]
+        RightSquaredBracket,
 
         /// <summary>
         /// Asterisk operator used in like expression
@@ -79,13 +79,13 @@
         /// <summary>
         /// Equal sign
         /// </summary>
-        [Token(Example = "=")]
+        [Token(Example = "=", Description = "equal symbol")]
         Equal,
 
         /// <summary>
         /// Underscore sign
         /// </summary>
-        [Token(Example = "_")]
+        [Token(Example = "_", Description = "underscore")]
         Underscore,
 
         /// <summary>
@@ -140,12 +140,12 @@
         /// The <c>{</c> character.
         /// </summary>
         [Token(Example = "{", Description = "left curly brace")]
-        LeftBrace,
+        LeftCurlyBrace,
 
         /// <summary>
         /// The <c>}</c> character.
         /// </summary>
         [Token(Example = "}", Description = "right curly brace")]
-        RightBrace
+        RightCurlyBrace
     }
 }

@@ -3,7 +3,7 @@
 namespace DataFilters.Grammar.Syntax;
 
 /// <summary>
-/// An expression that has a <see cref="Left"/> and <see cref="Right"/> operands.
+/// An expression that has <see cref="Left"/> and <see cref="Right"/> operands.
 /// </summary>
 public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
 {
@@ -41,8 +41,8 @@ public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
     ///<inheritdoc/>
     public virtual FilterExpression Simplify()
     {
-        FilterExpression simplifiedLeft = Simplify((Left as ISimplifiable)?.Simplify() ?? Left);
-        FilterExpression simplifiedRight = Simplify((Right as ISimplifiable)?.Simplify() ?? Right);
+        FilterExpression simplifiedLeft = SimplifyLocal(Left);
+        FilterExpression simplifiedRight = SimplifyLocal(Right);
 
         FilterExpression simplifiedExpression = this;
 
@@ -54,17 +54,18 @@ public abstract class BinaryFilterExpression : FilterExpression, ISimplifiable
         }
 
         return simplifiedExpression;
+    }
 
-        static FilterExpression Simplify(FilterExpression expression)
+    /// <inheritdoc />
+    public override string ToString(string format, IFormatProvider formatProvider)
+    {
+        FormattableString formattable = format switch
         {
-            FilterExpression current = expression;
+            "d" or "D" => $"@{GetType().Name}({Left:d},{Right:d})",
+            null or "" => $"{EscapedParseableString}",
+            _ => throw new ArgumentOutOfRangeException(nameof(format), $"Unsupported '{format}' format")
+        };
 
-            while (current is ISimplifiable simplifiable && !simplifiable.Equals(current))
-            {
-                current = Simplify(simplifiable.Simplify());
-            }
-
-            return current;
-        }
+        return formattable.ToString(formatProvider);
     }
 }

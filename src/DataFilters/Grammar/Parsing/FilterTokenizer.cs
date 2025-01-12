@@ -90,10 +90,26 @@
         /// The <c>"</c> character
         /// </summary>
         public const char DoubleQuote = '"';
+
         /// <summary>
         /// The <c>&#38;</c> character
         /// </summary>
         private const char Ampersand = '&';
+
+        /// <summary>
+        /// The <c>.</c> character.
+        /// </summary>
+        private const char Dot = '.';
+
+        /// <summary>
+        /// The space character
+        /// </summary>
+        private const char Space = ' ';
+
+        /// <summary>
+        /// The character to use to escape a special character.
+        /// </summary>
+        public const char EscapedCharacter = BackSlash;
 
         /// <summary>
         /// List of characters that have a special meaning and should be escaped
@@ -115,9 +131,9 @@
             RightCurlyBracket,
             LeftCurlyBracket,
             ':',
-            '-',
-            '.',
-            ' '
+            Hyphen,
+            Dot,
+            Space
         ];
 
         /// <summary>
@@ -194,7 +210,7 @@
                     }
                     case LeftCurlyBracket:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => LeftBrace, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => LeftCurlyBrace, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -202,7 +218,7 @@
                     }
                     case RightCurlyBracket:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => RightBrace, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => RightCurlyBrace, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -218,7 +234,7 @@
                     }
                     case LeftSquareBracket:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenSquaredBracket, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => LeftSquaredBracket, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -226,7 +242,7 @@
                     }
                     case RightSquareBracket:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseSquaredBracket, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => RightSquaredBracket, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -242,7 +258,7 @@
                     }
                     case LeftParenthesis:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => OpenParenthese, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.LeftParenthesis, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -250,13 +266,13 @@
                     }
                     case RightParenthesis:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => CloseParenthese, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.RightParenthesis, _ => Escaped },
                                                   next.Location,
                                                   next.Remainder);
                         next = next.Remainder.ConsumeChar();
                         break;
                     }
-                    case ' ':
+                    case Space:
                     {
                         yield return Result.Value(_mode switch { TokenizerMode.Normal => Whitespace, _ => Escaped },
                                                   next.Location,
@@ -289,9 +305,9 @@
                         next = next.Remainder.ConsumeChar();
                         break;
                     }
-                    case '.':
+                    case Dot:
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Dot, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Dot, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();
@@ -314,7 +330,7 @@
                             TextSpan remainderAfterBackslash = next.Remainder;
                             next = next.Remainder.ConsumeChar();
                             // Only backslash and double quote need to be escaped when in Escaped mode
-                            bool shouldEscape = next.Value == BackSlash || next.Value == DoubleQuote;
+                            bool shouldEscape = next.Value is BackSlash or DoubleQuote;
                             if (next.HasValue)
                             {
                                 if (shouldEscape)

@@ -155,14 +155,14 @@
                 {
                     "[",
                     results => results.Once()
-                               && results.Once(result => result.Kind == OpenSquaredBracket && result.Span.EqualsValue("["))
+                               && results.Once(result => result.Kind == LeftSquaredBracket && result.Span.EqualsValue("["))
 
                 },
 
                 {
                     "]",
                     results => results.Once()
-                               && results.Once(result => result.Kind == CloseSquaredBracket && result.Span.EqualsValue("]"))
+                               && results.Once(result => result.Kind == RightSquaredBracket && result.Span.EqualsValue("]"))
 
                 },
 
@@ -204,6 +204,37 @@
                                 && results.Once(result => result.Kind == Dash  && result.Span.EqualsValue("-") && result.Position.Column == 8)
                                 && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Position.Column == 9)
                                 && results.Once(result => result.Kind == Digit && result.Span.EqualsValue("2") && result.Position.Column == 10)
+
+                },
+
+                {
+                    @"""foo\""bar""",
+                    results => results.Exactly(9)
+                               && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@"""") && result.Position.Column == 1)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("f") && result.Position.Column == 2)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("o") && result.Position.Column == 3)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("o") && result.Position.Column == 4)
+                               && results.Once(result => result.Kind == Escaped  && result.Span.EqualsValue(@"""") && result.Position.Column == 6)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("b") && result.Position.Column == 7)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Position.Column == 8)
+                               && results.Once(result => result.Kind == Letter  && result.Span.EqualsValue("r") && result.Position.Column == 9)
+                               && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@"""") && result.Position.Column == 10)
+
+                },
+
+                {
+                    @"""foo\""bar\\""",
+                    results => results.Exactly(10)
+                               && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@"""") && result.Position.Column == 1)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("f") && result.Position.Column == 2)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("o") && result.Position.Column == 3)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("o") && result.Position.Column == 4)
+                               && results.Once(result => result.Kind == Escaped  && result.Span.EqualsValue(@"""") && result.Position.Column == 6)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("b") && result.Position.Column == 7)
+                               && results.Once(result => result.Kind == Letter && result.Span.EqualsValue("a") && result.Position.Column == 8)
+                               && results.Once(result => result.Kind == Letter  && result.Span.EqualsValue("r") && result.Position.Column == 9)
+                               && results.Once(result => result.Kind == Escaped  && result.Span.EqualsValue("\\") && result.Position.Column == 11)
+                               && results.Once(result => result.Kind == DoubleQuote && result.Span.EqualsValue(@"""") && result.Position.Column == 12)
 
                 },
 
