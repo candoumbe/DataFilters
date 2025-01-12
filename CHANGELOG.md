@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.13.1] / 2025-01-12
 ### ⚠️ Breaking Changes
 
 - Renamed `FilterToken.OpenParenthese` to `FilterToken.LeftParenthesis`
@@ -26,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pipeline fails to publish NuGet packages to GitHub due to incorrect URL
 - Refactoring of `ISimplifiable` implementations
 - Updated GitHub nuget registry URL
-- Bumped `Candoumbe.Pipelines` to 0.11.0
+- Bumped `Candoumbe.Pipelines` to 0.13.0-rc.39
 - Bumped `Microsoft.NET.Test.Sdk` to 17.11.1
 
 
@@ -207,7 +209,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.1...HEAD
+[0.13.1]: https://github.com/candoumbe/DataFilters/compare/0.13.0...0.13.1
 [0.13.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.12.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.11.0...0.12.0
