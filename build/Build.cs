@@ -184,8 +184,8 @@ namespace DataFilters.ContinuousIntegration
                 source: new Uri("https://api.nuget.org/v3/index.json"),
                 () => NugetApiKey is not null),
             new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
-                                           source: new Uri($"https://nukpg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
-                                           () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
+                                             source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
+                                        () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
         ];
 
         protected override void OnBuildCreated()
