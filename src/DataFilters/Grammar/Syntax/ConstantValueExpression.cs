@@ -15,8 +15,8 @@
         /// <summary>
         /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
-        /// <param name="value"></param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported
+        /// <param name="value">raw unescaped value.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported.
         /// </exception>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
         protected ConstantValueExpression(string value)
@@ -52,9 +52,9 @@
         /// <summary>
         /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => left + AsteriskExpression.Instance + new EndsWithExpression(right.Value);
+        /// <param name="left">a <see cref="ConstantValueExpression"/></param>
+        /// <param name="right">a <see cref="EndsWithExpression"/></param>
+        /// <returns><see cref="AndExpression"/></returns>
+        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => new StartsWithExpression(left.Value) & right;
     }
 }

@@ -12,10 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="8.0.0" PrivateAssets="all" />
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.9.0" />
-    <PackageReference Include="ReportGenerator" Version="[5.3.7]" />
-    <PackageDownload Include="GitVersion.Tool" Version="[5.10.3]" />
-    <PackageDownload Include="Codecov.Tool" Version="[1.12.3]" />
+    <PackageReference Include="Candoumbe.Pipelines" Version="0.13.0-rc.39" />
+    <PackageReference Include="ReportGenerator" Version="5.4.3" />
+    <PackageDownload Include="GitVersion.Tool" Version="[6.1.0]" />
+    <PackageDownload Include="CodecovUploader" Version="[0.8.0]" />
   </ItemGroup>
 </Project>

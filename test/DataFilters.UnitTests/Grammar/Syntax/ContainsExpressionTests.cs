@@ -1,4 +1,8 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using System.Linq;
+using System.Text;
+using DataFilters.Grammar.Parsing;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Syntax;
@@ -111,11 +115,13 @@
             => contains.IsEquivalentTo(contains).Should().BeTrue();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> text)
+        public void Given_TextExpression_as_input_EscapedParseableString_should_be_correct(NonNull<TextExpression> textExpressionGenerator)
         {
             // Arrange
-            ContainsExpression expression = new(text.Item);
-            string expected = $"*{text.Item.EscapedParseableString}*";
+            TextExpression textExpression = textExpressionGenerator.Item;
+            ContainsExpression expression = new(textExpression);
+
+            string expected = $"*{textExpression.EscapedParseableString}*";
 
             // Act
             string actual = expression.EscapedParseableString;
@@ -126,12 +132,22 @@
         }
 
         [Property]
-        public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString text)
+        public void Given_non_whitespace_string_as_input_Then_EscapedParseableString_should_be_correct(NonWhiteSpaceString textGenerator)
         {
             // Arrange
-            ContainsExpression expression = new(text.Item);
-            StringValueExpression stringValueExpression = new(text.Item);
-            string expected = $"*{stringValueExpression.EscapedParseableString}*";
+            string text = textGenerator.Item;
+            ContainsExpression expression = new(text);
+
+            StringBuilder sb = new (text.Length * 2);
+            foreach (char chr in text)
+            {
+                if (FilterTokenizer.SpecialCharacters.Contains(chr))
+                {
+                    sb = sb.Append('\\');
+                }
+                sb = sb.Append(chr);
+            }
+            string expected = $"*{sb}*";
 
             // Act
             string actual = expression.EscapedParseableString;
@@ -142,8 +158,11 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_commutative(NonNull<ContainsExpression> first, FilterExpression second)
+        public void Equals_should_be_commutative(NonNull<ContainsExpression> firstGenerator, FilterExpression second)
         {
+            // Arrange
+            ContainsExpression first = firstGenerator.Item;
+
             // Act
             bool firstEqualsSecond = first.Equals(second);
             bool secondEqualsFirst = second.Equals(first);
@@ -163,7 +182,7 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<ContainsExpression> expression, NonNull<FilterExpression> otherExpression)
         {
             // Act
 
@@ -171,7 +190,46 @@
             bool otherEqualsExpression = otherExpression.Item.Equals(expression.Item);
 
             // Assert
-            expressionEqualsOther.Should().Be(otherEqualsExpression, "'equals' implementation must be symetric");
+            expressionEqualsOther.Should().Be(otherEqualsExpression, "'equals' implementation must be symmetric");
+        }
+
+        /// <summary>
+        /// Tests the constructor by copy of <see cref="TextExpression"/>.
+        /// </summary>
+        /// <param name="textExpressionGenerator"></param>
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_constructor_argument_is_TextExpression_Then_ContainsExpression_should_be_correct(NonNull<TextExpression> textExpressionGenerator)
+        {
+            // Arrange
+            TextExpression textExpression = textExpressionGenerator.Item;
+            outputHelper.WriteLine($"TextExpression : {textExpression.EscapedParseableString}");
+
+            // Act
+            ContainsExpression containsExpression = new (textExpression);
+
+            // Assert
+            containsExpression.EscapedParseableString.Should()
+                .Be($"*{textExpression.EscapedParseableString}*");
+        }
+
+        public static TheoryData<string, string> EscapedParseableStringCases
+            => new()
+            {
+                { "Oi\fj8G]t:JK%H6m>+r{)[5\n6", "*Oi\fj8G\\]t\\:JK%H6m>+r\\{\\)\\[5\n6*" }
+            };
+
+        [Theory]
+        [MemberData(nameof(EscapedParseableStringCases))]
+        public void Given_input_as_string_Then_the_constructor_should_properly_escape_it(string input, string expected)
+        {
+            // Arrange
+            ContainsExpression expression = new(input);
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should().Be(expected);
         }
     }
 }

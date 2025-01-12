@@ -33,11 +33,11 @@
                     },
 
                     {
-                        "",
+                        string.Empty,
                         new Filter(field: null, @operator: EqualTo)
                     },
                     {
-                        "",
+                        string.Empty,
                         Filter.True
                     },
                     {
@@ -45,14 +45,14 @@
                         new Filter(field: nameof(Person.Firstname), @operator: NotEndsWith, value: "wayne")
                     },
                     {
-                        $"{nameof(Person.Firstname)}=Vandal|Gengis",
+                        $"{nameof(Person.Firstname)}=Vandal|Genghis",
                         new MultiFilter
                         {
                             Logic = Or,
                             Filters = new IFilter[]
                         {
                             new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Vandal"),
-                            new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Gengis")
+                            new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Genghis")
                         }
                         }
                     },
@@ -252,11 +252,11 @@
                         new MultiFilter
                         {
                             Logic = Or,
-                            Filters = new IFilter[]
-                        {
-                            new Filter("Firstname", EndsWith, "Bru"),
-                            new Filter("Firstname", EndsWith, "BrU"),
-                        }
+                            Filters =
+                            [
+                                new Filter("Firstname", EndsWith, "Bru"),
+                                new Filter("Firstname", EndsWith, "BrU"),
+                            ]
                         }
                     },
 

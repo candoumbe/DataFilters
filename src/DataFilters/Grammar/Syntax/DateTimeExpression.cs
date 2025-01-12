@@ -5,12 +5,15 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> implementation that can holds a datetime value
     /// </summary>
+    /// <remarks>
+    /// This class guaranties that one of the <see cref="Date"/> / <see cref="Time"/>
+    /// </remarks>
     public sealed class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
     {
         private readonly Lazy<string> _lazyEscapedParseableString;
 
         /// <summary>
-        /// Date part of the expression
+        /// Date part of the expression.
         /// </summary>
         public DateExpression Date { get; }
 
@@ -25,7 +28,7 @@
         public OffsetExpression Offset { get; }
 
         /// <summary>
-        /// Definies the kind of the current <see cref="DateTimeExpression"/> instance.
+        /// Defines the kind of the current <see cref="DateTimeExpression"/> instance.
         /// </summary>
         public DateTimeExpressionKind Kind { get; }
 
@@ -33,7 +36,7 @@
         /// Builds a new <see cref="DateTimeExpression"/> instance where only <see cref="Date"/> part is set
         /// </summary>
         /// <param name="date"></param>
-        /// <exception cref="ArgumentNullException">if <paramref name="date"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="date"/> is <see langword="null"/>.</exception>
         public DateTimeExpression(DateExpression date) : this(date, null)
         {
         }
@@ -42,7 +45,7 @@
         /// Builds a new <see cref="DateTimeExpression"/> where only the <see cref="Time"/> part is specified
         /// </summary>
         /// <param name="time"></param>
-        /// <exception cref="ArgumentNullException">if <paramref name="time"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="time"/> is <see langword="null"/>.</exception>
         public DateTimeExpression(TimeExpression time) : this(null, time) { }
 
         /// <summary>
@@ -51,7 +54,7 @@
         /// </summary>
         /// <param name="date">date part of the expression</param>
         /// <param name="time">time part of the expression</param>
-        /// <exception cref="ArgumentException">if both <paramref name="date"/> and <paramref name="time"/> are <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">if both <paramref name="date"/> and <paramref name="time"/> are <see langword="null"/>.</exception>
         public DateTimeExpression(DateExpression date, TimeExpression time) : this(date, time, null)
         {
         }
@@ -63,12 +66,12 @@
         /// <param name="date">date part of the expression</param>
         /// <param name="time">time part of the expression</param>
         /// <param name="offset">offset with the UTC time</param>
-        /// <exception cref="ArgumentException">if both <paramref name="date"/> and <paramref name="time"/> are <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">if both <paramref name="date"/> and <paramref name="time"/> are <see langword="null"/>.</exception>
         public DateTimeExpression(DateExpression date, TimeExpression time, OffsetExpression offset)
         {
             if (date is null && time is null)
             {
-                throw new ArgumentException($"Both {nameof(date)} and {nameof(time)} cannot be null and ");
+                throw new ArgumentException($"Both {nameof(date)} and {nameof(time)} cannot be null at the same time ");
             }
 
             Date = date;
@@ -80,9 +83,9 @@
 
             _lazyEscapedParseableString = new(() => (date, time, offset) switch
            {
-               ({ }, { }, { }) => $"{date.EscapedParseableString}T{time.EscapedParseableString}{offset.EscapedParseableString}",
-               ({ }, { }, null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}",
-               (null, { }, _) => $"T{time.EscapedParseableString}",
+               (not null, not null, not null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}{offset.EscapedParseableString}",
+               (not null, not null, null) => $"{date.EscapedParseableString}T{time.EscapedParseableString}",
+               (null, not null, _) => $"T{time.EscapedParseableString}",
                _ => date.EscapedParseableString
            });
         }

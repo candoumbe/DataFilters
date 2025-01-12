@@ -1,10 +1,10 @@
 # Datafilters <!-- omit in toc -->
 
-![GitHub Main branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/delivery.yml?branch=main&label=main)
-![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop)
-[![codecov](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3)](https://codecov.io/gh/candoumbe/DataFilters)
+![GitHub Main branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/delivery.yml?branch=main&label=main "GitHub Main branch status")
+![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop "GitHub Develop branch status")
+[![Unit test code coverage percentage](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3 "Unit tests code coverage")](https://codecov.io/gh/candoumbe/DataFilters)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
-[![DataFilters](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters)](https://nuget.org/packages/datafilters)
+[![](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters "DataFilters latest nuget package version (including beta)")](https://nuget.org/packages/datafilters)
 
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not bound to a peculiar datasource.
@@ -294,9 +294,13 @@ are equivalent
 
 The library offers a limited support of regular expressions. To be more specific, only bracket expressions are currently supported.
 A bracket expression. Matches a single character that is contained within the brackets.
-For example, `[abc]` matches `a`, `b`, or `c`. `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
 
-`BracketExpression`s can be, as any other expressions  combined with any other expressions to build more complex expressions.
+For example:
+
+- `[abc]` matches `a`, `b`, or `c`
+- `[a-z]` specifies a range which matches any lowercase letter from `a` to `z`.
+
+[`BracketExpression`](src/DataFilters/Grammar/Syntax/BracketExpression.cs)s can be, as any other expressions, combined with any other expressions to build more complex expressions.
 
 ## Logical operators
 
@@ -422,11 +426,25 @@ a special character.
 | ------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `comment=*\!` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
 
-💡 For longer texts, just wrap it between quotes and you're good to go
+💡 Escaping special characters can be a tedious task when working with longer texts. Just use a text expression instead by wrapping 
+the text between double quotes (`"`).
 
 | Query string   | JSON                                                | C#                                                                              |
 | -------------- | --------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `comment=*"!"` | `{"field":"comment", "op":"endswith", "value":"!"}` | `new Filter(field: "comments", @operator: FilterOperator.EndsWith, value: "!")` |
+
+Example : 
+
+```
+I'm a long text with some \"special characters\"  in it and each one must be escaped properly`
+```
+can be rewritten
+
+```
+"I'm a long text with some \"special characters\"  in it and each one must be escaped properly !`
+```
+
+When using text expressions, only `\` and `"` characters need to be escaped.
 
 ## Sorting
 

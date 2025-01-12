@@ -1,4 +1,8 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax
+﻿using System.Linq;
+using System.Text;
+using DataFilters.Grammar.Parsing;
+
+namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using DataFilters.Grammar.Syntax;
@@ -53,7 +57,7 @@
         }
 
         [Property]
-        public void Given_two_instances_that_hold_values_that_are_equals_Equals_shoud_return_true(NonEmptyString value)
+        public void Given_two_instances_that_hold_values_that_are_equals_Equals_should_return_true(NonEmptyString value)
         {
             // Arrange
             StringValueExpression first = new(value.Item);
@@ -74,6 +78,16 @@
                     new StringValueExpression("True"),
                     new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
                     false
+                },
+                {
+                    new StringValueExpression("0"),
+                    new NumericValueExpression("0"),
+                    true
+                },
+                {
+                    new StringValueExpression("True"),
+                    new StringValueExpression("True"),
+                    true
                 }
             };
 
@@ -115,7 +129,7 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (constant.Complexity == 1).ToProperty();
+        public void Given_StringValueExpression_GetComplexity_should_return_1(StringValueExpression constant) => (Math.Abs(constant.Complexity - 1) < float.Epsilon).ToProperty();
 
         [Property]
         public void Given_StringValueExpression_and_TextExpression_are_based_on_same_value_IsEquivalentTo_should_be_true(NonWhiteSpaceString input)
@@ -145,6 +159,32 @@
             // Assert
             actual.Should()
                   .BeTrue();
+        }
+
+        [Property]
+        public void Given_input_as_string_Then_EscapedParseableString_should_be_correct(NonWhiteSpaceString inputGenerator)
+        {
+            // Arrange
+            string input = inputGenerator.Item;
+            StringValueExpression expression = new(input);
+            StringBuilder sbExpected = new (input.Length * 2);
+
+            foreach (char c in input)
+            {
+                if (FilterTokenizer.SpecialCharacters.Contains(c))
+                {
+                    sbExpected.Append('\\');
+                }
+                sbExpected.Append(c);
+            }
+
+            string expected = sbExpected.ToString();
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should().Be(expected);
         }
     }
 }

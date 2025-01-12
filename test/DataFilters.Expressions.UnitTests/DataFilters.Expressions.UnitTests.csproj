@@ -1,47 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\tests.props" />
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-  </PropertyGroup>
+    <Import Project="..\..\tests.props"/>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\DataFilters.TestObjects\Appointment.cs" Link="TestsObjects\Appointment.cs" />
-    <Compile Include="..\DataFilters.TestObjects\Henchman.cs" Link="TestsObjects\Henchman.cs" />
-    <Compile Include="..\DataFilters.TestObjects\Model.cs" Link="TestsObjects\Model.cs" />
-    <Compile Include="..\DataFilters.TestObjects\Person.cs" Link="TestsObjects\Person.cs" />
-    <Compile Include="..\DataFilters.TestObjects\SuperHero.cs" Link="TestsObjects\SuperHero.cs" />
-    <Compile Include="..\DataFilters.TestObjects\Weapon.cs" Link="TestsObjects\Weapon.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\DataFilters.TestObjects\Appointment.cs" Link="TestsObjects\Appointment.cs"/>
+        <Compile Include="..\DataFilters.TestObjects\Henchman.cs" Link="TestsObjects\Henchman.cs"/>
+        <Compile Include="..\DataFilters.TestObjects\Model.cs" Link="TestsObjects\Model.cs"/>
+        <Compile Include="..\DataFilters.TestObjects\Person.cs" Link="TestsObjects\Person.cs"/>
+        <Compile Include="..\DataFilters.TestObjects\SuperHero.cs" Link="TestsObjects\SuperHero.cs"/>
+        <Compile Include="..\DataFilters.TestObjects\Weapon.cs" Link="TestsObjects\Weapon.cs"/>
+    </ItemGroup>
 
 
-  <Choose>
-   <When Condition="'$(TargetFramework)' == 'net6.0'">
-      <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.26"/>
-      </ItemGroup>
-    </When>
-   <When Condition="'$(TargetFramework)' == 'net7.0'">
-      <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.15"/>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1"/>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-  
-  <ItemGroup>
-    <PackageReference Include="NodaTime.Testing" Version="3.0.5" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Datafilters.Expressions\DataFilters.Expressions.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11"/>
+        <PackageReference Include="NodaTime.Testing" Version="3.2.0"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Datafilters.Expressions\DataFilters.Expressions.csproj"/>
+    </ItemGroup>
 
 </Project>

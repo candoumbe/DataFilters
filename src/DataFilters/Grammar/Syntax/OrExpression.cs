@@ -23,12 +23,12 @@
         /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <see langword="null"/>.</exception>
         public OrExpression(FilterExpression left, FilterExpression right) : base(left, right)
         {
-            _lazyToString = new(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
-            _lazyEscapedParseableString = new(() => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}");
+            _lazyToString = new Lazy<string>(() => $@"[""{nameof(Left)} ({Left.GetType().Name})"": {Left.EscapedParseableString}; ""{nameof(Right)} ({Right.GetType().Name})"": {Right.EscapedParseableString}]");
+            _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString}|{Right.EscapedParseableString}");
         }
 
         ///<inheritdoc/>
-        public bool Equals(OrExpression other) => Left.Equals(other?.Left) && Right.Equals(other?.Right);
+        public bool Equals(OrExpression other) => other is not null && ( ( Left.Equals(other.Left) && Right.Equals(other.Right) ) || ( Left.Equals(other.Right) && Right.Equals(other.Left) ) );
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => Equals(obj as OrExpression);
@@ -43,22 +43,71 @@
         ///<inheritdoc/>
         public override string ToString() => _lazyToString.Value;
 
+        
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
         /// <inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other)
         {
-            return other switch
+            bool isEquivalent = false;
+
+            if (other is not null)
             {
-                OrExpression or => (or.Right.IsEquivalentTo(Right) && or.Left.IsEquivalentTo(Left))
-                                    || (or.Left.IsEquivalentTo(Right) && or.Right.IsEquivalentTo(Left)),
-                OneOfExpression oneOf => IsEquivalentTo(oneOf.Simplify()),
-                _ => Left.IsEquivalentTo(Right) && Left.IsEquivalentTo(other),
-            };
+                switch (other)
+                {
+                    case GroupExpression { Expression : OrExpression expression }:
+                        isEquivalent = IsEquivalentTo(expression);
+                        break;
+                    case OrExpression or:
+                        isEquivalent = ( or.Right.IsEquivalentTo(Right) && or.Left.IsEquivalentTo(Left) ) || ( or.Left.IsEquivalentTo(Right) && or.Right.IsEquivalentTo(Left) );
+                        break;
+                    case OneOfExpression oneOf:
+                    {
+                        FilterExpression simplifiedOneOf = oneOf.Simplify();
+                        isEquivalent = simplifiedOneOf switch
+                        {
+                            OrExpression orExpression => IsEquivalentTo(orExpression),
+                            OneOfExpression _ => false,
+                            _ => Left.IsEquivalentTo(Right) && ( Left.IsEquivalentTo(simplifiedOneOf) || Right.IsEquivalentTo(simplifiedOneOf) )
+                        };
+
+                        break;
+                    }
+                    default:
+                        isEquivalent = Left.IsEquivalentTo(Right) && ( Left.IsEquivalentTo(other) || Right.IsEquivalentTo(other) );
+                        break;
+                }
+            }
+
+            return isEquivalent;
         }
 
         ///<inheritdoc/>
         public override double Complexity => Left.Complexity + Right.Complexity;
+
+        /// <inheritdoc />
+        public override FilterExpression Simplify()
+        {
+            FilterExpression simplified;
+            if (ReferenceEquals(Left, Right) || Left.Equals(Right) || Left.IsEquivalentTo(Right))
+            {
+                simplified = Left.Complexity < Right.Complexity
+                    ? Left.As<ISimplifiable>()?.Simplify() ?? Left
+                    : Right.As<ISimplifiable>()?.Simplify() ?? Right;
+            }
+            else
+            {
+                simplified = ( Left, Right ) switch
+                {
+                    (GroupExpression { Expression: OrExpression left }, GroupExpression { Expression: OrExpression right }) => new OneOfExpression(left.Left, left.Right, right.Left, right.Right),
+                    (GroupExpression { Expression: OrExpression or }, _) => new OneOfExpression(or.Left, or.Right, Right),
+                    (_, GroupExpression { Expression: OrExpression or }) => new OneOfExpression(or.Left, or.Right, Right),
+                    _ => this
+                };
+            }
+
+            return simplified;
+        }
     }
 }

@@ -55,7 +55,7 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Equals_should_be_symetric(NonNull<ConstantBracketValue> expression, NonNull<BracketValue> otherExpression)
+        public void Equals_should_be_symmetric(NonNull<ConstantBracketValue> expression, NonNull<BracketValue> otherExpression)
         {
             // Act
             bool actual = expression.Item.Equals(otherExpression.Item) == otherExpression.Item.Equals(expression.Item);

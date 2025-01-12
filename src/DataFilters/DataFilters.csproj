@@ -2,7 +2,7 @@
 
   <Import Project="..\..\core.props" />
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
@@ -15,7 +15,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Miscutilities" Version="0.13.0"/>
+    <PackageReference Include="Candoumbe.Miscutilities" Version="0.14.0"/>
   </ItemGroup>
   <Choose>
     <When Condition="'$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard2.0'">
@@ -25,7 +25,7 @@
     </When>
     <When Condition="'$(TargetFramework)' == 'net6.0'">
       <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+        <PackageReference Include="System.Collections.Immutable" Version="6.0.1" />
         <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="2.1.1" />
       </ItemGroup>
     </When>

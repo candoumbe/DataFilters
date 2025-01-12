@@ -1,5 +1,4 @@
-﻿
-namespace DataFilters.UnitTests.Grammar.Syntax
+﻿namespace DataFilters.UnitTests.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +7,6 @@ namespace DataFilters.UnitTests.Grammar.Syntax
     using DataFilters.UnitTests.Helpers;
     using FluentAssertions;
     using FsCheck;
-    using FsCheck.Fluent;
     using FsCheck.Xunit;
     using Xunit;
     using Xunit.Abstractions;
@@ -157,8 +155,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void IsEquivalent_should_be_reflexive(AndExpression and)
-            => and.IsEquivalentTo(and).Should().BeTrue();
+        public void IsEquivalent_should_be_reflexive(AndExpression and) => and.IsEquivalentTo(and).Should().BeTrue();
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_two_AndExpression_instances_first_and_second_and_firstU002ERight_eq_secondU002Eright_and_firstU002ELeft_eq_secondU002ELeft_Equals_should_returns_true(FilterExpression left, FilterExpression right)
@@ -189,16 +186,15 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         public void Given_AndExpression_instance_where_instanceU002ELeft_is_equivalent_to_instanceU002ERight_Simplify_should_return_the_expression_with_the_lowest_Complexity(FilterExpression expression, PositiveInt count)
         {
             // Arrange
-            OneOfExpression oneOfExpression = new(Enumerable.Repeat(expression, count.Item + 1) // if count == 1
-                                                            .ToArray());
+            OneOfExpression oneOfExpression = new([.. Enumerable.Repeat(expression, count.Item + 1)]); // if count == 1 we want to have at least two values in our OneOfExpression
 
             outputHelper.WriteLine($"{nameof(oneOfExpression)} : '{oneOfExpression.EscapedParseableString}'");
             outputHelper.WriteLine($"{nameof(oneOfExpression.Complexity)} : {oneOfExpression.Complexity}");
 
-            AndExpression and = new(oneOfExpression, expression);
+            AndExpression initial = new(oneOfExpression, expression);
 
             // Act
-            FilterExpression actual = and.Simplify();
+            FilterExpression actual = initial.Simplify();
             bool isEquivalent = actual.IsEquivalentTo(oneOfExpression);
             double actualComplexity = actual.Complexity;
 
@@ -206,8 +202,8 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             outputHelper.WriteLine($"actual : {actual.EscapedParseableString} (Complexity : {actual.Complexity})");
             outputHelper.WriteLine($"actual is equivalent to expression : {isEquivalent})");
 
-            isEquivalent.Should().BeTrue();
-            actualComplexity.Should().BeLessThan(oneOfExpression.Complexity);
+            isEquivalent.Should().BeTrue("Simplifying an expression should not change its meaning");
+            actualComplexity.Should().BeLessThan(initial.Complexity);
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

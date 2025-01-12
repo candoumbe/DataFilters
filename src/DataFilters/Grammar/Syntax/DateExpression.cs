@@ -5,7 +5,7 @@
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a date.
     /// </summary>
-    public sealed class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression
+    public sealed class DateExpression : FilterExpression, IEquatable<DateExpression>, IBoundaryExpression, IFormattable
     {
         /// <summary>
         /// Year part of the date

@@ -7,35 +7,110 @@
     /// <summary>
     /// An expression that holds a string value "as is".
     /// </summary>
-    /// <remarks>
-    /// Builds a new <see cref="TextExpression"/> instance.
-    /// </remarks>
-    /// <param name="value">Value of the expression</param>
-    public class TextExpression(string value) : StringValueExpression(value), IEquatable<TextExpression>
+    public class TextExpression : StringValueExpression, IEquatable<TextExpression>
     {
-        private readonly Lazy<string> _lazyEscapedParseableString = new(() =>
+        private readonly Lazy<string> _lazyEscapedParseableString;
+
+        /// <summary>
+        /// Builds a new <see cref="TextExpression"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <paramref name="value"/> should neither start nor end with &quot; unless these quotes are part of the raw text expression.
+        /// More specifically, all quotes inside <paramref name="value"/> will be escaped.
+        /// </para>
+        /// <list type="table">
+        /// <listheader>
+        ///     <term>Input</term>
+        ///     <term>Outputs</term>
+        /// </listheader>
+        /// <item>
+        ///     <term><c>foo</c></term>
+        ///     <description>
+        ///         <list type="bullet">
+        ///             <item>
+        ///                 <term><see cref="ConstantValueExpression.Value"/></term>
+        ///                 <description><c>foo</c></description>
+        ///             </item>
+        ///             <item>
+        ///                 <term><see cref="OriginalString"/></term>
+        ///                 <description><c>foo</c></description>
+        ///             </item>
+        ///             <item>
+        ///                 <term><see cref="EscapedParseableString"/></term>
+        ///                 <description><c>"foo"</c></description>
+        ///             </item>
+        ///         </list>
+        ///     </description>
+        /// </item>
+        /// <item>
+        ///     <term><c>"bar"</c></term>
+        ///     <description>
+        ///         <list type="bullet">
+        ///             <item>
+        ///                 <term><see cref="ConstantValueExpression.Value"/></term>
+        ///                 <description><c>"bar"</c></description>
+        ///             </item>
+        ///             <item>
+        ///                 <term><see cref="OriginalString"/></term>
+        ///                 <description><c>"bar"</c></description>
+        ///             </item>
+        ///             <item>
+        ///                 <term><see cref="EscapedParseableString"/></term>
+        ///                 <description><c>"\"bar\""</c></description>
+        ///             </item>
+        ///         </list>
+        ///     </description>
+        /// </item>
+        /// <item>
+        ///     <term><c>foo"bar</c></term>
+        ///     <description>
+        ///         <list type="bullet">
+        ///             <item>
+        ///                 <term><see cref="ConstantValueExpression.Value"/></term>
+        ///                 <description><c>foo"bar</c></description>
+        ///             </item>
+        ///             <item>
+        ///                 <term><see cref="OriginalString"/></term>
+        ///                 <description><c>foo"bar</c></description>
+        ///             </item>
+        ///             <item>
+        ///                 <term><see cref="EscapedParseableString"/></term>
+        ///                 <description><c>"foo\"bar"</c></description>
+        ///             </item>
+        ///         </list>
+        ///     </description> 
+        /// </item>
+        /// </list>
+        /// </remarks>
+        /// <param name="value">Value of the expression.</param>
+        public TextExpression(string value) : base(value)
+        {
+            _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 StringBuilder escapedParseableString;
                 if (value.AtLeastOnce(chr => chr == '"' || chr == '\\'))
                 {
-                    escapedParseableString = new StringBuilder((value.Length * 2) + 2);
+                    escapedParseableString = new StringBuilder(( value.Length * 2 ) + 2);
 
                     foreach (char chr in value)
                     {
-                        if (chr == '"' || chr == '\\')
+                        if (chr is '"' or '\\')
                         {
-                            escapedParseableString.Append('\\');
+                            escapedParseableString = escapedParseableString.Append('\\');
                         }
-                        escapedParseableString.Append(chr);
+
+                        escapedParseableString = escapedParseableString.Append(chr);
                     }
                 }
                 else
                 {
-                    escapedParseableString = new(value);
+                    escapedParseableString = new StringBuilder(value);
                 }
 
                 return escapedParseableString.Insert(0, '"').Append('"').ToString();
             });
+        }
 
         ///<inheritdoc/>
         public override string EscapedParseableString => _lazyEscapedParseableString.Value;

@@ -19,7 +19,6 @@
         public virtual double Complexity => 0;
 #else
         double Complexity { get; }
-
 #endif
     }
 }

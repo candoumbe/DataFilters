@@ -15,10 +15,10 @@
     {
         [Fact]
         public void IsFilterExpression() => typeof(OneOfExpression).Should()
-            .BeAssignableTo<FilterExpression>().And
-            .Implement<IEquatable<OneOfExpression>>().And
-            .HaveConstructor(new[] { typeof(FilterExpression[]) }).And
-            .HaveProperty<IReadOnlyCollection<FilterExpression>>("Values");
+                                                                   .BeAssignableTo<FilterExpression>().And
+                                                                   .Implement<IEquatable<OneOfExpression>>().And
+                                                                   .HaveConstructor(new[] { typeof(FilterExpression[]) }).And
+                                                                   .HaveProperty<IReadOnlyList<FilterExpression>>(nameof(OneOfExpression.Values));
 
         [Fact]
         public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -35,7 +35,7 @@
         public void Constructor_throws_InvalidOperationException_when_values_is_empty()
         {
             // Act
-            Action ctorWithEmptyArray = () => _ = new OneOfExpression(Array.Empty<FilterExpression>());
+            Action ctorWithEmptyArray = () => _ = new OneOfExpression([]);
 
             // Assert
             ctorWithEmptyArray.Should()
@@ -78,12 +78,12 @@
 
             // Assert
             actual.Should()
-                .Be(expected, reason);
+                  .Be(expected, reason);
 
             object _ = expected switch
             {
                 true => actualHashCode.Should()
-                    .Be(other?.GetHashCode(), reason),
+                                      .Be(other?.GetHashCode(), reason),
                 _ => true
             };
         }
@@ -152,21 +152,21 @@
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_ConstantExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(StringValueExpression filterExpression, PositiveInt n)
-            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_expression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateExpression filterExpression, PositiveInt n)
-            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_expression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_DateTimeExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(DateTimeExpression filterExpression, PositiveInt n)
-            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
+            => Given_OneOfExpression_contains_the_same_expression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(filterExpression, n.Item);
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
         public void Given_AsteriskExpression_equals_left_and_left_equals_right_expression_IsEquivalentTo_should_be_true(PositiveInt n)
-            => Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(AsteriskExpression.Instance, n.Item);
+            => Given_OneOfExpression_contains_the_same_expression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(AsteriskExpression.Instance, n.Item);
 
-        private static void Given_OneOfExpression_contains_the_same_epxression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
+        private static void Given_OneOfExpression_contains_the_same_expression_repeated_many_time_When_comparing_to_that_expression_IsEquivalentTo_should_return_true(FilterExpression filterExpression, int n)
         {
             // Arrange
             IEnumerable<FilterExpression> filterExpressions = Enumerable.Repeat(filterExpression, n);
@@ -195,7 +195,7 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_OneOfExpression_with_same_values_repetead_more_than_once_Simplify_should_filter_out_duplicated_values(NonEmptyArray<FilterExpression> expressions)
+        public void Given_OneOfExpression_with_same_values_repeated_more_than_once_Simplify_should_filter_out_duplicated_values(NonEmptyArray<FilterExpression> expressions)
         {
             // Arrange
             OneOfExpression oneOf = new(expressions.Item);
@@ -230,6 +230,14 @@
                                                new IntervalExpression(new BoundaryExpression(new NumericValueExpression("-1"), true),
                                                                 new BoundaryExpression(new NumericValueExpression("-1"), true))),
                     new NumericValueExpression("-1")
+                },
+                {
+                    new OneOfExpression(null, new GroupExpression(new AndExpression(new StringValueExpression("a"), new StringValueExpression("b"))), null),
+                    new AndExpression(new StringValueExpression("a"), new StringValueExpression("b"))
+                },
+                {
+                    new OneOfExpression(new ContainsExpression("A"), new ContainsExpression("A"), new ContainsExpression("A")),
+                    new ContainsExpression("A")
                 }
             };
 
@@ -245,19 +253,20 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_requivalent_to_the_inner_expression(NonNull<FilterExpression> expression)
+        public void Given_OneOfExpression_instance_which_contains_only_one_expression_Simplify_should_return_an_expression_that_is_equivalent_to_the_inner_expression(NonNull<FilterExpression> expression)
         {
             // Arrange
-            outputHelper.WriteLine($"input : {expression.Item}");
-            OneOfExpression oneOf = new(expression.Item);
+            FilterExpression expected = expression.Item;
+            outputHelper.WriteLine($"input : {expected:d}");
+            OneOfExpression oneOf = new(expected);
 
             // Act
-            FilterExpression simplified = oneOf.Simplify();
+            FilterExpression actual = oneOf.Simplify();
 
-            outputHelper.WriteLine($"Simplified : {simplified}");
+            outputHelper.WriteLine($"Actual : {actual:d}");
 
             // Assert
-            simplified.IsEquivalentTo(expression.Item)
+            actual.IsEquivalentTo(expected)
                       .Should()
                       .BeTrue();
         }
@@ -266,8 +275,7 @@
         public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(PositiveInt count, NonNull<FilterExpression> expression)
         {
             // Arrange
-            FilterExpression[] expressions = Enumerable.Repeat(expression.Item, count.Item + 2)
-                                                       .ToArray();
+            FilterExpression[] expressions = [ .. Enumerable.Repeat(expression.Item, count.Item + 2) ];
 
             OneOfExpression oneOfExpression = new(expressions);
 
@@ -282,21 +290,40 @@
         }
 
         [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-        public void Given_OneExpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> first, NonEmptyArray<FilterExpression> second, NonEmptyArray<FilterExpression> third)
+        public void Given_OneExpression_that_contains_inner_OneOfExpressions_Simplify_should_flatten_them(NonEmptyArray<FilterExpression> oneOfExpressionGenerator)
         {
             // Arrange
-            FilterExpression expected = new OneOfExpression([.. first.Item, .. second.Item, .. third.Item]).Simplify();
+            FilterExpression[] oneOfExpressions = oneOfExpressionGenerator.Item;
+            FilterExpression expected = new OneOfExpression([.. oneOfExpressions]).Simplify();
+            outputHelper.WriteLine($"expected  (debug): {expected:d}");
+            outputHelper.WriteLine($"expected : {expected}");
 
-            OneOfExpression initial = new(new OneOfExpression(first.Item),
-                                          new OneOfExpression(second.Item),
-                                          new OneOfExpression(third.Item));
+            OneOfExpression initial = new([.. oneOfExpressions]);
+            outputHelper.WriteLine($"initial : {initial:d}");
 
             // Act
             FilterExpression actual = initial.Simplify();
+            outputHelper.WriteLine($"actual (debug): {actual:d}");
+            outputHelper.WriteLine($"actual : {actual}");
 
             // Assert
             actual.Should()
                   .Be(expected);
+        }
+
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+        public void Given_several_expressions_When_wrapped_in_OneOfExpression_Then_EscapedParseableString_should_have_expected_value(NonEmptyArray<FilterExpression> expressionGenerators)
+        {
+            // Arrange
+            FilterExpression[] innerExpressions = [.. expressionGenerators.Item];
+            OneOfExpression expression = new(innerExpressions);
+            string expected = $"{{{string.Join("|", innerExpressions.Select(expr => expr.EscapedParseableString))}}}";
+
+            // Act
+            string actual = expression.EscapedParseableString;
+
+            // Assert
+            actual.Should().Be(expected);
         }
     }
 }
