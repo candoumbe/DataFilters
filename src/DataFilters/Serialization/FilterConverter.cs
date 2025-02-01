@@ -109,22 +109,22 @@
                 throw new JsonException($@"Missing ""{Filter.OperatorJsonPropertyName}"" property.");
             }
 
-        reader.Read();
-        FilterOperator op = Operators[reader.GetString()];
-        if (!Filter.UnaryOperators.Contains(op))
-        {
-            if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName && Filter.ValueJsonPropertyName == reader.GetString())
+            reader.Read();
+            FilterOperator op = Operators[reader.GetString()];
+            if (!Filter.UnaryOperators.Contains(op))
             {
-                reader.Read();
-                value = reader.TokenType switch
+                if (reader.Read() && reader.TokenType == JsonTokenType.PropertyName && Filter.ValueJsonPropertyName == reader.GetString())
                 {
-                    JsonTokenType.Number => reader.GetInt64(),
-                    JsonTokenType.String => reader.GetString(),
-                    JsonTokenType.False => reader.GetBoolean(),
-                    JsonTokenType.True => reader.GetBoolean(),
-                    _ => null
-                };
-            }
+                    reader.Read();
+                    value = reader.TokenType switch
+                    {
+                        JsonTokenType.Number => reader.GetInt64(),
+                        JsonTokenType.String => reader.GetString(),
+                        JsonTokenType.False => reader.GetBoolean(),
+                        JsonTokenType.True => reader.GetBoolean(),
+                        _ => null
+                    };
+                }
 
                 if (!reader.Read() || reader.TokenType != JsonTokenType.EndObject)
                 {
@@ -138,6 +138,7 @@
                 {
                     // empty loop to get to the end of the current JSON object
                 }
+                reader.Read();
             }
 
             return new Filter(field, op, value);
