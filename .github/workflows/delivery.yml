@@ -32,9 +32,6 @@ jobs:
   ubuntu-latest:
     name: ubuntu-latest
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet: [ '9.0.x', '8.0.x' ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,10 +43,6 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('global.json', 'src/**/*.csproj') }}
-      - name: 'Install dotnet SDK ${{matrix.dotnet}}'
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{matrix.dotnet}}
       - name: 'Run: UnitTests, Publish, AddGithubRelease'
         run: ./build.cmd UnitTests Publish AddGithubRelease
         env:
