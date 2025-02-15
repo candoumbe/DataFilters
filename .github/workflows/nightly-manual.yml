@@ -22,9 +22,6 @@ jobs:
   ubuntu-latest:
     name: ubuntu-latest
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet: [ '9.0.x', '8.0.x' ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,10 +40,6 @@ jobs:
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           StrykerDashboardApiKey: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 'Install dotnet SDK ${{matrix.dotnet}}'
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{matrix.dotnet}}
       - name: 'Publish: mutation-tests'
         uses: actions/upload-artifact@v4
         with:
