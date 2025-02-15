@@ -1,16 +1,15 @@
 mode: ContinuousDeployment
 branches:
   feature:
-    regex: "^feature(s)?[/-]"
+    regex: "^feature(s)?[/-](?<BranchName>.+)"
   coldfix:
-    regex: "^coldfix(es)?[/-]"
+    regex: "^coldfix(es)?[/-](?<BranchName>.+)"
     mode: ContinuousDelivery
     label: '{BranchName}'
     increment: Inherit
     prevent-increment:
       of-merged-branch: false
     track-merge-target: false
-    increment: Inherit
     source-branches: [ 'develop', 'feature', 'support', 'hotfix' ]
     tracks-release-branches: false
     is-release-branch: false
