@@ -19,7 +19,7 @@ namespace DataFilters.ContinuousIntegration
 
     [GitHubActions(
         "integration",
-        GitHubActionsImage.UbuntuLatest,
+        GitHubActionsImage.Ubuntu2204,
         AutoGenerate = false,
         FetchDepth = 0,
         OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
@@ -41,7 +41,7 @@ namespace DataFilters.ContinuousIntegration
     )]
     [GitHubActions(
         "delivery",
-        GitHubActionsImage.UbuntuLatest,
+        GitHubActionsImage.Ubuntu2204,
         AutoGenerate = false,
         FetchDepth = 0,
         OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
@@ -63,7 +63,7 @@ namespace DataFilters.ContinuousIntegration
         ]
     )]
 
-    //[GitHubActions("nightly", GitHubActionsImage.UbuntuLatest,
+    //[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
     //    AutoGenerate = false,
     //    FetchDepth = 0,
     //    OnCronSchedule = "0 0 * * *",
@@ -90,7 +90,7 @@ namespace DataFilters.ContinuousIntegration
     //        "LICENSE"
     //    }
     //)]
-    [GitHubActions("nightly-manual", GitHubActionsImage.UbuntuLatest,
+    [GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
         AutoGenerate = false,
         FetchDepth = 0,
         On = [GitHubActionsTrigger.WorkflowDispatch],
