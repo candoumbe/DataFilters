@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped `Candoumbe.Pipelines` to 0.13.0-rc.39
 - Bumped `Microsoft.NET.Test.Sdk` to 17.11.1
 - Updated required NET SDK to `9.0.102`
+- Set `Ubuntu 22.04` image for continuous integration
 
 
 ## [0.13.0] / 2024-07-11
