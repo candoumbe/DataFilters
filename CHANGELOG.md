@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### ⚠️ Breaking Changes
+
+## [0.13.1] / 2025-01-12
+### 💥 Breaking Changes
 
 - Renamed `FilterToken.OpenParenthese` to `FilterToken.LeftParenthesis`
 - Renamed `FilterToken.CloseParenthese` to `FilterToken.RightParenthesis`
@@ -26,8 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pipeline fails to publish NuGet packages to GitHub due to incorrect URL
 - Refactoring of `ISimplifiable` implementations
 - Updated GitHub nuget registry URL
-- Bumped `Candoumbe.Pipelines` to 0.11.0
+- Bumped `Candoumbe.Pipelines` to 0.13.0-rc.39
 - Bumped `Microsoft.NET.Test.Sdk` to 17.11.1
+- Updated required NET SDK to `9.0.102`
 
 
 ## [0.13.0] / 2024-07-11
@@ -35,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `net8.0` support
 
-### ⚠️ Breaking Changes
+### 💥 Breaking Changes
 
 - Dropped `net7.0` support
 - Dropped `net5.0` support
@@ -73,7 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
 - Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
-### ⚠️ Breaking changes
+### 💥 Breaking changes
 - `AsteriskExpression` default constructor is now private
 - Dropped filter service
 - Renamed `ISort<T>` to `IOrder<T>`
@@ -94,7 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `|` operator to combine two `FilterExpression`s into a `OrExpression`
 - Added `&` operator to combine two `FilterExpression`s into a `AndExpression`
 
-### ⚠️ Breaking changes
+### 💥 Breaking changes
 - `AsteriskExpression` default constructor is now private
 - Dropped filter service
 - Renamed `ISort<T>` to `IOrder<T>`
@@ -207,7 +210,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.1...HEAD
+[0.13.1]: https://github.com/candoumbe/DataFilters/compare/0.13.0...0.13.1
 [0.13.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.12.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.11.0...0.12.0

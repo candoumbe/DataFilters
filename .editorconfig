@@ -4,7 +4,7 @@ tab_width = 4
 indent_size = 4
 indent_style = space
 
-[{*.yaml,*.yml,*.json,*.xml}]
+[{*.yaml,*.yml,*.json,*.props,*.csproj}]
 indent_size = 2
 
 [*.cs]
@@ -79,7 +79,6 @@ csharp_prefer_braces = true:warning
 csharp_prefer_simple_default_expression = true:warning
 
 dotnet_sort_system_directives_first = true
-csharp_using_directive_placement = outside_namespace:warning
 dotnet_style_predefined_type_for_locals_parameters_members = true:error
 dotnet_style_predefined_type_for_member_access = true:suggestion
 dotnet_style_qualification_for_field = false:suggestion

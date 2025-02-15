@@ -1,39 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\core.props" />
+  <Import Project="..\..\core.props"/>
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8.0;net9.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net7.0' or '$(TargetFramework)' == 'net8.0'">
     <DefineConstants>STRING_SEGMENT</DefineConstants>
   </PropertyGroup>
 
-
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Types" Version="0.2.1-fix.4" />
+    <PackageReference Include="Candoumbe.Miscutilities" Version="0.14.0"/>
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0"/>
+    <PackageReference Include="OneOf.Extended" Version="3.0.271"/>
+    <PackageReference Include="Superpower" Version="3.*"/>
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="3.*"/>
   </ItemGroup>
-  <Choose>
-    <When Condition="'$(TargetFramework)' == 'net6.0'">
-      <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-        <PackageReference Include="DateOnlyTimeOnly.AspNet" Version="2.1.1" />
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-
-  <ItemGroup>
-    <PackageReference Include="OneOf.Extended" Version="3.0.271" />
-    <PackageReference Include="Superpower" Version="3.0.0" />
-    <PackageReference Include="Newtonsoft.Json.Schema" Version="3.*" />
-  </ItemGroup>
-  </Project>
+</Project>
