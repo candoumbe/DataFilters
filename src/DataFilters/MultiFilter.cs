@@ -58,7 +58,7 @@
 #else
         [JsonPropertyName(FiltersJsonPropertyName)]
 #endif
-        public IEnumerable<IFilter> Filters { get; set; } = Enumerable.Empty<IFilter>();
+        public IEnumerable<IFilter> Filters { get; set; } = [];
 
         /// <summary>
         /// Operator to apply between <see cref="Filters"/>

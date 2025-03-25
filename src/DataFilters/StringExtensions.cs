@@ -81,7 +81,7 @@
             }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
-            ReadOnlyMemory<string> sorts = sortString.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries)
+            ReadOnlyMemory<string> sorts = sortString.Split([Separator], StringSplitOptions.RemoveEmptyEntries)
                                                      .AsMemory();
 
 #else
@@ -281,15 +281,15 @@
                             filter = new MultiFilter
                             {
                                 Logic = FilterLogic.And,
-                                Filters = new IFilter[]
-                                {
+                                Filters =
+                                [
                                     new Filter(propInfo.Name,
                                                minOperator,
                                                tc.ConvertFrom(minValue)),
                                     new Filter(propInfo.Name,
                                                maxOperator,
                                                tc.ConvertFrom(maxValue))
-                                }
+                                ]
                             };
                         }
                         else if (min.constantExpression?.Value != default)

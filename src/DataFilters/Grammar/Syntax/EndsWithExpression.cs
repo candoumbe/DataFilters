@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using DataFilters.Grammar.Parsing;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
     using System.Collections.Generic;
@@ -52,7 +54,7 @@
                     {
                         if (SpecialCharacters.Contains(chr))
                         {
-                            parseableString = parseableString.Append('\\');
+                            parseableString = parseableString.Append(BackSlash);
                         }
                         parseableString = parseableString.Append(chr);
                     }
@@ -62,7 +64,7 @@
                     parseableString = new StringBuilder(value, value.Length + 1);
                 }
 
-                return parseableString.Insert(0, '*').ToString();
+                return parseableString.Insert(0, Asterisk).ToString();
             });
         }
 
@@ -75,7 +77,7 @@
 #if !NETSTANDARD1_3
             : this(Guard.Against.Null(text, nameof(text)).OriginalString)
         {
-            _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}");
+            _lazyEscapedParseableString = new(() => $"{Asterisk}{text.EscapedParseableString}");
         }
 #else
         {

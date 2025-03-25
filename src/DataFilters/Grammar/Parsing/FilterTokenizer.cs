@@ -24,7 +24,7 @@
         /// <summary>
         /// The <c>*</c> character
         /// </summary>
-        private const char Asterisk = '*';
+        internal const char Asterisk = '*';
 
         /// <summary>
         /// The <c>=</c> character
