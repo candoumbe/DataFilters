@@ -85,7 +85,7 @@ namespace System
             }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1 || NET5_0_OR_GREATER
-            ReadOnlyMemory<string> sorts = sortString.Split(new[] { Separator }, StringSplitOptions.RemoveEmptyEntries)
+            ReadOnlyMemory<string> sorts = sortString.Split([Separator], StringSplitOptions.RemoveEmptyEntries)
                                                      .AsMemory();
 
 #else

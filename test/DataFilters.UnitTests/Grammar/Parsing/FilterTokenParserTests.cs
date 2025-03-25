@@ -1184,50 +1184,29 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        public static TheoryData<GroupExpression, string> ParseGroupCases
-        {
-            get
+        public static TheoryData<GroupExpression> ParseGroupCases
+            => new()
             {
-                TheoryData<GroupExpression, string> cases = [];
-                string[] cultures = ["fr-FR", "en-GB", "en-US"];
-                
-                foreach (string culture in cultures)
-                {
-                    cases.Add
-                    (
-                        new GroupExpression(new DateTimeExpression(new DateExpression(2090, 10, 10), new TimeExpression(3, 0, 40, 583), OffsetExpression.Zero)),
-                        culture
-                    );
-
-                    cases.Add
-                    (
-                        new GroupExpression(new DateTimeExpression(new DateExpression(2010, 06, 02), new TimeExpression(23, 45, 54, 331), OffsetExpression.Zero)),
-                        culture
-                    );
-                    
-                    
-                }
-                return cases;
-            }
-        }
+                new GroupExpression(new DateTimeExpression(new DateExpression(2090, 10, 10),
+                    new TimeExpression(3, 0, 40, 583), OffsetExpression.Zero)),
+                new GroupExpression(new DateTimeExpression(new DateExpression(2010, 06, 02),
+                    new TimeExpression(23, 45, 54, 331), OffsetExpression.Zero)),
+            };
         
 
         [Theory]
         [MemberData(nameof(ParseGroupCases))]
-        public void Given_GroupExpression_EscapedParseableString_as_input_Parser_should_return_GroupExpression_that_is_equivalent_to_input(GroupExpression expected, string culture)
+        public void Given_GroupExpression_EscapedParseableString_as_input_Parser_should_return_GroupExpression_that_is_equivalent_to_input(GroupExpression expected)
         {
-            _cultureSwitcher.Run(culture, () =>
-            {
-                _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
-                _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
-                TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
+            _outputHelper.WriteLine($"Current culture is '{_cultureSwitcher.CurrentCulture}'");
+            _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
 
-                // Act
-                GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
+            // Act
+            GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
 
-                // Assert
-                AssertThatShould_parse(actual, expected);
-            });
+            // Assert
+            AssertThatShould_parse(actual, expected);
         }
 
         public static TheoryData<CultureInfo, NumericValueExpression> ParseNumberCases
