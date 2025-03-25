@@ -1,25 +1,26 @@
 ﻿using DataFilters.PerfomanceTests;
 
-namespace DataFilters.PerformanceTests
+namespace DataFilters.PerformanceTests;
+
+using System;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
+
+[MemoryDiagnoser]
+[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net90)]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
+public class BracketVsOr
 {
-    using System;
-    using BenchmarkDotNet.Attributes;
-    using BenchmarkDotNet.Jobs;
+    [Benchmark]
+    [Arguments("Nickname=Br[a-f]")]
+    public IFilter Bracket(string input) => input.ToFilter<SuperHero>();
 
-    [MemoryDiagnoser]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
-    public class BracketVsOr
-    {
-        [Benchmark]
-        [Arguments("Nickname=Br[a-f]")]
-        public IFilter Bracket(string input) => input.ToFilter<SuperHero>();
+    [Benchmark]
+    [Arguments("Nickname=(Bra|Brb)|(Brc|Brd)|(Bre|Brf)")]
+    public IFilter Or(string input) => input.ToFilter<SuperHero>();
 
-        [Benchmark]
-        [Arguments("Nickname=(Bra|Brb)|(Brc|Brd)|(Bre|Brf)")]
-        public IFilter Or(string input) => input.ToFilter<SuperHero>();
-
-        [Benchmark]
-        [Arguments("Nickname={Bra|Brb|Brc|Brd|Bre|Brf}")]
-        public IFilter OneOf(string input) => input.ToFilter<SuperHero>();
-    }
+    [Benchmark]
+    [Arguments("Nickname={Bra|Brb|Brc|Brd|Bre|Brf}")]
+    public IFilter OneOf(string input) => input.ToFilter<SuperHero>();
 }

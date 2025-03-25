@@ -219,7 +219,7 @@
                             from max in Constant
                             from ___ in Token.EqualTo(FilterToken.RightSquaredBracket)
 
-                            where min != default || max != default
+                            where min is not null || max is not null
                             select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
@@ -252,7 +252,7 @@
                             from max in Constant
                             from ___ in Token.EqualTo(FilterToken.RightSquaredBracket)
 
-                            where min != default || max != default
+                            where min is not null || max is not null
                             select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
@@ -287,7 +287,7 @@
 
                             from ___ in Token.EqualTo(FilterToken.LeftSquaredBracket)
 
-                            where min != default || max != default
+                            where min is not null || max is not null
                             select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
@@ -323,7 +323,7 @@
                                                 .Or(Constant)
                             from ___ in Token.EqualTo(FilterToken.LeftSquaredBracket)
 
-                            where min != default || max != default
+                            where min is not null || max is not null
                             select new IntervalExpression(
                                 min: new BoundaryExpression(min switch
                                 {
@@ -391,7 +391,7 @@
                                                                                  from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                                                                                  from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                  from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
-                                                                                 select @$"[""{subProp.Value}""]"
+                                                                                 select $"""["{subProp.Value}"]"""
                                                                              ).Many()
                                                                              select new PropertyName(string.Concat(prop.Value, string.Concat(subProps)));
 
@@ -485,7 +485,7 @@
                     (null, BracketExpression bracket, AsteriskExpression) => new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]),
 
                     // <ends with><bracket>
-                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(chr => (FilterExpression) new EndsWithExpression($"{head.Value}{chr}")).ToArray()),
+                    (EndsWithExpression head, BracketExpression body, null) => new OneOfExpression(ConvertRegexToCharArray(body.Values).Select(FilterExpression (chr) => new EndsWithExpression($"{head.Value}{chr}")).ToArray()),
 
                     // <ends with><bracket><constant>
                     (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant) => new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression($"{head.Value}{chr}{constant.Value}"))]),
@@ -601,9 +601,9 @@
         private static TokenListParser<FilterToken, Token<FilterToken>> PlusSign => Token.EqualToValue(FilterToken.None, "+");
 
         private static TokenListParser<FilterToken, NumericSign> MinusOrPlusSign => MinusSign.Or(PlusSign).Optional()
-                                                                                              .Select(token => token?.ToStringValue() switch
+                                                                                              .Select(token => token switch
                                                                                               {
-                                                                                                  "-" => NumericSign.Minus,
+                                                                                                  { Kind: FilterToken.Dash } => NumericSign.Minus,
                                                                                                   _ => NumericSign.Plus
                                                                                               });
 
