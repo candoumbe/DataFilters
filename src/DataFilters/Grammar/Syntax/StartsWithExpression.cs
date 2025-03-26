@@ -1,13 +1,11 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DataFilters.Grammar.Parsing;
-#if !NETSTANDARD1_3
 using Ardalis.GuardClauses;
-#endif
+
+namespace DataFilters.Grammar.Syntax;
 
 /// <summary>
 /// A <see cref="FilterExpression"/> that defines a string that starts with a specified <see cref="Value"/>.
@@ -35,7 +33,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
         Value = value switch
         {
             null => throw new ArgumentNullException(nameof(value)),
-            {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+            { Length: 0 } => throw new ArgumentOutOfRangeException(nameof(value)),
             _ => value
         };
 
@@ -48,12 +46,12 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
 
             if (requireEscapingCharacters)
             {
-                escapedParseableString = new StringBuilder((Value.Length * 2) + 1);
+                escapedParseableString = new StringBuilder(( Value.Length * 2 ) + 1);
                 foreach (char chr in Value)
                 {
                     if (FilterTokenizer.SpecialCharacters.Contains(chr))
                     {
-                        escapedParseableString = escapedParseableString.Append('\\');
+                        escapedParseableString = escapedParseableString.Append(FilterTokenizer.BackSlash);
                     }
 
                     escapedParseableString = escapedParseableString.Append(chr);
@@ -64,7 +62,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
                 escapedParseableString = new StringBuilder(Value, Value.Length + 1);
             }
 
-            return escapedParseableString.Append('*').ToString();
+            return escapedParseableString.Append(FilterTokenizer.Asterisk).ToString();
         });
     }
 
@@ -74,7 +72,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// <param name="text"></param>
     /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
     public StartsWithExpression(TextExpression text)
-        : this (Guard.Against.Null(text, nameof(text)).OriginalString)
+        : this(Guard.Against.Null(text, nameof(text)).OriginalString)
     {
         _lazyEscapedParseableString = new Lazy<string>(() => $"{text.EscapedParseableString}*");
     }
@@ -99,7 +97,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// <returns>a <see cref="AndExpression"/> whose <see cref="BinaryFilterExpression.Left"/> is <paramref name="left"/> and <see cref="BinaryFilterExpression.Right"/> is
     /// <paramref name="right"/></returns>
     /// <exception cref="ArgumentNullException">if either <paramref name="left"/> or <paramref name="right"/> is <see langword="null"/>.</exception>
-    public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new AndExpression(left, right);
+    public static AndExpression operator +(StartsWithExpression left, EndsWithExpression right) => new(left, right);
 
     /// <summary>
     /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
@@ -114,7 +112,9 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     ///     <item>exactly starts with <paramref name="left"/>'s value and contains <paramref name="right"/>'s value.</item>
     /// </list>
     /// </returns>
-    public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new (new StringValueExpression(left.Value + right.Value), new StartsWithExpression(left.Value + right.Value), new AndExpression(left, new ContainsExpression(right.Value)));
+    public static OneOfExpression operator +(StartsWithExpression left, StartsWithExpression right) => new(
+        new StringValueExpression(left.Value + right.Value), new StartsWithExpression(left.Value + right.Value),
+        new AndExpression(left, new ContainsExpression(right.Value)));
 
     /// <summary>
     /// Combines the specified <paramref name="left"/> and <paramref name="right"/>
@@ -136,7 +136,8 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     {
         string value = $"{left.Value}{right.Value}";
 
-        return new OneOfExpression(new StartsWithExpression(value), new AndExpression(left, right), new StringValueExpression(value));
+        return new OneOfExpression(new StartsWithExpression(value), new AndExpression(left, right),
+            new StringValueExpression(value));
     }
 
     /// <summary>
@@ -148,7 +149,8 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// A <see cref="AndExpression"/> that can match any <see langword="string"/> that starts with <paramref name="left"/>
     /// and ends with <paramref name="right"/>.
     /// </returns>
-    public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) => left + new EndsWithExpression(right.Value);
+    public static AndExpression operator +(StartsWithExpression left, StringValueExpression right) =>
+        left + new EndsWithExpression(right.Value);
 
     /// <summary>
     /// Combines the specified <paramref name="left"/> and <paramref name="right"/> into and <see cref="AndExpression"/> expression
@@ -171,5 +173,5 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
     /// </summary>
     /// <param name="expression">The start expression</param>
     /// <returns></returns>
-    public static NotExpression operator !(StartsWithExpression expression) => new (expression);
+    public static NotExpression operator !(StartsWithExpression expression) => new(expression);
 }
