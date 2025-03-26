@@ -7,7 +7,6 @@
     <PackageTags>expressions, querystring</PackageTags>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.xml</DocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <DefineConstants>STRING_SEGMENT</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
