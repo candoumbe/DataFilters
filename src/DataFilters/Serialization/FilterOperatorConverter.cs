@@ -1,28 +1,28 @@
-﻿namespace DataFilters.Converters
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using System.Linq;
+﻿namespace DataFilters.Converters;
+
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 #if NETSTANDARD1_3
     using Newtonsoft.Json;
 #else
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
-    /// <summary>
-    /// <see cref="JsonConverter"/> implementation that can handle (de)serialization of <see cref="FilterOperator"/>
-    /// from/to JSon .
-    /// </summary>
+/// <summary>
+/// <see cref="JsonConverter"/> implementation that can handle (de)serialization of <see cref="FilterOperator"/>
+/// from/to JSon .
+/// </summary>
 #if NETSTANDARD1_3
     public class FilterOperatorConverter : JsonConverter
     {
 #else
-    public class FilterOperatorConverter : JsonConverter<FilterOperator>
-    {
+public class FilterOperatorConverter : JsonConverter<FilterOperator>
+{
 #endif
-    private readonly static IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
+    private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
     {
         ["contains"] = FilterOperator.Contains,
         ["ncontains"] = FilterOperator.NotContains,
@@ -59,13 +59,13 @@
             return _operators[op.ToLower()];
         }
 #else
-        /// <inheritdoc/>
-        public override FilterOperator Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    /// <inheritdoc/>
+    public override FilterOperator Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.String)
         {
-            if (reader.TokenType != JsonTokenType.String)
-            {
-                throw new JsonException($"Expected {nameof(FilterOperator)} value");
-            }
+            throw new JsonException($"Expected {nameof(FilterOperator)} value");
+        }
 
         string op = reader.GetString();
         return Operators[op.ToLower()];
@@ -81,16 +81,15 @@
         }
 #else
 
-        /// <inheritdoc/>
-        public override void Write(Utf8JsonWriter writer, FilterOperator value, JsonSerializerOptions options)
-        {
+    /// <inheritdoc/>
+    public override void Write(Utf8JsonWriter writer, FilterOperator value, JsonSerializerOptions options)
+    {
 #if NETSTANDARD2_0
         string key = Operators.Single(op => op.Value == value).Key;
 #else
         (string key, _) = Operators.Single(op => op.Value == value);
 #endif
-            writer.WriteStringValue(key);
-        }
-#endif
+        writer.WriteStringValue(key);
     }
+#endif
 }
