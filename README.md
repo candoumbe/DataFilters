@@ -4,7 +4,10 @@
 ![GitHub Develop branch Status](https://img.shields.io/github/actions/workflow/status/candoumbe/datafilters/integration.yml?branch=develop&label=develop "GitHub Develop branch status")
 [![Unit test code coverage percentage](https://codecov.io/gh/candoumbe/DataFilters/branch/develop/graph/badge.svg?token=FHSC41A4X3 "Unit tests code coverage")](https://codecov.io/gh/candoumbe/DataFilters)
 [![GitHub raw issues](https://img.shields.io/github/issues-raw/candoumbe/datafilters)](https://github.com/candoumbe/datafilters/issues)
-[![](https://img.shields.io/nuget/vpre/datafilters?label=Datafilters "DataFilters latest nuget package version (including beta)")](https://nuget.org/packages/datafilters)
+[![](https://img.shields.io/nuget/vpre/datafilters "DataFilters latest nuget package version (including beta)")](https://nuget.org/packages/datafilters)
+[![Mutation testing badge](https://img.shields.io/endpoint?label=DataFilters&style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcandoumbe%2FDataFilters%2Fbaseline%2Fdevelop?module=DataFilters)](https://dashboard.stryker-mutator.io/reports/github.com/candoumbe/DataFilters/baseline/develop?module=DataFilters)
+[![Mutation testing badge](https://img.shields.io/endpoint?label=DataFilters.Expressions&style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcandoumbe%2FDataFilters%2Fbaseline%2Fdevelop?module=DataFilters.Expressions)](https://dashboard.stryker-mutator.io/reports/github.com/candoumbe/DataFilters/baseline/develop?module=DataFilters.Expressions)
+[![Mutation testing badge](https://img.shields.io/endpoint?label=DataFilters.Queries&style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fcandoumbe%2FDataFilters%2Fbaseline%2Fdevelop?module=DataFilters.Queries)](https://dashboard.stryker-mutator.io/reports/github.com/candoumbe/DataFilters/baseline/develop?module=DataFilters.Queries)
 
 A small library that allow to convert a string to a generic [`IFilter`][class-ifilter] object.
 Highly inspired by the elastic query syntax, it offers a powerful way to build and query data with a syntax that's not
