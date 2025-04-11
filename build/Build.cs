@@ -45,7 +45,10 @@ using Nuke.Common.Tools.DotNet;
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
-    InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)],
+    InvokedTargets =
+    [
+        nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)
+    ],
     EnableGitHubToken = true,
     CacheKeyFiles = ["global.json", "src/**/*.csproj"],
     PublishArtifacts = true,
@@ -63,43 +66,47 @@ using Nuke.Common.Tools.DotNet;
     ]
 )]
 
-//[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
-//    AutoGenerate = false,
-//    FetchDepth = 0,
-//    OnCronSchedule = "0 0 * * *",
-//    InvokedTargets = new[] { nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack) },
-//    OnPushBranches = new[] { IHaveDevelopBranch.DevelopBranchName },
-//    CacheKeyFiles = new[] {
-//        "src/**/*.csproj",
-//        "test/**/*.csproj",
-//        "stryker-config.json",
-//        "test/**/*/xunit.runner.json" },
-//    EnableGitHubToken = true,
-//    ImportSecrets = new[]
-//    {
-//        nameof(NugetApiKey),
-//        nameof(IReportCoverage.CodecovToken),
-//        nameof(IMutationTest.StrykerDashboardApiKey)
-//    },
-//    PublishArtifacts = true,
-//    OnPullRequestExcludePaths = new[]
-//    {
-//        "docs/*",
-//        "README.md",
-//        "CHANGELOG.md",
-//        "LICENSE"
-//    }
-//)]
+[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
+    AutoGenerate = false,
+    FetchDepth = 0,
+    OnCronSchedule = "0 0 * * *",
+    InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+    OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
+    CacheKeyFiles =
+    [
+        "src/**/*.csproj",
+        "test/**/*.csproj",
+        "stryker-config.json",
+        "test/**/*/xunit.runner.json"
+    ],
+    EnableGitHubToken = true,
+    ImportSecrets =
+    [
+        nameof(NugetApiKey),
+        nameof(IReportCoverage.CodecovToken),
+        nameof(IMutationTest.StrykerDashboardApiKey)
+    ],
+    PublishArtifacts = true,
+    OnPullRequestExcludePaths =
+    [
+        "docs/*",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    ]
+)]
 [GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
     InvokedTargets = [nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
-    CacheKeyFiles = [
+    CacheKeyFiles =
+    [
         "src/**/*.csproj",
         "test/**/*.csproj",
         "stryker-config.json",
-        "test/**/*/xunit.runner.json"],
+        "test/**/*/xunit.runner.json"
+    ],
     EnableGitHubToken = true,
     ImportSecrets =
     [
@@ -126,13 +133,10 @@ public class Build : EnhancedNukeBuild,
     IPushNugetPackages,
     ICreateGithubRelease
 {
-    [Parameter("API key used to publish artifacts to Nuget.org")]
-    [Secret]
+    [Parameter("API key used to publish artifacts to Nuget.org")] [Secret]
     public readonly string NugetApiKey;
 
-    [Solution]
-    [Required]
-    public readonly Solution Solution;
+    [Solution] [Required] public readonly Solution Solution;
 
     ///<inheritdoc/>
     Solution IHaveSolution.Solution => Solution;
@@ -140,8 +144,7 @@ public class Build : EnhancedNukeBuild,
     public static int Main() => Execute<Build>(x => ((ICompile)x).Compile);
 
     ///<inheritdoc/>
-    IEnumerable<AbsolutePath> IClean.DirectoriesToDelete
-        =>
+    IEnumerable<AbsolutePath> IClean.DirectoriesToDelete =>
         [
             .. this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj"),
             .. this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj")
@@ -163,10 +166,12 @@ public class Build : EnhancedNukeBuild,
 
     ///<inheritdoc/>
     IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects
-        => Projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
-                configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
-            .ToArray();
+        =>
+        [
+            ..Projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
+                                                                              testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
+                                                                              configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
+        ];
 
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
@@ -187,12 +192,4 @@ public class Build : EnhancedNukeBuild,
             source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
             canBeUsed: () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
     ];
-
-    protected override void OnBuildCreated()
-    {
-        if (IsServerBuild)
-        {
-            EnvironmentInfo.SetVariable("DOTNET_ROLL_FORWARD", "LatestMajor");
-        }
-    }
 }
