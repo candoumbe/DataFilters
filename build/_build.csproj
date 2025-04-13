@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Pipelines" Version="0.13.1" />
+    <PackageReference Include="Candoumbe.Pipelines" Version="0.13.2" />
     <PackageReference Include="ReportGenerator" Version="5.4.5" />
     <PackageDownload Include="dotnet-stryker" Version="[4.5.1]"/>
     <PackageDownload Include="GitVersion.Tool" Version="[6.1.0]" />
