@@ -66,35 +66,29 @@ using Nuke.Common.Tools.DotNet;
     ]
 )]
 
-[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
-    AutoGenerate = false,
-    FetchDepth = 0,
-    OnCronSchedule = "0 0 * * *",
-    InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
-    OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
-    CacheKeyFiles =
-    [
-        "src/**/*.csproj",
-        "test/**/*.csproj",
-        "stryker-config.json",
-        "test/**/*/xunit.runner.json"
-    ],
-    EnableGitHubToken = true,
-    ImportSecrets =
-    [
-        nameof(NugetApiKey),
-        nameof(IReportCoverage.CodecovToken),
-        nameof(IMutationTest.StrykerDashboardApiKey)
-    ],
-    PublishArtifacts = true,
-    OnPullRequestExcludePaths =
-    [
-        "docs/*",
-        "README.md",
-        "CHANGELOG.md",
-        "LICENSE"
-    ]
-)]
+// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
+//     AutoGenerate = false,
+//     FetchDepth = 0,
+//     OnCronSchedule = "0 0 * * *",
+//     InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+//     OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
+//
+//     CacheKeyFiles =
+//     [
+//         "src/**/*.csproj",
+//         "test/**/*.csproj",
+//         "stryker-config.json",
+//         "test/**/*/xunit.runner.json"
+//     ],
+//     EnableGitHubToken = true,
+//     ImportSecrets =
+//     [
+//         nameof(NugetApiKey),
+//         nameof(IReportCoverage.CodecovToken),
+//         nameof(IMutationTest.StrykerDashboardApiKey)
+//     ],
+//     PublishArtifacts = true
+// )]
 [GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
