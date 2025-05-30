@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Candoumbe.MiscUtilities.Comparers;
 
     using Utilities;
 
@@ -57,12 +58,16 @@
             }
             else
             {
-                equivalent = other is OneOfExpression oneOfExpression
-                    ? EqualityComparer.Equals([.. oneOfExpression._values], [.. _values])
-                                    || !(_values.Except(oneOfExpression._values).Any() || oneOfExpression._values.Except(_values).Any())
-                    : other switch
+                if (other is OneOfExpression oneOfExpression)
+                {
+                    equivalent = oneOfExpression._values.SequenceEqual(_values)
+                                 || ( _values.All(oneOfExpression._values.Contains) && oneOfExpression._values.All(_values.Contains) );
+                }
+                else
+                {
+                    equivalent = other switch
                     {
-                        AsteriskExpression asterisk => Values.All(x => x is AsteriskExpression),
+                        AsteriskExpression _ => Values.All(x => x is AsteriskExpression),
                         ConstantValueExpression constant => Values.All(value => value.IsEquivalentTo(constant)),
                         DateExpression date => Values.All(value => value.IsEquivalentTo(date)),
                         DateTimeExpression dateTime => Values.All(value => value.Equals(dateTime) || value.IsEquivalentTo(dateTime)),
@@ -70,6 +75,7 @@
                         ISimplifiable simplifiable => Values.All(value => value.IsEquivalentTo(simplifiable.Simplify())),
                         _ => false
                     };
+                }
             }
 
             return equivalent;
@@ -82,7 +88,12 @@
         public override bool Equals(object obj) => Equals(obj as OneOfExpression);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => EqualityComparer.GetHashCode(_values);
+        public override int GetHashCode()
+        {
+            HashCode hash = new();
+            _values.ForEach(hash.Add);
+            return hash.ToHashCode();
+        }
 
         ///<inheritdoc/>
         public static bool operator ==(OneOfExpression left, OneOfExpression right) => left?.Equals(right) ?? false;

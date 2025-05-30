@@ -4,10 +4,7 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using DataFilters.Converters;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Schema;
-    using static Newtonsoft.Json.DefaultValueHandling;
-    using static Newtonsoft.Json.Required;
 #if !NETSTANDARD1_3
     using System.Text.Json.Serialization;
 #endif

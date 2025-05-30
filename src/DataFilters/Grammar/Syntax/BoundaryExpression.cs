@@ -3,7 +3,6 @@
 namespace DataFilters.Grammar.Syntax
 {
     using System;
-    using System.Collections.Generic;
 
     /// <summary>
     /// A <see cref="FilterExpression"/> that can be used to construct <see cref="IntervalExpression"/> instances.

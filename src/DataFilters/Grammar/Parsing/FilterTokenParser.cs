@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Candoumbe.Types.Strings;
+﻿using Candoumbe.Types.Strings;
 using Microsoft.Extensions.Primitives;
 
 namespace DataFilters.Grammar.Parsing
@@ -400,9 +399,9 @@ namespace DataFilters.Grammar.Parsing
                                                                              select new GroupExpression(expression);
 
         private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.OneOf(
-                         Parse.Ref(() => UnaryExpression.AtEnd() ),
             Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()),
-                         Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>())
+                         Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()),
+                         Parse.Ref(() => UnaryExpression )
                                                                                                              )
         ;
 
@@ -731,7 +730,7 @@ namespace DataFilters.Grammar.Parsing
             ;
 
         /// <summary>
-        /// Handles special case of &lt;constant&gt;*&lt;constant&gt; which should be turned into a <see cref="AndExpression"/>
+        /// Handles a special case of &lt;constant&gt;*&lt;constant&gt; which should be turned into a <see cref="AndExpression"/>
         /// even though from user's perspective, it's just a text filter with no specific logic in it.
         /// </summary>
         private static TokenListParser<FilterToken, AndExpression> StartsAndEndsWith

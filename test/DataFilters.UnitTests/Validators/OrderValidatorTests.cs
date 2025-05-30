@@ -1,9 +1,8 @@
-﻿namespace DataFilters.UnitTests.Validators
+﻿using FluentAssertions;
+using FluentValidation.Results;
+
+namespace DataFilters.UnitTests.Validators
 {
-    using FluentAssertions;
-
-    using FluentValidation.Results;
-
     using Xunit;
 
     public class OrderValidatorTests

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -256,7 +255,8 @@ I&_Oj
                     { "*bat*", new ContainsExpression("bat")},
                     { @"*bat\*man*", new ContainsExpression("bat*man")},
                     {"*d3aa022d-ec52-47aa-be13-6823c478c60a*", new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")},
-                    {"*\"Oi\012j8G]t:JK%H6m>+r{)[5\n6\"*", AsteriskExpression.Instance + new StringValueExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6") + AsteriskExpression.Instance}
+                    {"*\"Oi\012j8G]t:JK%H6m>+r{)[5\n6\"*", AsteriskExpression.Instance + new StringValueExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6") + AsteriskExpression.Instance},
+                    {@"*\""cnQa#UE*", AsteriskExpression.Instance + new StringValueExpression(@"\""cnQa#UE") + AsteriskExpression.Instance }
                 };
 
                 string[] punctuations = [".", "-", ":", "_"];
@@ -1141,7 +1141,7 @@ I&_Oj
             AssertThatShould_parse(actual, expected);
         }
 
-        [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(2835403711024236146,16840947086399937335)")]
+        [Property(Arbitrary = [typeof(ExpressionsGenerators)], StartSize = 64, Replay = "(2835403711024236146,16840947086399937335)")]
         public void Should_parse_Groups(GroupExpression expected)
         {
             // Arrange
@@ -1151,6 +1151,7 @@ I&_Oj
 
             // Act
             GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
+            _outputHelper.WriteLine($"tokens : {StringifyTokens(tokens)}");
 
             // Assert
             _outputHelper.WriteLine($"expected : {expected:d}");
@@ -1281,7 +1282,7 @@ I&_Oj
         /// <summary>
         /// Asserts that <paramref name="actual"/> and <paramref name="expected"/> are
         /// <list type="bullet">
-        ///     <item>not the same :</item>
+        ///     <item>different instances</item>
         ///     <item>equal</item>
         /// </list> 
         /// </summary>
@@ -1290,7 +1291,7 @@ I&_Oj
         /// <param name="reason">a string that will be displayed if the assertion fails</param>
         private static void AssertThatShould_parse(FilterExpression actual, FilterExpression expected, string reason = "")
             => actual.Should()
-                     .NotBeSameAs(expected).And
+                     .NotBeSameAs(expected, "instances are different").And
                      .Be(expected, reason);
 
         private static void AssertThatParseExceptionIsThrown(Action action, string reason)

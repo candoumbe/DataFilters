@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
+using Ardalis.GuardClauses;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
 using Microsoft.Extensions.Primitives;
@@ -10,7 +10,6 @@ namespace DataFilters.Grammar.Syntax
     using static FilterTokenizer;
 
 #if !NETSTANDARD1_3
-    using Ardalis.GuardClauses;
 #endif
 
     /// <summary>

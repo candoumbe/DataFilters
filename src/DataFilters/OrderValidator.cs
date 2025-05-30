@@ -1,9 +1,10 @@
-﻿namespace DataFilters
+﻿using FluentValidation;
+using System.Linq;
+
+namespace DataFilters
 {
     using System;
-    using System.Linq;
     using System.Text.RegularExpressions;
-    using FluentValidation;
 
     /// <summary>
     /// Validates sort expression
@@ -26,6 +27,7 @@
                 .WithMessage(search =>
                 {
                     string[] incorrectExpresions = search.Split([Separator])
+                        // TODO use ZLinq
                         .Where(x => !_orderRegex.IsMatch(x))
                         .Select(x => $@"""{x}""")
                         .ToArray();

@@ -1,7 +1,7 @@
 ﻿using Candoumbe.MiscUtilities.Comparers;
+using Candoumbe.Types;
 using Candoumbe.Types.Strings;
 using Microsoft.Extensions.Primitives;
-using Superpower.Model;
 
 namespace DataFilters.Grammar.Syntax
 {

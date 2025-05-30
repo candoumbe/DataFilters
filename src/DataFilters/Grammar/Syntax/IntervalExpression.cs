@@ -1,11 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace DataFilters.Grammar.Syntax;
+﻿namespace DataFilters.Grammar.Syntax;
 
 using System;
 using Exceptions;
-using System.Text.Json;
-
 
 /// <summary>
 /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
 using Microsoft.Extensions.Primitives;
@@ -51,7 +50,11 @@ namespace DataFilters.Grammar.Syntax
             _lazyEscapedParseableString = new Lazy<string>(() =>
             {
                 string escapedValue = text.Value.Replace(chr => chr is FilterTokenizer.BackSlash or FilterTokenizer.DoubleQuote,
-                        new Dictionary<char, ReadOnlyMemory<char>> { [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash], [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote] })
+                        new Dictionary<char, ReadOnlyMemory<char>>
+                        {
+                            [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash],
+                            [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote]
+                        })
                     .ToStringValue();
 
                 return $@"*""{escapedValue}""*";

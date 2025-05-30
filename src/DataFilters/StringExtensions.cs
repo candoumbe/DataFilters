@@ -1,9 +1,8 @@
-﻿namespace System
+﻿using FluentValidation.Results;
+
+namespace System
 {
     using DataFilters;
-
-    using FluentValidation.Results;
-
     using System.Linq;
 
     using DataFilters.Grammar.Parsing;

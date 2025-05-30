@@ -1,7 +1,6 @@
 ﻿namespace DataFilters
 {
 #if STRING_SEGMENT
-    using Microsoft.Extensions.Primitives;
 #endif
     using System;
 

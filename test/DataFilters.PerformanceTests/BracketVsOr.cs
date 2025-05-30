@@ -2,7 +2,6 @@
 {
     using System;
     using BenchmarkDotNet.Attributes;
-    using BenchmarkDotNet.Jobs;
 
     [MemoryDiagnoser]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]

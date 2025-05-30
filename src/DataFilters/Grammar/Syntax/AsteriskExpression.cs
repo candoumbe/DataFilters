@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax
 {
     using System;
 

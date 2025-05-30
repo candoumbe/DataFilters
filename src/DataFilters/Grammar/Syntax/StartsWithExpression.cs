@@ -1,10 +1,10 @@
-﻿using Candoumbe.Types.Strings;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.Primitives;
 using DataFilters.Grammar.Parsing;
 
 using System;
 using System.Linq;
 using Ardalis.GuardClauses;
+using Candoumbe.Types.Strings;
 
 namespace DataFilters.Grammar.Syntax;
 
