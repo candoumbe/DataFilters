@@ -19,6 +19,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         [Theory]
         [InlineData(@"<\\Y!A", @"""<\\\\Y!A""")]
         [InlineData("1.\"Foo!", @"""1.\""Foo!""")]
+        [InlineData("a", @"""a""")]
         public void Given_input_EscapedParseableString_should_be_correct(string input, string expected)
         {
             // Arrange
