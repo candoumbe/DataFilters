@@ -5,8 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" />
-    <PackageReference Include="xunit.analyzers" Version="1.22.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.2" />
+    <PackageReference Include="xunit.analyzers" Version="1.23.0" />
     <PackageReference Include="xunit.categories" Version="3.0.1" />
     <PackageReference Include="FluentAssertions" Version="7.2.0" />
     <PackageReference Include="FsCheck.XUnit" Version="3.3.0" />
