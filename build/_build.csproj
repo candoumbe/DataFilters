@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Candoumbe.Pipelines" Version="0.13.2" />
-    <PackageReference Include="ReportGenerator" Version="5.4.9" />
+    <PackageReference Include="ReportGenerator" Version="5.4.10" />
     <PackageDownload Include="dotnet-stryker" Version="[4.5.1]"/>
     <PackageDownload Include="GitVersion.Tool" Version="[6.1.0]" />
     <PackageDownload Include="CodecovUploader" Version="[0.8.0]" />
