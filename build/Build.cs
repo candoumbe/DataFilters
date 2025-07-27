@@ -17,7 +17,7 @@ using Nuke.Common.Tools.GitHub;
 
 [GitHubActions(
     "integration",
-    GitHubActionsImage.Ubuntu2404,
+    GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
@@ -40,7 +40,7 @@ using Nuke.Common.Tools.GitHub;
 )]
 [GitHubActions(
     "delivery",
-    GitHubActionsImage.Ubuntu2404,
+    GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
@@ -67,7 +67,7 @@ using Nuke.Common.Tools.GitHub;
     ]
 )]
 
-// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2404,
+// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
 //     AutoGenerate = false,
 //     FetchDepth = 0,
 //     OnCronSchedule = "0 0 * * *",
@@ -90,7 +90,7 @@ using Nuke.Common.Tools.GitHub;
 //     ],
 //     PublishArtifacts = true
 // )]
-[GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2404,
+[GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
