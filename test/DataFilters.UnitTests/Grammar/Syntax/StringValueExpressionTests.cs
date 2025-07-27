@@ -89,6 +89,11 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     new StringValueExpression("True"),
                     new StringValueExpression("True"),
                     true
+                },
+                {
+                    new StringValueExpression(@"""True"""),
+                    new TextExpression("True"),
+                    true
                 }
             };
 
@@ -124,7 +129,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
             StringValueExpression second = new(input.Get);
 
             // Act
-            (first.Equals(second) == first.Value.IsEquivalentTo(second.Value, CharComparer.Ordinal))
+            (first.Equals(second) == first.Value.Equals(second.Value, CharComparer.Ordinal))
                 .ToProperty()
                 .QuickCheckThrowOnFailure(outputHelper);
         }

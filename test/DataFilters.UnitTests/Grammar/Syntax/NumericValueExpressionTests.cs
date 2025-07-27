@@ -80,7 +80,7 @@ public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
         NumericValueExpression second = new(input.Get);
 
         // Act
-        first.Equals(second).Should().Be(first.Value.IsEquivalentTo(second.Value, CharComparer.Ordinal));
+        first.Equals(second).Should().Be(first.Value.Equals(second.Value, CharComparer.Ordinal));
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

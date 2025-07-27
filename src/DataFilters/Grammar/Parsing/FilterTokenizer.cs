@@ -2,14 +2,15 @@
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;
 #endif
+using System.Collections.Generic;
+using System.Linq;
+using Superpower;
+using Superpower.Model;
+using static DataFilters.Grammar.Parsing.FilterToken;
+
 
 namespace DataFilters.Grammar.Parsing
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using Superpower;
-    using Superpower.Model;
-    using static FilterToken;
 
     /// <summary>
     /// <see cref="FilterTokenizer"/> is the base class used to "tokenize" a string.
@@ -30,6 +31,8 @@ namespace DataFilters.Grammar.Parsing
         /// The <c>*</c> character
         /// </summary>
         private const char Asterisk = '*';
+
+        internal const string AsteriskString = "*";
 
         /// <summary>
         /// The <c>=</c> character
@@ -112,9 +115,11 @@ namespace DataFilters.Grammar.Parsing
         private const char Dot = '.';
 
         /// <summary>
-        /// The space character
+        /// The space character.
         /// </summary>
         private const char Space = ' ';
+
+        private const char Colon = ':';
 
         /// <summary>
         /// The character to use to escape a special character.
@@ -140,7 +145,7 @@ namespace DataFilters.Grammar.Parsing
             Ampersand,
             RightCurlyBracket,
             LeftCurlyBracket,
-            ':',
+            Colon,
             Hyphen,
             Dot,
             Space
@@ -297,9 +302,9 @@ namespace DataFilters.Grammar.Parsing
                         next = next.Remainder.ConsumeChar();
                         break;
                     }
-                    case ':':
+                    case Colon :
                     {
-                        yield return Result.Value(_mode switch { TokenizerMode.Normal => Colon, _ => Escaped },
+                        yield return Result.Value(_mode switch { TokenizerMode.Normal => FilterToken.Colon, _ => Escaped },
                             next.Location,
                             next.Remainder);
                         next = next.Remainder.ConsumeChar();

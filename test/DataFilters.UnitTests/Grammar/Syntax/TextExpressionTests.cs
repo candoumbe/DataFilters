@@ -97,5 +97,21 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                   .EndWith(@"""").And
                   .Be(expected);
         }
+
+
+        public static TheoryData<TextExpression, object, bool, string> EqualCases
+            => new() { { new TextExpression(""), new StringValueExpression(@""""""), true, "" } };
+
+
+        [Theory]
+        [MemberData(nameof(EqualCases))]
+        public void Equals_should_behave_as_expected(TextExpression current, object other, bool expected, string reason)
+        {
+            // Act
+            bool actual = current.Equals(other);
+
+            // Assert
+            actual.Should().Be(expected, reason);
+        }
     }
 }

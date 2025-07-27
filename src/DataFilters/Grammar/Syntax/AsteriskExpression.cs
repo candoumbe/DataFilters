@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿using Candoumbe.Types.Strings;
+
+namespace DataFilters.Grammar.Syntax
 {
     using System;
 

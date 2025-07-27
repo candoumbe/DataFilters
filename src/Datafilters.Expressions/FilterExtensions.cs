@@ -271,10 +271,17 @@
             };
         }
 
+#if NET6_0_OR_GREATER
         /// <summary>
         /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
         /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, <see cref="DateOnly"/> (for .NET 6.0 or greater), enumerable types, and other types.
         /// </summary>
+#else
+        /// <summary>
+        /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
+        /// Handles different scenarios based on the member type, including <see cref="DateTime"/>(for .NET 6.0 or greater), enumerable types, and other types.
+        /// </summary>
+#endif
         private static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
         {
             ConstantExpression ce;

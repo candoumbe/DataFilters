@@ -42,11 +42,11 @@ namespace DataFilters.Grammar.Parsing
                                                                                                      || digitsAfter.Length > 0
                                                                                                      || symbolAfter.Length > 0
 
-                                                                                               let value = new StringSegmentLinkedList(StringSegment.Empty, [ .. symbolBefore.Select(x => x.Span.ToStringSegment()).ToArray(),
-                                                                                                                        .. digitsBefore.Select(x => x.Span.ToStringSegment()).ToArray(),
-                                                                                                                         .. alpha.Select(item => item.Span.ToStringSegment()).ToArray(),
-                                                                                                                         .. digitsAfter.Select(x => x.Span.ToStringSegment()).ToArray(),
-                                                                                                                         .. symbolAfter.Select(x => x.Span.ToStringSegment()).ToArray() ])
+                                                                                               let value = new StringSegmentLinkedList(StringSegment.Empty, [ .. symbolBefore.Select(x => x.Span.ToStringSegment()),
+                                                                                                                        .. digitsBefore.Select(x => x.Span.ToStringSegment()),
+                                                                                                                         .. alpha.Select(item => item.Span.ToStringSegment()),
+                                                                                                                         .. digitsAfter.Select(x => x.Span.ToStringSegment()),
+                                                                                                                         .. symbolAfter.Select(x => x.Span.ToStringSegment()) ])
                                                                                                select value).AtLeastOnce()
 
                                                                                             let alphaNumericValue = data.Aggregate(new StringSegmentLinkedList(), (mainList , list) => mainList.Append(list)).ToStringValue()
@@ -112,40 +112,42 @@ namespace DataFilters.Grammar.Parsing
                                                                                        .Or(
                                                                                            from _ in Asterisk
                                                                                            from data in (
-                                                                                               from beforeSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                               from beforePunctuation in Punctuation.Many()
+                                                                                               from symbolBefore in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                               from punctuationBefore in Punctuation.Many()
                                                                                                from alpha in AlphaNumeric.Many()
-                                                                                               from afterPunctuation in Punctuation.Many()
-                                                                                               from afterSymbol in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
-                                                                                               where beforeSymbol.AtLeastOnce()
-                                                                                                     || beforePunctuation.AtLeastOnce()
+                                                                                               from punctuationAfter in Punctuation.Many()
+                                                                                               from symbolAfter in Token.EqualTo(FilterToken.Escaped).Try().Or(Whitespace).Many()
+                                                                                               where symbolBefore.AtLeastOnce()
+                                                                                                     || punctuationBefore.AtLeastOnce()
                                                                                                      || alpha.AtLeastOnce()
-                                                                                                     || afterPunctuation.AtLeastOnce()
-                                                                                                     || afterSymbol.AtLeastOnce()
-                                                                                               
+                                                                                                     || punctuationAfter.AtLeastOnce()
+                                                                                                     || symbolAfter.AtLeastOnce()
+
                                                                                                let result = new StringSegmentLinkedList()
 
                                                                                                select new
                                                                                                {
-                                                                                                   value = result.Append(beforeSymbol.Select(x => x.Span.ToStringSegment())
-                                                                                                                                     .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
-                                                                                                       .Append(afterSymbol.Select(x => x.Span.ToStringSegment())
-                                                                                                                          .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
-                                                                                                       .Append(beforePunctuation.Select(x => x.Value)
-                                                                                                                                .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                   value = result.Append(symbolBefore.Select(x => x.Span.ToStringSegment())
+                                                                                                                                     .Aggregate(new StringSegmentLinkedList(), (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(symbolAfter.Select(x => x.Span.ToStringSegment())
+                                                                                                                          .Aggregate(new StringSegmentLinkedList(), (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(punctuationBefore.Select(x => x.Value)
+                                                                                                                                .Aggregate(new StringSegmentLinkedList(), (mainList , segment) => mainList.Append(segment)))
                                                                                                        .Append(alpha.Select(item => item.Value)
-                                                                                                                    .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
-                                                                                                       .Append(afterPunctuation.Select(x => x.Value)
-                                                                                                            .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
-                                                                                                       .Append(afterSymbol.Select(x => x.Span.ToStringSegment())
-                                                                                                                         .Aggregate(result, (mainList , segment) => mainList.Append(segment)))
+                                                                                                                    .Aggregate(new StringSegmentLinkedList(), (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(punctuationAfter.Select(x => x.Value)
+                                                                                                            .Aggregate(new StringSegmentLinkedList(), (mainList , segment) => mainList.Append(segment)))
+                                                                                                       .Append(symbolAfter.Select(x => x.Span.ToStringSegment())
+                                                                                                                         .Aggregate(new StringSegmentLinkedList(), (mainList , segment) => mainList.Append(segment)))
                                                                                                }).AtLeastOnce()
-                                                                                    from escaped in Token.EqualTo(FilterToken.Backslash).Many()
+                                                                                    //from escaped in Token.EqualTo(FilterToken.Backslash).Many()
                                                                                     from __ in Asterisk
                                                                                     let result = new StringSegmentLinkedList()
-    
-                                                                                    select new ContainsExpression(data.Select(x => x.value)
-                                                                                        .Aggregate(result, (current, other) => current.Append(other))) 
+
+                                                                                    select new ContainsExpression(EscapedString.From(data.Select(x => x.value)
+                                                                                                                                         .Aggregate(result,
+                                                                                                                                                    (current, other) => current.Append(other))
+                                                                                                                                         .ToStringValue()))
                                                                                     );
 
         /// <summary>
@@ -985,7 +987,8 @@ namespace DataFilters.Grammar.Parsing
 
         private static StringSegmentLinkedList TokensToString(IReadOnlyList<Token<FilterToken>> tokens)
         {
-            return new StringSegmentLinkedList(tokens[0].Span.ToStringSegment(), [.. tokens.Skip(1).Select(TokenToStringSegment)]);
+            return new StringSegmentLinkedList(tokens[0].Span.ToStringSegment(),
+                                               [.. tokens.Skip(1).Select(TokenToStringSegment)]);
             
             static StringSegment TokenToStringSegment(Token<FilterToken> token) => token.Span.ToStringSegment();
         }

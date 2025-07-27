@@ -23,7 +23,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                                                                       .Implement<IParseableString>();
 
         [Fact]
-        public void Given_string_argument_is_null_Constructor_should_thros_ArgumentNullException()
+        public void Given_string_argument_is_null_Constructor_should_throw_ArgumentNullException()
         {
             // Act
             Action action = () => _ = new ContainsExpression((string)null);
@@ -34,7 +34,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Fact]
-        public void Given_TextExpression_is_null_Constructor_should_thros_ArgumentNullException()
+        public void Given_TextExpression_is_null_Constructor_should_throw_ArgumentNullException()
         {
             // Act
             Action action = () => _ = new ContainsExpression((TextExpression)null);
@@ -45,7 +45,7 @@ namespace DataFilters.UnitTests.Grammar.Syntax
         }
 
         [Fact]
-        public void Given_argument_is_an_empty_string_Constructor_should_thros_ArgumentNullException()
+        public void Given_argument_is_an_empty_string_Constructor_should_throw_ArgumentNullException()
         {
             // Act
             Action action = () => _ = new ContainsExpression(string.Empty);
@@ -82,6 +82,12 @@ namespace DataFilters.UnitTests.Grammar.Syntax
                     new ContainsExpression("prop2"),
                     false,
                     "comparing two different instances with different property name"
+                },
+                {
+                    new ContainsExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6"),
+                    AsteriskExpression.Instance + new TextExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6") + AsteriskExpression.Instance,
+                    true,
+                    ""
                 }
             };
 

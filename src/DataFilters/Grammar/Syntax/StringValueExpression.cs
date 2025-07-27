@@ -31,7 +31,7 @@ namespace DataFilters.Grammar.Syntax
                 throw new ArgumentNullException(nameof(value));
             }
 
-            if (value.Length == 0)
+            if (value.Length is 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }
@@ -62,6 +62,7 @@ namespace DataFilters.Grammar.Syntax
             obj switch
             {
                 NumericValueExpression numericValue => _lazyOriginalString.Value.Equals(numericValue.OriginalString),
+                TextExpression text => text.EscapedParseableString == OriginalString,
                 not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
                 _ => false
             };
@@ -81,11 +82,21 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public override double Complexity => 1;
 
-        ///<inheritdoc/>
+        /// <summary>
+        /// Checks if <paramref name="left"/> and <paramref name="right"/> values are equal.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> and <paramref name="right"/> are equal, and <see langword="false"/> otherwise.</returns>
         public static bool operator ==(StringValueExpression left, StringValueExpression right)
             => (left is null && right is null) || (left?.Equals(right) ?? false);
 
-        ///<inheritdoc/>
+        /// <summary>
+        /// Checks if <paramref name="left"/> and <paramref name="right"/> values are not equal.
+        /// </summary>
+        /// <param name="left">left operand</param>
+        /// <param name="right">right operand</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>, and <see langword="false"/> otherwise.</returns>
         public static bool operator !=(StringValueExpression left, StringValueExpression right)
             => !(left == right);
     }

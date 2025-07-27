@@ -120,7 +120,12 @@ namespace DataFilters.Grammar.Syntax
         public virtual bool Equals(TextExpression other) => _lazyOriginalString.Value.Equals(other?._lazyOriginalString.Value);
 
         ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as TextExpression);
+        public override bool Equals(object obj) => obj switch
+        {
+            TextExpression other => Equals(other),
+            StringValueExpression stringValue => EscapedParseableString.Equals(stringValue.OriginalString),
+            _ => false,
+        };
 
         ///<inheritdoc/>
         public override int GetHashCode() => _lazyOriginalString.GetHashCode();

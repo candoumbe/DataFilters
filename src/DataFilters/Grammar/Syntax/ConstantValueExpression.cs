@@ -34,7 +34,7 @@ namespace DataFilters.Grammar.Syntax
 
         ///<inheritdoc/>
         public virtual bool Equals(ConstantValueExpression other)
-            => other is not null && Value.IsEquivalentTo(other.Value, CharComparer.Ordinal);
+            => other is not null && Value.Equals(other.Value, CharComparer.Ordinal);
 
         ///<inheritdoc/>
         public override bool Equals(object obj) => ReferenceEquals(this, obj) || Equals(obj as ConstantValueExpression);

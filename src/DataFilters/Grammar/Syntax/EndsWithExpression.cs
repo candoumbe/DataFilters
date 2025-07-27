@@ -47,7 +47,7 @@ namespace DataFilters.Grammar.Syntax
         /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/>'s length is <c>0</c>.</exception>
         public EndsWithExpression(StringSegmentLinkedList value)
         {
@@ -70,7 +70,7 @@ namespace DataFilters.Grammar.Syntax
         /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="text"/>.
         /// </summary>
         /// <param name="text"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
         public EndsWithExpression(TextExpression text)
 #if !NETSTANDARD1_3
             : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
@@ -109,5 +109,14 @@ namespace DataFilters.Grammar.Syntax
         /// <param name="_"></param>
         /// <returns></returns>
         public static ContainsExpression operator +(EndsWithExpression left, AsteriskExpression _) => new(left.Value);
+
+        /// <summary>
+        /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="right">The right operand</param>
+        /// <returns></returns>
+        public static EndsWithExpression operator +(EndsWithExpression left, ConstantValueExpression right) => new(left.Value.Append(right.Value));
+
     }
 }

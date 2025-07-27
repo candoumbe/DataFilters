@@ -255,8 +255,8 @@ I&_Oj
                     { "*bat*", new ContainsExpression("bat")},
                     { @"*bat\*man*", new ContainsExpression("bat*man")},
                     {"*d3aa022d-ec52-47aa-be13-6823c478c60a*", new ContainsExpression("d3aa022d-ec52-47aa-be13-6823c478c60a")},
-                    {"*\"Oi\012j8G]t:JK%H6m>+r{)[5\n6\"*", AsteriskExpression.Instance + new StringValueExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6") + AsteriskExpression.Instance},
-                    {@"*\""cnQa#UE*", AsteriskExpression.Instance + new StringValueExpression(@"\""cnQa#UE") + AsteriskExpression.Instance }
+                    {"*\"Oi\012j8G]t:JK%H6m>+r{)[5\n6\"*", new ContainsExpression(new TextExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6")) },
+                    {@"*\""cnQa#UE*", new ContainsExpression(EscapedString.From(@"""cnQa#UE")) }
                 };
 
                 string[] punctuations = [".", "-", ":", "_"];
@@ -276,7 +276,7 @@ I&_Oj
 
         [Theory]
         [MemberData(nameof(ContainsCases))]
-        public void Should_parse_Contains(string input, ContainsExpression expectedContains)
+        public void Should_parse_Contains(string input, ContainsExpression expected)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
@@ -284,10 +284,10 @@ I&_Oj
             _outputHelper.WriteLine($"Tokens : ${StringifyTokens(tokens)}");
 
             // Act
-            ContainsExpression expression = FilterTokenParser.Contains.Parse(tokens);
+            ContainsExpression actual = FilterTokenParser.Contains.Parse(tokens);
 
             // Assert
-            AssertThatShould_parse(expression, expectedContains);
+            AssertThatShould_parse(actual, expected);
         }
 
         public static TheoryData<string, OrExpression> OrExpressionCases
@@ -418,7 +418,7 @@ I&_Oj
                     @"*""1.\""Foo!"",*""2.\""Bar!""*",
                     new AndExpression(
                         AsteriskExpression.Instance + new TextExpression(@"1.""Foo!"),
-                        AsteriskExpression.Instance + new TextExpression(@"2.""Bar!") + AsteriskExpression.Instance
+                        new ContainsExpression(new TextExpression(@"2.""Bar!"))
                     )
                 }
             };
@@ -1013,6 +1013,13 @@ I&_Oj
                         new PropertyName("Prop"),
                         new ContainsExpression("Foo") & new EndsWithExpression("Bar")
                     )
+                },
+                {
+                    $@"Prop=*\""abc*",
+                    (
+                        new PropertyName("Prop"),
+                        new ContainsExpression(EscapedString.From(@"""abc"))
+                    )
                 }
             };
 
@@ -1146,15 +1153,14 @@ I&_Oj
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{expected.EscapedParseableString}'");
+            _outputHelper.WriteLine($"input : {expected:f}");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(expected.EscapedParseableString);
-            _outputHelper.WriteLine($"actual : {expected:d}");
 
             // Act
             GroupExpression actual = FilterTokenParser.Group.Parse(tokens);
-            _outputHelper.WriteLine($"tokens : {StringifyTokens(tokens)}");
+            _outputHelper.WriteLine($"actual : {actual:f}");
 
             // Assert
-            _outputHelper.WriteLine($"expected : {expected:d}");
             AssertThatShould_parse(actual, expected);
         }
 
