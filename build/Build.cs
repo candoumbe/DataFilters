@@ -176,10 +176,6 @@ public class Build : EnhancedNukeBuild,
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 
     ///<inheritdoc/>
-    Configure<DotNetTestSettings> IUnitTest.UnitTestSettings => settings => settings.SetBlameHangTimeout("2min")
-        .EnableBlameHang();
-
-    ///<inheritdoc/>
     bool IReportCoverage.ReportToCodeCov => this.Get<IReportCoverage>().CodecovToken is not null;
 
     ///<inheritdoc/>
