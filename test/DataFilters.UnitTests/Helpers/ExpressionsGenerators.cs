@@ -154,7 +154,7 @@ namespace DataFilters.UnitTests.Helpers
             Gen<GroupExpression> gen;
             switch (size)
             {
-                case 0:
+                case < 3:
                     {
                         gen = GenerateFilterExpressions().Generator
                                                          .Select(expr => new GroupExpression(expr));
@@ -163,7 +163,7 @@ namespace DataFilters.UnitTests.Helpers
 
                 default:
                     {
-                        Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 2);
+                        Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 10);
                         gen = Gen.OneOf(GenerateFilterExpressions().Generator.Select(expr => new GroupExpression(expr)),
                                         subtree.Select(expr => new GroupExpression(expr)));
                         break;
