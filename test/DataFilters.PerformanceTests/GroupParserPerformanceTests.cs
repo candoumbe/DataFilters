@@ -51,5 +51,5 @@ public class GroupParserPerformanceTests
         
     [Benchmark]
     public GroupExpression Parse() => FilterTokenParser.Group.Parse(_tokens);
-    
+
 }

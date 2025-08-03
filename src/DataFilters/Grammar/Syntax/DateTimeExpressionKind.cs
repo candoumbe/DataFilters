@@ -1,23 +1,22 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax;
+
+/// <summary>
+/// Defines a type of <see cref="DateTimeExpression"/> instance
+/// </summary>
+public enum DateTimeExpressionKind
 {
     /// <summary>
-    /// Defines a type of <see cref="DateTimeExpression"/> instance
+    /// Default value
     /// </summary>
-    public enum DateTimeExpressionKind
-    {
-        /// <summary>
-        /// Default value
-        /// </summary>
-        Unspecified,
+    Unspecified,
 
-        /// <summary>
-        /// Inidcates that the <see cref="DateTimeExpression"/> is a local date/time.
-        /// </summary>
-        Local,
+    /// <summary>
+    /// Inidcates that the <see cref="DateTimeExpression"/> is a local date/time.
+    /// </summary>
+    Local,
 
-        /// <summary>
-        /// Inidcates that the <see cref="DateTimeExpression"/> is a UTC datetime.
-        /// </summary>
-        Utc
-    }
+    /// <summary>
+    /// Inidcates that the <see cref="DateTimeExpression"/> is a UTC datetime.
+    /// </summary>
+    Utc
 }

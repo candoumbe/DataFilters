@@ -3,44 +3,44 @@ using System;
 using System.Diagnostics;
 using Candoumbe.Types.Strings;
 
-namespace DataFilters.Grammar.Syntax
+namespace DataFilters.Grammar.Syntax;
+
+/// <summary>
+/// Wraps a string that represents a numeric value of some sort
+/// </summary>
+[DebuggerDisplay("{Value}")]
+public class NumericValueExpression : ConstantValueExpression, IEquatable<NumericValueExpression>, IBoundaryExpression
 {
+    internal NumericValueExpression(StringSegmentLinkedList value) : base(value)
+    {
+    }
+
     /// <summary>
     /// Wraps a string that represents a numeric value of some sort
     /// </summary>
-    [DebuggerDisplay("{Value}")]
-    public class NumericValueExpression : ConstantValueExpression, IEquatable<NumericValueExpression>, IBoundaryExpression
+    /// <remarks>
+    /// Builds a new <see cref="NumericValueExpression"/> instance that can wrap a numeric value of some sort
+    /// </remarks>
+    /// <param name="value"></param>
+    /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>[DebuggerDisplay("{Value}")]
+    public NumericValueExpression(string value) : base(value switch
     {
-        internal NumericValueExpression(StringSegmentLinkedList value) : base(value)
-        {
-        }
+        null => throw new ArgumentNullException(nameof(value)),
+        {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+        _ => value
+    })
+    {
+    }
 
-        /// <summary>
-        /// Wraps a string that represents a numeric value of some sort
-        /// </summary>
-        /// <remarks>
-        /// Builds a new <see cref="NumericValueExpression"/> instance that can wrap a numeric value of some sort
-        /// </remarks>
-        /// <param name="value"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/></exception>
-        public NumericValueExpression(string value) : base(value switch
-        {
-            null => throw new ArgumentNullException(nameof(value)),
-            {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
-            _ => value
-        })
-        {
-        }
+    ///<inheritdoc/>
+    public override string EscapedParseableString => Value.ToStringValue();
 
-        ///<inheritdoc/>
-        public override string EscapedParseableString => Value.ToStringValue();
+    ///<inheritdoc/>
+    public virtual bool Equals(NumericValueExpression other) => Value.Equals(other?.Value);
 
-        ///<inheritdoc/>
-        public virtual bool Equals(NumericValueExpression other) => Value.Equals(other?.Value);
-
-        ///<inheritdoc/>
-        public override int GetHashCode() => Value.GetHashCode();
+    ///<inheritdoc/>
+    public override int GetHashCode() => Value.GetHashCode();
 
         ///<inheritdoc/>
         public override bool IsEquivalentTo(FilterExpression other) => other switch
@@ -51,19 +51,18 @@ namespace DataFilters.Grammar.Syntax
             _ => false
         };
 
-        ///<inheritdoc/>
-        public static bool operator ==(NumericValueExpression left, NumericValueExpression right) => Equals(left, right);
+    ///<inheritdoc/>
+    public static bool operator ==(NumericValueExpression left, NumericValueExpression right) => Equals(left, right);
 
-        ///<inheritdoc/>
-        public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
+    ///<inheritdoc/>
+    public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
-        ///<inheritdoc/>
-        public override bool Equals(object obj)  =>
-            obj switch
-            {
-                StringValueExpression stringValue => Value.Equals(stringValue.Value),
-                not null => ReferenceEquals(this, obj) || Equals(obj as NumericValueExpression),
-                _ => false
-            };
-    }
+    ///<inheritdoc/>
+    public override bool Equals(object obj)  =>
+        obj switch
+        {
+            StringValueExpression stringValue => Value.Equals(stringValue.Value),
+            not null => ReferenceEquals(this, obj) || Equals(obj as NumericValueExpression),
+            _ => false
+        };
 }

@@ -1,4 +1,7 @@
 ﻿using Candoumbe.MiscUtilities.Comparers;
+using DataFilters.Grammar.Syntax;
+using FluentAssertions;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
@@ -17,9 +20,9 @@ public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
 {
     [Fact]
     public void IsFilterExpression() => typeof(NumericValueExpression).Should()
-                                                                       .BeAssignableTo<FilterExpression>().And
-                                                                       .Implement<IEquatable<NumericValueExpression>>().And
-                                                                       .Implement<IBoundaryExpression>();
+        .BeAssignableTo<FilterExpression>().And
+        .Implement<IEquatable<NumericValueExpression>>().And
+        .Implement<IBoundaryExpression>();
 
     [Fact]
     public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -99,7 +102,7 @@ public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
 
         // Assert
         actual.Should()
-              .BeTrue();
+            .BeTrue();
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -127,31 +130,12 @@ public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
     public static TheoryData<NumericValueExpression, object, bool, string> EqualsCases
         => new()
         {
+            { new NumericValueExpression("0"), new NumericValueExpression("0"), true, $"Left and right are both {nameof(NumericValueExpression)}s with exact same values" },
+            { new NumericValueExpression("0"), new StringValueExpression("0"), true, $"Right is {nameof(StringValueExpression)} and hold the same value as current instance" },
+            { new NumericValueExpression("+0"), new NumericValueExpression("0"), false, $"Left and right values are not the same numbers" },
             {
-                new NumericValueExpression("0"),
-                new NumericValueExpression("0"),
-                true,
-                $"Left and right are both {nameof(NumericValueExpression)}s with exact same values"
+                new NumericValueExpression("1"), new GuidValueExpression("13a26ddf-33ce-f600-223f-09d5193fe9bf"), false, "NumericValueExpression is not a Guid"
             },
-            {
-                new NumericValueExpression("0"),
-                new StringValueExpression("0"),
-                true,
-                $"Right is {nameof(StringValueExpression)} and hold the same value as current instance"
-            },
-            {
-                new NumericValueExpression("+0"),
-                new NumericValueExpression("0"),
-                false,
-                $"Left and right values are not the same numbers"
-            },
-            {
-                new NumericValueExpression("1"),
-                new GuidValueExpression("13a26ddf-33ce-f600-223f-09d5193fe9bf"),
-                false,
-                "NumericValueExpression is not a Guid"
-            }
-
         };
 
     [Theory]

@@ -28,9 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pipeline fails to publish NuGet packages to GitHub due to incorrect URL
 - Refactoring of `ISimplifiable` implementations
 - Updated GitHub nuget registry URL
-- Bumped `Candoumbe.Pipelines` to 0.13.0-rc.39
+- Bumped `Candoumbe.Pipelines` to 0.13.0
 - Bumped `Microsoft.NET.Test.Sdk` to 17.11.1
-- Updated required NET SDK to `9.0.102`
+- Updated required NET SDK to `9.0.303`
+- Set `Ubuntu 22.04` image for continuous integration
 
 
 ## [0.13.0] / 2024-07-11

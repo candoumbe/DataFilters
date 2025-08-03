@@ -1,39 +1,38 @@
 ﻿using FluentValidation;
 using System.Linq;
 
-namespace DataFilters
+namespace DataFilters;
+
+using System;
+using System.Text.RegularExpressions;
+
+/// <summary>
+/// Validates sort expression
+/// </summary>
+public class OrderValidator : AbstractValidator<string>
 {
-    using System;
-    using System.Text.RegularExpressions;
+    private const string FieldPattern = Filter.ValidFieldNamePattern;
+    /// <summary>
+    /// Order expression pattern.
+    /// </summary>
+    public static readonly string Pattern = @$"^\s*(-|\+)?(({FieldPattern})\w*)+(\s*,\s*((-|\+)?(({FieldPattern})\w*)+)\s*)*$";
+    private readonly Regex _orderRegex = new(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+    private const char Separator = ',';
 
     /// <summary>
-    /// Validates sort expression
+    /// Builds a new <see cref="OrderValidator"/> instance.
     /// </summary>
-    public class OrderValidator : AbstractValidator<string>
-    {
-        private const string FieldPattern = Filter.ValidFieldNamePattern;
-        /// <summary>
-        /// Order expression pattern.
-        /// </summary>
-        public readonly static string Pattern = @$"^\s*(-|\+)?(({FieldPattern})\w*)+(\s*,\s*((-|\+)?(({FieldPattern})\w*)+)\s*)*$";
-        private readonly Regex _orderRegex = new(Pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
-        private const char Separator = ',';
-
-        /// <summary>
-        /// Builds a new <see cref="OrderValidator"/> instance.
-        /// </summary>
-        public OrderValidator() => RuleFor(x => x)
-                .Matches(Pattern)
-                .WithMessage(search =>
-                {
-                    string[] incorrectExpresions = search.Split([Separator])
-                        // TODO use ZLinq
+    public OrderValidator() => RuleFor(x => x)
+        .Matches(Pattern)
+        .WithMessage(search =>
+        {
+            string[] incorrectExpressions = search.Split([Separator])
+                // TODO use ZLinq
                         .Where(x => !_orderRegex.IsMatch(x))
                         .Select(x => $@"""{x}""")
                         .ToArray();
 
-                    return $"Sort expression{(incorrectExpresions.Length == 1 ? string.Empty : "s")} {string.Join(", ", incorrectExpresions)} " +
-                $@"do{(incorrectExpresions.Length == 1 ? "es" : string.Empty)} not match ""{Pattern}"".";
-                });
-    }
+            return $"Sort expression{(incorrectExpressions.Length == 1 ? string.Empty : "s")} {string.Join(", ", incorrectExpressions)} " +
+                   $@"do{(incorrectExpressions.Length == 1 ? "es" : string.Empty)} not match ""{Pattern}"".";
+        });
 }

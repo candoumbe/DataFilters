@@ -1,4 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax;
+using System.Runtime.CompilerServices;
+
+namespace DataFilters.Grammar.Syntax;
 
 using System;
 using Exceptions;
@@ -6,7 +8,7 @@ using Exceptions;
 /// <summary>
 /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
 /// </summary>
-public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalExpression>, ISimplifiable
+public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalExpression>, ISimplifiable, IFormattable
 {
     /// <summary>
     /// Lower bound of the current instance

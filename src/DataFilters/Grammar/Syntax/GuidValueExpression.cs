@@ -3,33 +3,32 @@ using System;
 using Candoumbe.Types.Strings;
 using Microsoft.Extensions.Primitives;
 
-namespace DataFilters.Grammar.Syntax
+namespace DataFilters.Grammar.Syntax;
+
+/// <summary>
+/// Wraps a string that represents a <see cref="System.Guid"/>
+/// </summary>
+public class GuidValueExpression : ConstantValueExpression
 {
+    private readonly Lazy<string> _lazyParseableString;
+
     /// <summary>
-    /// Wraps a string that represents a <see cref="System.Guid"/>
+    /// Builds a new <see cref="GuidValueExpression"/> instance that can wrap a <see cref="System.Guid"/>
     /// </summary>
-    public class GuidValueExpression : ConstantValueExpression
+    /// <param name="value"></param>
+    public GuidValueExpression(StringSegment value): base(value)
     {
-        private readonly Lazy<string> _lazyParseableString;
-
-        /// <summary>
-        /// Builds a new <see cref="GuidValueExpression"/> instance that can wrap a <see cref="System.Guid"/>
-        /// </summary>
-        /// <param name="value"></param>
-        public GuidValueExpression(StringSegment value): base(value)
-        {
-            _lazyParseableString = new Lazy<string>(value.Value);
-        }
-
-        internal GuidValueExpression(StringSegmentLinkedList value): base(value)
-        {
-            _lazyParseableString = new Lazy<string>(value.ToStringValue);
-        }
-
-        /// <inheritdoc />
-        public override string EscapedParseableString => _lazyParseableString.Value;
-
-        /// <inheritdoc />
-        public override string ToString() => EscapedParseableString;
+        _lazyParseableString = new Lazy<string>(value.Value);
     }
+
+    internal GuidValueExpression(StringSegmentLinkedList value): base(value)
+    {
+        _lazyParseableString = new Lazy<string>(value.ToStringValue);
+    }
+
+    /// <inheritdoc />
+    public override string EscapedParseableString => _lazyParseableString.Value;
+
+    /// <inheritdoc />
+    public override string ToString() => EscapedParseableString;
 }

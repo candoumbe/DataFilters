@@ -2,12 +2,11 @@
 using System.Linq;
 using Ardalis.GuardClauses;
 using Candoumbe.Types.Strings;
-using DataFilters.Grammar.Parsing;
 using Microsoft.Extensions.Primitives;
+using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
 namespace DataFilters.Grammar.Syntax
 {
-    using static FilterTokenizer;
 
 #if !NETSTANDARD1_3
 #endif
@@ -25,7 +24,7 @@ namespace DataFilters.Grammar.Syntax
         public StringSegmentLinkedList Value { get; }
 
         /// <summary>
-        /// Builds a new <see cref="ContainsExpression"/> instance which holds the specified <paramref name="value"/>.
+        /// Builds a new <see cref="EndsWithExpression"/> instance which holds the specified <paramref name="value"/>.
         /// </summary>
         /// <param name="value">The desired value</param>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> contains <see langword="null"/>.</exception>
@@ -90,17 +89,17 @@ namespace DataFilters.Grammar.Syntax
         ///<inheritdoc/>
         public bool Equals(EndsWithExpression other) => Value.Equals(other?.Value);
 
-        ///<inheritdoc/>
-        public override bool Equals(object obj) => Equals(obj as EndsWithExpression);
+    ///<inheritdoc/>
+    public override bool Equals(object obj) => Equals(obj as EndsWithExpression);
 
-        ///<inheritdoc/>
-        public override int GetHashCode() => Value.GetHashCode();
+    ///<inheritdoc/>
+    public override int GetHashCode() => Value.GetHashCode();
 
-        ///<inheritdoc/>
-        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+    ///<inheritdoc/>
+    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
-        ///<inheritdoc/>
-        public override double Complexity => 1.5;
+    ///<inheritdoc/>
+    public override double Complexity => 1.5;
 
         /// <summary>
         /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.

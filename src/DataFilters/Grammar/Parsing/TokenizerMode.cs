@@ -1,18 +1,17 @@
-﻿namespace DataFilters.Grammar.Parsing
+﻿namespace DataFilters.Grammar.Parsing;
+
+/// <summary>
+/// Defines the way <see cref="FilterTokenizer"/> "tokenizes" each <see cref="char"/> read.
+/// </summary>
+public enum TokenizerMode
 {
     /// <summary>
-    /// Defines the way <see cref="FilterTokenizer"/> "tokenizes" each <see cref="char"/> read.
+    /// Character are interpreted as-is
     /// </summary>
-    public enum TokenizerMode
-    {
-        /// <summary>
-        /// Character are interpreted as-is
-        /// </summary>
-        Normal,
+    Normal,
 
-        /// <summary>
-        /// Each character read is considered as already escaped
-        /// </summary>
-        Escaped
-    }
+    /// <summary>
+    /// Each character read is considered as already escaped
+    /// </summary>
+    Escaped
 }

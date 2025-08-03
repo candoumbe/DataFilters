@@ -1,29 +1,29 @@
-﻿namespace DataFilters.Converters
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using System.Linq;
+﻿namespace DataFilters.Converters;
+
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 #if NETSTANDARD1_3
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 #else
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
-    /// <summary>
-    /// <see cref="JsonConverter"/> implementation that can convert from/to <see cref="Filter"/>
-    /// </summary>
+/// <summary>
+/// <see cref="JsonConverter"/> implementation that can convert from/to <see cref="Filter"/>
+/// </summary>
 #if NETSTANDARD1_3
     public class FilterConverter : JsonConverter
 #else
-    public class FilterConverter : JsonConverter<Filter>
+public class FilterConverter : JsonConverter<Filter>
 
 #endif
 {
-    private readonly static IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
+    private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
     {
         ["contains"] = FilterOperator.Contains,
         ["ncontains"] = FilterOperator.NotContains,
@@ -86,28 +86,28 @@
         }
 
 #else
-        ///<inheritdoc/>
-        public override Filter Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    ///<inheritdoc/>
+    public override Filter Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        object value = null;
+
+        if (reader.TokenType != JsonTokenType.StartObject)
         {
-            object value = null;
+            throw new JsonException($"Expected '{{' but found {reader.TokenType}");
+        }
 
-            if (reader.TokenType != JsonTokenType.StartObject)
-            {
-                throw new JsonException($"Expected '{{' but found {reader.TokenType}");
-            }
+        if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.FieldJsonPropertyName != reader.GetString())
+        {
+            throw new JsonException($"Missing {Filter.FieldJsonPropertyName} property.");
+        }
 
-            if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.FieldJsonPropertyName != reader.GetString())
-            {
-                throw new JsonException($"Missing {Filter.FieldJsonPropertyName} property.");
-            }
+        reader.Read();
+        string field = reader.GetString();
 
-            reader.Read();
-            string field = reader.GetString();
-
-            if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.OperatorJsonPropertyName != reader.GetString())
-            {
-                throw new JsonException($@"Missing ""{Filter.OperatorJsonPropertyName}"" property.");
-            }
+        if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.OperatorJsonPropertyName != reader.GetString())
+        {
+            throw new JsonException($@"Missing ""{Filter.OperatorJsonPropertyName}"" property.");
+        }
 
         reader.Read();
         FilterOperator op = Operators[reader.GetString()];
@@ -126,43 +126,43 @@
                 };
             }
 
-                if (!reader.Read() || reader.TokenType != JsonTokenType.EndObject)
-                {
-                    throw new JsonException("Filter json must end with '}'.");
-                }
-                reader.Read();
-            }
-            else
+            if (!reader.Read() || reader.TokenType != JsonTokenType.EndObject)
             {
-                while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
-                {
-                    // empty loop to get to the end of the current JSON object
-                }
+                throw new JsonException("Filter json must end with '}'.");
             }
-
-            return new Filter(field, op, value);
+            reader.Read();
         }
+        else
+        {
+            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+            {
+                // empty loop to get to the end of the current JSON object
+            }
+        }
+
+        return new Filter(field, op, value);
+    }
 
 #endif
 
-        ///<inheritdoc/>
+    ///<inheritdoc/>
 #if NETSTANDARD1_3
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             Filter filter = (Filter)value;
 #else
-        public override void Write(Utf8JsonWriter writer, Filter value, JsonSerializerOptions options)
-        {
-            Filter filter = value;
+    public override void Write(Utf8JsonWriter writer, Filter value, JsonSerializerOptions options)
+    {
+        Filter filter = value;
 #endif
-            writer.WriteStartObject();
+        writer.WriteStartObject();
 
-            // Field
-            writer.WritePropertyName(Filter.FieldJsonPropertyName);
+        // Field
+        writer.WritePropertyName(Filter.FieldJsonPropertyName);
 #if NETSTANDARD1_3
             writer.WriteValue(filter.Field);
 #else
-            writer.WriteStringValue(filter.Field);
+        writer.WriteStringValue(filter.Field);
 #endif
 
         // operator
@@ -172,21 +172,20 @@
 #if NETSTANDARD1_3
             writer.WriteValue(kv.Key);
 #else
-            writer.WriteStringValue(kv.Key);
+        writer.WriteStringValue(kv.Key);
 #endif
 
-            // value (only if the operator is not an unary operator)
-            if (!Filter.UnaryOperators.Contains(filter.Operator))
-            {
-                writer.WritePropertyName(Filter.ValueJsonPropertyName);
+        // value (only if the operator is not an unary operator)
+        if (!Filter.UnaryOperators.Contains(filter.Operator))
+        {
+            writer.WritePropertyName(Filter.ValueJsonPropertyName);
 #if NETSTANDARD1_3
                 writer.WriteValue(filter.Value);
 #else
-                writer.WriteStringValue(filter.Value.ToString());
+            writer.WriteStringValue(filter.Value.ToString());
 #endif
-            }
-
-            writer.WriteEndObject();
         }
+
+        writer.WriteEndObject();
     }
 }

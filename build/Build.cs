@@ -1,3 +1,5 @@
+using Nuke.Common.Tools.GitHub;
+
 namespace DataFilters.ContinuousIntegration;
 
 using System;
@@ -147,6 +149,9 @@ public class Build : EnhancedNukeBuild,
             .. this.Get<IHaveSourceDirectory>().SourceDirectory.GlobDirectories("**/bin", "**/obj"),
             .. this.Get<IHaveTestDirectory>().TestDirectory.GlobDirectories("**/bin", "**/obj")
         ];
+
+    /// <inheritdoc />
+    Configure<DotNetToolRestoreSettings> IRestore.RestoreToolSettings => _ => _.SetDisableParallel(true);
 
     ///<inheritdoc/>
     AbsolutePath IHaveSourceDirectory.SourceDirectory => RootDirectory / "src";

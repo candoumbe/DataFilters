@@ -1,30 +1,30 @@
-﻿namespace DataFilters.Grammar.Syntax
+﻿namespace DataFilters.Grammar.Syntax;
+
+using System;
+using System.Collections.Generic;
+
+/// <summary>
+/// stores a range value used in a bracket expression
+/// </summary>
+/// <remarks>
+/// Builds a new <see cref="RangeBracketValue"/> instance.
+/// </remarks>
+/// <param name="start"></param>
+/// <param name="end"></param>
+public sealed class RangeBracketValue(char start, char end) : BracketValue, IEquatable<RangeBracketValue>, IComparable<RangeBracketValue>
 {
-    using System;
-    using System.Collections.Generic;
+    /// <summary>
+    /// Start of the regex range
+    /// </summary>
+    public char Start { get; } = start;
 
     /// <summary>
-    /// stores a range value used in a bracket expression
+    /// Ends of the regex range
     /// </summary>
-    /// <remarks>
-    /// Builds a new <see cref="RangeBracketValue"/> instance.
-    /// </remarks>
-    /// <param name="start"></param>
-    /// <param name="end"></param>
-    public sealed class RangeBracketValue(char start, char end) : BracketValue, IEquatable<RangeBracketValue>, IComparable<RangeBracketValue>
-    {
-        /// <summary>
-        /// Start of the regex range
-        /// </summary>
-        public char Start { get; } = start;
+    public char End { get; } = end;
 
-        /// <summary>
-        /// Ends of the regex range
-        /// </summary>
-        public char End { get; } = end;
-
-        ///<inheritdoc/>
-        public bool Equals(RangeBracketValue other) => (Start, End) == (other?.Start, other?.End);
+    ///<inheritdoc/>
+    public bool Equals(RangeBracketValue other) => (Start, End) == (other?.Start, other?.End);
 
         ///<inheritdoc/>
         public override bool Equals(object obj)
@@ -40,36 +40,36 @@
 #else
                     char tail = chars[chars.Length - 1];
 #endif
-                    equals = (Start, End).Equals((head, tail));
-                    break;
-                default:
-                    equals = Equals(obj as RangeBracketValue);
-                    break;
-            }
-            return equals;
+                equals = (Start, End).Equals((head, tail));
+                break;
+            default:
+                equals = Equals(obj as RangeBracketValue);
+                break;
         }
+        return equals;
+    }
 
-        ///<inheritdoc />
-        public static bool operator ==(RangeBracketValue left, RangeBracketValue right) => EqualityComparer<RangeBracketValue>.Default.Equals(left, right);
+    ///<inheritdoc />
+    public static bool operator ==(RangeBracketValue left, RangeBracketValue right) => EqualityComparer<RangeBracketValue>.Default.Equals(left, right);
 
-        ///<inheritdoc />
-        public static bool operator !=(RangeBracketValue left, RangeBracketValue right) => !(left == right);
+    ///<inheritdoc />
+    public static bool operator !=(RangeBracketValue left, RangeBracketValue right) => !(left == right);
 
-        ///<inheritdoc />
-        public static bool operator <(RangeBracketValue left, RangeBracketValue right) => left.Start < right.Start;
+    ///<inheritdoc />
+    public static bool operator <(RangeBracketValue left, RangeBracketValue right) => left.Start < right.Start;
 
-        ///<inheritdoc />
-        public static bool operator >(RangeBracketValue left, RangeBracketValue right) => left.Start > right.Start;
+    ///<inheritdoc />
+    public static bool operator >(RangeBracketValue left, RangeBracketValue right) => left.Start > right.Start;
 
-        ///<inheritdoc />
-        public static bool operator <=(RangeBracketValue left, RangeBracketValue right) => left < right || left == right;
+    ///<inheritdoc />
+    public static bool operator <=(RangeBracketValue left, RangeBracketValue right) => left < right || left == right;
 
-        ///<inheritdoc />
-        public static bool operator >=(RangeBracketValue left, RangeBracketValue right) => left > right || left == right;
+    ///<inheritdoc />
+    public static bool operator >=(RangeBracketValue left, RangeBracketValue right) => left > right || left == right;
 
-        ///<inheritdoc />
+    ///<inheritdoc />
 #if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
-        public override int GetHashCode() => HashCode.Combine(Start, End);
+    public override int GetHashCode() => HashCode.Combine(Start, End);
 #else
         public override int GetHashCode()
         {
@@ -81,16 +81,15 @@
 
 #endif
 
-        ///<inheritdoc />
-        public override string EscapedParseableString => $"[{Start}-{End}]";
+    ///<inheritdoc />
+    public override string EscapedParseableString => $"[{Start}-{End}]";
 
-        ///<inheritdoc />
-        public override string OriginalString => $"[{Start}-{End}]";
+    ///<inheritdoc />
+    public override string OriginalString => $"[{Start}-{End}]";
 
-        ///<inheritdoc />
-        public override double Complexity => 1 + Math.Pow(2, End - Start);
+    ///<inheritdoc />
+    public override double Complexity => 1 + Math.Pow(2, End - Start);
 
-        ///<inheritdoc />
-        public int CompareTo(RangeBracketValue other) => (Start, End).CompareTo((other.Start, other.End));
-    }
+    ///<inheritdoc />
+    public int CompareTo(RangeBracketValue other) => (Start, End).CompareTo((other.Start, other.End));
 }

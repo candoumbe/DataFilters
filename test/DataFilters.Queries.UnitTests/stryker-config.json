@@ -1,6 +1,7 @@
 {
   "stryker-config": {
     "project-info": {
+      "name": "github.com/candoumbe/DataFilters",
       "module": "DataFilters.Queries"
     },
     "concurrency": 4

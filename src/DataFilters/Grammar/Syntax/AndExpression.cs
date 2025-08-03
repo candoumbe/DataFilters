@@ -1,6 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
 using System;
+
+namespace DataFilters.Grammar.Syntax;
 
 /// <summary>
 /// A <see cref="FilterExpression"/> that combine two <see cref="FilterExpression"/> expressions using the logical <c>AND</c> operator
@@ -30,22 +30,22 @@ public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpres
         _lazyEscapedParseableString = new Lazy<string>(() => $"{Left.EscapedParseableString},{Right.EscapedParseableString}");
     }
 
-        ///<inheritdoc/>
-        public bool Equals(AndExpression other) => (Left.Equals(other?.Left) && Right.Equals(other?.Right)) || (Left.Equals(other?.Right) && Right.Equals(other?.Left));
+    ///<inheritdoc/>
+    public bool Equals(AndExpression other) => (Left.Equals(other?.Left) && Right.Equals(other?.Right)) || (Left.Equals(other?.Right) && Right.Equals(other?.Left));
 
     ///<inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as AndExpression);
 
-        ///<inheritdoc/>
-        public override int GetHashCode() => (Left, Right).GetHashCode();
+    ///<inheritdoc/>
+    public override int GetHashCode() => (Left, Right).GetHashCode();
 
     ///<inheritdoc/>
     public override bool IsEquivalentTo(FilterExpression other)
         => ReferenceEquals(this, other)
            || other switch
            {
-               AndExpression and => Equals(and) || ( Left.IsEquivalentTo(and.Left) && Right.IsEquivalentTo(and.Right) ) || ( Left.IsEquivalentTo(and.Right) && Right.IsEquivalentTo(and.Left) ),
-               ConstantValueExpression constant => ( Left.Equals(Right) || Left.IsEquivalentTo(Right) ) && ( Left.IsEquivalentTo(constant) || Right.IsEquivalentTo(constant) ),
+               AndExpression and => Equals(and) || (Left.IsEquivalentTo(and.Left) && Right.IsEquivalentTo(and.Right)) || (Left.IsEquivalentTo(and.Right) && Right.IsEquivalentTo(and.Left)),
+               ConstantValueExpression constant => (Left.Equals(Right) || Left.IsEquivalentTo(Right)) && (Left.IsEquivalentTo(constant) || Right.IsEquivalentTo(constant)),
                ISimplifiable simplifiable => simplifiable.Simplify().IsEquivalentTo(this),
                _ => false
            };
