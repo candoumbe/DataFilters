@@ -1,6 +1,6 @@
-﻿namespace DataFilters.Grammar.Parsing;
+﻿using Superpower.Display;
 
-using Superpower.Display;
+namespace DataFilters.Grammar.Parsing;
 
 /// <summary>
 /// Enumeration of token used throughout the parsing process.

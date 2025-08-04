@@ -79,25 +79,25 @@ public static class ExpressionsGenerators
     {
         IList<Gen<ConstantValueExpression>> generators = new List<Gen<ConstantValueExpression>>
         {
-            TextExpressions().Generator.Select(value => (ConstantValueExpression) value),
-            StringValueExpressions().Generator.Select(value => (ConstantValueExpression) value),
-            GetArbitraryFor<bool>().Generator.Select(value => (ConstantValueExpression) new StringValueExpression(value.ToString())),
-            GetArbitraryFor<Guid>().Generator.Select(value => (ConstantValueExpression) new GuidValueExpression(value.ToString("d"))),
-            NumericValueExpressions().Generator.Select(value => (ConstantValueExpression) value)
+            TextExpressions().Generator.Select(ConstantValueExpression (value) => value),
+            StringValueExpressions().Generator.Select(ConstantValueExpression (value) => value),
+            GetArbitraryFor<bool>().Generator.Select(ConstantValueExpression (value) => new StringValueExpression(value.ToString())),
+            GetArbitraryFor<Guid>().Generator.Select(ConstantValueExpression (value) => new GuidValueExpression(value.ToString("d"))),
+            NumericValueExpressions().Generator.Select(ConstantValueExpression (value) => value)
         };
 
         return Gen.OneOf(generators)
             .ToArbitrary();
     }
 
-    public static Arbitrary<NumericValueExpression> NumericValueExpressions()
-    {
-        IEnumerable<Gen<NumericValueExpression>> generators = new Gen<NumericValueExpression>[]
+        public static Arbitrary<NumericValueExpression> NumericValueExpressions()
         {
+            IEnumerable<Gen<NumericValueExpression>> generators =
+        [
             GetArbitraryFor<int>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
             GetArbitraryFor<long>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
             GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString(CultureInfo.InvariantCulture)))
-        };
+            ];
 
         return Gen.OneOf(generators)
             .ToArbitrary();
@@ -154,7 +154,7 @@ public static class ExpressionsGenerators
         Gen<GroupExpression> gen;
         switch (size)
         {
-            case 0:
+            case < 3:
             {
                 gen = GenerateFilterExpressions().Generator
                     .Select(expr => new GroupExpression(expr));
@@ -163,7 +163,7 @@ public static class ExpressionsGenerators
 
             default:
             {
-                Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 2);
+                Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 10);
                 gen = Gen.OneOf(GenerateFilterExpressions().Generator.Select(expr => new GroupExpression(expr)),
                     subtree.Select(expr => new GroupExpression(expr)));
                 break;
@@ -180,16 +180,16 @@ public static class ExpressionsGenerators
     {
         Gen<FilterExpression>[] generators =
         [
-            EndsWithExpressions().Generator.Select(item => (FilterExpression) item),
-            StartsWithExpressions().Generator.Select(item => (FilterExpression) item),
-            ContainsExpressions().Generator.Select(item => (FilterExpression) item),
-            IntervalExpressions().Generator.Select(item => (FilterExpression) item),
-            DateExpressions().Generator.Select(item => (FilterExpression) item),
-            DateTimeExpressions().Generator.Select(item => (FilterExpression) item),
-            TimeExpressions().Generator.Select(item => (FilterExpression) item),
-            DurationExpressions().Generator.Select(item => (FilterExpression) item),
-            ConstantValueExpressions().Generator.Select(item => (FilterExpression) item),
-            GroupExpressions().Generator.Select(item => (FilterExpression) item)
+            EndsWithExpressions().Generator.Select(FilterExpression (item) => item),
+            StartsWithExpressions().Generator.Select(FilterExpression (item) => item),
+            ContainsExpressions().Generator.Select(FilterExpression (item) => item),
+            IntervalExpressions().Generator.Select(FilterExpression (item) => item),
+            DateExpressions().Generator.Select(FilterExpression (item) => item),
+            DateTimeExpressions().Generator.Select(FilterExpression (item) => item),
+            TimeExpressions().Generator.Select(FilterExpression (item) => item),
+            DurationExpressions().Generator.Select(FilterExpression (item) => item),
+            ConstantValueExpressions().Generator.Select(FilterExpression (item) => item),
+            GroupExpressions().Generator.Select(FilterExpression (item) => item)
         ];
 
         return Gen.OneOf(generators).ToArbitrary();
@@ -203,8 +203,8 @@ public static class ExpressionsGenerators
     {
         Gen<BinaryFilterExpression>[] generators =
         [
-            AndExpressions().Generator.Select(item => (BinaryFilterExpression) item),
-            OrExpressions().Generator.Select(item => (BinaryFilterExpression) item)
+            AndExpressions().Generator.Select(BinaryFilterExpression (item) => item),
+            OrExpressions().Generator.Select(BinaryFilterExpression (item) => item)
         ];
 
         return Gen.OneOf(generators).ToArbitrary();
@@ -271,14 +271,14 @@ public static class ExpressionsGenerators
         {
             Gen<FilterExpression>[] generators =
             [
-                AndExpressions().Generator.Select(expr => (FilterExpression)expr),
-                OrExpressions().Generator.Select(expr => (FilterExpression)expr),
-                ConstantValueExpressions().Generator.Select(expr => (FilterExpression)expr),
-                DurationExpressions().Generator.Select(expr => (FilterExpression)expr),
-                DateExpressions().Generator.Select(expr => (FilterExpression)expr),
-                TimeExpressions().Generator.Select(expr => (FilterExpression)expr),
-                DateTimeExpressions().Generator.Select(expr => (FilterExpression)expr),
-                IntervalExpressions().Generator.Select(expr => (FilterExpression)expr)
+                AndExpressions().Generator.Select(FilterExpression (expr) => expr),
+                OrExpressions().Generator.Select(FilterExpression (expr) => expr),
+                ConstantValueExpressions().Generator.Select(FilterExpression (expr) => expr),
+                DurationExpressions().Generator.Select(FilterExpression (expr) => expr),
+                DateExpressions().Generator.Select(FilterExpression (expr) => expr),
+                TimeExpressions().Generator.Select(FilterExpression (expr) => expr),
+                DateTimeExpressions().Generator.Select(FilterExpression (expr) => expr),
+                IntervalExpressions().Generator.Select(FilterExpression (expr) => expr)
             ];
 
             Gen<NotExpression> gen;
@@ -306,28 +306,28 @@ public static class ExpressionsGenerators
     private static TFilterExpression CreateFilterExpression<TFilterExpression>((FilterExpression, FilterExpression) input, Func<(FilterExpression, FilterExpression), TFilterExpression> func)
         => func.Invoke(input);
 
-    public static Arbitrary<IntervalExpression> IntervalExpressions()
-    {
-        Gen<bool> boolGenerator = GetArbitraryFor<bool>().Generator;
-        (Gen<IBoundaryExpression> gen, Gen<bool> included)[] datesGen = new[]
+        public static Arbitrary<IntervalExpression> IntervalExpressions()
         {
-            (DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
-            (DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator)
-        };
+            Gen<bool> boolGenerator = GetArbitraryFor<bool>().Generator;
+            (Gen<IBoundaryExpression> gen, Gen<bool> included)[] datesGen =
+        [
+            (DateExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator),
+                (DateTimeExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator)
+            ];
 
-        (Gen<IBoundaryExpression> gen, Gen<bool> included)[] numericsGen = new[]
-        {
-            (GetArbitraryFor<short>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.ToString())), boolGenerator),
-            (GetArbitraryFor<int>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.ToString())), boolGenerator),
-            (GetArbitraryFor<long>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.ToString())), boolGenerator),
-            (GetArbitraryFor<NormalFloat>().Generator.Select(value => (IBoundaryExpression) new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture))), boolGenerator)
-        };
+            (Gen<IBoundaryExpression> gen, Gen<bool> included)[] numericsGen =
+        [
+            (GetArbitraryFor<short>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
+                (GetArbitraryFor<int>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
+                (GetArbitraryFor<long>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
+                (GetArbitraryFor<NormalFloat>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture))), boolGenerator)
+            ];
 
-        (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(item => (IBoundaryExpression)item), boolGenerator);
+        (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator);
         (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)AsteriskExpression.Instance), Gen.Constant(false));
 
         IEnumerable<Gen<IntervalExpression>> generatorsWithMinAndMax = datesGen.CrossJoin(datesGen)
-                .Concat(datesGen.CrossJoin(new[] { timeGen }))
+                .Concat(datesGen.CrossJoin([timeGen]))
                 .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
                 .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
                     (tuple.max.gen, tuple.max.included)))
@@ -337,7 +337,7 @@ public static class ExpressionsGenerators
                         (tuple.max.gen, tuple.max.included))))
             ;
 
-        IEnumerable<Gen<IntervalExpression>> generatorsWithMinOrMaxOnly = datesGen.CrossJoin(new[] { asteriskGen })
+        IEnumerable<Gen<IntervalExpression>> generatorsWithMinOrMaxOnly = datesGen.CrossJoin([asteriskGen])
             .Concat(new[] { asteriskGen }.CrossJoin(datesGen))
             .Select(tuple => (min: tuple.Item1, max: tuple.Item2))
             .Select(tuple => CreateIntervalExpressionGenerator((tuple.min.gen, tuple.min.included),
@@ -353,9 +353,9 @@ public static class ExpressionsGenerators
 
         IList<Gen<BoundaryExpression>> generators = new List<Gen<BoundaryExpression>>
         {
-            CreateBoundaryGenerator(DateExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
-            CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
-            CreateBoundaryGenerator(TimeExpressions().Generator.Select(item => (IBoundaryExpression) item), boolGenerator),
+            CreateBoundaryGenerator(DateExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator),
+            CreateBoundaryGenerator(DateTimeExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator),
+            CreateBoundaryGenerator(TimeExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator),
             CreateBoundaryGenerator(Gen.Constant((IBoundaryExpression)AsteriskExpression.Instance), Gen.Constant(false)),
         };
 
@@ -388,10 +388,10 @@ public static class ExpressionsGenerators
 
     public static Arbitrary<BracketValue> GenerateRegexValues()
     {
-        Gen<BracketValue> regexRangeGenerator = RangeBracketValues().Convert(range => (BracketValue)range,
+        Gen<BracketValue> regexRangeGenerator = RangeBracketValues().Convert(BracketValue (range) => range,
                 bracket => (RangeBracketValue)bracket)
             .Generator;
-        Gen<BracketValue> regexConstantGenerator = ConstantBracketValues().Convert(range => (BracketValue)range,
+        Gen<BracketValue> regexConstantGenerator = ConstantBracketValues().Convert(BracketValue (range) => range,
                 bracket => (ConstantBracketValue)bracket)
             .Generator;
 
@@ -427,8 +427,8 @@ public static class ExpressionsGenerators
     /// </summary>
     /// <returns><see cref="Arbitrary{BracketExpression}"/></returns>
     public static Arbitrary<BracketExpression> BracketExpressions()
-        => Gen.OneOf(RangeBracketValues().Generator.Select(x => (BracketValue)x),
-                ConstantBracketValues().Generator.Select(x => (BracketValue)x))
+        => Gen.OneOf(RangeBracketValues().Generator.Select(BracketValue (x) => x),
+                ConstantBracketValues().Generator.Select(BracketValue (x) => x))
             .ArrayOf()
             .Select(brackets => new BracketExpression(brackets))
             .ToArbitrary();

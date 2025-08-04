@@ -1,7 +1,4 @@
-﻿namespace DataFilters.UnitTests;
-
-using System;
-using DataFilters;
+﻿using System;
 using DataFilters.Casing;
 using DataFilters.TestObjects;
 using FluentAssertions;
@@ -13,22 +10,24 @@ using Xunit.Categories;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
+namespace DataFilters.UnitTests;
+
 [UnitTest]
 public class FilterExtensionsTests(ITestOutputHelper outputHelper)
 {
     public static TheoryData<string, IFilter> ToFilterCases
         => new()
-        {
-            {
-                $"{nameof(Person.Firstname)}=Hal&{nameof(Person.Lastname)}=Jordan",
-                new MultiFilter
                 {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-                        new Filter(nameof(Person.Firstname), EqualTo, "Hal"),
-                        new Filter(nameof(Person.Lastname), EqualTo, "Jordan")
-                    }
+                        $"{nameof(Person.Firstname)}=Hal&{nameof(Person.Lastname)}=Jordan",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter(nameof(Person.Firstname), EqualTo, "Hal"),
+                            new Filter(nameof(Person.Lastname), EqualTo, "Jordan")
+                            ]
                 }
             },
 
@@ -46,42 +45,42 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
             },
             {
                 $"{nameof(Person.Firstname)}=Vandal|Genghis",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters = new IFilter[]
-                    {
-                        new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Vandal"),
-                        new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Genghis")
-                    }
-                }
-            },
-            {
-                $"{nameof(Person.Firstname)}=(V*|G*),(*l|*s)",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
-                    {
                         new MultiFilter
                         {
                             Logic = Or,
-                            Filters = new IFilter[]
+                            Filters =
+                            [
+                                new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Vandal"),
+                            new Filter(field: nameof(Person.Firstname), @operator: EqualTo, value: "Genghis")
+                            ]
+                        }
+                    },
+                    {
+                        $"{nameof(Person.Firstname)}=(V*|G*),(*l|*s)",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new MultiFilter
                             {
+                                Logic = Or,
+                                Filters =
+                            [
                                 new Filter(field: nameof(Person.Firstname), @operator: StartsWith, value: "V"),
                                 new Filter(field: nameof(Person.Firstname), @operator: StartsWith, value: "G")
-                            }
-                        },
-                        new MultiFilter
-                        {
-                            Logic = Or,
-                            Filters = new IFilter[]
+                            ]
+                            },
+                            new MultiFilter
                             {
+                                Logic = Or,
+                                Filters =
+                            [
                                 new Filter(field: nameof(Person.Firstname), @operator: EndsWith, value: "l"),
                                 new Filter(field: nameof(Person.Firstname), @operator: EndsWith, value: "s")
+                            ]
                             }
-                        }
-                    }
+                            ]
                 }
             },
 
@@ -105,16 +104,16 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
                 new Filter("Firstname", EqualTo, "Bruce")
             },
 
-            {
-                "Firstname=Bruce|Dick",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Firstname", EqualTo, "Bruce"),
-                        new Filter("Firstname", EqualTo, "Dick")
-                    }
+                        "Firstname=Bruce|Dick",
+                        new MultiFilter
+                        {
+                            Logic = Or,
+                            Filters =
+                            [
+                                new Filter("Firstname", EqualTo, "Bruce"),
+                            new Filter("Firstname", EqualTo, "Dick")
+                            ]
                 }
             },
 
@@ -133,29 +132,29 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
                 new Filter("Height", GreaterThanOrEqual, 100)
             },
 
-            {
-                "Height=[100 TO 200]",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Height", GreaterThanOrEqual, 100),
-                        new Filter("Height", LessThanOrEqualTo, 200)
-                    }
+                        "Height=[100 TO 200]",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Height", GreaterThanOrEqual, 100),
+                            new Filter("Height", LessThanOrEqualTo, 200)
+                            ]
                 }
             },
 
-            {
-                "Height=]100 TO 200[",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Height", GreaterThan, 100),
-                        new Filter("Height", FilterOperator.LessThan, 200)
-                    }
+                        "Height=]100 TO 200[",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Height", GreaterThan, 100),
+                            new Filter("Height", FilterOperator.LessThan, 200)
+                            ]
                 }
             },
 
@@ -164,42 +163,42 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
                 new Filter("Height", LessThanOrEqualTo, 200)
             },
 
-            {
-                "Nickname=Bat*,*man",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Nickname", StartsWith, "Bat"),
-                        new Filter("Nickname", EndsWith, "man"),
-                    }
+                        "Nickname=Bat*,*man",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Nickname", StartsWith, "Bat"),
+                            new Filter("Nickname", EndsWith, "man")
+                            ]
                 }
             },
 
-            {
-                "Nickname=Bat*man",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Nickname", StartsWith, "Bat"),
-                        new Filter("Nickname", EndsWith, "man"),
-                    }
+                        "Nickname=Bat*man",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Nickname", StartsWith, "Bat"),
+                            new Filter("Nickname", EndsWith, "man")
+                            ]
                 }
             },
 
-            {
-                "Nickname=Bat*,*man*",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Nickname", StartsWith, "Bat"),
-                        new Filter("Nickname", Contains, "man"),
-                    }
+                        "Nickname=Bat*,*man*",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Nickname", StartsWith, "Bat"),
+                            new Filter("Nickname", Contains, "man")
+                            ]
                 }
             },
 
@@ -208,110 +207,110 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
                 new Filter("Firstname", NotStartsWith, "Bru")
             },
 
-            {
-                "Nickname=!(Bat*man)",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters = new IFilter[]
                     {
-                        new Filter("Nickname", NotStartsWith, "Bat"),
-                        new Filter("Nickname", NotEndsWith, "man"),
-                    }
-                }
-            },
-
-            {
-                "Firstname=Bru*&Lastname=Wayne",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
-                    {
-                        new Filter("Firstname", StartsWith, "Bru"),
-                        new Filter("Lastname", EqualTo, "Wayne"),
-                    }
-                }
-            },
-
-            {
-                "Firstname=Br[uU]ce",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters = new IFilter[]
-                    {
-                        new Filter("Firstname", EqualTo, "Bruce"),
-                        new Filter("Firstname", EqualTo, "BrUce"),
-                    }
-                }
-            },
-
-            {
-                "Firstname=*Br[uU]",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters =
-                    [
-                        new Filter("Firstname", EndsWith, "Bru"),
-                        new Filter("Firstname", EndsWith, "BrU"),
-                    ]
-                }
-            },
-
-            {
-                "Firstname=!(Bruce|Wayne)",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
-                    {
-                        new Filter("Firstname", NotEqualTo, "Bruce"),
-                        new Filter("Firstname", NotEqualTo, "Wayne")
-                    }
-                }
-            },
-
-            {
-                "Firstname=(Bruce|Wayne)",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters = new IFilter[]
-                    {
-                        new Filter("Firstname", EqualTo, "Bruce"),
-                        new Filter("Firstname", EqualTo, "Wayne")
-                    }
-                }
-            },
-
-            {
-                "Firstname=(Bat*|Sup*)|(*man|*er)",
-                new MultiFilter
-                {
-                    Logic = Or,
-                    Filters = new IFilter[]
-                    {
+                        "Nickname=!(Bat*man)",
                         new MultiFilter
                         {
                             Logic = Or,
-                            Filters = new IFilter[]
+                            Filters =
+                            [
+                                new Filter("Nickname", NotStartsWith, "Bat"),
+                            new Filter("Nickname", NotEndsWith, "man")
+                            ]
+                }
+            },
+
+                    {
+                        "Firstname=Bru*&Lastname=Wayne",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Firstname", StartsWith, "Bru"),
+                            new Filter("Lastname", EqualTo, "Wayne")
+                            ]
+                }
+            },
+
+                    {
+                        "Firstname=Br[uU]ce",
+                        new MultiFilter
+                        {
+                            Logic = Or,
+                            Filters =
+                            [
+                                new Filter("Firstname", EqualTo, "Bruce"),
+                            new Filter("Firstname", EqualTo, "BrUce")
+                            ]
+                }
+            },
+
+                    {
+                        "Firstname=*Br[uU]",
+                        new MultiFilter
+                        {
+                            Logic = Or,
+                            Filters =
+                            [
+                                new Filter("Firstname", EndsWith, "Bru"),
+                                new Filter("Firstname", EndsWith, "BrU"),
+                            ]
+                }
+            },
+
+                    {
+                        "Firstname=!(Bruce|Wayne)",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("Firstname", NotEqualTo, "Bruce"),
+                                new Filter("Firstname", NotEqualTo, "Wayne")
+                            ]
+                }
+            },
+
+                    {
+                        "Firstname=(Bruce|Wayne)",
+                        new MultiFilter
+                        {
+                            Logic = Or,
+                            Filters =
+                            [
+                                new Filter("Firstname", EqualTo, "Bruce"),
+                                new Filter("Firstname", EqualTo, "Wayne")
+                            ]
+                }
+            },
+
+                    {
+                        "Firstname=(Bat*|Sup*)|(*man|*er)",
+                        new MultiFilter
+                        {
+                            Logic = Or,
+                            Filters =
+                            [
+                                new MultiFilter
                             {
+                                Logic = Or,
+                                Filters =
+                            [
                                 new Filter("Firstname", StartsWith, "Bat"),
-                                new Filter("Firstname", StartsWith, "Sup"),
-                            }
-                        },
-                        new MultiFilter
-                        {
-                            Logic = Or,
-                            Filters = new IFilter[]
+                                new Filter("Firstname", StartsWith, "Sup")
+                            ]
+                            },
+                            new MultiFilter
                             {
+                                Logic = Or,
+                                Filters =
+                            [
                                 new Filter("Firstname", EndsWith, "man"),
-                                new Filter("Firstname", EndsWith, "er"),
-                            }
-                        },
-                    }
+                                new Filter("Firstname", EndsWith, "er")
+                            ]
+                        }
+                            ]
                 }
             },
 
@@ -325,82 +324,72 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
                 new Filter(field: "BattleCry", @operator: StartsWith, "*")
             },
 
-            {
-                "BirthDate=]2016-10-18 TO 2016-10-25[",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
                     {
-#if NET6_0_OR_GREATER
-                        new Filter(nameof(SuperHero.BirthDate), GreaterThan, DateOnly.FromDateTime(18.October(2016))),
-                        new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, DateOnly.FromDateTime(25.October(2016)))
-#else
-                            new Filter(nameof(SuperHero.BirthDate), GreaterThan, 18.October(2016)),
-                            new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, 25.October(2016))
-#endif
-                    }
-                }
-            },
-
-            {
-                "BirthDate=]2016-10-18T18:00:00 TO 2016-10-25T19:00:00[",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
-                    {
-#if NET6_0_OR_GREATER
-                        new Filter(nameof(SuperHero.BirthDate), GreaterThan, DateOnly.FromDateTime(18.October(2016))),
-                        new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, DateOnly.FromDateTime(25.October(2016)))
-#else
-                            new Filter(nameof(SuperHero.BirthDate), GreaterThan, 18.October(2016).Add(18.Hours())),
-                            new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, 25.October(2016).Add(19.Hours()))
-#endif
-                    }
-                }
-            },
-
-            {
-                "DateTimeWithOffset=]2016-10-18T18:00:00Z TO 2016-10-18T23:00:00-02:00[",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new IFilter[]
-                    {
-                        new Filter("DateTimeWithOffset", GreaterThan, 18.October(2016).Add(18.Hours()).ToDateTimeOffset()),
-                        new Filter("DateTimeWithOffset", FilterOperator.LessThan, 18.October(2016).Add(23.Hours()).ToDateTimeOffset(-2.Hours()))
-                    }
-                }
-            },
-
-            {
-                "Nickname={Bat|Sup|Wonder}*,*m[ae]n",
-                new MultiFilter
-                {
-                    Logic = And,
-                    Filters = new[]
-                    {
+                        "BirthDate=]2016-10-18 TO 2016-10-25[",
                         new MultiFilter
                         {
-                            Logic = Or,
-                            Filters = new[]
-                            {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter(nameof(SuperHero.BirthDate), GreaterThan, DateOnly.FromDateTime(18.October(2016))),
+                                new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, DateOnly.FromDateTime(25.October(2016)))
+                            ]
+                }
+            },
+
+                    {
+                        "BirthDate=]2016-10-18T18:00:00 TO 2016-10-25T19:00:00[",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter(nameof(SuperHero.BirthDate), GreaterThan, DateOnly.FromDateTime(18.October(2016))),
+                                new Filter(nameof(SuperHero.BirthDate), FilterOperator.LessThan, DateOnly.FromDateTime(25.October(2016)))
+                            ]
+                }
+            },
+
+                    {
+                        "DateTimeWithOffset=]2016-10-18T18:00:00Z TO 2016-10-18T23:00:00-02:00[",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new Filter("DateTimeWithOffset", GreaterThan, 18.October(2016).Add(18.Hours()).ToDateTimeOffset()),
+                                new Filter("DateTimeWithOffset", FilterOperator.LessThan, 18.October(2016).Add(23.Hours()).ToDateTimeOffset(-2.Hours()))
+                            ]
+                }
+            },
+
+                    {
+                        "Nickname={Bat|Sup|Wonder}*,*m[ae]n",
+                        new MultiFilter
+                        {
+                            Logic = And,
+                            Filters =
+                            [
+                                new MultiFilter
+                                {
+                                    Logic = Or,
+                                    Filters =
+                                    [
                                 new Filter(nameof(SuperHero.Nickname), StartsWith, "Bat"),
                                 new Filter(nameof(SuperHero.Nickname), StartsWith, "Sup"),
                                 new Filter(nameof(SuperHero.Nickname), StartsWith, "Wonder")
-                            }
-                        },
-                        new MultiFilter
-                        {
-                            Logic = Or,
-                            Filters = new[]
-                            {
+                            ]
+                                },
+                                new MultiFilter
+                                {
+                                    Logic = Or,
+                                    Filters =
+                                    [
                                 new Filter(nameof(SuperHero.Nickname), EndsWith, "man"),
                                 new Filter(nameof(SuperHero.Nickname), EndsWith, "men")
-                            }
+                            ]
                         }
-                    }
+                    ]
                 }
             },
         };
@@ -460,41 +449,41 @@ public class FilterExtensionsTests(ITestOutputHelper outputHelper)
             .Be(expected);
     }
 
-    public static TheoryData<string, FilterOptions, MultiFilter> ToFilterWithFilterOptionsCases
-    {
-        get
+        public static TheoryData<string, FilterOptions, MultiFilter> ToFilterWithFilterOptionsCases
         {
-            FilterLogic[] logics = [And, Or];
-            TheoryData<string, FilterOptions, MultiFilter> cases = [];
-            foreach (FilterLogic logic in logics)
+            get
             {
-                cases.Add
-                (
-                    "snake_case_property=10&PascalCaseProperty=value",
-                    new FilterOptions { Logic = logic },
-                    new MultiFilter
-                    {
-                        Logic = logic,
-                        Filters = new IFilter[]
+                FilterLogic[] logics = [And, Or];
+                TheoryData<string, FilterOptions, MultiFilter> cases = [];
+                foreach (FilterLogic logic in logics)
+                {
+                    cases.Add
+                    (
+                        "snake_case_property=10&PascalCaseProperty=value",
+                        new FilterOptions { Logic = logic },
+                        new MultiFilter
                         {
+                            Logic = logic,
+                            Filters =
+                        [
                             new Filter("snake_case_property", EqualTo, "10"),
-                            new Filter("PascalCaseProperty", EqualTo, "value"),
-                        }
+                            new Filter("PascalCaseProperty", EqualTo, "value")
+                        ]
                     }
                 );
 
-                cases.Add
-                (
-                    "snake_case_property=10&PascalCaseProperty=value",
-                    new FilterOptions { Logic = logic },
-                    new MultiFilter
-                    {
-                        Logic = logic,
-                        Filters = new IFilter[]
+                    cases.Add
+                    (
+                        "snake_case_property=10&PascalCaseProperty=value",
+                        new FilterOptions { Logic = logic },
+                        new MultiFilter
                         {
+                            Logic = logic,
+                            Filters =
+                        [
                             new Filter("snake_case_property", EqualTo, "10"),
                             new Filter("PascalCaseProperty", EqualTo, "value")
-                        }
+                        ]
                     }
                 );
             }

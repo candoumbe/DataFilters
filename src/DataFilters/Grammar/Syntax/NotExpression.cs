@@ -1,6 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax;
+﻿using System;
+namespace DataFilters.Grammar.Syntax;
 
-using System;
 
 /// <summary>
 /// An expression that negate whatever <see cref="FilterExpression"/> wrapped inside.
@@ -45,7 +45,7 @@ public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>,
     public override string ToString(string format, IFormatProvider formatProvider)
     {
         FormattableString formattable = format switch
-        {
+    {
             "d" or "D" => $"@{nameof(NotExpression)}({Expression:d})",
             "f" or "F" => $"@{nameof(NotExpression)}[{Expression:f}]",
             null or "" => $"{EscapedParseableString}",
@@ -79,4 +79,5 @@ public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>,
 
     ///<inheritdoc/>
     public static bool operator !=(NotExpression left, NotExpression right) => !(left == right);
+
 }

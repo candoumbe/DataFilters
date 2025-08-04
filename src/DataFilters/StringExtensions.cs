@@ -1,18 +1,27 @@
-﻿using DataFilters;
 using FluentValidation.Results;
+
+using DataFilters;
 using System.Linq;
+
 using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
+
 using Superpower;
 using Superpower.Model;
+
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using DataFilters.Casing;
-using Microsoft.Extensions.Primitives;
-using System.Runtime.InteropServices;
 
 using static DataFilters.FilterOperator;
+
+using DataFilters.Casing;
+
+#if STRING_SEGMENT
+    using Microsoft.Extensions.Primitives;
+#endif
+
+using System.Runtime.InteropServices;
 using static DataFilters.OrderDirection;
 
 #if NET7_0_OR_GREATER
@@ -142,40 +151,40 @@ public static class StringExtensions
             switch (expression)
             {
                 case ConstantValueExpression constant:
-                    string constantValue = constant.Value;
+                    string constantValue = constant.Value.ToStringValue();
 
                     filter = new Filter(propInfo.Name,
                         EqualTo,
                         tc.ConvertFromInvariantString(constantValue));
                     break;
                 case StartsWithExpression startsWith:
-                    filter = new Filter(propInfo.Name, StartsWith, startsWith.Value);
+                    filter = new Filter(propInfo.Name, StartsWith, startsWith.Value.ToStringValue());
                     break;
                 case EndsWithExpression endsWith:
-                    filter = new Filter(propInfo.Name, EndsWith, endsWith.Value);
+                    filter = new Filter(propInfo.Name, EndsWith, endsWith.Value.ToStringValue());
                     break;
-                case ContainsExpression endsWith:
-                    filter = new Filter(propInfo.Name, Contains, endsWith.Value);
-                    break;
-                case NotExpression not:
-                    filter = ConvertExpressionToFilter(propInfo, not.Expression, tc).Negate();
-                    break;
-                case OrExpression orExpression:
-                    filter = new MultiFilter
-                    {
-                        Logic = FilterLogic.Or,
-                        Filters =
+                case ContainsExpression contains:
+                    filter = new Filter(propInfo.Name, Contains, contains.Value.ToStringValue());
+                        break;
+                    case NotExpression not:
+                        filter = ConvertExpressionToFilter(propInfo, not.Expression, tc).Negate();
+                        break;
+                    case OrExpression orExpression:
+                        filter = new MultiFilter
+                        {
+                            Logic = FilterLogic.Or,
+                            Filters =
                         [
                             ConvertExpressionToFilter(propInfo, orExpression.Left, tc),
                             ConvertExpressionToFilter(propInfo, orExpression.Right, tc)
                         ]
-                    };
-                    break;
-                case AndExpression andExpression:
-                    filter = new MultiFilter
-                    {
-                        Logic = FilterLogic.And,
-                        Filters =
+                        };
+                        break;
+                    case AndExpression andExpression:
+                        filter = new MultiFilter
+                        {
+                            Logic = FilterLogic.And,
+                            Filters =
                         [
                             ConvertExpressionToFilter(propInfo, andExpression.Left, tc),
                             ConvertExpressionToFilter(propInfo, andExpression.Right, tc)
@@ -201,10 +210,9 @@ public static class StringExtensions
                     else
                     {
                         List<IFilter> filters = new(possibleValues.Length);
-                        filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(propInfo, item, tc)));
+                            filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(propInfo, item, tc)));
 
-                        filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
-                    }
+                        filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };}
 
                     break;
                 case IntervalExpression range:
@@ -213,7 +221,7 @@ public static class StringExtensions
                         ConvertBoundaryExpressionToConstantExpression(BoundaryExpression input)
                         => input?.Expression switch
                         {
-                            NumericValueExpression numeric => ( new StringValueExpression(numeric.Value),
+                            NumericValueExpression numeric => (new StringValueExpression(numeric.Value),
                                 input.Included ),
                             DateTimeExpression { Date: not null, Time: null } dateTime => (
                                 new StringValueExpression(
@@ -237,7 +245,7 @@ public static class StringExtensions
                             DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (
                                 new StringValueExpression(dateTime.EscapedParseableString), input.Included ),
                             AsteriskExpression or null => default, // because this is equivalent to an unbounded range
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
                                 _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
 #else
                             _ => throw new NotSupportedException($"Unsupported boundary type {input.Expression.GetType()}")
@@ -254,12 +262,12 @@ public static class StringExtensions
 
                     if (min.constantExpression?.Value is not null && max.constantExpression?.Value is not null)
                     {
-                        string minValue = min.constantExpression.Value;
-                        string maxValue = max.constantExpression.Value;
-                        filter = new MultiFilter
-                        {
-                            Logic = FilterLogic.And,
-                            Filters =
+                        string minValue = min.constantExpression.Value.ToStringValue();
+                        string maxValue = max.constantExpression.Value.ToStringValue();
+                            filter = new MultiFilter
+                            {
+                                Logic = FilterLogic.And,
+                                Filters =
                             [
                                 new Filter(propInfo.Name,
                                     minOperator,
@@ -272,12 +280,12 @@ public static class StringExtensions
                     }
                     else if (min.constantExpression?.Value is not null)
                     {
-                        string minValue = min.constantExpression.Value;
+                        string minValue = min.constantExpression.Value.ToStringValue();
                         filter = new Filter(propInfo.Name, minOperator, tc.ConvertFrom(minValue));
                     }
                     else
                     {
-                        string maxValue = max.constantExpression.Value;
+                        string maxValue = max.constantExpression.Value.ToStringValue();
                         filter = new Filter(propInfo.Name, maxOperator, tc.ConvertFrom(maxValue));
                     }
 

@@ -1,10 +1,11 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Utilities;
+
+namespace DataFilters.Grammar.Syntax;
+
 
 /// <summary>
 /// A <see cref="FilterExpression"/> that holds a regex pattern as its <see cref="Values"/>.
@@ -63,30 +64,31 @@ public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpr
     public override double Complexity => Values.Select(x => x.Complexity)
         .Aggregate((initial, current) => initial * current);
 
-    ///<inheritdoc/>
-    public override bool IsEquivalentTo(FilterExpression other)
-    {
-        bool equivalent = false;
-        if (other is not null)
+        ///<inheritdoc/>
+        public override bool IsEquivalentTo(FilterExpression other)
         {
-            if (ReferenceEquals(this, other))
+            bool equivalent = false;
+            if (other is not null)
             {
-                equivalent = true;
-            }
-            else if (other is BracketExpression bracketExpression)
-            {
-                equivalent = Equals(bracketExpression);
-            }
-            else if (other is OneOfExpression oneOf)
-            {
-                equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<StringValueExpression>().Count())
-                             && oneOf.Values.All(x => x is StringValueExpression)
+                if (ReferenceEquals(this, other))
+                {
+                    equivalent = true;
+                }
+                else if (other is BracketExpression bracketExpression)
+                {
+                    equivalent = Equals(bracketExpression);
+                }
+                else if (other is OneOfExpression oneOf)
+                {
+                    equivalent = oneOf.Values.Exactly(oneOf.Values.OfType<StringValueExpression>().Count())
+                        && oneOf.Values.All(x => x is StringValueExpression)
                              && Values.All(value => value switch
                              {
-                                 ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
+                                 // TODO replace call to .ToStringValue with instanciation of new StringSegmentLinkedList([chr])
+                            ConstantBracketValue constant => constant.Value.All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.ToStringValue().Equals(chr.ToString()))),
                                  RangeBracketValue range => Enumerable.Range(range.Start, range.End - range.Start + 1)
                                      .Select(ascii => (char)ascii)
-                                     .All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.Equals(chr.ToString()))),
+                                     .All(chr => oneOf.Values.Any(expr => expr.As<StringValueExpression>().Value.ToStringValue().Equals(chr.ToString()))),
                                  _ => throw new NotSupportedException("Unsupported value")
                              });
             }

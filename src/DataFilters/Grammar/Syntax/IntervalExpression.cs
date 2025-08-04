@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 namespace DataFilters.Grammar.Syntax;
 
@@ -28,12 +28,12 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
     /// </summary>
     /// <param name="min">Lower bound of the interval</param>
     /// <param name="max">Upper bound of the interval</param>
-    /// <exception cref="ArgumentNullException">if both <paramref name="min"/> and <paramref name="max"/> are <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException">if both <paramref name="min"/> and <paramref name="max"/> are <c>null</c>.</exception>
     /// <exception cref="BoundariesTypeMismatchException">if <paramref name="min"/> and <paramref name="max"/> types are not "compatible".</exception>
     /// <exception cref="IncorrectBoundaryException">if
     /// <list type="bullet">
     ///     <item>both<paramref name="min"/> and <paramref name="max"/> types are <see cref="AsteriskExpression"/>.</item>
-    ///     <item>both<paramref name="min"/> is <see cref="AsteriskExpression"/> and <paramref name="max"/> <see langword="null"/>.</item>
+    ///     <item>both<paramref name="min"/> is <see cref="AsteriskExpression"/> and <paramref name="max"/> <c>null</c>.</item>
     /// </list>
     /// </exception>
     /// <remarks>
@@ -43,7 +43,7 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
     {
         switch (min?.Expression)
         {
-            case AsteriskExpression when max?.Expression is AsteriskExpression expression:
+            case AsteriskExpression when max?.Expression is AsteriskExpression:
                 throw new IncorrectBoundaryException($"{nameof(min)} and {nameof(max)} cannot be both {nameof(AsteriskExpression)}");
             case AsteriskExpression when max is null:
                 throw new IncorrectBoundaryException($"{nameof(max)} cannot be null when {nameof(min)} is {nameof(AsteriskExpression)}");

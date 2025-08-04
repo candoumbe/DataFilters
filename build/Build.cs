@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Candoumbe.Pipelines.Components;
-using Candoumbe.Pipelines.Components.Formatting;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
@@ -16,13 +15,15 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Tools.GitHub;
 
 [GitHubActions(
     "integration",
-    GitHubActionsImage.Ubuntu2404,
+    GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranchesIgnore = [IHaveMainBranch.MainBranchName],
+    EnableGitHubToken = true,
     PublishArtifacts = true,
     InvokedTargets = [nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(IPack.Pack)],
     CacheKeyFiles = ["global.json", "src/**/*.csproj"],
@@ -41,13 +42,15 @@ using Nuke.Common.Tools.DotNet;
 )]
 [GitHubActions(
     "delivery",
-    GitHubActionsImage.Ubuntu2404,
+    GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     OnPushBranches = [IHaveMainBranch.MainBranchName, IGitFlow.ReleaseBranch + "/*"],
     InvokedTargets =
     [
-        nameof(IUnitTest.UnitTests), nameof(IPushNugetPackages.Publish), nameof(ICreateGithubRelease.AddGithubRelease)
+        nameof(IUnitTest.UnitTests),
+        nameof(IPushNugetPackages.Publish),
+        nameof(ICreateGithubRelease.AddGithubRelease)
     ],
     EnableGitHubToken = true,
     CacheKeyFiles = ["global.json", "src/**/*.csproj"],
@@ -66,7 +69,7 @@ using Nuke.Common.Tools.DotNet;
     ]
 )]
 
-// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2404,
+// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
 //     AutoGenerate = false,
 //     FetchDepth = 0,
 //     OnCronSchedule = "0 0 * * *",
@@ -89,7 +92,7 @@ using Nuke.Common.Tools.DotNet;
 //     ],
 //     PublishArtifacts = true
 // )]
-[GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2404,
+[GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
@@ -127,10 +130,13 @@ public class Build : EnhancedNukeBuild,
     IPushNugetPackages,
     ICreateGithubRelease
 {
-    [Parameter("API key used to publish artifacts to Nuget.org")] [Secret]
+    [Parameter("API key used to publish artifacts to Nuget.org")]
+    [Secret]
     public readonly string NugetApiKey;
 
-    [Solution] [Required] public readonly Solution Solution;
+    [Solution]
+    [Required]
+    public readonly Solution Solution;
 
     ///<inheritdoc/>
     Solution IHaveSolution.Solution => Solution;
@@ -163,7 +169,11 @@ public class Build : EnhancedNukeBuild,
         =>
         [
             ..Projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                                                                              testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests", StringComparison.InvariantCultureIgnoreCase)),
+                                                                              testProjects: projectName switch
+                                                                              {
+                                                                                  "DataFilters" => Solution.AllProjects.Where(csproj => csproj.Name.EndsWith(".UnitTests")),
+                                                                                  _ => Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests"))
+                                                                              },
                                                                               configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
         ];
 

@@ -332,7 +332,7 @@ public class IntervalExpressionTests(ITestOutputHelper outputHelper)
         // Arrange
         IntervalExpression range = new(new BoundaryExpression(boundaryExpression, minIncluded), new BoundaryExpression(boundaryExpression, maxIsIncluded));
 
-        // Act 
+        // Act
         bool actual = range.IsEquivalentTo(filterExpression);
 
         // Assert
@@ -387,7 +387,7 @@ public class IntervalExpressionTests(ITestOutputHelper outputHelper)
     [MemberData(nameof(SimplifyCases))]
     public void Given_IntervalExpression_Simplify_should_return_expected_expression(IntervalExpression rangeExpression, FilterExpression expected, string reason)
     {
-        outputHelper.WriteLine($"Range expression : {rangeExpression}");
+        outputHelper.WriteLine($"Range expression : {rangeExpression:d}");
 
         // Act
         FilterExpression actual = rangeExpression.Simplify();

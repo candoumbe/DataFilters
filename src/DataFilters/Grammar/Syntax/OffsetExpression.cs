@@ -29,25 +29,25 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
 
     private readonly Lazy<string> _lazyParseableString;
 
-    /// <summary>
-    /// Builds a new <see cref="OffsetExpression"/> instance
-    /// </summary>
-    /// <param name="sign"></param>
-    /// <param name="hours"></param>
-    /// <param name="minutes">The sign of </param>
-    public OffsetExpression(NumericSign sign = NumericSign.Plus, uint hours = 0, uint minutes = 0)
-    {
-        if (hours > 23)
+        /// <summary>
+        /// Builds a new <see cref="OffsetExpression"/> instance
+        /// </summary>
+        /// <param name="sign"></param>
+        /// <param name="hours"></param>
+        /// <param name="minutes">The sign of </param>
+        public OffsetExpression(NumericSign sign = NumericSign.Plus, uint hours = 0, uint minutes = 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(hours),
-                $"{nameof(hours)} must be between 0 and 23 inclusive");
-        }
+            if (hours > 23)
+            {
+                throw new ArgumentOutOfRangeException(nameof(hours),
+                    $"{nameof(hours)} must be between 0 and 23 inclusive");
+            }
 
-        if (minutes > 59)
-        {
-            throw new ArgumentOutOfRangeException(nameof(minutes),
-                $"{nameof(minutes)} must be between 0 and 59 inclusive");
-        }
+            if (minutes > 59)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minutes),
+                    $"{nameof(minutes)} must be between 0 and 59 inclusive");
+            }
 
         Hours = (int)hours;
         Minutes = (int)minutes;
@@ -88,16 +88,16 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
         }
 #endif
 
-    ///<inheritdoc/>
-    public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString,
-        out string originalString)
-    {
-        sign = Sign;
-        hours = Hours;
-        minutes = Minutes;
-        escapedParseableString = EscapedParseableString;
-        originalString = OriginalString;
-    }
+        ///<inheritdoc/>
+        public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString,
+            out string originalString)
+        {
+            sign = Sign;
+            hours = Hours;
+            minutes = Minutes;
+            escapedParseableString = EscapedParseableString;
+            originalString = OriginalString;
+        }
 
     /// <inheritdoc />
     public static bool operator ==(OffsetExpression left, OffsetExpression right) => left switch

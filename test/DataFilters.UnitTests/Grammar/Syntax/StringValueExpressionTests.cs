@@ -1,19 +1,20 @@
 ﻿using System.Linq;
 using System.Text;
 using DataFilters.Grammar.Parsing;
-
-namespace DataFilters.UnitTests.Grammar.Syntax;
-
 using System;
+using Candoumbe.MiscUtilities.Comparers;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
+using Microsoft.Extensions.Primitives;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 [UnitTest]
 public class StringValueExpressionTests(ITestOutputHelper outputHelper)
@@ -23,26 +24,23 @@ public class StringValueExpressionTests(ITestOutputHelper outputHelper)
         .BeAssignableTo<FilterExpression>().And
         .Implement<IEquatable<StringValueExpression>>();
 
-    [Fact]
-    public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
+    public static TheoryData<StringSegment, string> CtorThrowsExceptionCases
+        => new()
+        {
+            { null, "The parameter of  StringValueExpression's constructor cannot be null" },
+            { string.Empty, "The parameter of  StringValueExpression's constructor cannot be empty" }
+        };
+
+    [Theory]
+    [MemberData(nameof(CtorThrowsExceptionCases))]
+    public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null(StringSegment value, string reason)
     {
         // Act
-        Action action = () => _ = new StringValueExpression(null);
+        Action action = () => _ = new StringValueExpression(value);
 
         // Assert
         action.Should()
-            .ThrowExactly<ArgumentNullException>($"The parameter of  {nameof(StringValueExpression)}'s constructor cannot be null");
-    }
-
-    [Fact]
-    public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
-    {
-        // Act
-        Action action = () => _ = new StringValueExpression(string.Empty);
-
-        // Assert
-        action.Should()
-            .ThrowExactly<ArgumentOutOfRangeException>($"The parameter of  {nameof(StringValueExpression)}'s constructor cannot be empty");
+            .ThrowExactly<ArgumentOutOfRangeException>(reason);
     }
 
     [Fact]
@@ -72,24 +70,7 @@ public class StringValueExpressionTests(ITestOutputHelper outputHelper)
     }
 
     public static TheoryData<StringValueExpression, object, bool> EqualsCases
-        => new()
-        {
-            {
-                new StringValueExpression("True"),
-                new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")),
-                false
-            },
-            {
-                new StringValueExpression("0"),
-                new NumericValueExpression("0"),
-                true
-            },
-            {
-                new StringValueExpression("True"),
-                new StringValueExpression("True"),
-                true
-            }
-        };
+        => new() { { new StringValueExpression("True"), new OrExpression(new StringValueExpression("True"), new StringValueExpression("True")), false }, { new StringValueExpression("0"), new NumericValueExpression("0"), true }, { new StringValueExpression("True"), new StringValueExpression("True"), true }, { new StringValueExpression(@"""True"""), new TextExpression("True"), true } };
 
     [Theory]
     [MemberData(nameof(EqualsCases))]
@@ -123,7 +104,7 @@ public class StringValueExpressionTests(ITestOutputHelper outputHelper)
         StringValueExpression second = new(input.Get);
 
         // Act
-        (first.Equals(second) == Equals(first.Value, second.Value))
+        (first.Equals(second) == first.Value.Equals(second.Value, CharComparer.Ordinal))
             .ToProperty()
             .QuickCheckThrowOnFailure(outputHelper);
     }
@@ -167,7 +148,7 @@ public class StringValueExpressionTests(ITestOutputHelper outputHelper)
         // Arrange
         string input = inputGenerator.Item;
         StringValueExpression expression = new(input);
-        StringBuilder sbExpected = new (input.Length * 2);
+        StringBuilder sbExpected = new(input.Length * 2);
 
         foreach (char c in input)
         {
@@ -175,6 +156,7 @@ public class StringValueExpressionTests(ITestOutputHelper outputHelper)
             {
                 sbExpected.Append('\\');
             }
+
             sbExpected.Append(c);
         }
 

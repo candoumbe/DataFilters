@@ -119,7 +119,7 @@ public class BracketExpressionTests(ITestOutputHelper outputHelper)
         OneOfExpression oneOf = new(Enumerable.Range(rangeBracketValue.Item.Start,
                 rangeBracketValue.Item.End - rangeBracketValue.Item.Start + 1)
             .Select(ascii => new StringValueExpression(((char)ascii).ToString()))
-            .ToArray());
+            .ToArray<FilterExpression>());
 
         // Act
         bool actual = rangeBracketExpression.IsEquivalentTo(oneOf);

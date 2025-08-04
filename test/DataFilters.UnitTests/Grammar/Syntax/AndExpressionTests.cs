@@ -1,5 +1,3 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +10,8 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
+
 [UnitTest]
 [Feature(nameof(AndExpression))]
 public class AndExpressionTests(ITestOutputHelper outputHelper)
@@ -21,7 +21,7 @@ public class AndExpressionTests(ITestOutputHelper outputHelper)
         .BeAssignableTo<FilterExpression>().And
         .Implement<IEquatable<AndExpression>>().And
         .Implement<IHaveComplexity>().And
-        .HaveConstructor(new[] { typeof(FilterExpression), typeof(FilterExpression) }).And
+        .HaveConstructor([typeof(FilterExpression), typeof(FilterExpression)]).And
         .HaveProperty<FilterExpression>("Left").And
         .HaveProperty<FilterExpression>("Right");
 

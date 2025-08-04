@@ -1,6 +1,6 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
 using System;
+
+namespace DataFilters.Grammar.Syntax;
 
 /// <summary>
 /// <see cref="AsteriskExpression"/> represent a <c>*</c> that can be used as a building block for more

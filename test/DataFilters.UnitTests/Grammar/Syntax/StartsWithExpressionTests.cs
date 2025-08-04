@@ -1,10 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
+using Candoumbe.Types.Strings;
 using DataFilters.Grammar.Parsing;
-
-namespace DataFilters.UnitTests.Grammar.Syntax;
-
-using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
@@ -13,6 +11,8 @@ using FsCheck.Fluent;
 using FsCheck.Xunit;
 using Xunit;
 using Xunit.Categories;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 [UnitTest("StartsWith")]
 public class StartsWithExpressionTests
@@ -48,14 +48,14 @@ public class StartsWithExpressionTests
     }
 
     [Fact]
-    public void Ctor_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
+    public void Ctor_DoesNot_Throws_ArgumentOutOfRangeException_When_Argument_Is_Empty()
     {
         // Act
         Action action = () => _ = new StartsWithExpression(string.Empty);
 
         // Assert
         action.Should()
-            .ThrowExactly<ArgumentOutOfRangeException>("The parameter of the constructor cannot be empty");
+            .NotThrow("The parameter of the constructor can be empty");
     }
 
     [Fact]
@@ -100,20 +100,20 @@ public class StartsWithExpressionTests
 
     [Property]
     public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString textGenerator)
-    {
-        // Arrange
-        string text = textGenerator.Item;
-        StartsWithExpression expression = new(text);
-        StringValueExpression stringValueExpression = new(text);
-        StringBuilder sb = new (text.Length * 2);
-        foreach (char chr in text)
         {
-            if (FilterTokenizer.SpecialCharacters.Contains(chr))
+            // Arrange
+            string text = textGenerator.Item;
+            StartsWithExpression expression = new(text);
+        StringValueExpression stringValueExpression = new(text);
+            StringBuilder sb = new (text.Length * 2);
+            foreach (char chr in text)
             {
-                sb = sb.Append(FilterTokenizer.EscapedCharacter);
+                if (FilterTokenizer.SpecialCharacters.Contains(chr))
+                {
+                    sb = sb.Append(FilterTokenizer.EscapedCharacter);
+                }
+                sb = sb.Append(chr);
             }
-            sb = sb.Append(chr);
-        }
         string expected = $"{stringValueExpression.EscapedParseableString}*";
 
         // Act
@@ -148,9 +148,9 @@ public class StartsWithExpressionTests
         StartsWithExpression rightStartsWith = rightOperandGen.Item;
 
         // bat*man*
-        OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+        OneOfExpression expected = new(new StringValueExpression(new StringSegmentLinkedList().Append(leftStartsWith.Value).Append(rightStartsWith.Value)),
             new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-            new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+            new StartsWithExpression(new StringSegmentLinkedList().Append(leftStartsWith.Value).Append(rightStartsWith.Value)));
 
         // Act
         OneOfExpression actual = leftStartsWith + rightStartsWith;
@@ -166,9 +166,9 @@ public class StartsWithExpressionTests
         StartsWithExpression leftStartsWith = leftOperandGen.Item;
         ContainsExpression rightStartsWith = rightOperandGen.Item;
 
-        OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value + rightStartsWith.Value),
+        OneOfExpression expected = new(new StringValueExpression(leftStartsWith.Value.Append(rightStartsWith.Value)),
             new AndExpression(leftStartsWith, new ContainsExpression(rightStartsWith.Value)),
-            new StartsWithExpression(leftStartsWith.Value + rightStartsWith.Value));
+            new StartsWithExpression(leftStartsWith.Value.Append(rightStartsWith.Value)));
 
         // Act
         OneOfExpression actual = leftStartsWith + rightStartsWith;

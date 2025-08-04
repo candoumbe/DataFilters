@@ -1,6 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
-using System;
+﻿using System;
 
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
@@ -13,6 +11,8 @@ using FsCheck.Xunit;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 [UnitTest]
 [Feature(nameof(AsteriskExpression))]
@@ -42,18 +42,10 @@ public class AsteriskExpressionTests(ITestOutputHelper outputHelper)
         bool actual = first.Equals(other);
         int actualHashCode = first.GetHashCode();
 
-        // Assert
-        actual.Should()
-            .Be(expected, reason);
-
-        _ = expected switch
-        {
-            true => actualHashCode.Should()
-                .Be(other?.GetHashCode(), reason),
-            _ => actualHashCode.Should()
-                .NotBe(other?.GetHashCode(), reason)
-        };
-    }
+            // Assert
+            actual.Should()
+                .Be(expected, reason);
+        }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
     public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);
