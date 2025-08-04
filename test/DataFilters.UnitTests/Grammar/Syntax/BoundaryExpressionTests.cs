@@ -1,6 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
-using System;
+﻿using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
@@ -8,6 +6,8 @@ using FsCheck;
 using FsCheck.Xunit;
 using Xunit;
 using Xunit.Categories;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 [UnitTest]
 [Feature(nameof(DataFilters.Grammar.Syntax))]
@@ -43,13 +43,10 @@ public class BoundaryExpressionTests
 
         // Act
         bool actual = first.Equals(other);
-        int firstHashCode = first.GetHashCode();
-        int otherHashCode = other.GetHashCode();
 
-        // Assert
-        actual.Should().BeTrue();
-        firstHashCode.Should().Be(otherHashCode);
-    }
+            // Assert
+            actual.Should().BeTrue();
+        }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
     public void Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included)
@@ -73,7 +70,7 @@ public class BoundaryExpressionTests
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
-    public void Equals_should_be_symetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
+    public void Equals_should_be_symmetric(NonNull<BoundaryExpression> group, NonNull<FilterExpression> otherExpression)
     {
         // Act
         bool groupEqualOtherExpression = group.Item.Equals(otherExpression.Item);

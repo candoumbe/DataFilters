@@ -1,69 +1,70 @@
 ﻿
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using DataFilters.Grammar.Parsing;
+using Candoumbe.Types.Strings;
+using Microsoft.Extensions.Primitives;
+using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
 namespace DataFilters.Grammar.Syntax;
-
-using static FilterTokenizer;
 
 /// <summary>
 /// Wraps a string that represents a constant string value
 /// </summary>
-/// <remarks>
-/// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
-/// </remarks>
-/// <param name="value">value of the expression.</param>
-/// <remarks>
-/// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
-/// </remarks>
-public class StringValueExpression(string value) : ConstantValueExpression(value), IEquatable<StringValueExpression>
+public class StringValueExpression : ConstantValueExpression, IEquatable<StringValueExpression>
 {
-    private readonly Lazy<string> _lazyParseableString = new(() =>
+    private readonly Lazy<string> _lazyParseableString;
+    private readonly Lazy<string> _lazyOriginalString;
+
+    /// <summary>
+    /// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
+    /// </remarks>
+    /// <param name="value">value of the expression.</param>
+    /// <exception cref="Argument"></exception>
+    public StringValueExpression(ReadOnlySpan<char> value) : this(new StringSegmentLinkedList(value))
     {
-        // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-        bool requireEscapingCharacters = value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
-        StringBuilder parseableString;
+        // if (!value.HasValue)
+        // {
+        //     throw new ArgumentNullException(nameof(value));
+        // }
 
-        if (requireEscapingCharacters)
+        if (value.IsEmpty)
         {
-            parseableString = new StringBuilder(value.Length * 2);
-            foreach (char chr in value)
-            {
-                if (SpecialCharacters.Contains(chr))
-                {
-                    parseableString = parseableString.Append('\\');
-                }
-                parseableString = parseableString.Append(chr);
-            }
+            throw new ArgumentOutOfRangeException(nameof(value), value.ToString(), $"{nameof(value)} cannot be null or empty");
         }
-        else
-        {
-            parseableString = new StringBuilder(value);
-        }
+    }
 
-        return parseableString.ToString();
-    });
+    /// <summary>
+    /// Builds a new <see cref="StringValueExpression"/> instance that can wrap a string value
+    /// </summary>
+    /// <param name="value">value of the expression.</param>
+    public StringValueExpression(StringSegmentLinkedList value) : base(value)
+    {
+        _lazyOriginalString = new Lazy<string>(value.ToStringValue);
+        _lazyParseableString = new Lazy<string>(() => Value.Replace(chr => SpecialCharacters.Contains(chr),
+                                      EscapedSpecialCharacters).ToStringValue());
+    }
 
     ///<inheritdoc/>
     public override string EscapedParseableString => _lazyParseableString.Value;
 
     ///<inheritdoc/>
-    public override string OriginalString => Value;
+    public override string OriginalString => _lazyOriginalString.Value;
 
     ///<inheritdoc/>
-    public virtual bool Equals(StringValueExpression other) => Equals(Value, other?.Value);
+    public virtual bool Equals(StringValueExpression other) => Equals(_lazyOriginalString.Value, other?._lazyOriginalString.Value);
 
-    ///<inheritdoc/>
-    public override bool Equals(object obj) =>
-        obj switch
-        {
-            NumericValueExpression numericValue => Value.Equals(numericValue.Value),
-            not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
-            _ => false
-        };
+        ///<inheritdoc/>
+        public override bool Equals(object obj) =>
+            obj switch
+            {
+                NumericValueExpression numericValue => _lazyOriginalString.Value.Equals(numericValue.OriginalString),
+                TextExpression text => text.EscapedParseableString == OriginalString,
+                not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
+                _ => false
+            };
 
     /// <inheritdoc/>
     public override bool IsEquivalentTo(FilterExpression other)
@@ -80,11 +81,21 @@ public class StringValueExpression(string value) : ConstantValueExpression(value
     ///<inheritdoc/>
     public override double Complexity => 1;
 
-    ///<inheritdoc/>
+    /// <summary>
+        /// Checks if <paramref name="left"/> and <paramref name="right"/> values are equal.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> and <paramref name="right"/> are equal, and <see langword="false"/> otherwise.</returns>
     public static bool operator ==(StringValueExpression left, StringValueExpression right)
         => (left is null && right is null) || (left?.Equals(right) ?? false);
 
-    ///<inheritdoc/>
+    /// <summary>
+        /// Checks if <paramref name="left"/> and <paramref name="right"/> values are not equal.
+        /// </summary>
+        /// <param name="left">left operand</param>
+        /// <param name="right">right operand</param>
+        /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>, and <see langword="false"/> otherwise.</returns>
     public static bool operator !=(StringValueExpression left, StringValueExpression right)
         => !(left == right);
 }

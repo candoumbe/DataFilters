@@ -1,9 +1,10 @@
-﻿namespace DataFilters;
+﻿using FluentValidation;
+using System.Linq;
+
+namespace DataFilters;
 
 using System;
-using System.Linq;
 using System.Text.RegularExpressions;
-using FluentValidation;
 
 /// <summary>
 /// Validates sort expression
@@ -26,9 +27,10 @@ public class OrderValidator : AbstractValidator<string>
         .WithMessage(search =>
         {
             string[] incorrectExpressions = search.Split([Separator])
-                .Where(x => !_orderRegex.IsMatch(x))
-                .Select(x => $@"""{x}""")
-                .ToArray();
+                // TODO use ZLinq
+                        .Where(x => !_orderRegex.IsMatch(x))
+                        .Select(x => $@"""{x}""")
+                        .ToArray();
 
             return $"Sort expression{(incorrectExpressions.Length == 1 ? string.Empty : "s")} {string.Join(", ", incorrectExpressions)} " +
                    $@"do{(incorrectExpressions.Length == 1 ? "es" : string.Empty)} not match ""{Pattern}"".";

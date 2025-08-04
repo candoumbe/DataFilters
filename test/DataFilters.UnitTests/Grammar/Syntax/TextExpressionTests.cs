@@ -1,12 +1,9 @@
 ﻿using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-
 using FluentAssertions;
-
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
-
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
@@ -19,6 +16,7 @@ public class TextExpressionTests(ITestOutputHelper outputHelper)
     [Theory]
     [InlineData(@"<\\Y!A", @"""<\\\\Y!A""")]
     [InlineData("1.\"Foo!", @"""1.\""Foo!""")]
+    [InlineData("a", @"""a""")]
     public void Given_input_EscapedParseableString_should_be_correct(string input, string expected)
     {
         // Arrange
@@ -95,5 +93,21 @@ public class TextExpressionTests(ITestOutputHelper outputHelper)
             .StartWith(@"""").And
             .EndWith(@"""").And
             .Be(expected);
+    }
+
+
+    public static TheoryData<TextExpression, object, bool, string> EqualCases
+        => new() { { new TextExpression(""), new StringValueExpression(@""""""), true, "" } };
+
+
+    [Theory]
+    [MemberData(nameof(EqualCases))]
+    public void Equals_should_behave_as_expected(TextExpression current, object other, bool expected, string reason)
+    {
+        // Act
+        bool actual = current.Equals(other);
+
+        // Assert
+        actual.Should().Be(expected, reason);
     }
 }

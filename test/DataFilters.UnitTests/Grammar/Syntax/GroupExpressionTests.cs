@@ -1,6 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
-using System;
+﻿using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
@@ -8,6 +6,8 @@ using FsCheck;
 using FsCheck.Xunit;
 using Xunit;
 using Xunit.Abstractions;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 public class GroupExpressionTests(ITestOutputHelper outputHelper)
 {
@@ -125,13 +125,13 @@ public class GroupExpressionTests(ITestOutputHelper outputHelper)
                 true,
                 "Two instances with inner expressions that are equal"
             },
-            {
-                new GroupExpression(new NumericValueExpression("0")),
-                new GroupExpression(new StringValueExpression("0")),
-                true,
-                "Two instances with inner expressions that are equal"
-            }
-        };
+                {
+                    new GroupExpression(new NumericValueExpression("0")),
+                    new GroupExpression(new StringValueExpression("0")),
+                    true,
+                    "Two instances with inner expressions that are equal"
+                }
+            };
 
     [Theory]
     [MemberData(nameof(EqualsCases))]
@@ -236,16 +236,16 @@ public class GroupExpressionTests(ITestOutputHelper outputHelper)
         int depth = count.Item / 2;
         FilterExpression filterExpression = filterExpressionGenerator.Item;
         GroupExpression initialGroup = new(filterExpression);
-        GroupExpression otherGroup = new(filterExpression);
+    GroupExpression otherGroup = new(filterExpression);
 
         for (int i = 0; i < depth; i++)
         {
             initialGroup = new GroupExpression(initialGroup);
             otherGroup = new GroupExpression(otherGroup);
-        }
+    }
 
-        // Act
-        bool isEquivalent = initialGroup.IsEquivalentTo(otherGroup);
+    // Act
+    bool isEquivalent = initialGroup.IsEquivalentTo(otherGroup);
 
         // Assert
         isEquivalent.Should().BeTrue();
@@ -285,7 +285,7 @@ public class GroupExpressionTests(ITestOutputHelper outputHelper)
     {
         // Act
         FilterExpression actual = input.Simplify();
-            
+
         // Assert
         actual.Should().Be(expected);
     }
@@ -300,14 +300,15 @@ public class GroupExpressionTests(ITestOutputHelper outputHelper)
                 "left and right are expressions with exactly same values"
             }
         };
-        
+
+
     [Theory]
     [MemberData(nameof(IsEquivalentToCases))]
     public void Given_left_is_a_GroupExpression_and_right_is_an_expression_Then_IsEquivalent_should_returns_expected_result(GroupExpression left, FilterExpression right, bool expected, string reason)
     {
         // Act
         bool actual = left.IsEquivalentTo(right);
- 
+
         // Assert
         actual.Should().Be(expected, reason);
     }

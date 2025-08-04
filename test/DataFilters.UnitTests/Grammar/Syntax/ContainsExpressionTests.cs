@@ -23,7 +23,7 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
         .Implement<IParseableString>();
 
     [Fact]
-    public void Given_string_argument_is_null_Constructor_should_thros_ArgumentNullException()
+    public void Given_string_argument_is_null_Constructor_should_throw_ArgumentNullException()
     {
         // Act
         Action action = () => _ = new ContainsExpression((string)null);
@@ -34,7 +34,7 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public void Given_TextExpression_is_null_Constructor_should_thros_ArgumentNullException()
+    public void Given_TextExpression_is_null_Constructor_should_throw_ArgumentNullException()
     {
         // Act
         Action action = () => _ = new ContainsExpression((TextExpression)null);
@@ -45,7 +45,7 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
     }
 
     [Fact]
-    public void Given_TextExpression_argument_is_null_Constructor_should_thros_ArgumentNullException()
+    public void Given_argument_is_an_empty_string_Constructor_should_throw_ArgumentNullException()
     {
         // Act
         Action action = () => _ = new ContainsExpression(string.Empty);
@@ -69,21 +69,7 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
     }
 
     public static TheoryData<ContainsExpression, object, bool, string> EqualsCases
-        => new()
-        {
-            {
-                new ContainsExpression("prop1"),
-                new ContainsExpression("prop1"),
-                true,
-                "comparing two different instances with same property name"
-            },
-            {
-                new ContainsExpression("prop1"),
-                new ContainsExpression("prop2"),
-                false,
-                "comparing two different instances with different property name"
-            }
-        };
+        => new() { { new ContainsExpression("prop1"), new ContainsExpression("prop1"), true, "comparing two different instances with same property name" }, { new ContainsExpression("prop1"), new ContainsExpression("prop2"), false, "comparing two different instances with different property name" }, { new ContainsExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6"), AsteriskExpression.Instance + new TextExpression("Oi\012j8G]t:JK%H6m>+r{)[5\n6") + AsteriskExpression.Instance, true, "" } };
 
     [Theory]
     [MemberData(nameof(EqualsCases))]
@@ -138,15 +124,17 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
         string text = textGenerator.Item;
         ContainsExpression expression = new(text);
 
-        StringBuilder sb = new (text.Length * 2);
+        StringBuilder sb = new(text.Length * 2);
         foreach (char chr in text)
         {
             if (FilterTokenizer.SpecialCharacters.Contains(chr))
             {
                 sb = sb.Append('\\');
             }
+
             sb = sb.Append(chr);
         }
+
         string expected = $"*{sb}*";
 
         // Act
@@ -202,10 +190,10 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
     {
         // Arrange
         TextExpression textExpression = textExpressionGenerator.Item;
-        outputHelper.WriteLine($"TextExpression : {textExpression.EscapedParseableString}");
+        outputHelper.WriteLine($"TextExpression : '{textExpression.EscapedParseableString}'");
 
         // Act
-        ContainsExpression containsExpression = new (textExpression);
+        ContainsExpression containsExpression = new(textExpression);
 
         // Assert
         containsExpression.EscapedParseableString.Should()
@@ -213,10 +201,7 @@ public class ContainsExpressionTests(ITestOutputHelper outputHelper)
     }
 
     public static TheoryData<string, string> EscapedParseableStringCases
-        => new()
-        {
-            { "Oi\fj8G]t:JK%H6m>+r{)[5\n6", "*Oi\fj8G\\]t\\:JK%H6m>+r\\{\\)\\[5\n6*" }
-        };
+        => new() { { "Oi\fj8G]t:JK%H6m>+r{)[5\n6", "*Oi\fj8G\\]t\\:JK%H6m>+r\\{\\)\\[5\n6*" } };
 
     [Theory]
     [MemberData(nameof(EscapedParseableStringCases))]

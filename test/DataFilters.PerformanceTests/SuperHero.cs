@@ -1,6 +1,6 @@
-﻿namespace DataFilters.PerfomanceTests;
-
 using System.Collections.Generic;
+
+namespace DataFilters.PerformanceTests;
 
 public class SuperHero
 {

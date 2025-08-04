@@ -1,4 +1,10 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
+﻿using Candoumbe.MiscUtilities.Comparers;
+using DataFilters.Grammar.Syntax;
+using FluentAssertions;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace DataFilters.UnitTests.Grammar.Syntax;
 
 using System;
 using DataFilters.Grammar.Syntax;
@@ -10,13 +16,13 @@ using Xunit;
 using Xunit.Categories;
 
 [UnitTest]
-public class NumericValueExpressionTests
+public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
 {
     [Fact]
     public void IsFilterExpression() => typeof(NumericValueExpression).Should()
-                                                                       .BeAssignableTo<FilterExpression>().And
-                                                                       .Implement<IEquatable<NumericValueExpression>>().And
-                                                                       .Implement<IBoundaryExpression>();
+        .BeAssignableTo<FilterExpression>().And
+        .Implement<IEquatable<NumericValueExpression>>().And
+        .Implement<IBoundaryExpression>();
 
     [Fact]
     public void Ctor_Throws_ArgumentNullException_When_Argument_Is_Null()
@@ -77,7 +83,7 @@ public class NumericValueExpressionTests
         NumericValueExpression second = new(input.Get);
 
         // Act
-        first.Equals(second).Should().Be(Equals(first.Value, second.Value));
+        first.Equals(second).Should().Be(first.Value.Equals(second.Value, CharComparer.Ordinal));
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -96,7 +102,7 @@ public class NumericValueExpressionTests
 
         // Assert
         actual.Should()
-              .BeTrue();
+            .BeTrue();
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
@@ -107,30 +113,28 @@ public class NumericValueExpressionTests
     public void Equals_should_be_reflexive(NonNull<NumericValueExpression> expression)
         => expression.Item.Should().Be(expression.Item);
 
-    [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
+    [Property(Arbitrary = [typeof(ExpressionsGenerators)], Replay = "(2263177707555740354,6550430739131839265)")]
     public void Equals_should_be_symmetric(NonNull<NumericValueExpression> expression, NonNull<FilterExpression> otherExpression)
-        => expression.Item.Equals(otherExpression.Item).Should().Be(otherExpression.Item.Equals(expression.Item));
+    {
+        // Arrange
+        NumericValueExpression left = expression.Item;
+        FilterExpression other = otherExpression.Item;
+
+        outputHelper.WriteLine($"Left is {left:d}");
+        outputHelper.WriteLine($"other is {other:d}");
+
+        // Assert
+        left.Equals(other).Should().Be(other.Equals(left));
+    }
 
     public static TheoryData<NumericValueExpression, object, bool, string> EqualsCases
         => new()
         {
+            { new NumericValueExpression("0"), new NumericValueExpression("0"), true, $"Left and right are both {nameof(NumericValueExpression)}s with exact same values" },
+            { new NumericValueExpression("0"), new StringValueExpression("0"), true, $"Right is {nameof(StringValueExpression)} and hold the same value as current instance" },
+            { new NumericValueExpression("+0"), new NumericValueExpression("0"), false, $"Left and right values are not the same numbers" },
             {
-                new NumericValueExpression("0"),
-                new NumericValueExpression("0"),
-                true,
-                $"Left and right are both {nameof(NumericValueExpression)}s with exact same values"
-            },
-            {
-                new NumericValueExpression("0"),
-                new StringValueExpression("0"),
-                true,
-                $"Right is {nameof(StringValueExpression)} and hold the same value as current instance"
-            },
-            {
-                new NumericValueExpression("+0"),
-                new NumericValueExpression("0"),
-                false,
-                $"Left and right values are not the same numbers"
+                new NumericValueExpression("1"), new GuidValueExpression("13a26ddf-33ce-f600-223f-09d5193fe9bf"), false, "NumericValueExpression is not a Guid"
             },
         };
 

@@ -20,13 +20,13 @@ public static class Generators
     /// </summary>
     public static Arbitrary<PropertyNameResolutionStrategy> Arbitrary_PropertyNameResolutionStrategies()
     {
-        IEnumerable<Gen<PropertyNameResolutionStrategy>> generators = new[]
-        {
-                Gen.Constant(PropertyNameResolutionStrategy.Default),
-                Gen.Constant(PropertyNameResolutionStrategy.CamelCase),
-                Gen.Constant(PropertyNameResolutionStrategy.PascalCase),
-                Gen.Constant(PropertyNameResolutionStrategy.SnakeCase),
-            };
+        IReadOnlyList<Gen<PropertyNameResolutionStrategy>> generators =
+        [
+            Gen.Constant(PropertyNameResolutionStrategy.Default),
+            Gen.Constant(PropertyNameResolutionStrategy.CamelCase),
+            Gen.Constant(PropertyNameResolutionStrategy.PascalCase),
+            Gen.Constant(PropertyNameResolutionStrategy.SnakeCase)
+        ];
 
         return Gen.OneOf(generators).ToArbitrary();
     }

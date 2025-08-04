@@ -28,7 +28,7 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
     }
 
     ///<inheritdoc/>
-    public bool Equals(OrExpression other) => other is not null && ( ( Left.Equals(other.Left) && Right.Equals(other.Right) ) || ( Left.Equals(other.Right) && Right.Equals(other.Left) ) );
+    public bool Equals(OrExpression other) => other is not null && ((Left.Equals(other.Left) && Right.Equals(other.Right)) || (Left.Equals(other.Right) && Right.Equals(other.Left)));
 
     ///<inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as OrExpression);
@@ -43,7 +43,7 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
     ///<inheritdoc/>
     public override string ToString() => _lazyToString.Value;
 
-        
+
     ///<inheritdoc/>
     public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
@@ -60,7 +60,7 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
                     isEquivalent = IsEquivalentTo(expression);
                     break;
                 case OrExpression or:
-                    isEquivalent = ( or.Right.IsEquivalentTo(Right) && or.Left.IsEquivalentTo(Left) ) || ( or.Left.IsEquivalentTo(Right) && or.Right.IsEquivalentTo(Left) );
+                    isEquivalent = (or.Right.IsEquivalentTo(Right) && or.Left.IsEquivalentTo(Left)) || (or.Left.IsEquivalentTo(Right) && or.Right.IsEquivalentTo(Left));
                     break;
                 case OneOfExpression oneOf:
                 {
@@ -68,14 +68,14 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
                     isEquivalent = simplifiedOneOf switch
                     {
                         OrExpression orExpression => IsEquivalentTo(orExpression),
-                        OneOfExpression _ => false,
-                        _ => Left.IsEquivalentTo(Right) && ( Left.IsEquivalentTo(simplifiedOneOf) || Right.IsEquivalentTo(simplifiedOneOf) )
+                        OneOfExpression _         => false,
+                        _                         => Left.IsEquivalentTo(Right) && (Left.IsEquivalentTo(simplifiedOneOf) || Right.IsEquivalentTo(simplifiedOneOf))
                     };
 
                     break;
                 }
                 default:
-                    isEquivalent = Left.IsEquivalentTo(Right) && ( Left.IsEquivalentTo(other) || Right.IsEquivalentTo(other) );
+                    isEquivalent = Left.IsEquivalentTo(Right) && (Left.IsEquivalentTo(other) || Right.IsEquivalentTo(other));
                     break;
             }
         }
@@ -93,17 +93,17 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
         if (ReferenceEquals(Left, Right) || Left.Equals(Right) || Left.IsEquivalentTo(Right))
         {
             simplified = Left.Complexity < Right.Complexity
-                ? Left.As<ISimplifiable>()?.Simplify() ?? Left
-                : Right.As<ISimplifiable>()?.Simplify() ?? Right;
+                             ? Left.As<ISimplifiable>()?.Simplify() ?? Left
+                             : Right.As<ISimplifiable>()?.Simplify() ?? Right;
         }
         else
         {
-            simplified = ( Left, Right ) switch
+            simplified = (Left, Right) switch
             {
                 (GroupExpression { Expression: OrExpression left }, GroupExpression { Expression: OrExpression right }) => new OneOfExpression(left.Left, left.Right, right.Left, right.Right),
-                (GroupExpression { Expression: OrExpression or }, _) => new OneOfExpression(or.Left, or.Right, Right),
-                (_, GroupExpression { Expression: OrExpression or }) => new OneOfExpression(or.Left, or.Right, Right),
-                _ => this
+                (GroupExpression { Expression: OrExpression or }, _)                                                    => new OneOfExpression(or.Left, or.Right, Right),
+                (_, GroupExpression { Expression: OrExpression or })                                                    => new OneOfExpression(or.Left, or.Right, Right),
+                _                                                                                                       => this
             };
         }
 

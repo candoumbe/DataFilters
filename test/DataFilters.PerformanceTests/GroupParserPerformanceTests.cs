@@ -3,6 +3,7 @@ using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using DataFilters.Grammar.Parsing;
+using DataFilters.Grammar.Syntax;
 using Superpower;
 using Superpower.Model;
 
@@ -49,6 +50,6 @@ public class GroupParserPerformanceTests
     }
         
     [Benchmark]
-    public void Parse() => FilterTokenParser.Group.Parse(_tokens);
-    
+    public GroupExpression Parse() => FilterTokenParser.Group.Parse(_tokens);
+
 }

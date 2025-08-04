@@ -1,4 +1,8 @@
-﻿namespace DataFilters.Grammar.Syntax;
+﻿using Candoumbe.MiscUtilities.Comparers;
+using Candoumbe.Types.Strings;
+using Microsoft.Extensions.Primitives;
+
+namespace DataFilters.Grammar.Syntax;
 
 using System;
 
@@ -8,9 +12,9 @@ using System;
 public abstract class ConstantValueExpression : FilterExpression, IEquatable<ConstantValueExpression>
 {
     /// <summary>
-    /// Gets the "raw" value hold by the current instance.
+    /// An optimized storage of the current value holds by this instance
     /// </summary>
-    public string Value { get; }
+    public StringSegmentLinkedList Value { get; }
 
     /// <summary>
     /// Builds a new <see cref="ConstantValueExpression"/> that holds the specified <paramref name="value"/>.
@@ -19,18 +23,17 @@ public abstract class ConstantValueExpression : FilterExpression, IEquatable<Con
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="string.Empty"/> or <paramref name="value"/> is not currently supported.
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
-    protected ConstantValueExpression(string value)
-    {
-        Value = value switch
+    internal ConstantValueExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
+        {}
+
+        internal ConstantValueExpression(StringSegmentLinkedList value)
         {
-            null => throw new ArgumentNullException(nameof(value)),
-            { Length: 0 } => throw new ArgumentOutOfRangeException(nameof(value)),
-            _ => value
-        };
+        Value = value;
     }
 
     ///<inheritdoc/>
-    public virtual bool Equals(ConstantValueExpression other) => Equals(Value, other?.Value);
+    public virtual bool Equals(ConstantValueExpression other)
+            => other is not null && Value.Equals(other.Value, CharComparer.Ordinal);
 
     ///<inheritdoc/>
     public override bool Equals(object obj) => ReferenceEquals(this, obj) || Equals(obj as ConstantValueExpression);
@@ -49,11 +52,11 @@ public abstract class ConstantValueExpression : FilterExpression, IEquatable<Con
     public static bool operator !=(ConstantValueExpression left, ConstantValueExpression right)
         => !(left == right);
 
-    /// <summary>
-    /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
-    /// </summary>
-    /// <param name="left">a <see cref="ConstantValueExpression"/></param>
-    /// <param name="right">a <see cref="EndsWithExpression"/></param>
-    /// <returns><see cref="AndExpression"/></returns>
-    public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => new StartsWithExpression(left.Value) & right;
+        /// <summary>
+        /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
+        /// </summary>
+        /// <param name="left">a <see cref="ConstantValueExpression"/></param>
+        /// <param name="right">a <see cref="EndsWithExpression"/></param>
+        /// <returns><see cref="AndExpression"/></returns>
+        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => new StartsWithExpression(left.Value) & right;
 }

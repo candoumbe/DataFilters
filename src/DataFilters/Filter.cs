@@ -1,41 +1,31 @@
-﻿namespace DataFilters;
-
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DataFilters.Converters;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
-using static Newtonsoft.Json.DefaultValueHandling;
-using static Newtonsoft.Json.Required;
-#if !NETSTANDARD1_3
 using System.Text.Json.Serialization;
-#endif
+
+namespace DataFilters;
 
 /// <summary>
 /// An instance of this class holds a filter
 /// </summary>
-#if NETSTANDARD1_3
-    [JsonObject]
-    [JsonConverter(typeof(FilterConverter))]
-#else
-[System.Text.Json.Serialization.JsonConverter(typeof(FilterConverter))]
-#endif
-    public sealed class Filter : IFilter, IEquatable<Filter>
-    {
-        /// <summary>
-        /// Filter that always returns <c>true</c>
-        /// </summary>
-        public static Filter True => new(null, default);
+[JsonConverter(typeof(FilterConverter))]
+public sealed class Filter : IFilter, IEquatable<Filter>
+{
+    /// <summary>
+    /// Filter that always returns <c>true</c>
+    /// </summary>
+    public static Filter True => new(null, default);
 
-        /// <summary>
-        /// Pattern that field name should respect.
-        /// </summary>
-        /// #lang : regex
-        /// language=regex
-        public const string ValidFieldNamePattern = """
-                                                    [a-zA-Z_]+((\["[a-zA-Z0-9_]+"]|(\.[a-zA-Z0-9_]+))*)
-                                                    """;
+    /// <summary>
+    /// Pattern that field name should respect.
+    /// </summary>
+    /// #lang : regex
+    /// language=regex
+    public const string ValidFieldNamePattern = """
+                                                [a-zA-Z_]+((\["[a-zA-Z0-9_]+"]|(\.[a-zA-Z0-9_]+))*)
+                                                """;
 
     /// <summary>
     /// Regular expression used to validate

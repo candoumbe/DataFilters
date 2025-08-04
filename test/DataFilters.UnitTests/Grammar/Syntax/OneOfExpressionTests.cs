@@ -46,6 +46,12 @@ public class OneOfExpressionTests(ITestOutputHelper outputHelper)
         => new()
         {
             {
+                new OneOfExpression(new StringValueExpression("prop1")),
+                new OneOfExpression(new StringValueExpression("prop1")),
+                true,
+                "comparing two different instances with same data in same order"
+            },
+            {
                 new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                 new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                 true,
@@ -91,6 +97,12 @@ public class OneOfExpressionTests(ITestOutputHelper outputHelper)
     public static TheoryData<OneOfExpression, FilterExpression, bool, string> IsEquivalentToCases
         => new()
         {
+            {
+                new OneOfExpression(new StringValueExpression("prop1")),
+                new OneOfExpression(new StringValueExpression("prop1")),
+                true,
+                "comparing two different instances with only one value"
+            },
             {
                 new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),
                 new OneOfExpression(new StringValueExpression("prop1"), new StringValueExpression("prop2")),

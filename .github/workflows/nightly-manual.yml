@@ -19,9 +19,9 @@ name: nightly-manual
 on: [workflow_dispatch]
 
 jobs:
-  ubuntu-22_04:
-    name: ubuntu-22_04
-    runs-on: ubuntu-24.04
+  ubuntu-latest:
+    name: ubuntu-22.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,3 +58,13 @@ jobs:
         with:
           name: packages
           path: output/artifacts/packages
+      - name: 'Publish: coverage-report'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: output/artifacts/reports/coverage-report
+      - name: 'Publish: coverage-history'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-history
+          path: output/artifacts/reports/coverage-history

@@ -22,7 +22,10 @@ branches:
   release:
     regex: "^release(s)?[/-]"
     label: "rc"
+    is-release-branch: true
     mode: ContinuousDelivery
+    source-branches:
+      - develop
   develop:
     label: "alpha"
 ignore:

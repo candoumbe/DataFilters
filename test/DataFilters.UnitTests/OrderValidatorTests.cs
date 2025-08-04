@@ -1,11 +1,11 @@
-namespace DataFilters.UnitTests;
-
 using FluentAssertions;
 
 using FluentValidation.Results;
 
 using Xunit;
 using Xunit.Categories;
+
+namespace DataFilters.UnitTests;
 
 [UnitTest]
 [Feature("Ordering")]

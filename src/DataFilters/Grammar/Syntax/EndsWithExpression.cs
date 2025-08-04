@@ -1,84 +1,81 @@
-﻿using DataFilters.Grammar.Parsing;
-
-namespace DataFilters.Grammar.Syntax;
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
+using Ardalis.GuardClauses;
+using Candoumbe.Types.Strings;
+using Microsoft.Extensions.Primitives;
+using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
-using static Parsing.FilterTokenizer;
+namespace DataFilters.Grammar.Syntax
+{
 
 #if !NETSTANDARD1_3
-using Ardalis.GuardClauses;
 #endif
 
-/// <summary>
-/// A <see cref="FilterExpression"/> that holds a string value
-/// </summary>
-public sealed class EndsWithExpression : FilterExpression, IEquatable<EndsWithExpression>
-{
     /// <summary>
-    /// The value of the expression
+    /// A <see cref="FilterExpression"/> that holds a string value
     /// </summary>
-    public string Value { get; }
-
-    private readonly Lazy<string> _lazyEscapedParseableString;
-
-    /// <summary>
-    /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="value"/>.
-    /// </summary>
-    /// <param name="value"></param>
-    /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/>'s length is <c>0</c>.</exception>
-    public EndsWithExpression(string value)
+    public sealed class EndsWithExpression : FilterExpression, IEquatable<EndsWithExpression>
     {
-        Value = value switch
-        {
-            null => throw new ArgumentNullException(nameof(value)),
-            {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
-            _ => value
-        };
+        private readonly Lazy<string> _lazyEscapedParseableString;
 
-        _lazyEscapedParseableString = new Lazy<string>(() =>
-        {
-            // The length of the final parseable string in worst cases scenario will double (1 backlash + the escaped character)
-            // Also we need an extra position for the final '*' that will be appended in all cases
-            bool requireEscapingCharacters = value.AtLeastOnce(chr => SpecialCharacters.Contains(chr));
-            StringBuilder parseableString;
+        /// <summary>
+        /// A memory optimized representation of the value hold by the current instance.
+        /// </summary>
+        public StringSegmentLinkedList Value { get; }
 
-            if (requireEscapingCharacters)
+        /// <summary>
+        /// Builds a new <see cref="EndsWithExpression"/> instance which holds the specified <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value">The desired value</param>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> contains <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is <see cref="StringSegment.Empty"/>.</exception>
+        public EndsWithExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
+        {
+            if (!value.HasValue)
             {
-                parseableString = new StringBuilder((value.Length * 2) + 1);
-                foreach (char chr in value)
-                {
-                    if (SpecialCharacters.Contains(chr))
-                    {
-                        parseableString = parseableString.Append(BackSlash);
-                    }
-                    parseableString = parseableString.Append(chr);
-                }
-            }
-            else
-            {
-                parseableString = new StringBuilder(value, value.Length + 1);
+                throw new ArgumentNullException(nameof(value));
             }
 
-            return parseableString.Insert(0, Asterisk).ToString();
-        });
-    }
+            if (StringSegment.IsNullOrEmpty(value))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+        }
 
-    /// <summary>
-    /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="text"/>.
-    /// </summary>
-    /// <param name="text"></param>
-    /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
-    public EndsWithExpression(TextExpression text)
+        /// <summary>
+        /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="value"/>.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/>'s length is <c>0</c>.</exception>
+        public EndsWithExpression(StringSegmentLinkedList value)
+        {
+            Value = value switch
+            {
+                { Count: 0 } => throw new ArgumentOutOfRangeException(nameof(value)),
+                _ => value
+            };
+
+            _lazyEscapedParseableString = new Lazy<string>(() =>
+            {
+                string escapedValue = Value.Replace(chr => SpecialCharacters.Contains(chr), EscapedSpecialCharacters)
+                    .ToStringValue();
+
+                return $"*{escapedValue}";
+            });
+        }
+
+        /// <summary>
+        /// Builds a new <see cref="EndsWithExpression"/> that holds the specified <paramref name="text"/>.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
+        public EndsWithExpression(TextExpression text)
 #if !NETSTANDARD1_3
-        : this(Guard.Against.Null(text, nameof(text)).OriginalString)
-    {
-        _lazyEscapedParseableString = new(() => $"{Asterisk}{text.EscapedParseableString}");
-    }
+            : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
+        {
+            _lazyEscapedParseableString = new Lazy<string>(() => $"*{text.EscapedParseableString}");
+        }
 #else
         {
             if (text is null)
@@ -89,8 +86,8 @@ public sealed class EndsWithExpression : FilterExpression, IEquatable<EndsWithEx
         }
 #endif
 
-    ///<inheritdoc/>
-    public bool Equals(EndsWithExpression other) => Value == other?.Value;
+        ///<inheritdoc/>
+        public bool Equals(EndsWithExpression other) => Value.Equals(other?.Value);
 
     ///<inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as EndsWithExpression);
@@ -104,11 +101,21 @@ public sealed class EndsWithExpression : FilterExpression, IEquatable<EndsWithEx
     ///<inheritdoc/>
     public override double Complexity => 1.5;
 
-    /// <summary>
-    /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.
-    /// </summary>
-    /// <param name="left">The left operand</param>
-    /// <param name="_"></param>
-    /// <returns></returns>
-    public static ContainsExpression operator +(EndsWithExpression left, AsteriskExpression _) => new(left.Value);
+        /// <summary>
+        /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="_"></param>
+        /// <returns></returns>
+        public static ContainsExpression operator +(EndsWithExpression left, AsteriskExpression _) => new(left.Value);
+
+        /// <summary>
+        /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="right">The right operand</param>
+        /// <returns></returns>
+        public static EndsWithExpression operator +(EndsWithExpression left, ConstantValueExpression right) => new(left.Value.Append(right.Value));
+
+    }
 }

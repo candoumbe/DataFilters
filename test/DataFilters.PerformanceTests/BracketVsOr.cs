@@ -1,15 +1,12 @@
-﻿using DataFilters.PerfomanceTests;
-
-namespace DataFilters.PerformanceTests;
-
 using System;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
+namespace DataFilters.PerformanceTests;
+
 [MemoryDiagnoser]
 [SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net90)]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
+[SimpleJob(RuntimeMoniker.Net90)][System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Marquer les membres comme étant static")]
 public class BracketVsOr
 {
     [Benchmark]

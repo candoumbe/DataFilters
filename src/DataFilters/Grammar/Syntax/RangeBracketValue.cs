@@ -26,17 +26,17 @@ public sealed class RangeBracketValue(char start, char end) : BracketValue, IEqu
     ///<inheritdoc/>
     public bool Equals(RangeBracketValue other) => (Start, End) == (other?.Start, other?.End);
 
-    ///<inheritdoc/>
-    public override bool Equals(object obj)
-    {
-        bool equals;
-        switch (obj)
+        ///<inheritdoc/>
+        public override bool Equals(object obj)
         {
-            case ConstantBracketValue constantBracketValue:
-                char[] chars = [.. constantBracketValue.Value];
-                char head = chars[0];
+            bool equals;
+            switch (obj)
+            {
+                case ConstantBracketValue constantBracketValue:
+                    char[] chars = [.. constantBracketValue.Value];
+                    char head = chars[0];
 #if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
-                char tail = chars[^1];
+                    char tail = chars[^1];
 #else
                     char tail = chars[chars.Length - 1];
 #endif

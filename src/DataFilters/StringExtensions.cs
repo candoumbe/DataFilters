@@ -1,18 +1,27 @@
-using DataFilters;
 using FluentValidation.Results;
+
+using DataFilters;
 using System.Linq;
+
 using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
+
 using Superpower;
 using Superpower.Model;
+
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using DataFilters.Casing;
-using Microsoft.Extensions.Primitives;
-using System.Runtime.InteropServices;
 
 using static DataFilters.FilterOperator;
+
+using DataFilters.Casing;
+
+#if STRING_SEGMENT
+    using Microsoft.Extensions.Primitives;
+#endif
+
+using System.Runtime.InteropServices;
 using static DataFilters.OrderDirection;
 
 #if NET7_0_OR_GREATER
@@ -260,8 +269,7 @@ public static class StringExtensions
                             List<IFilter> filters = new(possibleValues.Length);
                             filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(fieldName, item, tc, fieldType)));
 
-                        filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
-                    }
+                        filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };}
 
                     break;
                 case IntervalExpression range:
@@ -270,7 +278,7 @@ public static class StringExtensions
                         ConvertBoundaryExpressionToConstantExpression(BoundaryExpression input)
                         => input?.Expression switch
                         {
-                            NumericValueExpression numeric => ( new StringValueExpression(numeric.Value),
+                            NumericValueExpression numeric => (new StringValueExpression(numeric.Value),
                                 input.Included ),
                             DateTimeExpression { Date: not null, Time: null } dateTime => (
                                 new StringValueExpression(
@@ -294,7 +302,7 @@ public static class StringExtensions
                             DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (
                                 new StringValueExpression(dateTime.EscapedParseableString), input.Included ),
                             AsteriskExpression or null => default, // because this is equivalent to an unbounded range
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
                                 _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
 #else
                             _ => throw new NotSupportedException($"Unsupported boundary type {input.Expression.GetType()}")

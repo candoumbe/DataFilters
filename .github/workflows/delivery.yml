@@ -29,15 +29,15 @@ on:
       - '!LICENSE'
 
 jobs:
-  ubuntu-22_04:
-    name: ubuntu-22_04
-    runs-on: ubuntu-24.04
+  ubuntu-latest:
+    name: ubuntu-22.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-dotnet@v4
-        with: 
+        with:
           global-json-file: 'global.json'
       - name: 'Cache: .nuke/temp, ~/.nuget/packages'
         uses: actions/cache@v4
@@ -57,6 +57,16 @@ jobs:
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
+      - name: 'Publish: coverage-report'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: output/artifacts/reports/coverage-report
+      - name: 'Publish: coverage-history'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-history
+          path: output/artifacts/reports/coverage-history
       - name: 'Publish: packages'
         uses: actions/upload-artifact@v4
         with:
