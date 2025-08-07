@@ -11,6 +11,7 @@
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="FsCheck.XUnit" Version="3.3.0" />
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.12.35" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.19" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="4.0.1" />
