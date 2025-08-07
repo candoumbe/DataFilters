@@ -1,5 +1,4 @@
-﻿namespace DataFilters.Expressions.UnitTests;
-
+﻿
 using System;
 using System.Linq;
 using FluentAssertions;
@@ -7,6 +6,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
+namespace DataFilters.Expressions.UnitTests;
 [UnitTest]
 public class QueryableExtensionsTests(ITestOutputHelper outputHelper)
 {

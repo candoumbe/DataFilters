@@ -1,8 +1,8 @@
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace DataFilters.TestObjects
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-
     [ExcludeFromCodeCoverage]
     public class Person
     {

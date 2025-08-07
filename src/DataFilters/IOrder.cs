@@ -1,7 +1,6 @@
-﻿namespace DataFilters;
+﻿using System;
 
-using System;
-
+namespace DataFilters;
 /// <summary>
 /// Marker interface
 /// </summary>
@@ -16,9 +15,5 @@ public interface IOrder<T> : IEquatable<IOrder<T>>
     /// Two <see cref="IOrder{T}"/> instances are equivalent when, given an expression, one can be swapped for the other without altering the meaning of the whole expression.
     /// </remarks>
     /// <returns><c>true</c> when current instance and <c>other</c> are equivalent and <c>false</c> otherwise.</returns>
-#if !(NETSTANDARD1_3 || NETSTANDARD2_0)
-    public virtual bool IsEquivalentTo(IOrder<T> other) => Equals(other);
-#else
-        bool IsEquivalentTo(IOrder<T> other);
-#endif
+    public bool IsEquivalentTo(IOrder<T> other) => Equals(other);
 }

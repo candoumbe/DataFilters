@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using DataFilters.Converters;
-using Newtonsoft.Json.Schema;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using DataFilters.Serialization;
+using Newtonsoft.Json.Schema;
 
 namespace DataFilters;
-
 /// <summary>
 /// An instance of this class holds a filter
 /// </summary>
-    [JsonConverter(typeof(FilterConverter))]
-    public sealed class Filter : IFilter, IEquatable<Filter>
-    {
-        /// <summary>
-        /// Filter that always returns <c>true</c>
-        /// </summary>
-        public static Filter True => new(default, default);
+[JsonConverter(typeof(FilterConverter))]
+public sealed class Filter : IFilter, IEquatable<Filter>
+{
+    /// <summary>
+    /// Filter that always returns <c>true</c>
+    /// </summary>
+    public static Filter True => new(null, default);
 
     /// <summary>
     /// Pattern that field name should respect.
@@ -48,12 +47,7 @@ namespace DataFilters;
     /// <summary>
     /// <see cref="FilterOperator"/>s that required <see cref="Value"/> to be null.
     /// </summary>
-    public static ISet<FilterOperator> UnaryOperators { get; } = new HashSet<FilterOperator>{
-        FilterOperator.IsEmpty,
-        FilterOperator.IsNotEmpty,
-        FilterOperator.IsNotNull,
-        FilterOperator.IsNull
-    };
+    public static ISet<FilterOperator> UnaryOperators { get; } = new HashSet<FilterOperator> { FilterOperator.IsEmpty, FilterOperator.IsNotEmpty, FilterOperator.IsNotNull, FilterOperator.IsNull };
 
     /// <summary>
     /// Generates the <see cref="JSchema"/> for the specified <see cref="FilterOperator"/>.
@@ -107,35 +101,19 @@ namespace DataFilters;
     /// <summary>
     /// Name of the field  the filter will be applied to
     /// </summary>
-#if NETSTANDARD1_3
-        [JsonProperty(FieldJsonPropertyName, Required = Always)]
-#else
     [JsonPropertyName(FieldJsonPropertyName)]
-#endif
     public string Field { get; }
 
     /// <summary>
     /// Operator to apply to the filter
     /// </summary>
-#if NETSTANDARD1_3
-        [JsonProperty(OperatorJsonPropertyName, Required = Always)]
-        [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
-#else
     [JsonPropertyName(OperatorJsonPropertyName)]
-#endif
     public FilterOperator Operator { get; }
 
     /// <summary>
     /// Value of the filter
     /// </summary>
-#if NETSTANDARD1_3
-        [JsonProperty(ValueJsonPropertyName,
-            Required = AllowNull,
-            DefaultValueHandling = IgnoreAndPopulate,
-            NullValueHandling = NullValueHandling.Ignore)]
-#else
     [JsonPropertyName(ValueJsonPropertyName)]
-#endif
     public object Value { get; }
 
     /// <summary>
@@ -169,14 +147,7 @@ namespace DataFilters;
     }
 
     ///<inheritdoc/>
-#if NETSTANDARD1_3
-        public string ToJson()
-        {
-            return this.Jsonify(new JsonSerializerSettings());
-        }
-#else
     public string ToJson() => this.Jsonify();
-#endif
 
     ///<inheritdoc/>
     public override string ToString() => ToJson();
@@ -194,11 +165,7 @@ namespace DataFilters;
     public bool Equals(IFilter other) => Equals(other as Filter);
 
     ///<inheritdoc/>
-#if NETSTANDARD1_3 || NETSTANDARD2_0
-        public override int GetHashCode() => (Field, Operator, Value).GetHashCode();
-#else
     public override int GetHashCode() => HashCode.Combine(Field, Operator, Value);
-#endif
 
     ///<inheritdoc/>
     public IFilter Negate()

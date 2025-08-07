@@ -1,9 +1,8 @@
-﻿namespace DataFilters.Expressions;
-
-using System;
+﻿using System;
 using System.Linq.Expressions;
-
 using static DataFilters.OrderDirection;
+
+namespace DataFilters.Expressions;
 
 /// <summary>
 /// An instance of this class holds an <see cref="LambdaExpression"/> which defines a property and its related <see cref="OrderDirection"/> to use to order collections

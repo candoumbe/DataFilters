@@ -1,4 +1,3 @@
-namespace DataFilters.Queries.UnitTests;
 
 using System;
 using FluentAssertions;
@@ -8,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.FilterOperator;
 
+namespace DataFilters.Queries.UnitTests;
 public class FilterToQueriesTests(ITestOutputHelper outputHelper)
 {
     public static TheoryData<IFilter, IWhereClause> FilterToWhereCases

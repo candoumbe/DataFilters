@@ -1,15 +1,13 @@
-﻿using FluentValidation;
+﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
+using FluentValidation;
 
 namespace DataFilters;
-
-using System;
-using System.Text.RegularExpressions;
-
 /// <summary>
 /// Validates sort expression
 /// </summary>
-public class OrderValidator : AbstractValidator<string>
+public partial class OrderValidator : AbstractValidator<string>
 {
     private const string FieldPattern = Filter.ValidFieldNamePattern;
     /// <summary>
@@ -28,11 +26,15 @@ public class OrderValidator : AbstractValidator<string>
         {
             string[] incorrectExpressions = search.Split([Separator])
                 // TODO use ZLinq
-                        .Where(x => !_orderRegex.IsMatch(x))
-                        .Select(x => $@"""{x}""")
-                        .ToArray();
+                    .Where(x => !_orderRegex.IsMatch(x))
+                    .Select(x => $"""
+                                  "{x}"
+                                  """)
+                    .ToArray();
 
-            return $"Sort expression{(incorrectExpressions.Length == 1 ? string.Empty : "s")} {string.Join(", ", incorrectExpressions)} " +
-                   $@"do{(incorrectExpressions.Length == 1 ? "es" : string.Empty)} not match ""{Pattern}"".";
+            return $"""
+                    Sort expression{(incorrectExpressions.Length == 1 ? string.Empty : "s")} {string.Join(", ", incorrectExpressions)}
+                    do{(incorrectExpressions.Length == 1 ? "es" : string.Empty)} not match "{Pattern}.
+                    """;
         });
 }

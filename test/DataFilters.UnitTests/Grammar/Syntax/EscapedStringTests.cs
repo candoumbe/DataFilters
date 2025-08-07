@@ -1,7 +1,6 @@
 using System;
 using DataFilters.Grammar.Syntax;
 using FluentAssertions;
-using FsCheck;
 using Xunit;
 using Xunit.Categories;
 

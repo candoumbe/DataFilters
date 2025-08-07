@@ -1,10 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using DataFilters.Grammar.Parsing;
-
-namespace DataFilters.UnitTests.Grammar.Syntax;
-
-using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
@@ -13,6 +10,7 @@ using FsCheck.Xunit;
 using Xunit;
 using Xunit.Abstractions;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 public class ContainsExpressionTests(ITestOutputHelper outputHelper)
 {
     [Fact]

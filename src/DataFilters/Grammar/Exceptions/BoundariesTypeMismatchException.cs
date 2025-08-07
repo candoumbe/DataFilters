@@ -1,7 +1,7 @@
-﻿namespace DataFilters.Grammar.Exceptions;
-
+﻿
 using System;
 
+namespace DataFilters.Grammar.Exceptions;
 /// <summary>
 /// Exception thrown when a <see cref="Syntax.IntervalExpression"/> has incorrect <see cref="Syntax.IntervalExpression.Min"/>
 /// </summary>

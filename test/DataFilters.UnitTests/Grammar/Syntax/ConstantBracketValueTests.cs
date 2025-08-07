@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using System.Linq;
 using DataFilters.Grammar.Syntax;
@@ -9,6 +8,7 @@ using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 public class ConstantBracketValueTests
 {
     [Property]

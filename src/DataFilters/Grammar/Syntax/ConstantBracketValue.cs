@@ -1,8 +1,8 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// Stores a constant value used in a bracket expression
 /// </summary>

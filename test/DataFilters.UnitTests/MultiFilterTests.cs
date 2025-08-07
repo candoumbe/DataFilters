@@ -1,10 +1,4 @@
-﻿#if NETCOREAPP2_1
-using static Newtonsoft.Json.JsonConvert;
-#else
-#endif
-
-namespace DataFilters.UnitTests;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +15,12 @@ using Xunit.Categories;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
+#if NETCOREAPP2_1
+using static Newtonsoft.Json.JsonConvert;
+#else
+#endif
+
+namespace DataFilters.UnitTests;
 [UnitTest]
 public class MultiFilterTests(ITestOutputHelper output)
 {

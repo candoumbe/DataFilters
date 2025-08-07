@@ -1,10 +1,8 @@
-using System.Runtime.CompilerServices;
+using System;
+using System.Text.Json;
+using DataFilters.Grammar.Exceptions;
 
 namespace DataFilters.Grammar.Syntax;
-
-using System;
-using Exceptions;
-
 /// <summary>
 /// A <see cref="FilterExpression"/> that holds an interval between <see cref="Min"/> and <see cref="Max"/> values.
 /// </summary>
@@ -106,13 +104,8 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
                         },
                         EscapedParseableString
                     }
-#if NETSTANDARD1_3
-        .Jsonify(new Newtonsoft.Json.JsonSerializerSettings() { Formatting = Newtonsoft.Json.Formatting.Indented })
-#elif NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
-                    .Jsonify(new() { WriteIndented = true, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull })
-#endif
-            )
-            ;
+                    .Jsonify(new JsonSerializerOptions { WriteIndented = true, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull })
+            );
 
         static string GetMinBracket(bool? included) => true.Equals(included) ? "[" : "]";
         static string GetMaxBracket(bool? included) => true.Equals(included) ? "]" : "[";

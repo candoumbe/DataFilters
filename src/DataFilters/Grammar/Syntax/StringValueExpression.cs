@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using Candoumbe.Types.Strings;
-using Microsoft.Extensions.Primitives;
 using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
 namespace DataFilters.Grammar.Syntax;
@@ -22,7 +21,7 @@ public class StringValueExpression : ConstantValueExpression, IEquatable<StringV
     /// The <see cref="EscapedParseableString"/> property automatically escapes <see cref="SpecialCharacters"/> from <paramref name="value"/>.
     /// </remarks>
     /// <param name="value">value of the expression.</param>
-    /// <exception cref="Argument"></exception>
+    /// <exception cref="ArgumentOutOfRangeException">value is empty</exception>
     public StringValueExpression(ReadOnlySpan<char> value) : this(new StringSegmentLinkedList(value))
     {
         // if (!value.HasValue)

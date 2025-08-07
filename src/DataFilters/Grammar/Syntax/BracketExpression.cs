@@ -20,7 +20,7 @@ namespace DataFilters.Grammar.Syntax;
 /// </remarks>
 public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpression>
 {
-    private static readonly ArrayEqualityComparer<BracketValue> EqualityComparer = new();
+    private static readonly ArrayEqualityComparer<BracketValue> s_equalityComparer = new();
 
     /// <summary>
     /// Builds a new <see cref="BracketExpression"/> instance.
@@ -44,7 +44,7 @@ public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpr
 
     ///<inheritdoc/>
     public bool Equals(BracketExpression other) => other is not null
-                                                   && EqualityComparer.Equals(Values.ToArray(), other.Values.ToArray());
+                                                   && s_equalityComparer.Equals(Values.ToArray(), other.Values.ToArray());
 
     ///<inheritdoc/>
     public override bool Equals(object obj) => obj switch
@@ -55,7 +55,7 @@ public sealed class BracketExpression : FilterExpression, IEquatable<BracketExpr
     };
 
     ///<inheritdoc/>
-    public override int GetHashCode() => EqualityComparer.GetHashCode([.. Values]);
+    public override int GetHashCode() => s_equalityComparer.GetHashCode([.. Values]);
 
     ///<inheritdoc/>
     public override string ToString() => $"{nameof(BracketExpression)} : [{string.Join(",", Values)}]";

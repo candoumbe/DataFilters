@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
@@ -11,6 +10,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 [Feature(nameof(DataFilters.Grammar.Syntax))]
 public class DateTimeExpressionTests(ITestOutputHelper outputHelper)
 {

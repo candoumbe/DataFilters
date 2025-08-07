@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bogus;
+using DataFilters.Grammar.Syntax;
 using FsCheck;
 using FsCheck.Fluent;
 
+using static DataFilters.UnitTests.Helpers.GeneratorHelper;
+
 namespace DataFilters.UnitTests.Helpers;
-
-using static GeneratorHelper;
-
 /// <summary>
 /// Helper class which contains usefull FsCheck generators.
 /// </summary>
 internal static class FilterGenerators
 {
-    private static readonly Faker Faker = new();
+    private static readonly Faker s_faker = new();
 
     /// <summary>
     /// Generates a <see cref="Arbitrary{Filter}"/> where the value of the filter is a string
@@ -30,7 +30,7 @@ internal static class FilterGenerators
 
         return genOperator.Zip(GetArbitraryFor<string>().Generator)
             .Select(tuple => (Op: tuple.Item1, Value: tuple.Item2))
-            .Select(tuple => new Filter(Faker.Hacker.Noun(), tuple.Op, tuple.Value))
+            .Select(tuple => new Filter(s_faker.Hacker.Noun(), tuple.Op, tuple.Value))
             .ToArbitrary();
     }
 
@@ -48,13 +48,13 @@ internal static class FilterGenerators
 
         return Gen.OneOf(genOperator.Zip(GetArbitraryFor<int>().Generator)
                         .Select(tuple => (Op: tuple.Item1, Value: tuple.Item2))
-                        .Select(tuple => new Filter(Faker.Hacker.Noun(), tuple.Op, tuple.Value)),
+                        .Select(tuple => new Filter(s_faker.Hacker.Noun(), tuple.Op, tuple.Value)),
                     genOperator.Zip(GetArbitraryFor<float>().Generator)
                         .Select(tuple => (Op: tuple.Item1, Value: tuple.Item2))
-                        .Select(tuple => new Filter(Faker.Hacker.Noun(), tuple.Op, tuple.Value)),
+                        .Select(tuple => new Filter(s_faker.Hacker.Noun(), tuple.Op, tuple.Value)),
                     genOperator.Zip(GetArbitraryFor<long>().Generator)
                         .Select(tuple => (Op: tuple.Item1, Value: tuple.Item2))
-                        .Select(tuple => new Filter(Faker.Hacker.Noun(), tuple.Op, tuple.Value))
+                        .Select(tuple => new Filter(s_faker.Hacker.Noun(), tuple.Op, tuple.Value))
                 )
                 .ToArbitrary()
             ;
@@ -74,7 +74,7 @@ internal static class FilterGenerators
 
         return genOperator.Zip(GetArbitraryFor<T>().Generator)
             .Select(tuple => (Op: tuple.Item1, Value: tuple.Item2))
-            .Select(tuple => new Filter(Faker.Hacker.Noun(), tuple.Op, tuple.Value))
+            .Select(tuple => new Filter(s_faker.Hacker.Noun(), tuple.Op, tuple.Value))
             .ToArbitrary();
     }
 
@@ -110,7 +110,7 @@ internal static class FilterGenerators
 
     internal static Arbitrary<Filter> GenerateFilterOverStrings(FilterOperator op)
         => GetArbitraryFor<NonEmptyString>().Generator
-            .Select(value => new Filter(field: Faker.Hacker.Noun(), op, value))
+            .Select(value => new Filter(field: s_faker.Hacker.Noun(), op, value))
             .ToArbitrary();
 
     private static Gen<MultiFilter> SafeFilterGenerator(int size)
@@ -159,5 +159,5 @@ internal static class FilterGenerators
 
     private static Gen<IFilter> GenerateFilterWithSpecifiedOperatorAndValue<TValue>(FilterOperator op)
         => GetArbitraryFor<TValue>().Generator
-            .Select(value => (IFilter)new Filter(Faker.Hacker.Noun(), op, value));
+            .Select(IFilter (value) => new Filter(s_faker.Hacker.Noun(), op, value));
 }

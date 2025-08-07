@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,12 +10,11 @@ using NodaTime;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
+using static DataFilters.Expressions.NullableValueBehavior;
+using static DataFilters.FilterLogic;
+using static DataFilters.FilterOperator;
 
 namespace DataFilters.Expressions.UnitTests;
-
-using static NullableValueBehavior;
-using static FilterLogic;
-using static FilterOperator;
 
 [Feature("Filters")]
 [UnitTest]
@@ -69,7 +69,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                             PeakShape = TimeOnly.FromTimeSpan(13.Hours())
                         },
 #else
-                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },  
+                        new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", BirthDate = 1.April(1938) },
 #endif
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" }
                     },
@@ -93,17 +93,19 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     new MultiFilter
                     {
                         Logic = And,
-                        Filters = new IFilter[] {
+                        Filters =
+                        [
                             new Filter(field: nameof(SuperHero.Firstname), @operator: Contains, value: "a"),
                             new MultiFilter
                             {
                                 Logic = Or,
-                                Filters = new[] {
+                                Filters =
+                                [
                                     new Filter(field: nameof(SuperHero.Nickname), @operator: EqualTo, value: "Batman"),
                                     new Filter(field: nameof(SuperHero.Nickname), @operator: EqualTo, value: "Superman")
-                                }
+                                ]
                             }
-                        }
+                        ]
                     },
                     NoAction,
                     item => item.Firstname.Contains('a') && (item.Nickname == "Batman" || item.Nickname == "Superman")
@@ -120,28 +122,30 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 #else
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
-                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }  
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }
 #endif
                     },
                     new MultiFilter
                     {
                         Logic = And,
-                        Filters = new IFilter[] {
+                        Filters =
+                        [
                             new Filter(field: nameof(SuperHero.Firstname), @operator: Contains, value: "a"),
                             new MultiFilter
                             {
                                 Logic = And,
-                                Filters = new[] {
+                                Filters =
+                                [
 #if NET6_0_OR_GREATER
                                     new Filter(field: nameof(SuperHero.LastBattleDate), @operator: GreaterThan, value: DateOnly.FromDateTime(1.January(2007))),
-                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: LessThan, value: DateOnly.FromDateTime(31.December(2012))),
+                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: FilterOperator.LessThan, value: DateOnly.FromDateTime(31.December(2012))),
 #else
 		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
 #endif
-                                }
+                                ]
                             }
-                        }
+                        ]
                     },
                     NoAction,
 
@@ -157,8 +161,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 #endif
                 },
                 {
-                    new[]
-                    {
+                    [
 #if NET6_0_OR_GREATER
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = DateOnly.FromDateTime(13.January(2007)) },
@@ -166,28 +169,30 @@ public class FilterToExpressionTests(ITestOutputHelper output)
 #else
                         new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = 25.December(2012) },
                         new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = 13.January(2007)},
-                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }  
+                        new SuperHero { Firstname = "Barry", Lastname = "Allen", Height = 190, Nickname = "Flash", LastBattleDate = 18.April(2014) }
 #endif
-                    },
+                    ],
                     new MultiFilter
                     {
                         Logic = And,
-                        Filters = new IFilter[] {
+                        Filters =
+                        [
                             new Filter(field: nameof(SuperHero.Firstname), @operator: Contains, value: "a"),
                             new MultiFilter
                             {
                                 Logic = And,
-                                Filters = new[] {
+                                Filters =
+                                [
 #if NET6_0_OR_GREATER
                                     new Filter(field: nameof(SuperHero.LastBattleDate), @operator: GreaterThan, value: DateOnly.FromDateTime(1.January(2007))),
-                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: LessThan, value: DateOnly.FromDateTime(31.December(2012)))
+                                    new Filter(field: nameof(SuperHero.LastBattleDate), @operator: FilterOperator.LessThan, value: DateOnly.FromDateTime(31.December(2012)))
 #else
 		                            new Filter(field : nameof(SuperHero.LastBattleDate), @operator : GreaterThan, value : 1.January(2007)),
                                     new Filter(field : nameof(SuperHero.LastBattleDate), @operator : FilterOperator.LessThan, value : 31.December(2012))
-#endif           
-                                }
+#endif
+                                ]
                             }
-                        }
+                        ]
                     },
                     NoAction,
 #if NET6_0_OR_GREATER
@@ -239,7 +244,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                             }
                         }
                     ],
-                    new Filter(field: @$"{nameof(SuperHero.Henchman)}[""{nameof(Henchman.Weapons)}""][""{nameof(Weapon.Name)}""]",
+                    new Filter(field: $"""{nameof(SuperHero.Henchman)}["{nameof(Henchman.Weapons)}"]["{nameof(Weapon.Name)}"]""",
                                @operator: EqualTo,
                                value: "stick"),
                     NoAction,
@@ -304,7 +309,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                             Firstname = "Dick", Lastname = "Grayson", Nickname = "Robin"
                         }
                     },
-                    new SuperHero 
+                    new SuperHero
                     {
                         Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman",
                         Henchman = new Henchman
@@ -582,11 +587,11 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                 new MultiFilter
                 {
                     Logic = Or,
-                    Filters = new IFilter[]
-                    {
+                    Filters =
+                    [
                         new Filter(field : nameof(SuperHero.Powers), @operator : Contains, value: "heat"),
-                        new Filter(field : nameof(SuperHero.Powers), @operator : Contains, value: "speed"),
-                    }
+                        new Filter(field : nameof(SuperHero.Powers), @operator : Contains, value: "speed")
+                    ]
                 },
                 NoAction,
                 item => item.Powers.Any(power => power.Contains("heat") || power.Contains("speed"))
@@ -626,7 +631,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman" },
                     new SuperHero { Firstname = null, Lastname = "", Height = 178, Nickname = "Sinestro" }
                 ],
-                new Filter(field : nameof(SuperHero.Height), @operator : LessThan, value: 150),
+                new Filter(field : nameof(SuperHero.Height), @operator : FilterOperator.LessThan, value: 150),
                 NoAction,
                 item => item.Height < 150
             }
@@ -692,7 +697,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
         => new()
         {
             {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 [
                     new SuperHero { Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman", LastBattleDate = DateOnly.FromDateTime(25.December(2012)) },
                     new SuperHero { Firstname = "Clark", Lastname = "Kent", Height = 190, Nickname = "Superman", LastBattleDate = DateOnly.FromDateTime(13.January(2007))},
@@ -769,7 +774,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
     [InlineData(IsNotEmpty, "")]
     [InlineData(IsNull, "")]
     [InlineData(IsNotNull, "")]
-    [InlineData(LessThan, " ")]
+    [InlineData(FilterOperator.LessThan, " ")]
     [InlineData(LessThanOrEqualTo, " ")]
     [InlineData(NotEqualTo, " ")]
     [InlineData(StartsWith, " ")]

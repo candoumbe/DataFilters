@@ -1,17 +1,16 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Candoumbe.MiscUtilities.Comparers;
 using Utilities;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// a <see cref="FilterExpression"/> that contains multiple <see cref="FilterExpression"/>s as <see cref="Values"/>.
 /// </summary>
 public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpression>, ISimplifiable, IEnumerable<FilterExpression>
 {
-    private static readonly ArrayEqualityComparer<FilterExpression> EqualityComparer = new();
+    private static readonly ArrayEqualityComparer<FilterExpression> s_equalityComparer = new();
 
     /// <summary>
     /// Collection of <see cref="FilterExpression"/> that the current instance holds.
@@ -81,7 +80,7 @@ public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpressi
     }
 
     ///<inheritdoc/>
-    public bool Equals(OneOfExpression other) => other is not null && EqualityComparer.Equals(_values, other._values);
+    public bool Equals(OneOfExpression other) => other is not null && s_equalityComparer.Equals(_values, other._values);
 
     /// <inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as OneOfExpression);

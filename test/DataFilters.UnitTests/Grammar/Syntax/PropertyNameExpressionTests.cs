@@ -1,11 +1,11 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using DataFilters.Grammar.Syntax;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 public class PropertyNameTests(ITestOutputHelper outputHelper)
 {
     [Fact]
