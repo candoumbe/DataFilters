@@ -37,17 +37,18 @@
     </When>
   </Choose>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
   <!-- Set package references based on target framework -->
   <Choose>
     <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
       <ItemGroup>
-        <PackageReference Include="FluentValidation" />
         <PackageReference Include="Ultimately" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="FluentValidation" />
         <PackageReference Include="Optional" />
       </ItemGroup>
     </Otherwise>
@@ -66,6 +67,6 @@
     <PackageReference Include="Ardalis.GuardClauses" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsTestProject)' == 'false' and '$(MSBuildProjectName)' != '_build'">
-      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+      <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
