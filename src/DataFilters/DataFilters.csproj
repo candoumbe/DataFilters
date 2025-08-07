@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\core.props"/>
+  <Import Project="..\..\core.props" />
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net8.0;net9.0</TargetFrameworks>
     <Description>Sets of classes to convert querystrings to strongly typed expressions.</Description>
@@ -11,10 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Candoumbe.Types.Strings" Version="0.3.1"/>
-    <PackageReference Include="System.Collections.Immutable" Version="8.0.0"/>
-    <PackageReference Include="OneOf.Extended" Version="3.0.271"/>
-    <PackageReference Include="Superpower" Version="3.1.0"/>
-    <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1"/>
+    <PackageReference Include="Candoumbe.Types.Strings" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="OneOf.Extended" />
+    <PackageReference Include="Superpower" />
+    <PackageReference Include="Newtonsoft.Json.Schema" />
   </ItemGroup>
 </Project>
