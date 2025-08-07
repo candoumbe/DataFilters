@@ -1,24 +1,18 @@
 using FluentValidation.Results;
-
 using DataFilters;
 using System.Linq;
-
 using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
-
 using Superpower;
 using Superpower.Model;
-
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-
 using static DataFilters.FilterOperator;
-
 using DataFilters.Casing;
 
 #if STRING_SEGMENT
-    using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.Primitives;
 #endif
 
 using System.Runtime.InteropServices;
@@ -77,7 +71,7 @@ public static class StringExtensions
         if (sorts.Length > 1)
         {
             sort = new MultiOrder<T>(MemoryMarshal.ToEnumerable(sorts)
-                .Select(s => s.ToOrder<T>(propertyNameResolutionStrategy) as Order<T>).ToArray());
+                                         .Select(s => s.ToOrder<T>(propertyNameResolutionStrategy) as Order<T>).ToArray());
         }
         else if (sortString.StartsWith("+"))
         {
@@ -86,7 +80,7 @@ public static class StringExtensions
         else if (sortString.StartsWith("-"))
         {
             sort = new Order<T>(propertyNameResolutionStrategy.Handle(sortString[1..]),
-                direction: Descending);
+                                direction: Descending);
         }
         else
         {
@@ -105,8 +99,7 @@ public static class StringExtensions
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
-    public static IFilter ToFilter<T>(this string queryString,
-        PropertyNameResolutionStrategy propertyNameResolutionStrategy)
+    public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         => new StringSegment(queryString).ToFilter<T>(propertyNameResolutionStrategy);
 
     /// <summary>
@@ -126,7 +119,7 @@ public static class StringExtensions
     /// <param name="queryString">A query string (without any leading <c>?</c> character)</param>
     /// <param name="propertyNameResolutionStrategy"></param>
     /// <returns>The corresponding <see cref="IFilter"/></returns>
-    /// <exception cref="ArgumentNullException">either <paramref name="queryString"/> or <paramref name="propertyNameResolutionStrategy"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentNullException">either <paramref name="queryString"/> or <paramref name="propertyNameResolutionStrategy"/> is <c>null</c>.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
     public static IFilter ToFilter<T>(this StringSegment queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         => ToFilter<T>(queryString.Value, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
@@ -143,7 +136,53 @@ public static class StringExtensions
     /// <exception cref="NotSupportedException"><paramref name="queryString"/> contains an unsupported</exception>
     public static IFilter ToFilter<T>(this string queryString, FilterOptions options)
     {
-        string localQueryString = queryString;
+        string localQueryString = queryString ?? throw new ArgumentNullException(nameof(queryString));
+
+        IFilter filter = Filter.True;
+        bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
+
+        if (!isEmptyQueryString)
+        {
+            FilterTokenizer tokenizer = new();
+            TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
+
+            (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
+
+            if (expressions.Once())
+            {
+                (PropertyName property, FilterExpression expression) = expressions[0];
+
+                PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                    .SingleOrDefault(x => x.CanRead
+                                          && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
+
+                if (pi is not null)
+                {
+                    TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
+                    filter = ConvertExpressionToFilter(pi, expression, tc);
+                }
+            }
+            else
+            {
+                IList<IFilter> filters = [];
+
+                foreach ((PropertyName property, FilterExpression expression) in expressions)
+                {
+                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
+                        .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
+
+                    if (pi is not null)
+                    {
+                        TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
+                        filters.Add(ConvertExpressionToFilter(pi, expression, tc));
+                    }
+                }
+
+                filter = new MultiFilter { Logic = options.Logic, Filters = filters };
+            }
+        }
+
+        return filter;
 
             if (localQueryString is null)
             {
@@ -269,38 +308,34 @@ public static class StringExtensions
                             List<IFilter> filters = new(possibleValues.Length);
                             filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(fieldName, item, tc, fieldType)));
 
-                        filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };}
+                        filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
+                    }
 
                     break;
                 case IntervalExpression range:
 
-                    static (ConstantValueExpression constantExpression, bool included)
-                        ConvertBoundaryExpressionToConstantExpression(BoundaryExpression input)
+                    static (ConstantValueExpression constantExpression, bool included) ConvertBoundaryExpressionToConstantExpression(BoundaryExpression input)
                         => input?.Expression switch
                         {
-                            NumericValueExpression numeric => (new StringValueExpression(numeric.Value),
-                                input.Included ),
-                            DateTimeExpression { Date: not null, Time: null } dateTime => (
-                                new StringValueExpression(
-                                    $"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"),
-                                input.Included ),
+                            NumericValueExpression numeric => (new StringValueExpression(numeric.Value), input.Included),
+                            DateTimeExpression { Date: not null, Time: null } dateTime => (new StringValueExpression($"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}"),
+                                                                                           input.Included),
                             DateExpression date => (
-                                new StringValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"),
-                                input.Included ),
+                                                       new StringValueExpression($"{date.Year:D4}-{date.Month:D2}-{date.Day:D2}"),
+                                                       input.Included),
                             DateTimeExpression { Date: null, Time: not null, Offset: null } dateTime => (
-                                new StringValueExpression(
-                                    $"0001-01-01T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"),
-                                input.Included ),
+                                                                                                            new StringValueExpression($"0001-01-01T{dateTime.Time.Hours}:{dateTime.Time.Minutes}:{dateTime.Time.Seconds}"),
+                                                                                                            input.Included),
                             TimeExpression time => (
-                                new StringValueExpression(
-                                    $"0001-01-01T{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"),
-                                input.Included ),
+                                                       new StringValueExpression(
+                                                                                 $"0001-01-01T{time.Hours:D2}:{time.Minutes:D2}:{time.Seconds:D2}"),
+                                                       input.Included),
                             DateTimeExpression { Date: not null, Time: not null, Offset: null } dateTime => (
-                                new StringValueExpression(
-                                    $"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"),
-                                input.Included ),
+                                                                                                                new StringValueExpression(
+                                                                                                                                          $"{dateTime.Date.Year:D4}-{dateTime.Date.Month:D2}-{dateTime.Date.Day:D2}T{dateTime.Time.Hours:D2}:{dateTime.Time.Minutes:D2}:{dateTime.Time.Seconds:D2}.{dateTime.Time.Milliseconds}"),
+                                                                                                                input.Included),
                             DateTimeExpression { Date: not null, Time: not null, Offset: not null } dateTime => (
-                                new StringValueExpression(dateTime.EscapedParseableString), input.Included ),
+                                                                                                                    new StringValueExpression(dateTime.EscapedParseableString), input.Included),
                             AsteriskExpression or null => default, // because this is equivalent to an unbounded range
 #if NET8_0_OR_GREATER
                                 _ => throw new UnreachableException($"Unsupported boundary type {input.Expression.GetType()}")
@@ -309,10 +344,8 @@ public static class StringExtensions
 #endif
                         };
 
-                    (ConstantValueExpression constantExpression, bool included) min =
-                        ConvertBoundaryExpressionToConstantExpression(range.Min);
-                    (ConstantValueExpression constantExpression, bool included) max =
-                        ConvertBoundaryExpressionToConstantExpression(range.Max);
+                    (ConstantValueExpression constantExpression, bool included) min = ConvertBoundaryExpressionToConstantExpression(range.Min);
+                    (ConstantValueExpression constantExpression, bool included) max = ConvertBoundaryExpressionToConstantExpression(range.Max);
 
                     FilterOperator minOperator = min.included ? GreaterThanOrEqual : GreaterThan;
                     FilterOperator maxOperator = max.included ? LessThanOrEqualTo : LessThan;
@@ -453,5 +486,4 @@ public static class StringExtensions
     /// <exception cref="ArgumentNullException"><paramref name="queryString"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="queryString"/> is not a valid query string.</exception>
     public static IFilter ToFilter<T>(this StringSegment queryString) => ToFilter<T>(queryString.Value, PropertyNameResolutionStrategy.Default);
-
 }

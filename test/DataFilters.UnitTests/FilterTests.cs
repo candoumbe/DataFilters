@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,10 +18,11 @@ using Xunit.Categories;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
+namespace DataFilters.UnitTests;
 [UnitTest]
 public class FilterTests(ITestOutputHelper output)
 {
-    private static readonly IImmutableDictionary<string, FilterOperator> Operators = new Dictionary<string, FilterOperator>
+    private static readonly IImmutableDictionary<string, FilterOperator> s_operators = new Dictionary<string, FilterOperator>
     {
         ["contains"] = Contains,
         ["endswith"] = EndsWith,
@@ -47,7 +47,7 @@ public class FilterTests(ITestOutputHelper output)
         get
         {
             TheoryData<string, Expression<Func<IFilter, bool>>> cases = [];
-            foreach (KeyValuePair<string, FilterOperator> item in Operators)
+            foreach (KeyValuePair<string, FilterOperator> item in s_operators)
             {
                 cases.Add
                 (

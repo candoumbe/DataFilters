@@ -1,12 +1,8 @@
-﻿namespace DataFilters;
+﻿using System.Text.Json.Serialization;
+using DataFilters.Serialization;
 
-using Converters;
+namespace DataFilters;
 
-#if NETSTANDARD1_3
-    using Newtonsoft.Json;
-#else
-using System.Text.Json.Serialization;
-#endif
 /// <summary>
 /// Operators that can be used when building <see cref="Filter"/> instances.
 /// </summary>

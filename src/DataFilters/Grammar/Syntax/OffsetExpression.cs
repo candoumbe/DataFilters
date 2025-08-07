@@ -1,7 +1,6 @@
-namespace DataFilters.Grammar.Syntax;
-
 using System;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// <see cref="OffsetExpression"/> records the offset between a time and the UTC time
 /// </summary>
@@ -29,35 +28,35 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
 
     private readonly Lazy<string> _lazyParseableString;
 
-        /// <summary>
-        /// Builds a new <see cref="OffsetExpression"/> instance
-        /// </summary>
-        /// <param name="sign"></param>
-        /// <param name="hours"></param>
-        /// <param name="minutes">The sign of </param>
-        public OffsetExpression(NumericSign sign = NumericSign.Plus, uint hours = 0, uint minutes = 0)
+    /// <summary>
+    /// Builds a new <see cref="OffsetExpression"/> instance
+    /// </summary>
+    /// <param name="sign"></param>
+    /// <param name="hours"></param>
+    /// <param name="minutes">The sign of </param>
+    public OffsetExpression(NumericSign sign = NumericSign.Plus, uint hours = 0, uint minutes = 0)
+    {
+        if (hours > 23)
         {
-            if (hours > 23)
-            {
-                throw new ArgumentOutOfRangeException(nameof(hours),
-                    $"{nameof(hours)} must be between 0 and 23 inclusive");
-            }
+            throw new ArgumentOutOfRangeException(nameof(hours),
+                                                  $"{nameof(hours)} must be between 0 and 23 inclusive");
+        }
 
-            if (minutes > 59)
-            {
-                throw new ArgumentOutOfRangeException(nameof(minutes),
-                    $"{nameof(minutes)} must be between 0 and 59 inclusive");
-            }
+        if (minutes > 59)
+        {
+            throw new ArgumentOutOfRangeException(nameof(minutes),
+                                                  $"{nameof(minutes)} must be between 0 and 59 inclusive");
+        }
 
         Hours = (int)hours;
         Minutes = (int)minutes;
         Sign = sign;
 
-        _lazyParseableString = new(() => ( Hours, Minutes, Sign ) switch
+        _lazyParseableString = new(() => (Hours, Minutes, Sign) switch
         {
-            (0, 0, _) => "Z",
+            (0, 0, _)                 => "Z",
             (_, _, NumericSign.Minus) => $"-{Hours:D2}:{Minutes:D2}",
-            _ => $"+{Hours:D2}:{Minutes:D2}",
+            _                         => $"+{Hours:D2}:{Minutes:D2}",
         });
     }
 
@@ -68,44 +67,33 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
     public override bool Equals(object obj) => Equals(obj as OffsetExpression);
 
     ///<inheritdoc/>
-    public bool Equals(OffsetExpression other) => ( Hours, Minutes, Sign ) switch
+    public bool Equals(OffsetExpression other) => (Hours, Minutes, Sign) switch
     {
-        (0, 0, _) => other?.Hours == 0 && other?.Minutes == 0,
-        _ => ( Hours, Minutes, Sign ) == ( other?.Hours, other?.Minutes, other?.Sign )
+        (0, 0, _) => other is { Hours: 0, Minutes: 0 },
+        _         => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign)
     };
 
     ///<inheritdoc/>
-#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
     public override int GetHashCode() => HashCode.Combine(Hours, Minutes, Sign);
-#else
-        public override int GetHashCode()
-        {
-            int hashCode = -793696894;
-            hashCode = ( hashCode * -1521134295 ) + Hours.GetHashCode();
-            hashCode = ( hashCode * -1521134295 ) + Minutes.GetHashCode();
-            hashCode = ( hashCode * -1521134295 ) + Sign.GetHashCode();
-            return hashCode;
-        }
-#endif
 
-        ///<inheritdoc/>
-        public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString,
-            out string originalString)
-        {
-            sign = Sign;
-            hours = Hours;
-            minutes = Minutes;
-            escapedParseableString = EscapedParseableString;
-            originalString = OriginalString;
-        }
+    ///<inheritdoc/>
+    public void Deconstruct(out NumericSign sign, out int hours, out int minutes, out string escapedParseableString,
+                            out string originalString)
+    {
+        sign = Sign;
+        hours = Hours;
+        minutes = Minutes;
+        escapedParseableString = EscapedParseableString;
+        originalString = OriginalString;
+    }
 
     /// <inheritdoc />
     public static bool operator ==(OffsetExpression left, OffsetExpression right) => left switch
     {
         null => right is null,
-        _ => left.Equals(right)
+        _    => left.Equals(right)
     };
 
     /// <inheritdoc />
-    public static bool operator !=(OffsetExpression left, OffsetExpression right) => !( left == right );
+    public static bool operator !=(OffsetExpression left, OffsetExpression right) => !(left == right);
 }

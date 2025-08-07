@@ -1,7 +1,7 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
+﻿
 using System;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// Allows to treat several expressions as a single unit.
 /// </summary>

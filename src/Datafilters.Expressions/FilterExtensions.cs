@@ -1,5 +1,4 @@
-﻿namespace DataFilters;
-
+﻿
 #if NET6_0
     using DateOnlyTimeOnly.AspNet.Converters;
     using System.ComponentModel;
@@ -12,9 +11,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using DataFilters.Expressions;
 using static System.Linq.Expressions.Expression;
+using static DataFilters.Expressions.NullableValueBehavior;
 using static DataFilters.FilterOperator;
-using static Expressions.NullableValueBehavior;
 
+namespace DataFilters;
 /// <summary>
 /// The `FilterExtensions` class provides extension methods for building expression trees from `IFilter` instances.
 /// It allows for filtering data based on various conditions.
@@ -41,15 +41,11 @@ using static Expressions.NullableValueBehavior;
 /// </remarks>
 public static class FilterExtensions
 {
-#if NET6_0
-        private readonly static ISet<bool> HackZone = new HashSet<bool>();
-#endif
-
     /// <summary>
     /// List of all primitives types
     /// </summary>
     /// <value></value>
-    private static readonly Type[] PrimitiveTypes = [
+    private static readonly Type[] s_primitiveTypes = [
         typeof(string),
         typeof(Guid),
         typeof(Guid?),
@@ -73,7 +69,7 @@ public static class FilterExtensions
         typeof(DateTime?),
         typeof(DateTimeOffset),
         typeof(DateTimeOffset?),
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         typeof(DateOnly), typeof(DateOnly?),
         typeof(TimeOnly), typeof(TimeOnly?),
 #endif
@@ -100,15 +96,6 @@ public static class FilterExtensions
         {
             throw new ArgumentNullException(nameof(filter), $"{nameof(filter)} cannot be null");
         }
-
-#if NET6_0
-            // HACK require to handle DateOnly and TimeOnly types.
-            if (HackZone.Add(true))
-            {
-                TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
-                TypeDescriptor.AddAttributes(typeof(TimeOnly), new TypeConverterAttribute(typeof(TimeOnlyTypeConverter)));
-            }
-#endif
 
         Expression<Func<T, bool>> filterExpression = null;
 
@@ -181,7 +168,7 @@ public static class FilterExtensions
                 dateTime = result;
             }
         }
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         else if (targetType == typeof(DateOnly) || targetType == typeof(DateOnly?))
         {
             if (DateOnly.TryParse(source?.ToString(), out DateOnly result))
@@ -207,16 +194,16 @@ public static class FilterExtensions
             FilterOperator.GreaterThan => GreaterThan(property, constantExpression),
             FilterOperator.GreaterThanOrEqual => GreaterThanOrEqual(property, constantExpression),
             LessThanOrEqualTo => LessThanOrEqual(property, constantExpression),
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [constantExpression.Value?.GetType() ?? typeof(string)])!, constantExpression),
             NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [constantExpression.Value?.GetType() ?? typeof(string)])!, constantExpression)),
             EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression),
             NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
 #else
-                StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [typeof(string)])!, constantExpression),
-                NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
-                EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression),
-                NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
+            StartsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [typeof(string)])!, constantExpression),
+            NotStartsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
+            EndsWith => Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression),
+            NotEndsWith => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.EndsWith), [value?.GetType() ?? typeof(string)])!, constantExpression)),
 #endif
             Contains => ComputeContains(property, value),
             NotContains => Not(Call(property, typeof(string).GetRuntimeMethod(nameof(string.Contains), [value?.GetType() ?? typeof(string)])!, constantExpression)),
@@ -273,7 +260,7 @@ public static class FilterExtensions
         };
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         /// <summary>
         /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
         /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, enumerable and other types.
@@ -292,7 +279,7 @@ public static class FilterExtensions
         {
             ce = Constant(ConvertObjectToDateTime(value, memberType), memberType);
         }
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         else if (IsDateOnly(memberType))
         {
             ce = Constant(ConvertObjectToDateTime(value, memberType), memberType);
@@ -331,12 +318,11 @@ public static class FilterExtensions
             Expression left = NotEqual(property, Constant(null));
             Expression right = null;
             Type genericType = null;
-#if !NETSTANDARD1_3
+
             if (property.Type.IsGenericType)
             {
                 genericType = property.Type.GenericTypeArguments[0];
             }
-#endif
 
             right = Not(Call(typeof(Enumerable),
                 nameof(Enumerable.Any),
@@ -491,7 +477,7 @@ public static class FilterExtensions
                 ParameterExpression localParameter = Parameter(enumerableGenericType);
                 Expression localBody;
 
-                if (!(typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType)))
+                if (!(typeInfo.IsPrimitive || s_primitiveTypes.Contains(enumerableGenericType)))
                 {
                     MemberExpression localProperty = Property(localParameter, fields.Single());
                     localBody = ComputeBodyExpression(localProperty, @operator, value);
@@ -539,7 +525,7 @@ public static class FilterExtensions
                     PropertyInfo pi = (PropertyInfo)property.Member;
                     TypeInfo propertyTypeInfo = pi.PropertyType.GetTypeInfo();
 
-                    if (propertyTypeInfo.IsPrimitive || PrimitiveTypes.Contains(pi.PropertyType))
+                    if (propertyTypeInfo.IsPrimitive || s_primitiveTypes.Contains(pi.PropertyType))
                     {
                         body = ComputeBodyExpression(property, @operator, value);
                     }
@@ -571,7 +557,7 @@ public static class FilterExtensions
                 ParameterExpression localParameter = Parameter(enumerableGenericType);
                 Expression localBody;
 
-                if (!(typeInfo.IsPrimitive || PrimitiveTypes.Contains(enumerableGenericType)))
+                if (!(typeInfo.IsPrimitive || s_primitiveTypes.Contains(enumerableGenericType)))
                 {
                     MemberExpression localProperty = Property(localParameter, fields.Single());
                     localBody = ComputeNullSafeBodyExpression(localProperty, @operator, value);
@@ -620,7 +606,7 @@ public static class FilterExtensions
                     PropertyInfo pi = (PropertyInfo)property.Member;
                     TypeInfo propertyTypeInfo = pi.PropertyType.GetTypeInfo();
 
-                    if (propertyTypeInfo.IsPrimitive || PrimitiveTypes.Contains(pi.PropertyType))
+                    if (propertyTypeInfo.IsPrimitive || s_primitiveTypes.Contains(pi.PropertyType))
                     {
                         body = ComputeNullSafeBodyExpression(property, @operator, value);
                     }
@@ -652,7 +638,7 @@ public static class FilterExtensions
                                                              || memberType == typeof(DateTimeOffset)
                                                              || memberType == typeof(DateTimeOffset?);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private static bool IsDateOnly(Type memberType) => memberType == typeof(DateOnly)
                                                        || memberType == typeof(DateOnly?);
 #endif

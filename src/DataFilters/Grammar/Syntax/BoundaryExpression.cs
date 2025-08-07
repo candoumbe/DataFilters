@@ -33,17 +33,7 @@ public sealed class BoundaryExpression(IBoundaryExpression expression, bool incl
     public override bool Equals(object obj) => Equals(obj as BoundaryExpression);
 
     ///<inheritdoc/>
-#if !(NETSTANDARD1_3 || NETSTANDARD2_0)
     public override int GetHashCode() => HashCode.Combine(Expression, Included);
-#else
-    public override int GetHashCode()
-    {
-        int hashCode = 1608575900;
-        hashCode = (hashCode * -1521134295) + EqualityComparer<IBoundaryExpression>.Default.GetHashCode(Expression);
-        hashCode = (hashCode * -1521134295) + Included.GetHashCode();
-        return hashCode;
-    }
-#endif
 
     ///<inheritdoc/>
     public static bool operator ==(BoundaryExpression left, BoundaryExpression right) => left switch

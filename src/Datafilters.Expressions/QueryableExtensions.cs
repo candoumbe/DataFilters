@@ -1,9 +1,9 @@
-﻿namespace System.Linq;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 using DataFilters;
 using DataFilters.Expressions;
+
+namespace System.Linq;
 
 /// <summary>
 /// Provides extension methods for ordering a collection of entities.

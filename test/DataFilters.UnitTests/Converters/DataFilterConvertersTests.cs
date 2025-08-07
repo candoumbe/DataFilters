@@ -1,9 +1,4 @@
-﻿#if NETCOREAPP2_1
-using static Newtonsoft.Json.JsonConvert;
-#endif
-namespace DataFilters.UnitTests.Converters;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -16,6 +11,8 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
+
+namespace DataFilters.UnitTests.Converters;
 
 [UnitTest]
 [Feature("Converters")]

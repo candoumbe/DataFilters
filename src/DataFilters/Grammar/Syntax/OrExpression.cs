@@ -1,7 +1,7 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
+﻿
 using System;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// Combines two <see cref="FilterExpression"/>s using the logical <c>OR</c> operator
 /// </summary>
@@ -34,11 +34,7 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
     public override bool Equals(object obj) => Equals(obj as OrExpression);
 
     ///<inheritdoc/>
-#if NETSTANDARD1_3 || NETSTANDARD2_0
-        public override int GetHashCode() => (Left, Right).GetHashCode();
-#else
     public override int GetHashCode() => HashCode.Combine(Left, Right);
-#endif
 
     ///<inheritdoc/>
     public override string ToString() => _lazyToString.Value;

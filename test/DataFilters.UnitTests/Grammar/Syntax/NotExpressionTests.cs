@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
@@ -12,6 +11,7 @@ using Superpower;
 using Superpower.Model;
 using Xunit;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 public class NotExpressionTests
 {
     [Fact]

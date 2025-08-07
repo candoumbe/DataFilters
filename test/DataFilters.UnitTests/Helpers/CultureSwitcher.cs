@@ -1,9 +1,9 @@
-﻿namespace DataFilters.UnitTests.Helpers;
-
+﻿
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
+namespace DataFilters.UnitTests.Helpers;
 /// <summary>
 /// A helper class to control the <see cref="CultureInfo.CurrentCulture"/> value during tests.
 /// </summary>

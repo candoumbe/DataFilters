@@ -1,11 +1,11 @@
-﻿namespace DataFilters;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Utilities;
 
+namespace DataFilters;
 /// <summary>
 /// Allow to sort by multiple <see cref="Order{T}"/> expression
 /// </summary>
@@ -21,16 +21,15 @@ public class MultiOrder<T>(params Order<T>[] orders) : IOrder<T>, IEquatable<Mul
     /// </summary>
     public IEnumerable<Order<T>> Orders => _orders;
 
-    private readonly Order<T>[] _orders = orders.Where(s => s is not null)
-        .ToArray();
+    private readonly Order<T>[] _orders = [ .. orders.Where(s => s is not null) ];
 
-    private static readonly ArrayEqualityComparer<Order<T>> EqualityComparer = new();
+    private static readonly ArrayEqualityComparer<Order<T>> s_equalityComparer = new();
 
     /// <inheritdoc/>
     public bool Equals(IOrder<T> other) => Equals(other as MultiOrder<T>);
 
     /// <inheritdoc/>
-    public bool Equals(MultiOrder<T> other) => other is not null && EqualityComparer.Equals(_orders, other._orders);
+    public bool Equals(MultiOrder<T> other) => other is not null && s_equalityComparer.Equals(_orders, other._orders);
 
     /// <inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as MultiOrder<T>);
@@ -40,7 +39,7 @@ public class MultiOrder<T>(params Order<T>[] orders) : IOrder<T>, IEquatable<Mul
                                                    && Orders.SequenceEqual(otherMultisort.Orders);
 
     /// <inheritdoc/>
-    public override int GetHashCode() => EqualityComparer.GetHashCode(_orders);
+    public override int GetHashCode() => s_equalityComparer.GetHashCode(_orders);
 
     /// <inheritdoc/>
     public override string ToString() => $"{nameof(Orders)}:[{string.Join(",", Orders.Select(x => x.ToString()))}]";

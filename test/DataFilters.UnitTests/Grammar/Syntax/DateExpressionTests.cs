@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
@@ -9,6 +8,7 @@ using FsCheck.Fluent;
 using FsCheck.Xunit;
 using Xunit;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 public class DateExpressionTests
 {
     [Fact]

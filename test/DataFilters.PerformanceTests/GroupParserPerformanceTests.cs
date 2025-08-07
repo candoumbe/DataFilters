@@ -28,7 +28,7 @@ public class GroupParserPerformanceTests
     {
         _tokenizer = new FilterTokenizer();
         StringBuilder sb = new StringBuilder();
-            
+
         // Ajout des parenthèses ouvrantes
         for (int i = 0; i < ParenthesesCount; i++)
         {
@@ -45,10 +45,10 @@ public class GroupParserPerformanceTests
         }
 
         _constructedString = sb.ToString();
-            
+
         _tokens = _tokenizer.Tokenize(_constructedString);
     }
-        
+
     [Benchmark]
     public GroupExpression Parse() => FilterTokenParser.Group.Parse(_tokens);
 

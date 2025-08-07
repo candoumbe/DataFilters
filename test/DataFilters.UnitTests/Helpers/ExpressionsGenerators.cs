@@ -1,4 +1,3 @@
-namespace DataFilters.UnitTests.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,9 @@ using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
 using FsCheck;
 using FsCheck.Fluent;
-using static GeneratorHelper;
+using static DataFilters.UnitTests.Helpers.GeneratorHelper;
+
+namespace DataFilters.UnitTests.Helpers;
 
 public static class ExpressionsGenerators
 {

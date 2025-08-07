@@ -1,8 +1,8 @@
-﻿namespace DataFilters;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using DataFilters.Expressions;
+
+namespace DataFilters;
 
 /// <summary>
 /// Extension methods for <see cref="IOrder{T}"/> instances.

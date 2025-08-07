@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using DataFilters.Grammar.Exceptions;
 using DataFilters.Grammar.Syntax;
@@ -11,6 +10,7 @@ using FsCheck.Xunit;
 using Xunit;
 using Xunit.Abstractions;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 public class IntervalExpressionTests(ITestOutputHelper outputHelper)
 {
     [Fact]

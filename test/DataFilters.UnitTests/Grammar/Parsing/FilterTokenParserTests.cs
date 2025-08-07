@@ -30,7 +30,7 @@ public class FilterTokenParserTests : IClassFixture<CultureSwitcher>, IDisposabl
     private readonly FilterTokenizer _tokenizer;
     private readonly ITestOutputHelper _outputHelper;
     private readonly CultureSwitcher _cultureSwitcher;
-    private static readonly Bogus.Faker Faker = new();
+    private static readonly Bogus.Faker s_faker = new();
 
     public FilterTokenParserTests(ITestOutputHelper outputHelper, CultureSwitcher cultureSwitcher)
     {
