@@ -1,4 +1,5 @@
 {
+  "$schema": "./build.schema.json",
   "GitHubToken": "v1:OhvldXY34GSHTumJiuoWhHPHKwSoVb7B/X19pufOj7+Q2O5n0YnxMIowWmry2b4SbtIW2Ah4uwPP1HpOLvvfB9LO4QIggTf/dAVK00aG+Cp2ZeG/kqhbEsc9c6tV8lZn",
   "NugetApiKey": "v1:pqiQ7rGFSYoCihCFSrdaCRFpf0BoThUJFRbvzCqVjnWssX61zbm6Z7aZH9x1/fOg",
   "CodecovToken": "v1:fD+Tl5VfvzhiKcjphPlwB+e7w7Dj7N645OTAjSoEtozxIae0KhwkqvHBi7RChHK3"
