@@ -1,11 +1,8 @@
-using Nuke.Common.Tools.GitHub;
-
-namespace DataFilters.ContinuousIntegration;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Candoumbe.Pipelines.Components;
+using Candoumbe.Pipelines.Components.Formatting;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
@@ -16,6 +13,9 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitHub;
+
+namespace DataFilters.ContinuousIntegration;
+
 
 [GitHubActions(
     "integration",
@@ -122,6 +122,7 @@ public class Build : EnhancedNukeBuild,
     IClean,
     IRestore,
     ICompile,
+    IDotnetFormat,
     IUnitTest,
     IMutationTest,
     IBenchmark,
@@ -196,4 +197,7 @@ public class Build : EnhancedNukeBuild,
             source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
             canBeUsed: () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)
     ];
+
+    /// <inheritdoc />
+    bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
 }
