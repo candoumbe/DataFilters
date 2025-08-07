@@ -7,10 +7,6 @@ using static DataFilters.Grammar.Parsing.FilterTokenizer;
 
 namespace DataFilters.Grammar.Syntax
 {
-
-#if !NETSTANDARD1_3
-#endif
-
     /// <summary>
     /// A <see cref="FilterExpression"/> that holds a string value
     /// </summary>
@@ -70,22 +66,10 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="text"></param>
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
-        public EndsWithExpression(TextExpression text)
-#if !NETSTANDARD1_3
-            : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
+        public EndsWithExpression(TextExpression text) : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
         {
             _lazyEscapedParseableString = new Lazy<string>(() => $"*{text.EscapedParseableString}");
         }
-#else
-        {
-            if (text is null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-            _lazyEscapedParseableString = new(() => $"*{text.EscapedParseableString}");
-        }
-#endif
-
         ///<inheritdoc/>
         public bool Equals(EndsWithExpression other) => Value.Equals(other?.Value);
 

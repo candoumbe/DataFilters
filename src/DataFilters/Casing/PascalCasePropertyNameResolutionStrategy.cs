@@ -1,7 +1,7 @@
-﻿namespace DataFilters.Casing;
-
+﻿
 using System;
 
+namespace DataFilters.Casing;
 /// <summary>
 /// <see cref="PropertyNameResolutionStrategy"/> that transform input to it <strong>PascalCase</strong> equivalent.
 /// </summary>

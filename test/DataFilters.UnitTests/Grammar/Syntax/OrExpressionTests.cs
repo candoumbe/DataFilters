@@ -1,10 +1,9 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataFilters.Grammar.Syntax;
-using Helpers;
+using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Fluent;
@@ -13,6 +12,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 [UnitTest]
 public class OrExpressionTests(ITestOutputHelper outputHelper)
 {

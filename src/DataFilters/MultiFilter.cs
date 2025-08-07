@@ -1,28 +1,16 @@
-﻿namespace DataFilters;
-
-using DataFilters.Converters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
-#if !NETSTANDARD1_3
 using System.Text.Json.Serialization;
-#else
-    using static Newtonsoft.Json.DefaultValueHandling;
-    using static Newtonsoft.Json.Required;
-#endif
+using DataFilters.Serialization;
+using Newtonsoft.Json.Schema;
+
+namespace DataFilters;
 
 /// <summary>
 /// An instance of this class holds combination of <see cref="IFilter"/>
 /// </summary>
-[JsonObject]
-#if NETSTANDARD1_3
-    [JsonConverter(typeof(MultiFilterConverter))]
-#else
-[System.Text.Json.Serialization.JsonConverter(typeof(MultiFilterConverter))]
-#endif
+[JsonConverter(typeof(MultiFilterConverter))]
 public sealed class MultiFilter : IFilter, IEquatable<MultiFilter>
 {
     /// <summary>
@@ -53,22 +41,13 @@ public sealed class MultiFilter : IFilter, IEquatable<MultiFilter>
     /// <summary>
     /// Collections of filters
     /// </summary>
-#if NETSTANDARD1_3
-        [JsonProperty(PropertyName = FiltersJsonPropertyName, Required = Always)]
-#else
     [JsonPropertyName(FiltersJsonPropertyName)]
-#endif
     public IEnumerable<IFilter> Filters { get; set; } = [];
 
     /// <summary>
     /// Operator to apply between <see cref="Filters"/>
     /// </summary>
-#if NETSTANDARD1_3
-        [JsonProperty(PropertyName = LogicJsonPropertyName, DefaultValueHandling = IgnoreAndPopulate)]
-        [JsonConverter(typeof(CamelCaseEnumTypeConverter))]
-#else
     [JsonPropertyName(LogicJsonPropertyName)]
-#endif
     public FilterLogic Logic { get; set; }
 
     ///<inheritdoc/>
@@ -83,21 +62,15 @@ public sealed class MultiFilter : IFilter, IEquatable<MultiFilter>
             {
                 FilterLogic.And => FilterLogic.Or,
                 FilterLogic.Or => FilterLogic.And,
-                _ => throw new ArgumentOutOfRangeException($"Unsupported {Logic}")
+                _ => throw new NotSupportedException($"Unsupported {Logic}")
             },
-            Filters = Filters.Select(f => f.Negate())
-#if DEBUG
-                .ToArray()
-#endif
+            Filters = [ ..Filters.Select(f => f.Negate()) ]
         };
 
         return filter;
     }
 
     ///<inheritdoc/>
-#if NETSTANDARD1_3 || NETSTANDARD2_0
-        public override int GetHashCode() => (Logic, Filters).GetHashCode();
-#else
     public override int GetHashCode()
     {
         HashCode hash = new();
@@ -108,7 +81,6 @@ public sealed class MultiFilter : IFilter, IEquatable<MultiFilter>
         }
         return hash.ToHashCode();
     }
-#endif
 
     ///<inheritdoc/>
     public bool Equals(IFilter other) => Equals(other as MultiFilter);

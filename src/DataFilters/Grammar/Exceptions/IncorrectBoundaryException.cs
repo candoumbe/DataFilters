@@ -1,7 +1,7 @@
-﻿namespace DataFilters.Grammar.Exceptions;
-
+﻿
 using System;
 
+namespace DataFilters.Grammar.Exceptions;
 /// <summary>
 /// Exception thrown when <see cref="Syntax.IntervalExpression"/> constructor is passed incorrect <see cref="Syntax.BoundaryExpression"/>s.
 /// </summary>

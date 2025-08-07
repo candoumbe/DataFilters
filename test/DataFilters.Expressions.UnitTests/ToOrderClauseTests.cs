@@ -1,5 +1,4 @@
-﻿namespace DataFilters.Expressions.UnitTests;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +9,7 @@ using Xunit;
 using Xunit.Categories;
 using static DataFilters.OrderDirection;
 
+namespace DataFilters.Expressions.UnitTests;
 [UnitTest]
 [Feature("Expressions")]
 public class ToOrderClauseTests

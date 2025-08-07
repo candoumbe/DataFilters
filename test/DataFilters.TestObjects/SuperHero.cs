@@ -1,10 +1,10 @@
-﻿namespace DataFilters.TestObjects
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
+namespace DataFilters.TestObjects
+{
     [ExcludeFromCodeCoverage]
     public class SuperHero : Person
     {

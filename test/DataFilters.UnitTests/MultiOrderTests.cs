@@ -1,11 +1,11 @@
-﻿namespace DataFilters.UnitTests;
-
+﻿
 using DataFilters.TestObjects;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.OrderDirection;
 
+namespace DataFilters.UnitTests;
 public class MultiOrderTests(ITestOutputHelper outputHelper)
 {
     public static TheoryData<MultiOrder<SuperHero>, object, bool, string> EqualsCases

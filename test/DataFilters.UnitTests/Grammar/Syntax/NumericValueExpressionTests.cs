@@ -1,20 +1,15 @@
-﻿using Candoumbe.MiscUtilities.Comparers;
-using DataFilters.Grammar.Syntax;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace DataFilters.UnitTests.Grammar.Syntax;
-
-using System;
+﻿using System;
+using Candoumbe.MiscUtilities.Comparers;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;
+using Xunit.Abstractions;
 using Xunit.Categories;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 [UnitTest]
 public class NumericValueExpressionTests(ITestOutputHelper outputHelper)
 {

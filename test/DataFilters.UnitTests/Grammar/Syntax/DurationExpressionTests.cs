@@ -1,4 +1,3 @@
-namespace DataFilters.UnitTests.Grammar.Syntax;
 
 using System;
 using DataFilters.Grammar.Syntax;
@@ -10,6 +9,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 [UnitTest]
 public class DurationExpressionTests(ITestOutputHelper outputHelper)
 {
@@ -135,7 +135,7 @@ public class DurationExpressionTests(ITestOutputHelper outputHelper)
         bool first = duration.IsEquivalentTo(other.Item);
         bool second = other.Item.IsEquivalentTo(third.Item);
 
-        // Act 
+        // Act
         bool actual = duration.IsEquivalentTo(third.Item);
 
         // Assert

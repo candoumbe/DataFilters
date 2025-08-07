@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests;
-
+﻿
 using System;
 using DataFilters.TestObjects;
 using FluentAssertions;
@@ -7,6 +6,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.OrderDirection;
 
+namespace DataFilters.UnitTests;
 public class OrderTests(ITestOutputHelper outputHelper)
 {
     [Theory]

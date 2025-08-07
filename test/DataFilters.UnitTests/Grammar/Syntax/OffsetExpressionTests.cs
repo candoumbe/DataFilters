@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests.Grammar.Syntax;
-
+﻿
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 
@@ -12,6 +11,7 @@ using FsCheck.Xunit;
 using Xunit;
 using Xunit.Categories;
 
+namespace DataFilters.UnitTests.Grammar.Syntax;
 [UnitTest]
 public class OffsetExpressionTests
 {

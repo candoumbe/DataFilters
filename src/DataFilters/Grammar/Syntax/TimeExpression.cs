@@ -1,7 +1,7 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
+﻿
 using System;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// A <see cref="FilterExpression"/> that only consists of time part.
 /// </summary>

@@ -1,7 +1,7 @@
-namespace DataFilters.Grammar.Syntax;
 
 using System;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// A <see cref="FilterExpression"/> implementation that contains values associated to a duration (see "https://en.wikipedia.org/wiki/ISO_8601#Durations")
 /// </summary>

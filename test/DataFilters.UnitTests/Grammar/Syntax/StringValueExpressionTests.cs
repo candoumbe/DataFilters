@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
-using DataFilters.Grammar.Parsing;
-using System;
 using Candoumbe.MiscUtilities.Comparers;
+using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
 using FluentAssertions;

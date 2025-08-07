@@ -1,5 +1,4 @@
-﻿namespace DataFilters.UnitTests;
-
+﻿
 using System;
 using DataFilters.Casing;
 using DataFilters.TestObjects;
@@ -8,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.OrderDirection;
 
+namespace DataFilters.UnitTests;
 public class StringExtensionsTests(ITestOutputHelper outputHelper)
 {
     [Theory]

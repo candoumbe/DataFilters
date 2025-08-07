@@ -1,8 +1,8 @@
-﻿namespace DataFilters.Grammar.Syntax;
-
+﻿
 using System;
 using System.Collections.Generic;
 
+namespace DataFilters.Grammar.Syntax;
 /// <summary>
 /// stores a range value used in a bracket expression
 /// </summary>
@@ -30,23 +30,19 @@ public sealed class RangeBracketValue(char start, char end) : BracketValue, IEqu
         public override bool Equals(object obj)
         {
             bool equals;
-            switch (obj)
+            if (obj is ConstantBracketValue constantBracketValue)
             {
-                case ConstantBracketValue constantBracketValue:
-                    char[] chars = [.. constantBracketValue.Value];
-                    char head = chars[0];
-#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
-                    char tail = chars[^1];
-#else
-                    char tail = chars[chars.Length - 1];
-#endif
+                char[] chars = [.. constantBracketValue.Value];
+                char head = chars[0];
+                char tail = chars[^1];
                 equals = (Start, End).Equals((head, tail));
-                break;
-            default:
+            }
+            else
+            {
                 equals = Equals(obj as RangeBracketValue);
-                break;
-        }
-        return equals;
+            }
+
+            return equals;
     }
 
     ///<inheritdoc />
@@ -68,18 +64,7 @@ public sealed class RangeBracketValue(char start, char end) : BracketValue, IEqu
     public static bool operator >=(RangeBracketValue left, RangeBracketValue right) => left > right || left == right;
 
     ///<inheritdoc />
-#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
     public override int GetHashCode() => HashCode.Combine(Start, End);
-#else
-        public override int GetHashCode()
-        {
-            int hashCode = -1676728671;
-            hashCode = (hashCode * -1521134295) + Start.GetHashCode();
-            hashCode = (hashCode * -1521134295) + End.GetHashCode();
-            return hashCode;
-        }
-
-#endif
 
     ///<inheritdoc />
     public override string EscapedParseableString => $"[{Start}-{End}]";
