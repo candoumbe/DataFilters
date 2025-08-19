@@ -52,7 +52,7 @@ public class FilterConverter : JsonConverter<Filter>
 
         if (!reader.Read() || reader.TokenType != JsonTokenType.PropertyName || Filter.OperatorJsonPropertyName != reader.GetString())
         {
-            throw new JsonException($@"Missing ""{Filter.OperatorJsonPropertyName}"" property.");
+            throw new JsonException($"""Missing "{Filter.OperatorJsonPropertyName}" property.""");
         }
 
         reader.Read();
@@ -66,13 +66,12 @@ public class FilterConverter : JsonConverter<Filter>
                 {
                     JsonTokenType.Number => reader.GetInt64(),
                     JsonTokenType.String => reader.GetString(),
-                    JsonTokenType.False => reader.GetBoolean(),
-                    JsonTokenType.True => reader.GetBoolean(),
+                    JsonTokenType.False or JsonTokenType.True => reader.GetBoolean(),
                     _ => null
                 };
             }
 
-            if (!reader.Read() || reader.TokenType != JsonTokenType.EndObject)
+            if (!reader.Read() || reader.TokenType is not JsonTokenType.EndObject)
             {
                 throw new JsonException("Filter json must end with '}'.");
             }
@@ -80,7 +79,7 @@ public class FilterConverter : JsonConverter<Filter>
         }
         else
         {
-            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+            while (reader.Read() && reader.TokenType is not JsonTokenType.EndObject)
             {
                 // empty loop to get to the end of the current JSON object
             }
@@ -105,7 +104,7 @@ public class FilterConverter : JsonConverter<Filter>
 
         writer.WriteStringValue(kv.Key);
 
-        // value (only if the operator is not an unary operator)
+        // value (only if the operator is not a unary operator)
         if (!Filter.UnaryOperators.Contains(filter.Operator))
         {
             writer.WritePropertyName(Filter.ValueJsonPropertyName);
