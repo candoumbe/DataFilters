@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Queries.Core.Parts.Sorting;
 
+// ReSharper disable once CheckNamespace
 namespace DataFilters;
 /// <summary>
 /// Extensions method for <see cref="IOrder{T}"/> types
@@ -17,21 +18,14 @@ public static class OrderExtensions
     /// <exception cref="NotSupportedException"><paramref name="order"/> is neither <see cref="Order{T}"/> nor <see cref="MultiOrder{T}"/>.</exception>
     public static IEnumerable<IOrder> ToOrder<T>(this IOrder<T> order)
     {
-        static OrderExpression CreateOrderExpressionFromOrder(in Order<T> instance)
-        {
-            return new OrderExpression(instance.Expression.Field(), direction: instance.Direction == OrderDirection.Ascending
-                ? Queries.Core.Parts.Sorting.OrderDirection.Ascending
-                : Queries.Core.Parts.Sorting.OrderDirection.Descending);
-        }
-
         switch (order)
         {
             case Order<T> expression:
                 yield return CreateOrderExpressionFromOrder(expression);
                 break;
-            case MultiOrder<T> multisort:
+            case MultiOrder<T> multiSort:
             {
-                foreach (Order<T> item in multisort.Orders)
+                foreach (Order<T> item in multiSort.Orders)
                 {
                     yield return CreateOrderExpressionFromOrder(item);
                 }
@@ -41,6 +35,15 @@ public static class OrderExtensions
 
             default:
                 throw new NotSupportedException("Unsupported order type");
+        }
+
+        yield break;
+
+        static OrderExpression CreateOrderExpressionFromOrder(in Order<T> instance)
+        {
+            return new OrderExpression(instance.Expression.Field(), direction: instance.Direction == OrderDirection.Ascending
+                                                                                   ? Queries.Core.Parts.Sorting.OrderDirection.Ascending
+                                                                                   : Queries.Core.Parts.Sorting.OrderDirection.Descending);
         }
     }
 }
