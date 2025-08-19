@@ -41,18 +41,40 @@ public class FilterToQueriesTests(ITestOutputHelper outputHelper)
                 new MultiFilter
                 {
                     Logic = FilterLogic.Or,
-                    Filters = new []{
+                    Filters =
+                    [
                         new Filter(field: "Name",@operator: EndsWith, value: "man"),
                         new Filter(field: "Name",@operator: StartsWith, value: "Bat")
-                    }
+                    ]
                 },
                 new CompositeWhereClause
                 {
                     Logic = ClauseLogic.Or,
-                    Clauses = new []{
+                    Clauses =
+                    [
                         new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "%man"),
                         new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "Bat%")
-                    }
+                    ]
+                }
+            },
+            {
+                new MultiFilter
+                {
+                    Logic = FilterLogic.And,
+                    Filters =
+                    [
+                        new Filter(field: "Name",@operator: EndsWith, value: "man"),
+                        new Filter(field: "Name",@operator: StartsWith, value: "Bat")
+                    ]
+                },
+                new CompositeWhereClause
+                {
+                    Logic = ClauseLogic.And,
+                    Clauses =
+                    [
+                        new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "%man"),
+                        new WhereClause("Name".Field(),@operator: ClauseOperator.Like, constraint: "Bat%")
+                    ]
                 }
             },
 
@@ -110,8 +132,6 @@ public class FilterToQueriesTests(ITestOutputHelper outputHelper)
                 new Filter("BirthDate", GreaterThan, 18.January(1983)),
                 new WhereClause("BirthDate".Field(), ClauseOperator.GreaterThan, 18.January(1983))
             },
-
-#if NET6_0_OR_GREATER
             {
                 new Filter("BirthDate", GreaterThan, DateOnly.FromDateTime(18.January(1983))),
                 new WhereClause("BirthDate".Field(), ClauseOperator.GreaterThan, DateOnly.FromDateTime(18.January(1983)))
@@ -121,7 +141,6 @@ public class FilterToQueriesTests(ITestOutputHelper outputHelper)
                 new Filter("Time", GreaterThan, TimeOnly.FromDateTime(18.January(1983).Add(15.Hours().And(47.Minutes())))),
                 new WhereClause("Time".Field(), ClauseOperator.GreaterThan, TimeOnly.FromDateTime(18.January(1983).Add(15.Hours().And(47.Minutes()))))
             }
-#endif
         };
 
     [Theory]
