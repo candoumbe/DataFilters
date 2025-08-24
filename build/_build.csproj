@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Candoumbe.Pipelines" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" />
     <PackageReference Include="ReportGenerator" />
     <PackageDownload Include="dotnet-stryker" Version="[4.5.1]" />
     <PackageDownload Include="GitVersion.Tool" Version="[6.1.0]" />
