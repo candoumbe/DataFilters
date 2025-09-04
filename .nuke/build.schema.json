@@ -145,6 +145,10 @@
           "type": "boolean",
           "description": "Indicates to open the pull request as 'draft'"
         },
+        "Filter": {
+          "type": "string",
+          "description": "Filter benchmarks to run by their full name (namespace.typeName.methodName) using glob pattern"
+        },
         "Formatters": {
           "type": "array",
           "description": "Sets of formatters that the tool must apply",
@@ -184,6 +188,11 @@
         "NugetApiKey": {
           "type": "string",
           "description": "API key used to publish artifacts to Nuget.org",
+          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
+        },
+        "NuGetApiKey": {
+          "type": "string",
+          "description": "API Key to use for accessing the NuGet repository",
           "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "SkipConfirmation": {
