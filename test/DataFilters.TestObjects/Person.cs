@@ -1,8 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
 namespace DataFilters.TestObjects
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-
     [ExcludeFromCodeCoverage]
     public class Person
     {
@@ -23,5 +24,7 @@ namespace DataFilters.TestObjects
         public int Height { get; set; }
 
         public DateTimeOffset DateTimeWithOffset { get; set; }
+
+        public IEnumerable<Person> Children { get; set; }
     }
 }

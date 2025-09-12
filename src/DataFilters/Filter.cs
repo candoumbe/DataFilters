@@ -26,13 +26,16 @@
         /// <summary>
         /// Filter that always returns <c>true</c>
         /// </summary>
-        public static Filter True => new(default, default);
+        public static Filter True => new(null, default);
 
         /// <summary>
         /// Pattern that field name should respect.
         /// </summary>
         /// #lang : regex
-        public const string ValidFieldNamePattern = @"[a-zA-Z_]+((\[""[a-zA-Z0-9_]+""]|(\.[a-zA-Z0-9_]+))*)";
+        /// language=regex
+        public const string ValidFieldNamePattern = """
+                                                    [a-zA-Z_]+((\["[a-zA-Z0-9_]+"]|(\.[a-zA-Z0-9_]+))*)
+                                                    """;
 
         /// <summary>
         /// Regular expression used to validate

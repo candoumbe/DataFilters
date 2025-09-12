@@ -1,4 +1,6 @@
-﻿namespace DataFilters.UnitTests.Grammar.Parsing
+﻿using DataFilters.TestObjects;
+
+namespace DataFilters.UnitTests.Grammar.Parsing
 {
     using System;
     using System.Collections.Generic;
@@ -1026,11 +1028,18 @@ I&_Oj
                         new PropertyName("Prop"),
                         new ContainsExpression("Foo") & new EndsWithExpression("Bar")
                     )
+                },
+                {
+                    """Acolytes["Nickname"]=Krypto*""",
+                    (
+                        new PropertyName("""Acolytes["Nickname"]"""),
+                        new StartsWithExpression("Krypto")
+                    )
                 }
             };
 
         /// <summary>
-        /// Tests if <see cref="FilterTokenParser.Criteria"/> can parse a criteria
+        /// Tests if <see cref="FilterTokenParser.Criterion"/> can parse a criteria
         /// </summary>
         /// <param name="input"></param>
         /// <param name="expected"></param>
@@ -1057,11 +1066,11 @@ I&_Oj
                 .Be(expected.expression);
         }
 
-        public static TheoryData<string, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
+        public static TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
         {
             get
             {
-                TheoryData<string, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
+                TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
                 {
                     {
                         "Firstname=Vandal&Lastname=Savage",
@@ -1076,6 +1085,13 @@ I&_Oj
                             && expressions.Once(expr => expr.prop.Equals(new PropertyName("Firstname"))
                                 && expr.expression.Equals(new OneOfExpression(new StringValueExpression("Vandal"),
                                                                                   new StringValueExpression("vandal"))))
+                    },
+                    {
+
+                        """Acolytes["Nickname"]=Krypto*""",
+                        expressions => expressions.Count == 1
+                                       && expressions[0].prop.Equals(new PropertyName("""Acolytes["Nickname"]"""))
+                                       && expressions[0].expression.Equals(new StartsWithExpression("Krypto"))
                     }
                 };
 
@@ -1112,14 +1128,14 @@ I&_Oj
         /// <param name="expectation"></param>
         [Theory]
         [MemberData(nameof(CriteriaCases))]
-        public void Should_parse_Criteria(string input, Expression<Func<IEnumerable<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
+        public void Should_parse_Criteria(string input, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
         {
             // Arrange
             _outputHelper.WriteLine($"input : '{input}'");
             TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
             // Act
-            IEnumerable<(PropertyName prop, FilterExpression expression)> actual = FilterTokenParser.Criteria.Parse(tokens);
+            IReadOnlyList<(PropertyName prop, FilterExpression expression)> actual = FilterTokenParser.Criteria.Parse(tokens);
 
             // Assert
             actual.Should()

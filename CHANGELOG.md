@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 🚨 Fixes
+
+- Fixed incorrect handling of nested properties when using sub-property syntax ([#477](https://github.com/candoumbe/datafilters/issues/477))
 
 ## [0.13.1] / 2025-01-12
 ### ⚠️ Breaking Changes

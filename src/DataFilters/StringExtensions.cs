@@ -1,4 +1,8 @@
-﻿namespace System
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.Text.RegularExpressions;
+
+namespace System
 {
     using DataFilters;
 
@@ -178,7 +182,64 @@
         {
             string localQueryString = queryString;
 
-            static IFilter ConvertExpressionToFilter(PropertyInfo propInfo, FilterExpression expression, TypeConverter tc)
+            if (localQueryString is null)
+            {
+                throw new ArgumentNullException(nameof(queryString));
+            }
+
+            IFilter filter = Filter.True;
+            bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
+
+            if (!isEmptyQueryString)
+            {
+                FilterTokenizer tokenizer = new();
+                TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
+
+                (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
+#if NET6_0
+                if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
+                {
+                    TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
+                }
+#endif
+                if (expressions.Once())
+                {
+                    (PropertyName property, FilterExpression expression) = expressions[0];
+
+                    string fieldName = options.DefaultPropertyNameResolutionStrategy.Handle(property.Name);
+                    Debug.Assert(Regex.IsMatch(fieldName, Filter.ValidFieldNamePattern, RegexOptions.Singleline, TimeSpan.FromSeconds(10)), "fieldName is not a valid field name");
+
+                    Type fieldType = ComputeTargetedPropertyType(fieldName);
+
+                    if (fieldType is not null)
+                    {
+                        TypeConverter tc = TypeDescriptor.GetConverter(fieldType);
+                        filter = ConvertExpressionToFilter(fieldName, expression, tc, fieldType);
+                    }
+                }
+                else
+                {
+                    IList<IFilter> filters = [];
+
+                    foreach (( PropertyName property, FilterExpression expression ) in expressions)
+                    {
+                        string fieldName = options.DefaultPropertyNameResolutionStrategy.Handle(property.Name);
+
+                        Type fieldType = ComputeTargetedPropertyType(fieldName);
+                        if (fieldType is not null)
+                        {
+                            TypeConverter tc = TypeDescriptor.GetConverter(fieldType);
+                            filters.Add(ConvertExpressionToFilter(fieldName, expression, tc, fieldType));
+                        }
+                    }
+
+                    filter = new MultiFilter { Logic = options.Logic, Filters = filters };
+                }
+            }
+
+            return filter;
+
+            static IFilter ConvertExpressionToFilter(string fieldName, FilterExpression expression, TypeConverter tc, Type fieldType)
             {
                 IFilter filter;
                 switch (expression)
@@ -186,21 +247,21 @@
                     case ConstantValueExpression constant:
                         string constantValue = constant.Value;
 
-                        filter = new Filter(propInfo.Name,
+                        filter = new Filter(fieldName,
                                             EqualTo,
-                                            tc.ConvertFromInvariantString(constantValue));
+                                            tc.ConvertTo(constantValue, fieldType));
                         break;
                     case StartsWithExpression startsWith:
-                        filter = new Filter(propInfo.Name, StartsWith, startsWith.Value);
+                        filter = new Filter(fieldName, StartsWith, startsWith.Value);
                         break;
                     case EndsWithExpression endsWith:
-                        filter = new Filter(propInfo.Name, EndsWith, endsWith.Value);
+                        filter = new Filter(fieldName, EndsWith, endsWith.Value);
                         break;
                     case ContainsExpression endsWith:
-                        filter = new Filter(propInfo.Name, Contains, endsWith.Value);
+                        filter = new Filter(fieldName, Contains, endsWith.Value);
                         break;
                     case NotExpression not:
-                        filter = ConvertExpressionToFilter(propInfo, not.Expression, tc).Negate();
+                        filter = ConvertExpressionToFilter(fieldName, not.Expression, tc, fieldType).Negate();
                         break;
                     case OrExpression orExpression:
                         filter = new MultiFilter
@@ -208,8 +269,8 @@
                             Logic = FilterLogic.Or,
                             Filters =
                             [
-                                ConvertExpressionToFilter(propInfo, orExpression.Left, tc),
-                                ConvertExpressionToFilter(propInfo, orExpression.Right, tc)
+                                ConvertExpressionToFilter(fieldName, orExpression.Left, tc, fieldType),
+                                ConvertExpressionToFilter(fieldName, orExpression.Right, tc, fieldType)
                             ]
                         };
                         break;
@@ -219,8 +280,8 @@
                             Logic = FilterLogic.And,
                             Filters =
                             [
-                                ConvertExpressionToFilter(propInfo, andExpression.Left, tc),
-                                ConvertExpressionToFilter(propInfo, andExpression.Right, tc)
+                                ConvertExpressionToFilter(fieldName, andExpression.Left, tc, fieldType),
+                                ConvertExpressionToFilter(fieldName, andExpression.Right, tc, fieldType)
                             ]
                         };
                         break;
@@ -232,18 +293,18 @@
                         };
                         break;
                     case GroupExpression group:
-                        filter = ConvertExpressionToFilter(propInfo, group.Expression, tc);
+                        filter = ConvertExpressionToFilter(fieldName, group.Expression, tc, fieldType);
                         break;
                     case OneOfExpression oneOf:
                         FilterExpression[] possibleValues = [.. oneOf.Values];
                         if (oneOf.Values.Exactly(1))
                         {
-                            filter = ConvertExpressionToFilter(propInfo, possibleValues[0], tc);
+                            filter = ConvertExpressionToFilter(fieldName, possibleValues[0], tc, fieldType);
                         }
                         else
                         {
                             List<IFilter> filters = new(possibleValues.Length);
-                            filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(propInfo, item, tc)));
+                            filters.AddRange(possibleValues.Select(item => ConvertExpressionToFilter(fieldName, item, tc, fieldType)));
 
                             filter = new MultiFilter { Logic = FilterLogic.Or, Filters = filters };
                         }
@@ -274,7 +335,7 @@
                         FilterOperator minOperator = min.included ? GreaterThanOrEqual : GreaterThan;
                         FilterOperator maxOperator = max.included ? LessThanOrEqualTo : LessThan;
 
-                        if (min.constantExpression?.Value != default && max.constantExpression?.Value != default)
+                        if (min.constantExpression?.Value is not null && max.constantExpression?.Value is not null)
                         {
                             object minValue = min.constantExpression.Value;
                             object maxValue = max.constantExpression.Value;
@@ -283,24 +344,24 @@
                                 Logic = FilterLogic.And,
                                 Filters = new IFilter[]
                                 {
-                                    new Filter(propInfo.Name,
+                                    new Filter(fieldName,
                                                minOperator,
                                                tc.ConvertFrom(minValue)),
-                                    new Filter(propInfo.Name,
+                                    new Filter(fieldName,
                                                maxOperator,
                                                tc.ConvertFrom(maxValue))
                                 }
                             };
                         }
-                        else if (min.constantExpression?.Value != default)
+                        else if (min.constantExpression?.Value is not null)
                         {
                             object minValue = min.constantExpression.Value;
-                            filter = new Filter(propInfo.Name, minOperator, tc.ConvertFrom(minValue));
+                            filter = new Filter(fieldName, minOperator, tc.ConvertFrom(minValue));
                         }
                         else
                         {
                             object maxValue = max.constantExpression.Value;
-                            filter = new Filter(propInfo.Name, maxOperator, tc.ConvertFrom(maxValue));
+                            filter = new Filter(fieldName, maxOperator, tc.ConvertFrom(maxValue));
                         }
                         break;
                     default:
@@ -310,60 +371,95 @@
                 return filter;
             }
 
-            if (localQueryString == default)
+            static IReadOnlyList<ReadOnlyMemory<char>> ParsePropertyPath(string input)
             {
-                throw new ArgumentNullException(nameof(queryString));
-            }
+                List<ReadOnlyMemory<char>> result = [];
+                int start = 0;
+                bool insideBrackets = false;
+                bool insideQuotes = false;
 
-            IFilter filter = Filter.True;
-            bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
-
-            if (!isEmptyQueryString)
-            {
-                FilterTokenizer tokenizer = new();
-                TokenList<FilterToken> tokens = tokenizer.Tokenize(localQueryString);
-
-                (PropertyName Property, FilterExpression Expression)[] expressions = FilterTokenParser.Criteria.Parse(tokens);
-#if NET6_0
-                if (HackZone.TryAdd(true, 1) && expressions.AtLeastOnce())
+                for (int i = 0; i < input.Length; i++)
                 {
-                    TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyTypeConverter)));
-                }
-#endif
-                if (expressions.Once())
-                {
-                    (PropertyName property, FilterExpression expression) = expressions[0];
+                    char currentChar = input[i];
 
-                    PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                               .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
-
-                    if (pi is not null)
+                    switch (currentChar)
                     {
-                        TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                        filter = ConvertExpressionToFilter(pi, expression, tc);
+                        case '[':
+                            if (!insideQuotes)
+                            {
+                                if (!insideBrackets && i > start)
+                                {
+                                    result.Add(input.AsMemory().Slice(start, i - start));
+                                }
+                                insideBrackets = true;
+                            }
+                            break;
+
+                        case '"':
+                            if (insideBrackets)
+                            {
+                                if (!insideQuotes)
+                                {
+                                    start = i + 1;
+                                }
+                                else
+                                {
+                                    result.Add(input.AsMemory(start, i - start));
+                                }
+                                insideQuotes = !insideQuotes;
+                            }
+                            break;
+
+                        case ']':
+                            if (!insideQuotes && insideBrackets)
+                            {
+                                insideBrackets = false;
+                                start = i + 1;
+                            }
+                            break;
                     }
                 }
-                else
+
+                return result is {Count: > 0}
+                           ? result
+                           : [ input.AsMemory() ];
+            }
+
+            static Type ComputeTargetedPropertyType(string fieldName)
+            {
+                IReadOnlyList<ReadOnlyMemory<char>> fieldPath = ParsePropertyPath(fieldName);
+
+                PropertyInfo currentProperty;
+                Type currentType = typeof(T);
+                for(int i = 0; i < fieldPath.Count; i++)
                 {
-                    IList<IFilter> filters = [];
-
-                    foreach ((PropertyName property, FilterExpression expression) in expressions)
+                    currentProperty = currentType?.GetProperty(fieldPath[i].ToString());
+                    if (currentProperty is not null)
                     {
-                        PropertyInfo pi = typeof(T).GetRuntimeProperties()
-                                                   .SingleOrDefault(x => x.CanRead && x.Name == options.DefaultPropertyNameResolutionStrategy.Handle(property.Name));
+                        currentType = currentProperty.PropertyType;
+#if NETSTANDARD2_0_OR_GREATER
+                        if (typeof(IEnumerable<>).IsAssignableFrom(currentType))
+#else
+                        if (currentType.IsAssignableTo(typeof(IEnumerable<>)))
+#endif
 
-                        if (pi is not null)
                         {
-                            TypeConverter tc = TypeDescriptor.GetConverter(pi.PropertyType);
-                            filters.Add(ConvertExpressionToFilter(pi, expression, tc));
+                            if (currentType.IsGenericType)
+                            {
+                                currentType = currentType.GetGenericArguments()[0];
+                                i++;
+                            }
+                            else if(currentType.IsArray)
+                            {
+                                currentType = currentType.GetElementType();
+                                i++;
+                            }
                         }
                     }
-
-                    filter = new MultiFilter { Logic = options.Logic, Filters = filters };
                 }
-            }
 
-            return filter;
+                return currentType;
+            }
         }
 
         /// <summary>
