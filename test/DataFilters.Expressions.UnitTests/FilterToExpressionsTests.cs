@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using DataFilters.TestObjects;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -20,6 +22,8 @@ namespace DataFilters.Expressions.UnitTests;
 [UnitTest]
 public class FilterToExpressionTests(ITestOutputHelper output)
 {
+    private static readonly JsonSerializerOptions s_jsonSerializerOptions = new() { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
     public static TheoryData<IReadOnlyList<SuperHero>, IFilter, NullableValueBehavior, Expression<Func<SuperHero, bool>>> EqualToTestCases
         => new()
             {
@@ -766,7 +770,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
     /// <param name="expression">Expression the filter should match once built</param>
     private void Build<T>(IReadOnlyList<T> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<T, bool>> expression)
     {
-        output.WriteLine($"Filtering {elements.Jsonify()}");
+        output.WriteLine($"Filtering {elements.Jsonify(s_jsonSerializerOptions)}");
         output.WriteLine($"Filter under test : {filter}");
         output.WriteLine($"Behavior : {nullableValueBehavior}");
         output.WriteLine($"Reference expression : {expression.Body}");
