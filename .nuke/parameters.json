@@ -2,5 +2,5 @@
   "$schema": "./build.schema.json",
   "Solution": "DataFilters.sln",
   "NoLogo": true,
-  "Formatters": ["analyzers", "style"]
+  "Formatters": ["Analyzers", "Style"]
 }
