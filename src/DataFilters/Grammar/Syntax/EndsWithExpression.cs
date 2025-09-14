@@ -66,24 +66,24 @@ namespace DataFilters.Grammar.Syntax
         /// </summary>
         /// <param name="text"></param>
         /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
-        public EndsWithExpression(TextExpression text) : this(new StringSegmentLinkedList( Guard.Against.Null(text, nameof(text)).OriginalString ))
+        public EndsWithExpression(TextExpression text) : this(new StringSegmentLinkedList(Guard.Against.Null(text, nameof(text)).OriginalString))
         {
             _lazyEscapedParseableString = new Lazy<string>(() => $"*{text.EscapedParseableString}");
         }
         ///<inheritdoc/>
         public bool Equals(EndsWithExpression other) => Value.Equals(other?.Value);
 
-    ///<inheritdoc/>
-    public override bool Equals(object obj) => Equals(obj as EndsWithExpression);
+        ///<inheritdoc/>
+        public override bool Equals(object obj) => Equals(obj as EndsWithExpression);
 
-    ///<inheritdoc/>
-    public override int GetHashCode() => Value.GetHashCode();
+        ///<inheritdoc/>
+        public override int GetHashCode() => Value.GetHashCode();
 
-    ///<inheritdoc/>
-    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+        ///<inheritdoc/>
+        public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
-    ///<inheritdoc/>
-    public override double Complexity => 1.5;
+        ///<inheritdoc/>
+        public override double Complexity => 1.5;
 
         /// <summary>
         /// Constructs a new <see cref="ContainsExpression"/> by adding an <see cref="AsteriskExpression"/> to a <see cref="EndsWithExpression"/>>.

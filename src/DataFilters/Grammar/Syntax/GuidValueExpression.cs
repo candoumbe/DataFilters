@@ -16,12 +16,12 @@ public class GuidValueExpression : ConstantValueExpression
     /// Builds a new <see cref="GuidValueExpression"/> instance that can wrap a <see cref="System.Guid"/>
     /// </summary>
     /// <param name="value"></param>
-    public GuidValueExpression(StringSegment value): base(value)
+    public GuidValueExpression(StringSegment value) : base(value)
     {
         _lazyParseableString = new Lazy<string>(value.Value);
     }
 
-    internal GuidValueExpression(StringSegmentLinkedList value): base(value)
+    internal GuidValueExpression(StringSegmentLinkedList value) : base(value)
     {
         _lazyParseableString = new Lazy<string>(value.ToStringValue);
     }

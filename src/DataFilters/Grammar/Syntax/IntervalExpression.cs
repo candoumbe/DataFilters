@@ -89,21 +89,21 @@ public sealed class IntervalExpression : FilterExpression, IEquatable<IntervalEx
 
         _lazyParseableString = new Lazy<string>(() => $"{GetMinBracket(Min?.Included)}{Min?.Expression?.EscapedParseableString ?? "*"} TO {Max?.Expression?.EscapedParseableString ?? "*"}{GetMaxBracket(Max?.Included)}");
         _lazyToString = new Lazy<string>(() => new
-                    {
-                        Min = new
-                        {
-                            Min?.Included,
-                            Min?.Expression?.EscapedParseableString,
-                            Type = Min?.Expression?.GetType().Name
-                        },
-                        Max = new
-                        {
-                            Max?.Included,
-                            Max?.Expression?.EscapedParseableString,
-                            Type = Max?.Expression?.GetType().Name
-                        },
-                        EscapedParseableString
-                    }
+        {
+            Min = new
+            {
+                Min?.Included,
+                Min?.Expression?.EscapedParseableString,
+                Type = Min?.Expression?.GetType().Name
+            },
+            Max = new
+            {
+                Max?.Included,
+                Max?.Expression?.EscapedParseableString,
+                Type = Max?.Expression?.GetType().Name
+            },
+            EscapedParseableString
+        }
                     .Jsonify(new JsonSerializerOptions { WriteIndented = true, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull })
             );
 

@@ -42,10 +42,10 @@ public class AsteriskExpressionTests(ITestOutputHelper outputHelper)
         bool actual = first.Equals(other);
         int actualHashCode = first.GetHashCode();
 
-            // Assert
-            actual.Should()
-                .Be(expected, reason);
-        }
+        // Assert
+        actual.Should()
+            .Be(expected, reason);
+    }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
     public void Given_AsteriskExpression_GetComplexity_should_return_1() => AsteriskExpression.Instance.Complexity.Should().Be(1);

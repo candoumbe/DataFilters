@@ -64,7 +64,7 @@ public sealed class MultiFilter : IFilter, IEquatable<MultiFilter>
                 FilterLogic.Or => FilterLogic.And,
                 _ => throw new NotSupportedException($"Unsupported {Logic}")
             },
-            Filters = [ ..Filters.Select(f => f.Negate()) ]
+            Filters = [.. Filters.Select(f => f.Negate())]
         };
 
         return filter;

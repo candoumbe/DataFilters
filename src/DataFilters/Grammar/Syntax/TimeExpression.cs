@@ -65,10 +65,10 @@ public sealed class TimeExpression : FilterExpression, IEquatable<TimeExpression
         Milliseconds = milliseconds;
     }
 
-        ///<inheritdoc/>
-        public bool Equals(TimeExpression other) => other is not null
-            && ((Hours, Minutes, Seconds, Milliseconds).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds))
-            || new TimeSpan(0, Hours, Minutes, Seconds, Milliseconds) == new TimeSpan(0, other.Hours, other.Minutes, other.Seconds, other.Milliseconds));
+    ///<inheritdoc/>
+    public bool Equals(TimeExpression other) => other is not null
+        && ((Hours, Minutes, Seconds, Milliseconds).Equals((other.Hours, other.Minutes, other.Seconds, other.Milliseconds))
+        || new TimeSpan(0, Hours, Minutes, Seconds, Milliseconds) == new TimeSpan(0, other.Hours, other.Minutes, other.Seconds, other.Milliseconds));
 
     ///<inheritdoc/>
     public override bool Equals(object obj) => Equals(obj as TimeExpression);

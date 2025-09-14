@@ -18,6 +18,6 @@ public interface IHaveComplexity
 #if NET5_0_OR_GREATER
     public virtual double Complexity => 0;
 #else
-        double Complexity { get; }
+    double Complexity { get; }
 #endif
 }

@@ -66,7 +66,7 @@ public sealed class GroupExpression : FilterExpression, IEquatable<GroupExpressi
     ///<inheritdoc/>
     public override bool IsEquivalentTo(FilterExpression other) => other switch
     {
-        GroupExpression {Expression: var innerExpression } => Expression.IsEquivalentTo(innerExpression),
+        GroupExpression { Expression: var innerExpression } => Expression.IsEquivalentTo(innerExpression),
         _ => Expression.IsEquivalentTo(other)
     };
 

@@ -27,7 +27,7 @@ public class NumericValueExpression : ConstantValueExpression, IEquatable<Numeri
     public NumericValueExpression(string value) : base(value switch
     {
         null => throw new ArgumentNullException(nameof(value)),
-        {Length: 0} => throw new ArgumentOutOfRangeException(nameof(value)),
+        { Length: 0 } => throw new ArgumentOutOfRangeException(nameof(value)),
         _ => value
     })
     {
@@ -42,14 +42,14 @@ public class NumericValueExpression : ConstantValueExpression, IEquatable<Numeri
     ///<inheritdoc/>
     public override int GetHashCode() => Value.GetHashCode();
 
-        ///<inheritdoc/>
-        public override bool IsEquivalentTo(FilterExpression other) => other switch
-        {
-            NumericValueExpression numericValue => Equals(numericValue),
-            ConstantValueExpression constant => base.Equals(constant),
-            ISimplifiable simplifiable => Equals(simplifiable.Simplify()),
-            _ => false
-        };
+    ///<inheritdoc/>
+    public override bool IsEquivalentTo(FilterExpression other) => other switch
+    {
+        NumericValueExpression numericValue => Equals(numericValue),
+        ConstantValueExpression constant => base.Equals(constant),
+        ISimplifiable simplifiable => Equals(simplifiable.Simplify()),
+        _ => false
+    };
 
     ///<inheritdoc/>
     public static bool operator ==(NumericValueExpression left, NumericValueExpression right) => Equals(left, right);
@@ -58,7 +58,7 @@ public class NumericValueExpression : ConstantValueExpression, IEquatable<Numeri
     public static bool operator !=(NumericValueExpression left, NumericValueExpression right) => !(left == right);
 
     ///<inheritdoc/>
-    public override bool Equals(object obj)  =>
+    public override bool Equals(object obj) =>
         obj switch
         {
             StringValueExpression stringValue => Value.Equals(stringValue.Value),

@@ -8,7 +8,7 @@ namespace DataFilters;
 #if NET6_0_OR_GREATER
 public record FilterOptions
 #else
-    public class FilterOptions
+public class FilterOptions
 #endif
 {
     private PropertyNameResolutionStrategy _propertyNameResolutionStrategy;
@@ -21,11 +21,11 @@ public record FilterOptions
     {
         get => _propertyNameResolutionStrategy;
 #if !NET6_0_OR_GREATER
-            set
+        set
 #else
         init
 #endif
-            => _propertyNameResolutionStrategy = value ?? PropertyNameResolutionStrategy.Default;
+        => _propertyNameResolutionStrategy = value ?? PropertyNameResolutionStrategy.Default;
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public record FilterOptions
     {
         get;
 #if !NET6_0_OR_GREATER
-            set;
+        set;
 #else
         init;
 #endif

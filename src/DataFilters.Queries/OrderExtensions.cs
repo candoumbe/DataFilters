@@ -24,14 +24,14 @@ public static class OrderExtensions
                 yield return CreateOrderExpressionFromOrder(expression);
                 break;
             case MultiOrder<T> multiSort:
-            {
-                foreach (Order<T> item in multiSort.Orders)
                 {
-                    yield return CreateOrderExpressionFromOrder(item);
-                }
+                    foreach (Order<T> item in multiSort.Orders)
+                    {
+                        yield return CreateOrderExpressionFromOrder(item);
+                    }
 
-                break;
-            }
+                    break;
+                }
 
             default:
                 throw new NotSupportedException("Unsupported order type");

@@ -80,9 +80,9 @@ public class EndsWithExpressionTests(ITestOutputHelper outputHelper)
         bool actual = current.Equals(other);
         int actualHashCode = current.GetHashCode();
 
-            // Assert
-            actual.Should().Be(expected, reason);
-        }
+        // Assert
+        actual.Should().Be(expected, reason);
+    }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
     public void Given_EndsWithExpression_Complexity_should_return_1U002E5(EndsWithExpression endsWith)

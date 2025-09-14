@@ -25,7 +25,7 @@ public partial class OrderValidator : AbstractValidator<string>
         .WithMessage(search =>
         {
             string[] incorrectExpressions = search.Split([Separator])
-                // TODO use ZLinq
+                    // TODO use ZLinq
                     .Where(x => !_orderRegex.IsMatch(x))
                     .Select(x => $"""
                                   "{x}"

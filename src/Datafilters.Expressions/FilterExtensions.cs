@@ -102,49 +102,49 @@ public static class FilterExtensions
         switch (filter)
         {
             case Filter df:
-            {
-                if (df.Field == null)
                 {
-                    filterExpression = _ => true;
-                }
-                else
-                {
-                    Type type = typeof(T);
-                    ParameterExpression pe = Parameter(type, "item");
+                    if (df.Field == null)
+                    {
+                        filterExpression = _ => true;
+                    }
+                    else
+                    {
+                        Type type = typeof(T);
+                        ParameterExpression pe = Parameter(type, "item");
 
-                    string[] fields =
-                    [
-                        .. df.Field.Replace(@"[""", ".")
+                        string[] fields =
+                        [
+                            .. df.Field.Replace(@"[""", ".")
                             .Replace(@"""]", string.Empty)
                             .Split(['.'])
-                    ];
+                        ];
 
-                    Expression body = nullableValueBehavior switch
-                    {
-                        NoAction => ComputeExpression(pe, fields, type, df.Operator, df.Value),
-                        AddNullCheck => ComputeNullSafeExpression(pe, fields, type, df.Operator, df.Value),
-                        _ => throw new NotSupportedException($"Unsupported '{nullableValueBehavior}' behavior")
-                    };
+                        Expression body = nullableValueBehavior switch
+                        {
+                            NoAction => ComputeExpression(pe, fields, type, df.Operator, df.Value),
+                            AddNullCheck => ComputeNullSafeExpression(pe, fields, type, df.Operator, df.Value),
+                            _ => throw new NotSupportedException($"Unsupported '{nullableValueBehavior}' behavior")
+                        };
 
-                    filterExpression = Lambda<Func<T, bool>>(body, pe);
+                        filterExpression = Lambda<Func<T, bool>>(body, pe);
+                    }
+
+                    break;
                 }
-
-                break;
-            }
 
             case MultiFilter dcf:
-            {
-                Expression<Func<T, bool>> expression = null;
-                foreach (IFilter item in dcf.Filters)
                 {
-                    expression = expression == null
-                        ? item.ToExpression<T>()
-                        : MergeExpressions(expression, dcf.Logic, item.ToExpression<T>());
-                }
+                    Expression<Func<T, bool>> expression = null;
+                    foreach (IFilter item in dcf.Filters)
+                    {
+                        expression = expression == null
+                            ? item.ToExpression<T>()
+                            : MergeExpressions(expression, dcf.Logic, item.ToExpression<T>());
+                    }
 
-                filterExpression = expression;
-                break;
-            }
+                    filterExpression = expression;
+                    break;
+                }
         }
 
         return filterExpression;
@@ -266,14 +266,14 @@ public static class FilterExtensions
         /// Handles different scenarios based on the member type, including <see cref="DateTime"/>, enumerable and other types.
         /// </summary>
 #else
-        /// <summary>
-        /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
-        /// Handles different scenarios based on the member type, including <see cref="DateTime"/>(for .NET 6.0 or greater), enumerable types, and other types.
-        /// </summary>
+    /// <summary>
+    /// Computes and returns a <see cref="ConstantExpression"/> based on the property expression target type and value.
+    /// Handles different scenarios based on the member type, including <see cref="DateTime"/>(for .NET 6.0 or greater), enumerable types, and other types.
+    /// </summary>
 #endif
-        private static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
-        {
-            ConstantExpression ce;
+    private static ConstantExpression ComputeConstantExpressionBasedOnPropertyExpressionTargetTypeAndValue(Type memberType, object value)
+    {
+        ConstantExpression ce;
 
         if (IsDatetimeMember(memberType))
         {

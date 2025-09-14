@@ -135,7 +135,7 @@ public static class FilterTokenParser
                                      .Append(symbolAfter.Select(x => x.Span.ToStringSegment())
                                                  .Aggregate(new StringSegmentLinkedList(), (mainList, segment) => mainList.Append(segment)))
                              }).AtLeastOnce()
-            //from escaped in Token.EqualTo(FilterToken.Backslash).Many()
+                //from escaped in Token.EqualTo(FilterToken.Backslash).Many()
             from __ in Asterisk
             let result = new StringSegmentLinkedList()
             select new ContainsExpression(EscapedString.From(data.Select(x => x.value)
@@ -239,7 +239,7 @@ public static class FilterTokenParser
                                                   min: new BoundaryExpression(min switch
                                                   {
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
 #else
@@ -249,7 +249,7 @@ public static class FilterTokenParser
                                                   max: new BoundaryExpression(max switch
                                                   {
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
 #else
@@ -270,9 +270,9 @@ public static class FilterTokenParser
                     select new IntervalExpression(
                                                   min: new BoundaryExpression(min switch
                                                   {
-                                                      AsteriskExpression asterisk     => asterisk,
+                                                      AsteriskExpression asterisk => asterisk,
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
 #else
@@ -282,7 +282,7 @@ public static class FilterTokenParser
                                                   max: new BoundaryExpression(max switch
                                                   {
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
 #else
@@ -304,7 +304,7 @@ public static class FilterTokenParser
                                                   min: new BoundaryExpression(min switch
                                                   {
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
 #else
@@ -313,9 +313,9 @@ public static class FilterTokenParser
                                                   }, included: true),
                                                   max: new BoundaryExpression(max switch
                                                   {
-                                                      AsteriskExpression asterisk     => asterisk,
+                                                      AsteriskExpression asterisk => asterisk,
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
 #else
@@ -337,9 +337,9 @@ public static class FilterTokenParser
                     select new IntervalExpression(
                                                   min: new BoundaryExpression(min switch
                                                   {
-                                                      AsteriskExpression asterisk     => asterisk,
+                                                      AsteriskExpression asterisk => asterisk,
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{min?.GetType()}' for min value")
 #else
@@ -348,9 +348,9 @@ public static class FilterTokenParser
                                                   }, included: false),
                                                   max: new BoundaryExpression(max switch
                                                   {
-                                                      AsteriskExpression asterisk     => asterisk,
+                                                      AsteriskExpression asterisk => asterisk,
                                                       NumericValueExpression constant => constant,
-                                                      DateTimeExpression dateTime     => dateTime,
+                                                      DateTimeExpression dateTime => dateTime,
 #if NET7_0_OR_GREATER
                             _ => throw new UnreachableException($"Unsupported '{max?.GetType()}' for max value")
 #else
@@ -394,19 +394,19 @@ public static class FilterTokenParser
                                                                                                          Parse.Ref(() => UnaryExpression)
                                                                                                         );
 
-        /// <summary>
-        /// Property name parser
-        /// </summary>
-        public static TokenListParser<FilterToken, PropertyName> Property => from prop in AlphaNumeric
-                                                                             from subProps in (
-                                                                                 from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
-                                                                                 from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
-                                                                                 from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
-                                                                                 select $"""
+    /// <summary>
+    /// Property name parser
+    /// </summary>
+    public static TokenListParser<FilterToken, PropertyName> Property => from prop in AlphaNumeric
+                                                                         from subProps in (
+                                                                             from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
+                                                                             from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
+                                                                             from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
+                                                                             select $"""
                                                                                          ["{subProp.Value.ToStringValue()}"]
                                                                                          """
-                                                                                              ).Many()
-                                                                             select new PropertyName(string.Concat(prop.Value.ToStringValue(), string.Concat(subProps)));
+                                                                                          ).Many()
+                                                                         select new PropertyName(string.Concat(prop.Value.ToStringValue(), string.Concat(subProps)));
 
     /// <summary>
     /// Parser for any text between double quotes <c>"</c>
@@ -481,132 +481,132 @@ public static class FilterTokenParser
                         {
                             // *<bracket>
                             case (AsteriskExpression, BracketExpression bracket, null):
-                            {
-                                return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new EndsWithExpression(chr.ToString()))]);
+                                }
                             // *<bracket><constant>
                             case (AsteriskExpression, BracketExpression bracket, ConstantValueExpression tail):
-                            {
-                                StringSegmentLinkedList tailValue = tail.Value;
-                                return new OneOfExpression([
-                                    ..ConvertRegexToCharArray(bracket.Values)
+                                {
+                                    StringSegmentLinkedList tailValue = tail.Value;
+                                    return new OneOfExpression([
+                                        ..ConvertRegexToCharArray(bracket.Values)
                                         .Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList(chr.ToString()).Append(tailValue)))
-                                ]);
-                            }
+                                    ]);
+                                }
                             // <bracket>*
                             case (null, BracketExpression bracket, AsteriskExpression):
-                            {
-                                return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(chr.ToString()))]);
+                                }
                             // <ends with><bracket>
                             case (EndsWithExpression head, BracketExpression body, null):
-                            {
-                                return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString())))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(FilterExpression (chr) => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString())))]);
+                                }
                             // <ends with><bracket><constant>
                             case (EndsWithExpression head, BracketExpression body, ConstantValueExpression constant):
-                            {
-                                return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()).Append(constant.Value)))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new EndsWithExpression(new StringSegmentLinkedList().Append(head.Value).Append(chr.ToString()).Append(constant.Value)))]);
+                                }
                             // <starts with><bracket>
                             case (StartsWithExpression head, BracketExpression body, null):
-                            {
-                                return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(body.Values).Select(chr => new AndExpression(head, new EndsWithExpression(chr.ToString())))]);
+                                }
                             // <bracket><starts with>*
                             case (null, BracketExpression bracket, StartsWithExpression body):
-                            {
-                                return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(new StringSegmentLinkedList(new StringSegment($"{chr}")).Append(body.Value)))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StartsWithExpression(new StringSegmentLinkedList(new StringSegment($"{chr}")).Append(body.Value)))]);
+                                }
                             // <constant><bracket><constant>
                             case (ConstantValueExpression bracket, BracketExpression regex, ConstantValueExpression tail):
-                            {
-                                string bracketValueAsString = bracket.Value.ToStringValue();
-                                string tailValueAsString = tail.Value.ToStringValue();
-                                return new OneOfExpression([
-                                    .. ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracketValueAsString}{chr}{tailValueAsString}"))
-                                ]);
-                            }
+                                {
+                                    string bracketValueAsString = bracket.Value.ToStringValue();
+                                    string tailValueAsString = tail.Value.ToStringValue();
+                                    return new OneOfExpression([
+                                        .. ConvertRegexToCharArray(regex.Values).Select(chr => new StringValueExpression($"{bracketValueAsString}{chr}{tailValueAsString}"))
+                                    ]);
+                                }
 
                             // <constant><bracket>
                             case (ConstantValueExpression head, BracketExpression bracket, null):
-                            {
-                                string bracketValueAsString = head.Value.ToStringValue();
-                                return new OneOfExpression([
-                                    ..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{bracketValueAsString}{chr}"))
-                                ]);
-                            }
+                                {
+                                    string bracketValueAsString = head.Value.ToStringValue();
+                                    return new OneOfExpression([
+                                        ..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{bracketValueAsString}{chr}"))
+                                    ]);
+                                }
                             // <bracket><constant>
                             case (null, BracketExpression bracket, ConstantValueExpression tail):
-                            {
-                                string tailValueAsString = tail.Value.ToStringValue();
-                                return new OneOfExpression([
-                                    .. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tailValueAsString}"))
-                                ]);
-                            }
+                                {
+                                    string tailValueAsString = tail.Value.ToStringValue();
+                                    return new OneOfExpression([
+                                        .. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression($"{chr}{tailValueAsString}"))
+                                    ]);
+                                }
                             // <bracket>
                             case (null, BracketExpression bracket, null):
-                            {
-                                return new OneOfExpression([..ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString()))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. ConvertRegexToCharArray(bracket.Values).Select(chr => new StringValueExpression(chr.ToString()))]);
+                                }
                             // <bracket><constant><bracket>
                             case (BracketExpression head, ConstantValueExpression body, BracketExpression tail):
-                            {
-                                string bodyValueAsString = body.Value.ToStringValue();
-                                return new OneOfExpression([
-                                    ..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
+                                {
+                                    string bodyValueAsString = body.Value.ToStringValue();
+                                    return new OneOfExpression([
+                                        ..ConvertRegexToCharArray(head.Values).CrossJoin(ConvertRegexToCharArray(tail.Values))
                                         .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                         .Select(tuple => new StringValueExpression($"{tuple.start}{bodyValueAsString}{tuple.end}"))
-                                ]);
-                            }
+                                    ]);
+                                }
                             // <bracket><bracket>
                             case (BracketExpression head, null, BracketExpression tail):
-                            {
-                                return new OneOfExpression([
-                                    ..ConvertRegexToCharArray(head.Values)
+                                {
+                                    return new OneOfExpression([
+                                        ..ConvertRegexToCharArray(head.Values)
                                         .CrossJoin(ConvertRegexToCharArray(tail.Values))
                                         .Select(tuple => (start: tuple.Item1, end: tuple.Item2))
                                         .Select(tuple => new StringValueExpression($"{tuple.start}{tuple.end}"))
-                                ]);
-                            }
+                                    ]);
+                                }
                             // <bracket><ends with>
                             case (null, BracketExpression body, EndsWithExpression tail):
-                            {
-                                return new OneOfExpression([
-                                    .. ConvertRegexToCharArray(body.Values)
+                                {
+                                    return new OneOfExpression([
+                                        .. ConvertRegexToCharArray(body.Values)
                                         .Select(chr => new AndExpression(new StartsWithExpression(chr.ToString()),
                                                                          tail))
-                                ]);
-                            }
+                                    ]);
+                                }
                             // *<one of>
                             case (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, null):
-                            {
-                                return new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. constants.Select(constant => new EndsWithExpression(constant.Value))]);
+                                }
                             // <one of>*
                             case (null, IEnumerable<ConstantValueExpression> constants, AsteriskExpression):
-                            {
-                                return new OneOfExpression([.. constants.Select(constant => new StartsWithExpression(constant.Value))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. constants.Select(constant => new StartsWithExpression(constant.Value))]);
+                                }
                             // *<one of>*
                             case (AsteriskExpression, IEnumerable<ConstantValueExpression> constants, AsteriskExpression):
-                            {
-                                return new OneOfExpression([.. constants.Select(constant => new ContainsExpression(constant.Value))]);
-                            }
+                                {
+                                    return new OneOfExpression([.. constants.Select(constant => new ContainsExpression(constant.Value))]);
+                                }
                             // <one of><ends with>
                             case (null, IEnumerable<ConstantValueExpression> constants, EndsWithExpression endsWith):
-                            {
-                                return new OneOfExpression([..constants.Select(constant => constant + endsWith)]);
-                            }
+                                {
+                                    return new OneOfExpression([.. constants.Select(constant => constant + endsWith)]);
+                                }
                             // <one of>
                             case (null, IEnumerable<ConstantValueExpression> constants, null):
-                            {
-                                return new OneOfExpression([.. constants]);
-                            }
+                                {
+                                    return new OneOfExpression([.. constants]);
+                                }
                             default:
-                            {
-                                throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}");
-                            }
+                                {
+                                    throw new NotSupportedException($"Unsupported {nameof(OneOf)} expression :  {item}");
+                                }
                         }
                     });
 
@@ -671,7 +671,7 @@ public static class FilterTokenParser
         .Select(token => token switch
         {
             { Kind: FilterToken.Dash } => NumericSign.Minus,
-            _                          => NumericSign.Plus
+            _ => NumericSign.Plus
         });
 
     /// <summary>
@@ -850,7 +850,7 @@ public static class FilterTokenParser
         => sign switch
         {
             NumericSign.Minus => "-",
-            _                 => mustOutputSign ? "+" : string.Empty
+            _ => mustOutputSign ? "+" : string.Empty
         };
 
     /// <summary>

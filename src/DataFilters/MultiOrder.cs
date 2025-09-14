@@ -21,7 +21,7 @@ public class MultiOrder<T>(params Order<T>[] orders) : IOrder<T>, IEquatable<Mul
     /// </summary>
     public IEnumerable<Order<T>> Orders => _orders;
 
-    private readonly Order<T>[] _orders = [ .. orders.Where(s => s is not null) ];
+    private readonly Order<T>[] _orders = [.. orders.Where(s => s is not null)];
 
     private static readonly ArrayEqualityComparer<Order<T>> s_equalityComparer = new();
 

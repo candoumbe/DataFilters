@@ -848,16 +848,16 @@ I&_Oj
                 }
             };
 
-        /// <summary>
-        /// Tests if <see cref="FilterTokenParser.Criterion"/> can parse a criteria
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="expected"></param>
-        [Theory]
-        [MemberData(nameof(CriterionCases))]
-        public void Should_parse_Criterion(string input, (PropertyName prop, FilterExpression expression) expected)
-        {
-            _outputHelper.WriteLine($"{nameof(input)} : '{input}'");
+    /// <summary>
+    /// Tests if <see cref="FilterTokenParser.Criterion"/> can parse a criteria
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="expected"></param>
+    [Theory]
+    [MemberData(nameof(CriterionCases))]
+    public void Should_parse_Criterion(string input, (PropertyName prop, FilterExpression expression) expected)
+    {
+        _outputHelper.WriteLine($"{nameof(input)} : '{input}'");
 
         // Arrange
         TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
@@ -876,11 +876,11 @@ I&_Oj
             .Be(expected.expression);
     }
 
-        public static TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
+    public static TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> CriteriaCases
+    {
+        get
         {
-            get
-            {
-                TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
+            TheoryData<string, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>>> cases = new()
                 {
                     {
                         "Firstname=Vandal&Lastname=Savage",
@@ -931,21 +931,21 @@ I&_Oj
         }
     }
 
-        /// <summary>
-        /// Tests if <see cref="FilterTokenParser.Criteria"/> can parse a criteria
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="expectation"></param>
-        [Theory]
-        [MemberData(nameof(CriteriaCases))]
-        public void Should_parse_Criteria(string input, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
-        {
-            // Arrange
-            _outputHelper.WriteLine($"input : '{input}'");
-            TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
+    /// <summary>
+    /// Tests if <see cref="FilterTokenParser.Criteria"/> can parse a criteria
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="expectation"></param>
+    [Theory]
+    [MemberData(nameof(CriteriaCases))]
+    public void Should_parse_Criteria(string input, Expression<Func<IReadOnlyList<(PropertyName prop, FilterExpression expression)>, bool>> expectation)
+    {
+        // Arrange
+        _outputHelper.WriteLine($"input : '{input}'");
+        TokenList<FilterToken> tokens = _tokenizer.Tokenize(input);
 
-            // Act
-            IReadOnlyList<(PropertyName prop, FilterExpression expression)> actual = FilterTokenParser.Criteria.Parse(tokens);
+        // Act
+        IReadOnlyList<(PropertyName prop, FilterExpression expression)> actual = FilterTokenParser.Criteria.Parse(tokens);
 
         // Assert
         actual.Should()

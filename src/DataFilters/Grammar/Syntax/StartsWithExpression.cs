@@ -55,7 +55,7 @@ public sealed class StartsWithExpression : FilterExpression, IEquatable<StartsWi
                     .ToStringValue();
 
                 return $"{escapedValue}*";
-        });
+            });
     }
 
     /// <summary>

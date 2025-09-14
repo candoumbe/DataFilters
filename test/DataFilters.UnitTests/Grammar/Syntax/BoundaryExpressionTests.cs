@@ -44,9 +44,9 @@ public class BoundaryExpressionTests
         // Act
         bool actual = first.Equals(other);
 
-            // Assert
-            actual.Should().BeTrue();
-        }
+        // Assert
+        actual.Should().BeTrue();
+    }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]
     public void Ctor_should_throw_ArgumentNullException_when_expression_is_null(bool included)

@@ -36,7 +36,7 @@ public sealed class AsteriskExpression : FilterExpression, IEquatable<AsteriskEx
     /// <param name="_"></param>
     /// <param name="right"></param>
     /// <returns><see cref="EndsWithExpression"/></returns>
-    public static EndsWithExpression operator +(AsteriskExpression _, TextExpression right) => new (right);
+    public static EndsWithExpression operator +(AsteriskExpression _, TextExpression right) => new(right);
 
     /// <summary>
     /// Computes a <see cref="EndsWithExpression"/> by adding a <see cref="AsteriskExpression"/> to a <see cref="StringValueExpression"/>.

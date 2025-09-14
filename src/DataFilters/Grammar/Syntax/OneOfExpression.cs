@@ -65,13 +65,13 @@ public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpressi
             {
                 equivalent = other switch
                 {
-                    AsteriskExpression _             => Values.All(x => x is AsteriskExpression),
+                    AsteriskExpression _ => Values.All(x => x is AsteriskExpression),
                     ConstantValueExpression constant => Values.All(value => value.IsEquivalentTo(constant)),
-                    DateExpression date              => Values.All(value => value.IsEquivalentTo(date)),
-                    DateTimeExpression dateTime      => Values.All(value => value.Equals(dateTime) || value.IsEquivalentTo(dateTime)),
-                    OrExpression or                  => Values.All(value => value.Equals(or.Left) || value.Equals(or.Right) || value.IsEquivalentTo(or.Left) || value.IsEquivalentTo(or.Right)),
-                    ISimplifiable simplifiable       => Values.All(value => value.IsEquivalentTo(simplifiable.Simplify())),
-                    _                                => false
+                    DateExpression date => Values.All(value => value.IsEquivalentTo(date)),
+                    DateTimeExpression dateTime => Values.All(value => value.Equals(dateTime) || value.IsEquivalentTo(dateTime)),
+                    OrExpression or => Values.All(value => value.Equals(or.Left) || value.Equals(or.Right) || value.IsEquivalentTo(or.Left) || value.IsEquivalentTo(or.Right)),
+                    ISimplifiable simplifiable => Values.All(value => value.IsEquivalentTo(simplifiable.Simplify())),
+                    _ => false
                 };
             }
         }
@@ -159,7 +159,7 @@ public sealed class OneOfExpression : FilterExpression, IEquatable<OneOfExpressi
         FormattableString formattable = format switch
         {
             "D" or "d" => $"{{{string.Join(", ", Values.Select(expression => $"{expression:d}"))}}}",
-            _          => $"{_lazyOriginalString.Value}"
+            _ => $"{_lazyOriginalString.Value}"
         };
 
         return formattable.ToString(formatProvider);

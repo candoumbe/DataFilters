@@ -6,11 +6,11 @@ namespace DataFilters.Grammar.Syntax;
 /// A <see cref="FilterExpression"/> implementation that can holds a datetime value
 /// </summary>
 /// <remarks>
-    /// This class guaranties that one of the <see cref="Date"/> / <see cref="Time"/>
-    /// </remarks>
-    public sealed class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
-    {
-        private readonly Lazy<string> _lazyEscapedParseableString;
+/// This class guaranties that one of the <see cref="Date"/> / <see cref="Time"/>
+/// </remarks>
+public sealed class DateTimeExpression : FilterExpression, IEquatable<DateTimeExpression>, IBoundaryExpression
+{
+    private readonly Lazy<string> _lazyEscapedParseableString;
 
     /// <summary>
     /// Date part of the expression.

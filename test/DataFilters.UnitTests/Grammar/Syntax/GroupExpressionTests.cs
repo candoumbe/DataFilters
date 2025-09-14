@@ -236,16 +236,16 @@ public class GroupExpressionTests(ITestOutputHelper outputHelper)
         int depth = count.Item / 2;
         FilterExpression filterExpression = filterExpressionGenerator.Item;
         GroupExpression initialGroup = new(filterExpression);
-    GroupExpression otherGroup = new(filterExpression);
+        GroupExpression otherGroup = new(filterExpression);
 
         for (int i = 0; i < depth; i++)
         {
             initialGroup = new GroupExpression(initialGroup);
             otherGroup = new GroupExpression(otherGroup);
-    }
+        }
 
-    // Act
-    bool isEquivalent = initialGroup.IsEquivalentTo(otherGroup);
+        // Act
+        bool isEquivalent = initialGroup.IsEquivalentTo(otherGroup);
 
         // Assert
         isEquivalent.Should().BeTrue();
