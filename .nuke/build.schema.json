@@ -27,6 +27,7 @@
         "AddGithubRelease",
         "Benchmarks",
         "Changelog",
+        "Chore",
         "Clean",
         "Coldfix",
         "Compile",
@@ -115,6 +116,10 @@
         "AutoStash": {
           "type": "boolean",
           "description": "Indicates if any changes should be stashed automatically prior to switching branch (Default : true)"
+        },
+        "ChoreBranchPrefix": {
+          "type": "string",
+          "description": "The name of the chore branch prefix"
         },
         "CodecovToken": {
           "type": "string",
