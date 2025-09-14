@@ -68,7 +68,7 @@ public sealed class AndExpression : BinaryFilterExpression, IEquatable<AndExpres
         }
         else
         {
-            simplified = ( Left, Right ) switch
+            simplified = (Left, Right) switch
             {
                 (ISimplifiable left, ISimplifiable right) => new AndExpression(left.Simplify(), right.Simplify()),
                 (ISimplifiable left, not ISimplifiable) => new AndExpression(left.Simplify(), Right),

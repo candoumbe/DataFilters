@@ -54,9 +54,9 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
 
         _lazyParseableString = new(() => (Hours, Minutes, Sign) switch
         {
-            (0, 0, _)                 => "Z",
+            (0, 0, _) => "Z",
             (_, _, NumericSign.Minus) => $"-{Hours:D2}:{Minutes:D2}",
-            _                         => $"+{Hours:D2}:{Minutes:D2}",
+            _ => $"+{Hours:D2}:{Minutes:D2}",
         });
     }
 
@@ -70,7 +70,7 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
     public bool Equals(OffsetExpression other) => (Hours, Minutes, Sign) switch
     {
         (0, 0, _) => other is { Hours: 0, Minutes: 0 },
-        _         => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign)
+        _ => (Hours, Minutes, Sign) == (other?.Hours, other?.Minutes, other?.Sign)
     };
 
     ///<inheritdoc/>
@@ -91,7 +91,7 @@ public sealed class OffsetExpression : FilterExpression, IEquatable<OffsetExpres
     public static bool operator ==(OffsetExpression left, OffsetExpression right) => left switch
     {
         null => right is null,
-        _    => left.Equals(right)
+        _ => left.Equals(right)
     };
 
     /// <inheritdoc />

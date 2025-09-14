@@ -98,20 +98,20 @@ public class TextExpression : StringValueExpression, IEquatable<TextExpression>
         _lazyOriginalString = new Lazy<string>(value.ToStringValue);
         _lazyEscapedParseableString = new Lazy<string>(() =>
         {
-            StringBuilder sb = new (value: FilterTokenizer.DoubleQuote.ToString());
+            StringBuilder sb = new(value: FilterTokenizer.DoubleQuote.ToString());
             sb.Append(value.Replace(chr => chr is FilterTokenizer.BackSlash or FilterTokenizer.DoubleQuote, new Dictionary<char, ReadOnlyMemory<char>>
-                {
-                    [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash],
-                    [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote]
-                })
+            {
+                [FilterTokenizer.BackSlash] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.BackSlash],
+                [FilterTokenizer.DoubleQuote] = FilterTokenizer.EscapedSpecialCharacters[FilterTokenizer.DoubleQuote]
+            })
                 .ToStringValue());
 
             return sb.Append(FilterTokenizer.DoubleQuote).ToString();
         });
     }
 
-///<inheritdoc/>
-public override string EscapedParseableString => _lazyEscapedParseableString.Value;
+    ///<inheritdoc/>
+    public override string EscapedParseableString => _lazyEscapedParseableString.Value;
 
     ///<inheritdoc/>
     public override string OriginalString => _lazyOriginalString.Value;

@@ -91,14 +91,14 @@ public static class ExpressionsGenerators
             .ToArbitrary();
     }
 
-        public static Arbitrary<NumericValueExpression> NumericValueExpressions()
-        {
-            IEnumerable<Gen<NumericValueExpression>> generators =
-        [
-            GetArbitraryFor<int>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
+    public static Arbitrary<NumericValueExpression> NumericValueExpressions()
+    {
+        IEnumerable<Gen<NumericValueExpression>> generators =
+    [
+        GetArbitraryFor<int>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
             GetArbitraryFor<long>().Generator.Select(value => new NumericValueExpression(value.ToString(CultureInfo.InvariantCulture))),
             GetArbitraryFor<NormalFloat>().Generator.Select(value => new NumericValueExpression(value.Item.ToString(CultureInfo.InvariantCulture)))
-            ];
+        ];
 
         return Gen.OneOf(generators)
             .ToArbitrary();
@@ -156,19 +156,19 @@ public static class ExpressionsGenerators
         switch (size)
         {
             case < 3:
-            {
-                gen = GenerateFilterExpressions().Generator
-                    .Select(expr => new GroupExpression(expr));
-                break;
-            }
+                {
+                    gen = GenerateFilterExpressions().Generator
+                        .Select(expr => new GroupExpression(expr));
+                    break;
+                }
 
             default:
-            {
-                Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 10);
-                gen = Gen.OneOf(GenerateFilterExpressions().Generator.Select(expr => new GroupExpression(expr)),
-                    subtree.Select(expr => new GroupExpression(expr)));
-                break;
-            }
+                {
+                    Gen<GroupExpression> subtree = SafeGroupExpressionGenerator(size / 10);
+                    gen = Gen.OneOf(GenerateFilterExpressions().Generator.Select(expr => new GroupExpression(expr)),
+                        subtree.Select(expr => new GroupExpression(expr)));
+                    break;
+                }
         }
 
         return gen;
@@ -217,22 +217,22 @@ public static class ExpressionsGenerators
         switch (size)
         {
             case 0:
-            {
-                gen = GenerateFilterExpressions().Generator.Two()
-                    .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new OrExpression(tuple.Item1, tuple.Item2)));
-                break;
-            }
+                {
+                    gen = GenerateFilterExpressions().Generator.Two()
+                        .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new OrExpression(tuple.Item1, tuple.Item2)));
+                    break;
+                }
 
             default:
-            {
-                Gen<OrExpression> subtree = SafeOrExpressionGenerator(size / 2);
-                gen = Gen.OneOf(GenerateFilterExpressions().Generator.Two()
-                        .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
-                            tuple => new OrExpression(tuple.Item1, tuple.Item2))),
-                    subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
-                        tuple => new OrExpression(tuple.Item1, tuple.Item2))));
-                break;
-            }
+                {
+                    Gen<OrExpression> subtree = SafeOrExpressionGenerator(size / 2);
+                    gen = Gen.OneOf(GenerateFilterExpressions().Generator.Two()
+                            .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
+                                tuple => new OrExpression(tuple.Item1, tuple.Item2))),
+                        subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
+                            tuple => new OrExpression(tuple.Item1, tuple.Item2))));
+                    break;
+                }
         }
 
         return gen;
@@ -244,21 +244,21 @@ public static class ExpressionsGenerators
         switch (size)
         {
             case 0:
-            {
-                gen = GenerateFilterExpressions().Generator.Two()
-                    .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
-                        tuple => new AndExpression(tuple.Item1, tuple.Item2)));
-                break;
-            }
+                {
+                    gen = GenerateFilterExpressions().Generator.Two()
+                        .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2),
+                            tuple => new AndExpression(tuple.Item1, tuple.Item2)));
+                    break;
+                }
 
             default:
-            {
-                Gen<AndExpression> subtree = SafeAndExpressionGenerator(size / 2);
-                gen = Gen.OneOf(GenerateFilterExpressions().Generator.Two()
-                        .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))),
-                    subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))));
-                break;
-            }
+                {
+                    Gen<AndExpression> subtree = SafeAndExpressionGenerator(size / 2);
+                    gen = Gen.OneOf(GenerateFilterExpressions().Generator.Two()
+                            .Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))),
+                        subtree.Two().Select(tuple => CreateFilterExpression((tuple.Item1, tuple.Item2), tuple => new AndExpression(tuple.Item1, tuple.Item2))));
+                    break;
+                }
         }
 
         return gen;
@@ -286,18 +286,18 @@ public static class ExpressionsGenerators
             switch (size)
             {
                 case 0:
-                {
-                    gen = Gen.OneOf(generators).Select(expr => new NotExpression(expr));
-                    break;
-                }
+                    {
+                        gen = Gen.OneOf(generators).Select(expr => new NotExpression(expr));
+                        break;
+                    }
 
                 default:
-                {
-                    Gen<NotExpression> subtree = SafeNotExpressionGenerator(size / 2);
-                    gen = Gen.OneOf(Gen.OneOf(generators).Select(exp => new NotExpression(exp)),
-                        subtree.Select(expr => new NotExpression(expr)));
-                    break;
-                }
+                    {
+                        Gen<NotExpression> subtree = SafeNotExpressionGenerator(size / 2);
+                        gen = Gen.OneOf(Gen.OneOf(generators).Select(exp => new NotExpression(exp)),
+                            subtree.Select(expr => new NotExpression(expr)));
+                        break;
+                    }
             }
 
             return gen;
@@ -307,22 +307,22 @@ public static class ExpressionsGenerators
     private static TFilterExpression CreateFilterExpression<TFilterExpression>((FilterExpression, FilterExpression) input, Func<(FilterExpression, FilterExpression), TFilterExpression> func)
         => func.Invoke(input);
 
-        public static Arbitrary<IntervalExpression> IntervalExpressions()
-        {
-            Gen<bool> boolGenerator = GetArbitraryFor<bool>().Generator;
-            (Gen<IBoundaryExpression> gen, Gen<bool> included)[] datesGen =
-        [
-            (DateExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator),
+    public static Arbitrary<IntervalExpression> IntervalExpressions()
+    {
+        Gen<bool> boolGenerator = GetArbitraryFor<bool>().Generator;
+        (Gen<IBoundaryExpression> gen, Gen<bool> included)[] datesGen =
+    [
+        (DateExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator),
                 (DateTimeExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator)
-            ];
+        ];
 
-            (Gen<IBoundaryExpression> gen, Gen<bool> included)[] numericsGen =
-        [
-            (GetArbitraryFor<short>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
+        (Gen<IBoundaryExpression> gen, Gen<bool> included)[] numericsGen =
+    [
+        (GetArbitraryFor<short>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
                 (GetArbitraryFor<int>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
                 (GetArbitraryFor<long>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.ToString())), boolGenerator),
                 (GetArbitraryFor<NormalFloat>().Generator.Select(IBoundaryExpression (value) => new NumericValueExpression(value.Item.ToString("G19", CultureInfo.InvariantCulture))), boolGenerator)
-            ];
+        ];
 
         (Gen<IBoundaryExpression> gen, Gen<bool> included) timeGen = (TimeExpressions().Generator.Select(IBoundaryExpression (item) => item), boolGenerator);
         (Gen<IBoundaryExpression> gen, Gen<bool> included) asteriskGen = (Gen.Constant((IBoundaryExpression)AsteriskExpression.Instance), Gen.Constant(false));

@@ -121,25 +121,25 @@ internal static class FilterGenerators
         switch (size)
         {
             case 0:
-            {
-                gen = GenerateFilters().Generator.Two()
-                    .Select(tuple => new[] { tuple.Item1, tuple.Item2 })
-                    .Zip(generateLogic)
-                    .Select(tuple => new MultiFilter { Logic = tuple.Item2, Filters = tuple.Item1 });
-                break;
-            }
-
-            default:
-            {
-                Gen<MultiFilter> subtree = SafeFilterGenerator(size / 2);
-
-                gen = Gen.OneOf(GenerateFilters().Generator.Two()
+                {
+                    gen = GenerateFilters().Generator.Two()
                         .Select(tuple => new[] { tuple.Item1, tuple.Item2 })
                         .Zip(generateLogic)
-                        .Select(tuple => new MultiFilter { Logic = tuple.Item2, Filters = tuple.Item1 }),
-                    subtree);
-                break;
-            }
+                        .Select(tuple => new MultiFilter { Logic = tuple.Item2, Filters = tuple.Item1 });
+                    break;
+                }
+
+            default:
+                {
+                    Gen<MultiFilter> subtree = SafeFilterGenerator(size / 2);
+
+                    gen = Gen.OneOf(GenerateFilters().Generator.Two()
+                            .Select(tuple => new[] { tuple.Item1, tuple.Item2 })
+                            .Zip(generateLogic)
+                            .Select(tuple => new MultiFilter { Logic = tuple.Item2, Filters = tuple.Item1 }),
+                        subtree);
+                    break;
+                }
         }
 
         return gen;

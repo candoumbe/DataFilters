@@ -25,40 +25,40 @@ public class TimeExpressionTests(ITestOutputHelper outputHelper)
                                         .HaveProperty<int>("Seconds").And
                                         .HaveProperty<int>("Milliseconds");
 
-[Property]
-public void Ctor_should_build_valid_instance(IntWithMinMax hours,
-    IntWithMinMax minutes,
-    IntWithMinMax seconds,
-    IntWithMinMax milliseconds)
-{
-    outputHelper.WriteLine($"hours : {hours.Item}");
-    outputHelper.WriteLine($"minutes : {minutes.Item}");
-    outputHelper.WriteLine($"seconds : {seconds.Item}");
-    outputHelper.WriteLine($"milliseconds : {milliseconds.Item}");
+    [Property]
+    public void Ctor_should_build_valid_instance(IntWithMinMax hours,
+        IntWithMinMax minutes,
+        IntWithMinMax seconds,
+        IntWithMinMax milliseconds)
+    {
+        outputHelper.WriteLine($"hours : {hours.Item}");
+        outputHelper.WriteLine($"minutes : {minutes.Item}");
+        outputHelper.WriteLine($"seconds : {seconds.Item}");
+        outputHelper.WriteLine($"milliseconds : {milliseconds.Item}");
 
-    // Arrange
-    Lazy<TimeExpression> timeExpressionBuilder = new(() => new TimeExpression(hours.Item, minutes.Item,
-        seconds.Item, milliseconds.Item));
+        // Arrange
+        Lazy<TimeExpression> timeExpressionBuilder = new(() => new TimeExpression(hours.Item, minutes.Item,
+            seconds.Item, milliseconds.Item));
 
-    Action invokingCtor = () => { TimeExpression value = timeExpressionBuilder.Value; };
+        Action invokingCtor = () => { TimeExpression value = timeExpressionBuilder.Value; };
 
-    ((Action)(() => invokingCtor.Should().ThrowExactly<ArgumentOutOfRangeException>())).When(hours.Item < 0
-            || minutes.Item < 0 || 59 < minutes.Item
-            || seconds.Item < 0 || 60 < seconds.Item
-            || (seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23)
-        )
-        .Label("Invalid TimeExpression").Trivial(hours.Item < 0
-                                                 || minutes.Item < 0 || 59 < minutes.Item
-                                                 || seconds.Item < 0 || 60 < seconds.Item
-                                                 || (seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23))
-        .And(() =>
-        {
-            TimeExpression timeExpression = timeExpressionBuilder.Value;
-            return timeExpression.Hours == hours.Item
-                   && timeExpression.Minutes == minutes.Item
-                   && timeExpression.Seconds == seconds.Item;
-        })
-        .VerboseCheck(outputHelper);
+        ((Action)(() => invokingCtor.Should().ThrowExactly<ArgumentOutOfRangeException>())).When(hours.Item < 0
+                || minutes.Item < 0 || 59 < minutes.Item
+                || seconds.Item < 0 || 60 < seconds.Item
+                || (seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23)
+            )
+            .Label("Invalid TimeExpression").Trivial(hours.Item < 0
+                                                     || minutes.Item < 0 || 59 < minutes.Item
+                                                     || seconds.Item < 0 || 60 < seconds.Item
+                                                     || (seconds.Item == 60 && minutes.Item != 59 && hours.Item != 23))
+            .And(() =>
+            {
+                TimeExpression timeExpression = timeExpressionBuilder.Value;
+                return timeExpression.Hours == hours.Item
+                       && timeExpression.Minutes == minutes.Item
+                       && timeExpression.Seconds == seconds.Item;
+            })
+            .VerboseCheck(outputHelper);
     }
 
     [Property(Arbitrary = [typeof(ExpressionsGenerators)])]

@@ -287,7 +287,7 @@ public class OneOfExpressionTests(ITestOutputHelper outputHelper)
     public void Given_OneOfExpression_Simplify_should_return_an_expression_that_cannot_be_further_simplified(PositiveInt count, NonNull<FilterExpression> expression)
     {
         // Arrange
-        FilterExpression[] expressions = [ .. Enumerable.Repeat(expression.Item, count.Item + 2) ];
+        FilterExpression[] expressions = [.. Enumerable.Repeat(expression.Item, count.Item + 2)];
 
         OneOfExpression oneOfExpression = new(expressions);
 

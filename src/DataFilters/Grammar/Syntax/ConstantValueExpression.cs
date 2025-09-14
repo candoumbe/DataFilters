@@ -22,10 +22,10 @@ public abstract class ConstantValueExpression : FilterExpression, IEquatable<Con
     /// </exception>
     /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
     internal ConstantValueExpression(StringSegment value) : this(new StringSegmentLinkedList(value))
-        {}
+    { }
 
-        internal ConstantValueExpression(StringSegmentLinkedList value)
-        {
+    internal ConstantValueExpression(StringSegmentLinkedList value)
+    {
         Value = value;
     }
 
@@ -50,11 +50,11 @@ public abstract class ConstantValueExpression : FilterExpression, IEquatable<Con
     public static bool operator !=(ConstantValueExpression left, ConstantValueExpression right)
         => !(left == right);
 
-        /// <summary>
-        /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
-        /// </summary>
-        /// <param name="left">a <see cref="ConstantValueExpression"/></param>
-        /// <param name="right">a <see cref="EndsWithExpression"/></param>
-        /// <returns><see cref="AndExpression"/></returns>
-        public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => new StartsWithExpression(left.Value) & right;
+    /// <summary>
+    /// Combines <see cref="ConstantValueExpression"/> and <see cref="EndsWithExpression"/> into a <see cref="AndExpression"/>.
+    /// </summary>
+    /// <param name="left">a <see cref="ConstantValueExpression"/></param>
+    /// <param name="right">a <see cref="EndsWithExpression"/></param>
+    /// <returns><see cref="AndExpression"/></returns>
+    public static AndExpression operator +(ConstantValueExpression left, EndsWithExpression right) => new StartsWithExpression(left.Value) & right;
 }

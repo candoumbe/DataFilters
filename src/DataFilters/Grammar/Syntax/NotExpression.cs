@@ -45,7 +45,7 @@ public sealed class NotExpression : FilterExpression, IEquatable<NotExpression>,
     public override string ToString(string format, IFormatProvider formatProvider)
     {
         FormattableString formattable = format switch
-    {
+        {
             "d" or "D" => $"@{nameof(NotExpression)}({Expression:d})",
             "f" or "F" => $"@{nameof(NotExpression)}[{Expression:f}]",
             null or "" => $"{EscapedParseableString}",

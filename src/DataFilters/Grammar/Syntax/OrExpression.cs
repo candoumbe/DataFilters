@@ -52,24 +52,24 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
         {
             switch (other)
             {
-                case GroupExpression { Expression : OrExpression expression }:
+                case GroupExpression { Expression: OrExpression expression }:
                     isEquivalent = IsEquivalentTo(expression);
                     break;
                 case OrExpression or:
                     isEquivalent = (or.Right.IsEquivalentTo(Right) && or.Left.IsEquivalentTo(Left)) || (or.Left.IsEquivalentTo(Right) && or.Right.IsEquivalentTo(Left));
                     break;
                 case OneOfExpression oneOf:
-                {
-                    FilterExpression simplifiedOneOf = oneOf.Simplify();
-                    isEquivalent = simplifiedOneOf switch
                     {
-                        OrExpression orExpression => IsEquivalentTo(orExpression),
-                        OneOfExpression _         => false,
-                        _                         => Left.IsEquivalentTo(Right) && (Left.IsEquivalentTo(simplifiedOneOf) || Right.IsEquivalentTo(simplifiedOneOf))
-                    };
+                        FilterExpression simplifiedOneOf = oneOf.Simplify();
+                        isEquivalent = simplifiedOneOf switch
+                        {
+                            OrExpression orExpression => IsEquivalentTo(orExpression),
+                            OneOfExpression _ => false,
+                            _ => Left.IsEquivalentTo(Right) && (Left.IsEquivalentTo(simplifiedOneOf) || Right.IsEquivalentTo(simplifiedOneOf))
+                        };
 
-                    break;
-                }
+                        break;
+                    }
                 default:
                     isEquivalent = Left.IsEquivalentTo(Right) && (Left.IsEquivalentTo(other) || Right.IsEquivalentTo(other));
                     break;
@@ -97,9 +97,9 @@ public sealed class OrExpression : BinaryFilterExpression, IEquatable<OrExpressi
             simplified = (Left, Right) switch
             {
                 (GroupExpression { Expression: OrExpression left }, GroupExpression { Expression: OrExpression right }) => new OneOfExpression(left.Left, left.Right, right.Left, right.Right),
-                (GroupExpression { Expression: OrExpression or }, _)                                                    => new OneOfExpression(or.Left, or.Right, Right),
-                (_, GroupExpression { Expression: OrExpression or })                                                    => new OneOfExpression(or.Left, or.Right, Right),
-                _                                                                                                       => this
+                (GroupExpression { Expression: OrExpression or }, _) => new OneOfExpression(or.Left, or.Right, Right),
+                (_, GroupExpression { Expression: OrExpression or }) => new OneOfExpression(or.Left, or.Right, Right),
+                _ => this
             };
         }
 

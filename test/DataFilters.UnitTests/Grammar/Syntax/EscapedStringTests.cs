@@ -13,7 +13,7 @@ public class EscapedStringShould
     public void Throws_ArgumentNullException_when_calling_From_with_null_parameter()
     {
         // Act
-        Action callingFromWithNullValue = () => _ = EscapedString.From( null );
+        Action callingFromWithNullValue = () => _ = EscapedString.From(null);
 
         // Assert
         callingFromWithNullValue.Should().ThrowExactly<ArgumentNullException>();

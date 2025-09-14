@@ -99,9 +99,9 @@ public sealed class ContainsExpression : FilterExpression, IEquatable<ContainsEx
     public override bool IsEquivalentTo(FilterExpression other)
         => other switch
         {
-            ContainsExpression contains                         => Equals(contains),
+            ContainsExpression contains => Equals(contains),
             GroupExpression { Expression: var innerExpression } => innerExpression.IsEquivalentTo(this),
-            ISimplifiable simplifiable                          => simplifiable.Simplify().IsEquivalentTo(this),
-            _                                                   => false
+            ISimplifiable simplifiable => simplifiable.Simplify().IsEquivalentTo(this),
+            _ => false
         };
 }

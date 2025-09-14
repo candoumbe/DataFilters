@@ -104,7 +104,7 @@ public static class StringExtensions
     public static IFilter ToFilter<T>(this string queryString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
         => ToFilter<T>(queryString, new FilterOptions() { DefaultPropertyNameResolutionStrategy = propertyNameResolutionStrategy });
 
-/// <summary>
+    /// <summary>
     /// Builds a <see cref="IFilter"/> from <paramref name="queryString"/> using <see cref="PropertyNameResolutionStrategy.Default"/>
     /// </summary>
     /// <typeparam name="T">Type of element to filter</typeparam>
@@ -138,12 +138,7 @@ public static class StringExtensions
     /// <exception cref="NotSupportedException"><paramref name="queryString"/> contains an unsupported</exception>
     public static IFilter ToFilter<T>(this string queryString, FilterOptions options)
     {
-        string localQueryString = queryString ?? throw new ArgumentNullException(nameof(queryString));
-
-        if (localQueryString is null)
-        {
-            throw new ArgumentNullException(nameof(queryString));
-        }
+        string localQueryString = (queryString ?? throw new ArgumentNullException(nameof(queryString))) ?? throw new ArgumentNullException(nameof(queryString));
 
         IFilter filter = Filter.True;
         bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);

@@ -14,7 +14,7 @@ internal static class TextSpanExtensions
     /// <exception cref="ArgumentException">if <paramref name="textSpan"/> underlying <see langword="string"/> is <see langword="null"/>.</exception>
     internal static StringSegment ToStringSegment(this TextSpan textSpan)
     {
-        if (textSpan is { Source: null})
+        if (textSpan is { Source: null })
         {
             throw new ArgumentException("The text span inner text cannot be null.", nameof(textSpan));
         }

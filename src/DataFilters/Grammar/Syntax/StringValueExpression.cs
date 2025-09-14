@@ -55,15 +55,15 @@ public class StringValueExpression : ConstantValueExpression, IEquatable<StringV
     ///<inheritdoc/>
     public virtual bool Equals(StringValueExpression other) => Equals(_lazyOriginalString.Value, other?._lazyOriginalString.Value);
 
-        ///<inheritdoc/>
-        public override bool Equals(object obj) =>
-            obj switch
-            {
-                NumericValueExpression numericValue => _lazyOriginalString.Value.Equals(numericValue.OriginalString),
-                TextExpression text => text.EscapedParseableString == OriginalString,
-                not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
-                _ => false
-            };
+    ///<inheritdoc/>
+    public override bool Equals(object obj) =>
+        obj switch
+        {
+            NumericValueExpression numericValue => _lazyOriginalString.Value.Equals(numericValue.OriginalString),
+            TextExpression text => text.EscapedParseableString == OriginalString,
+            not null => ReferenceEquals(this, obj) || Equals(obj as StringValueExpression),
+            _ => false
+        };
 
     /// <inheritdoc/>
     public override bool IsEquivalentTo(FilterExpression other)
@@ -81,20 +81,20 @@ public class StringValueExpression : ConstantValueExpression, IEquatable<StringV
     public override double Complexity => 1;
 
     /// <summary>
-        /// Checks if <paramref name="left"/> and <paramref name="right"/> values are equal.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns><see langword="true"/> if <paramref name="left"/> and <paramref name="right"/> are equal, and <see langword="false"/> otherwise.</returns>
+    /// Checks if <paramref name="left"/> and <paramref name="right"/> values are equal.
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> and <paramref name="right"/> are equal, and <see langword="false"/> otherwise.</returns>
     public static bool operator ==(StringValueExpression left, StringValueExpression right)
         => (left is null && right is null) || (left?.Equals(right) ?? false);
 
     /// <summary>
-        /// Checks if <paramref name="left"/> and <paramref name="right"/> values are not equal.
-        /// </summary>
-        /// <param name="left">left operand</param>
-        /// <param name="right">right operand</param>
-        /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>, and <see langword="false"/> otherwise.</returns>
+    /// Checks if <paramref name="left"/> and <paramref name="right"/> values are not equal.
+    /// </summary>
+    /// <param name="left">left operand</param>
+    /// <param name="right">right operand</param>
+    /// <returns><see langword="true"/> if <paramref name="left"/> is not equal to <paramref name="right"/>, and <see langword="false"/> otherwise.</returns>
     public static bool operator !=(StringValueExpression left, StringValueExpression right)
         => !(left == right);
 }

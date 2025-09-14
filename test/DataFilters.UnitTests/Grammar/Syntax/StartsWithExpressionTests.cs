@@ -100,20 +100,20 @@ public class StartsWithExpressionTests
 
     [Property]
     public void Given_non_whitespace_string_as_input_as_input_EscapedParseableString_should_be_correct(NonWhiteSpaceString textGenerator)
-        {
-            // Arrange
-            string text = textGenerator.Item;
-            StartsWithExpression expression = new(text);
+    {
+        // Arrange
+        string text = textGenerator.Item;
+        StartsWithExpression expression = new(text);
         StringValueExpression stringValueExpression = new(text);
-            StringBuilder sb = new (text.Length * 2);
-            foreach (char chr in text)
+        StringBuilder sb = new(text.Length * 2);
+        foreach (char chr in text)
+        {
+            if (FilterTokenizer.SpecialCharacters.Contains(chr))
             {
-                if (FilterTokenizer.SpecialCharacters.Contains(chr))
-                {
-                    sb = sb.Append(FilterTokenizer.EscapedCharacter);
-                }
-                sb = sb.Append(chr);
+                sb = sb.Append(FilterTokenizer.EscapedCharacter);
             }
+            sb = sb.Append(chr);
+        }
         string expected = $"{stringValueExpression.EscapedParseableString}*";
 
         // Act

@@ -17,7 +17,7 @@ namespace DataFilters.Grammar.Syntax
         /// <summary>
         /// Represents an empty escaped string.
         /// </summary>
-        public static readonly EscapedString Empty = new (string.Empty);
+        public static readonly EscapedString Empty = new(string.Empty);
 
         /// <summary>
         /// Escape the specified <see cref="string"/> value.
