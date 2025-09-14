@@ -403,10 +403,10 @@ public static class FilterTokenParser
                                                                                  from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                  from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
                                                                                  select $"""
-                                                                                         ["{subProp.Value}"]
+                                                                                         ["{subProp.Value.ToStringValue()}"]
                                                                                          """
                                                                                               ).Many()
-                                                                             select new PropertyName(string.Concat(prop.Value, string.Concat(subProps)));
+                                                                             select new PropertyName(string.Concat(prop.Value.ToStringValue(), string.Concat(subProps)));
 
     /// <summary>
     /// Parser for any text between double quotes <c>"</c>
