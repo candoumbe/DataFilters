@@ -138,7 +138,7 @@ public static class StringExtensions
     /// <exception cref="NotSupportedException"><paramref name="queryString"/> contains an unsupported</exception>
     public static IFilter ToFilter<T>(this string queryString, FilterOptions options)
     {
-        string localQueryString = (queryString ?? throw new ArgumentNullException(nameof(queryString))) ?? throw new ArgumentNullException(nameof(queryString));
+        string localQueryString = queryString ?? throw new ArgumentNullException(nameof(queryString));
 
         IFilter filter = Filter.True;
         bool isEmptyQueryString = string.IsNullOrWhiteSpace(localQueryString);
