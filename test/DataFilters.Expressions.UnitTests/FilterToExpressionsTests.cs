@@ -396,6 +396,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                     NoAction,
                     item => item.Lastname != string.Empty
             },
+            // Filter statically built with a value
             {
                 [
                     new SuperHero
@@ -456,7 +457,37 @@ public class FilterToExpressionTests(ITestOutputHelper output)
                 new Filter(field : nameof(SuperHero.Nickname), @operator : StartsWith, value: "B"),
                 AddNullCheck,
                 item => item != null && item.Nickname != null && item.Nickname.StartsWith('B')
-            }
+            },
+
+			// Filter dynamically built
+            {
+                [
+                    new SuperHero
+                    {
+                        Firstname = "Bruce", Lastname = "Wayne", Height = 190, Nickname = "Batman",
+                        Henchman = new Henchman
+                        {
+                            Firstname = "Dick", Lastname = "Grayson", Nickname = "Robin"
+                        }
+                    },
+                    new SuperHero
+                    {
+                        Firstname = "Clark",
+                        Lastname = "Kent",
+                        Height = 190,
+                        Nickname = "Superman",
+                        Acolytes = new []
+                        {
+                            new SuperHero { Nickname = "Krypto" }
+                        }
+                    }
+                ],
+                $"""
+                 {nameof(SuperHero.Acolytes)}["{nameof(SuperHero.Nickname)}"]=Krypto*
+                 """.ToFilter<SuperHero>(),
+                NoAction,
+                item => item.Acolytes.Any(acolyte => acolyte.Nickname.StartsWith("Krypto"))
+            },
         };
 
     [Theory]
@@ -731,6 +762,7 @@ public class FilterToExpressionTests(ITestOutputHelper output)
     /// </summary>
     /// <param name="elements">Collections of </param>
     /// <param name="filter">filter under test</param>
+    /// <param name="nullableValueBehavior"></param>
     /// <param name="expression">Expression the filter should match once built</param>
     private void Build<T>(IReadOnlyList<T> elements, IFilter filter, NullableValueBehavior nullableValueBehavior, Expression<Func<T, bool>> expression)
     {

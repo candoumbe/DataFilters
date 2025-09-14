@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DataFilters.TestObjects
@@ -23,5 +24,7 @@ namespace DataFilters.TestObjects
         public int Height { get; set; }
 
         public DateTimeOffset DateTimeWithOffset { get; set; }
+
+        public IEnumerable<Person> Children { get; set; }
     }
 }

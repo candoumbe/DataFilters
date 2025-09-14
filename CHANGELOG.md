@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.2] / 2025-09-14
+### 🚨 Fixes
+
+- Fixed incorrect handling of nested properties when using sub-property syntax ([#477](https://github.com/candoumbe/datafilters/issues/477))
+
 ## [0.13.1] / 2025-01-12
 ### 💥 Breaking Changes
 
@@ -211,7 +216,8 @@ for a corresponding property ([#8](https://github.com/candoumbe/datafilters/issu
 - Added support for "equals" operator on collections
 - Added support for "contains" operator on collections.
 
-[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.1...HEAD
+[Unreleased]: https://github.com/candoumbe/DataFilters/compare/0.13.2...HEAD
+[0.13.2]: https://github.com/candoumbe/DataFilters/compare/0.13.1...0.13.2
 [0.13.1]: https://github.com/candoumbe/DataFilters/compare/0.13.0...0.13.1
 [0.13.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/candoumbe/DataFilters/compare/0.12.0...0.12.0
