@@ -3,7 +3,7 @@
 namespace DataFilters
 {
     /// <summary>
-    /// Allow to customize the computation of an <see cref="IFilter"/> instance.
+    /// Allow customizing the computation of an <see cref="IFilter"/> instance.
     /// </summary>
 #if NET6_0_OR_GREATER
     public record FilterOptions

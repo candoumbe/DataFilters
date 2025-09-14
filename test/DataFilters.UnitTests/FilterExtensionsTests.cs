@@ -403,6 +403,10 @@
                             }
                         }
                     },
+                    {
+                        $"""{nameof(SuperHero.Acolytes)}["{nameof(SuperHero.Nickname)}"]=Krypto*""",
+                        new Filter(field: $"""{nameof(SuperHero.Acolytes)}["{nameof(SuperHero.Nickname)}"]""", @operator: StartsWith, "Krypto")
+                    }
                 };
 
         [Theory]

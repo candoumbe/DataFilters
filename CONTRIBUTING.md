@@ -108,14 +108,14 @@ included in the project:
    # Navigate to the newly cloned directory
    cd <folder-name>
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/candoumbe/<this-repro-name>.git
+   git remote add upstream https://github.com/candoumbe/datafilters.git
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream:
 
    ```bash
-   git checkout master
-   git pull upstream master
+   git checkout main
+   git pull upstream main
    ```
 
 3. Create a new topic branch (off the main project development branch) to
@@ -201,4 +201,3 @@ public void myMethod()
 ```
 
 A code with one exit point is easier to read as we are assured to not miss it.
-

@@ -391,8 +391,10 @@
                                                                                  from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
                                                                                  from subProp in AlphaNumeric.Between(Token.EqualTo(FilterToken.DoubleQuote), Token.EqualTo(FilterToken.DoubleQuote))
                                                                                  from __ in Token.EqualTo(FilterToken.RightSquaredBracket)
-                                                                                 select @$"[""{subProp.Value}""]"
-                                                                             ).Many()
+                                                                                 select $"""
+                                                                                         ["{subProp.Value}"]
+                                                                                         """
+                                                                                              ).Many()
                                                                              select new PropertyName(string.Concat(prop.Value, string.Concat(subProps)));
 
         /// <summary>
