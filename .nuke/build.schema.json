@@ -34,10 +34,11 @@
         "Feature",
         "Format",
         "Hotfix",
-        "MutationTests",
         "Pack",
         "Publish",
+        "RegenerateWorkflow",
         "Release",
+        "ReportUnitTestCoverage",
         "Restore",
         "UnitTests"
       ]
@@ -190,11 +191,6 @@
           "type": "string",
           "description": "Name of the branch to create"
         },
-        "NugetApiKey": {
-          "type": "string",
-          "description": "API key used to publish artifacts to Nuget.org",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
-        },
         "NuGetApiKey": {
           "type": "string",
           "description": "API Key to use for accessing the NuGet repository",
@@ -207,11 +203,6 @@
         "Solution": {
           "type": "string",
           "description": "Path to a solution file that is automatically loaded"
-        },
-        "StrykerDashboardApiKey": {
-          "type": "string",
-          "description": "API KEY used to submit mutation report to a stryker dashboard",
-          "default": "Secrets must be entered via 'nuke :secrets [profile]'"
         },
         "Title": {
           "type": "string",

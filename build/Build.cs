@@ -29,7 +29,7 @@ namespace DataFilters.ContinuousIntegration;
     CacheKeyFiles = ["global.json", "src/**/*.csproj"],
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken),
     ],
     OnPullRequestExcludePaths =
@@ -57,7 +57,7 @@ namespace DataFilters.ContinuousIntegration;
     PublishArtifacts = true,
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken)
     ],
     OnPullRequestExcludePaths =
@@ -96,7 +96,7 @@ namespace DataFilters.ContinuousIntegration;
     AutoGenerate = false,
     FetchDepth = 0,
     On = [GitHubActionsTrigger.WorkflowDispatch],
-    InvokedTargets = [nameof(IUnitTest.Compile), nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+    InvokedTargets = [nameof(IUnitTest.Compile), nameof(IPushNugetPackages.Pack)],
     CacheKeyFiles =
     [
         "src/**/*.csproj",
@@ -107,7 +107,7 @@ namespace DataFilters.ContinuousIntegration;
     EnableGitHubToken = true,
     ImportSecrets =
     [
-        nameof(NugetApiKey),
+        nameof(IPushNugetPackages.NuGetApiKey),
         nameof(IReportCoverage.CodecovToken),
         nameof(IMutationTest.StrykerDashboardApiKey)
     ],
@@ -115,6 +115,7 @@ namespace DataFilters.ContinuousIntegration;
 )]
 [DotNetVerbosityMapping]
 public class Build : EnhancedNukeBuild,
+    ICanRegenerateGitHubWorkflows,
     IHaveSolution,
     IHaveSourceDirectory,
     IHaveTestDirectory,
@@ -123,15 +124,11 @@ public class Build : EnhancedNukeBuild,
     IRestore,
     IDotnetFormat,
     IUnitTest,
-    IMutationTest,
     IBenchmark,
-    IReportCoverage,
+    IReportUnitTestCoverage,
     IPushNugetPackages,
     ICreateGithubRelease
 {
-    [Parameter("API key used to publish artifacts to Nuget.org")]
-    [Secret]
-    public readonly string NugetApiKey;
 
     [Solution]
     [Required]
@@ -155,21 +152,6 @@ public class Build : EnhancedNukeBuild,
     ///<inheritdoc/>
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");
 
-    private static IReadOnlyList<string> Projects => ["DataFilters", "DataFilters.Expressions", "DataFilters.Queries"];
-
-    ///<inheritdoc/>
-    IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects
-        =>
-        [
-            ..Projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => string.Equals(csproj.Name, projectName, StringComparison.InvariantCultureIgnoreCase)),
-                                                                              testProjects: projectName switch
-                                                                              {
-                                                                                  "DataFilters" => Solution.AllProjects.Where(csproj => csproj.Name.EndsWith(".UnitTests")),
-                                                                                  _ => Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests"))
-                                                                              },
-                                                                              configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
-        ];
-
     ///<inheritdoc/>
     IEnumerable<Project> IBenchmark.BenchmarkProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*.PerformanceTests");
 
@@ -182,9 +164,9 @@ public class Build : EnhancedNukeBuild,
     ///<inheritdoc/>
     IEnumerable<PushNugetPackageConfiguration> IPushNugetPackages.PublishConfigurations =>
     [
-        new NugetPushConfiguration(apiKey: NugetApiKey,
+        new NugetPushConfiguration(apiKey: this.As<IPushNugetPackages>()?.NuGetApiKey,
             source: new Uri("https://api.nuget.org/v3/index.json"),
-            canBeUsed: () => NugetApiKey is not null),
+            canBeUsed: () => this.As<IPushNugetPackages>()?.NuGetApiKey is not null),
         new GitHubPushNugetConfiguration(githubToken: this.Get<IHaveGitHubRepository>().GitHubToken,
             source: new Uri($"https://nuget.pkg.github.com/{this.Get<IHaveGitHubRepository>().GitRepository.GetGitHubOwner()}/index.json"),
             canBeUsed: () => this.As<ICreateGithubRelease>()?.GitHubToken is not null)

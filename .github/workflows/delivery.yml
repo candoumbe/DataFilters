@@ -29,9 +29,9 @@ on:
       - '!LICENSE'
 
 jobs:
-  ubuntu-latest:
-    name: ubuntu-22.04
-    runs-on: ubuntu-24.04
+  ubuntu-22_04:
+    name: ubuntu-22_04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
         with:
@@ -49,7 +49,7 @@ jobs:
       - name: 'Run: UnitTests, Publish, AddGithubRelease'
         run: ./build.cmd UnitTests Publish AddGithubRelease
         env:
-          NugetApiKey: ${{ secrets.NUGET_API_KEY }}
+          NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Publish: unit-tests'
@@ -57,16 +57,16 @@ jobs:
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
-      - name: 'Publish: coverage-report'
+      - name: 'Publish: unit-tests-coverage'
         uses: actions/upload-artifact@v5
         with:
-          name: coverage-report
-          path: output/artifacts/reports/coverage-report
-      - name: 'Publish: coverage-history'
+          name: unit-tests-coverage
+          path: output/artifacts/reports/coverage-report/unit-tests-coverage
+      - name: 'Publish: unit-tests-coverage-history'
         uses: actions/upload-artifact@v5
         with:
-          name: coverage-history
-          path: output/artifacts/reports/coverage-history
+          name: unit-tests-coverage-history
+          path: output/artifacts/reports/coverage-history/unit-tests-coverage-history
       - name: 'Publish: packages'
         uses: actions/upload-artifact@v5
         with:
