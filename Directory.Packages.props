@@ -25,7 +25,6 @@
     <PackageVersion Include="Superpower" Version="3.1.0" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Queryable" Version="4.3.0" />
-    <PackageVersion Include="Ultimately" Version="4.0.0" />
     <PackageVersion Include="xunit.analyzers" Version="1.25.0" />
     <PackageVersion Include="xunit.categories" Version="3.0.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
@@ -39,6 +38,18 @@
     <Otherwise>
       <ItemGroup>
         <PackageVersion Include="FluentValidation" Version="12.1.0"/>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <Choose>
+    <When Condition="'$(TargetFramework)' == 'net10.0'">
+      <ItemGroup>
+        <PackageVersion Include="Ultimately" Version="4.0.0"/>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageVersion Include="Ultimately" Version="3.0.0"/>
       </ItemGroup>
     </Otherwise>
   </Choose>
