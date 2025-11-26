@@ -121,13 +121,11 @@ public class Build : EnhancedNukeBuild,
     IGitFlowWithPullRequest,
     IClean,
     IRestore,
-    ICompile,
     IDotnetFormat,
     IUnitTest,
     IMutationTest,
     IBenchmark,
     IReportCoverage,
-    IPack,
     IPushNugetPackages,
     ICreateGithubRelease
 {
@@ -152,13 +150,7 @@ public class Build : EnhancedNukeBuild,
         ];
 
     /// <inheritdoc />
-    Configure<DotNetToolRestoreSettings> IRestore.RestoreToolSettings => _ => _.SetDisableParallel(true);
-
-    ///<inheritdoc/>
-    AbsolutePath IHaveSourceDirectory.SourceDirectory => RootDirectory / "src";
-
-    ///<inheritdoc/>
-    AbsolutePath IHaveTestDirectory.TestDirectory => RootDirectory / "test";
+    Configure<DotNetToolRestoreSettings> IRestore.RestoreToolSettings => settings => settings.SetDisableParallel(true);
 
     ///<inheritdoc/>
     IEnumerable<Project> IUnitTest.UnitTestsProjects => this.Get<IHaveSolution>().Solution.GetAllProjects("*UnitTests");

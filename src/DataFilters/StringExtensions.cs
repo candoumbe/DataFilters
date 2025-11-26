@@ -20,10 +20,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using static DataFilters.OrderDirection;
 
-#if NET7_0_OR_GREATER
-    using System.Diagnostics;
-#endif
-
+// ReSharper disable once CheckNamespace
 namespace System;
 
 /// <summary>
@@ -52,7 +49,7 @@ public static class StringExtensions
     /// <exception cref="InvalidOrderExpressionException">when <paramref name="sortString"/> is not a valid sort expression.</exception>
     public static IOrder<T> ToOrder<T>(this string sortString, PropertyNameResolutionStrategy propertyNameResolutionStrategy)
     {
-        if (string.IsNullOrWhiteSpace(sortString) || sortString?.Length == 0)
+        if (string.IsNullOrWhiteSpace(sortString) || sortString.Length == 0)
         {
             throw new ArgumentOutOfRangeException(nameof(sortString), "cannot be be null or whitespace only");
         }
