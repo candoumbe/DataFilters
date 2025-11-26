@@ -12,7 +12,7 @@ public enum FilterLogic
     And,
 
     /// <summary>
-    /// Logicial OR operatior will be applied
+    /// Logical OR operator will be applied
     /// </summary>
     Or
 }
