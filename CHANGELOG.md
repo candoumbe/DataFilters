@@ -6,11 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### 🚀 New features
+- Added `net10.0` TFM support ([#502](https://github.com/candoumbe/datafilters/issues/502))
+
+### 🧹 Housekeeping
+- Bumped `Ultimately` to `4.0.0`
 
 ## [0.13.2] / 2025-09-14
 ### 🚨 Fixes
 
-- Fixed incorrect handling of nested properties when using sub-property syntax ([#477](https://github.com/candoumbe/datafilters/issues/477))
+- Fixed incorrect handling of nested properties when using subproperty syntax ([#477](https://github.com/candoumbe/datafilters/issues/477))
 
 ## [0.13.1] / 2025-01-12
 ### 💥 Breaking Changes
