@@ -33,17 +33,17 @@ public sealed class Filter : IFilter, IEquatable<Filter>
     public static readonly Regex ValidFieldNameRegex = new(ValidFieldNamePattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
     /// <summary>
-    /// Name of the json property that holds the field name
+    /// Name of the JSON property that holds the field name
     /// </summary>
     public const string FieldJsonPropertyName = "field";
 
     /// <summary>
-    /// Name of the json property that holds the operator
+    /// Name of the JSON property that holds the operator
     /// </summary>
     public const string OperatorJsonPropertyName = "op";
 
     /// <summary>
-    /// Name of the json property that holds the value
+    /// Name of the JSON property that holds the value
     /// </summary>
     public const string ValueJsonPropertyName = "value";
 
@@ -56,7 +56,7 @@ public sealed class Filter : IFilter, IEquatable<Filter>
     /// Generates the <see cref="JSchema"/> for the specified <see cref="FilterOperator"/>.
     /// </summary>
     /// <param name="op"></param>
-    /// <returns></returns>
+    /// <returns>The JSON schema</returns>
     public static JSchema Schema(FilterOperator op)
     {
         JSchema schema = op switch
@@ -89,8 +89,7 @@ public sealed class Filter : IFilter, IEquatable<Filter>
                 {
                     [FieldJsonPropertyName] = new JSchema { Type = JSchemaType.String,  },
                     [OperatorJsonPropertyName] = new JSchema { Type = JSchemaType.String },
-                    [ValueJsonPropertyName] = new JSchema {
-                        Not = new JSchema() { Type = JSchemaType.Null }
+                    [ValueJsonPropertyName] = new JSchema { Not = new JSchema() { Type = JSchemaType.Null }
                     }
                 },
                 Required = { FieldJsonPropertyName, OperatorJsonPropertyName, ValueJsonPropertyName }
@@ -196,7 +195,12 @@ public sealed class Filter : IFilter, IEquatable<Filter>
         return new Filter(Field, @operator, Value);
     }
 
-    ///<inheritdoc/>
+    /// <summary>
+    /// Deconstructs this instance into its component parts.
+    /// </summary>
+    /// <param name="field"></param>
+    /// <param name="operator"></param>
+    /// <param name="value"></param>
     public void Deconstruct(out string field, out FilterOperator @operator, out object value)
     {
         field = Field;
