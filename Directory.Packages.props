@@ -25,7 +25,7 @@
     <PackageVersion Include="Superpower" Version="3.1.0" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Queryable" Version="4.3.0" />
-    <PackageVersion Include="xunit.analyzers" Version="1.25.0" />
+    <PackageVersion Include="xunit.analyzers" Version="1.26.0" />
     <PackageVersion Include="xunit.categories" Version="3.0.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
