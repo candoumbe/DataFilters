@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.7" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Candoumbe.Pipelines" Version="1.3.0" />
     <PackageVersion Include="Candoumbe.Types.Strings" Version="0.4.2" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
