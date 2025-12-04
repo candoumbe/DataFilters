@@ -52,7 +52,7 @@ jobs:
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Publish: unit-tests'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
