@@ -53,22 +53,22 @@ jobs:
           CodecovToken: ${{ secrets.CODECOV_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Publish: unit-tests'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: unit-tests
           path: output/artifacts/tests-results/unit-tests
       - name: 'Publish: unit-tests-coverage'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: unit-tests-coverage
           path: output/artifacts/reports/coverage-report/unit-tests-coverage
       - name: 'Publish: unit-tests-coverage-history'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: unit-tests-coverage-history
           path: output/artifacts/reports/coverage-history/unit-tests-coverage-history
       - name: 'Publish: packages'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: packages
           path: output/artifacts/packages
