@@ -23,6 +23,6 @@
       }
     }
   },
-  "postCreateCommand": "dotnet tool restore && dotnet restore",
+  "postCreateCommand": "./build.sh restore",
   "remoteUser": "vscode"
 }
