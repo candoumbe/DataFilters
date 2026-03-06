@@ -47,6 +47,11 @@ The public API SHOULD NOT be considered stable.
     - [On the backend](#on-the-backend)
         - [Building expression trees to filtering data from any datasource](#building-expression-trees-to-filtering-data-from-any-datasource)
         - [Extending `IFIlter`s](#extending-ifilters)
+- [Getting started (Development)](#getting-started-development)
+    - [Prerequisites](#prerequisites)
+    - [Using Dev Container](#using-dev-container)
+    - [Local setup](#local-setup)
+    - [Build](#build)
 
 The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
@@ -604,6 +609,67 @@ You can find more info on that directly in the Github repository.
 | [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)                                     | ![DataFilters download count](https://img.shields.io/nuget/dt/Datafilters?label=&color=blue)                         | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                                                                                       |
 | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | ![DataFilters.Expressions download count](https://img.shields.io/nuget/dt/Datafilters.Expressions?label=&color=blue) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.                                                           |
 | [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)             | ![DataFilters.Queries download count](https://img.shields.io/nuget/dt/Datafilters.Queries?label=&color=blue)         | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://github.com/candoumbe/Queries/blob/develop/src/Queries.Core/Parts/Clauses/IWhereClause.cs) instance. |
+
+## Getting started (Development)
+
+### Prerequisites
+
+- [Git](https://git-scm.com/)
+- [.NET SDK 10.0](https://dotnet.microsoft.com/download/dotnet/10.0) (see [global.json](global.json) for the exact version)
+- Optionally, [Docker](https://www.docker.com/) and [VS Code](https://code.visualstudio.com/) for the Dev Container workflow
+
+### Using Dev Container
+
+The repository includes a [Dev Container](https://containers.dev/) configuration that provides a ready-to-use development environment with all the required tools pre-installed.
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/candoumbe/DataFilters.git
+   cd DataFilters
+   ```
+
+2. Open the project in VS Code:
+
+   ```bash
+   code .
+   ```
+
+3. When prompted, click **"Reopen in Container"** (or run the command `Dev Containers: Reopen in Container` from the Command Palette).
+
+   VS Code will build the container, install the .NET SDK and extensions, then restore the dotnet local tools and NuGet packages automatically.
+
+> **Tip**: You can also open this repository directly in [GitHub Codespaces](https://github.com/codespaces) for a cloud-hosted development environment.
+
+### Local setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/candoumbe/DataFilters.git
+   cd DataFilters
+   ```
+
+2. Restore NuGet packages and local .NET tools:
+
+   ```bash
+   ./build.sh restore
+   ```
+
+### Build
+
+The project uses [Nuke](https://nuke.build/) as its build system. You can run the build with:
+
+```bash
+./build.sh   # Linux / macOS
+build.cmd     # Windows
+```
+
+To run the unit tests:
+
+```bash
+./build.sh tests
+```
 
 [class-multi-filter]: /src/DataFilters/MultiFilter.cs
 
