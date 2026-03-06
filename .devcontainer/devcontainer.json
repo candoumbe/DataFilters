@@ -4,6 +4,11 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
+  "runArgs": [
+    "--userns=keep-id"
+  ],
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -13,7 +18,8 @@
         "GitHub.copilot"
       ],
       "settings": {
-        "dotnet.defaultSolution": "DataFilters.sln"
+        "dotnet.defaultSolution": "DataFilters.sln",
+        "dev.containers.dockerPath": "podman"
       }
     }
   },
