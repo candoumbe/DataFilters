@@ -8,7 +8,7 @@
     <PackageVersion Include="Candoumbe.Pipelines" Version="2.0.0" />
     <PackageVersion Include="Candoumbe.Types.Strings" Version="0.4.2" />
     <PackageVersion Include="coverlet.msbuild" Version="8.0.0" />
-    <PackageVersion Include="FluentAssertions" Version="7.2.1" />
+    <PackageVersion Include="FluentAssertions" Version="7.2.2" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FsCheck.XUnit" Version="3.3.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.25" />
