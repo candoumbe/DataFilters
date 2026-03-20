@@ -2,7 +2,8 @@
   "name": "DataFilters",
   "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/copilot-cli": {}
   },
   "runArgs": [
     "--userns=keep-id"
@@ -15,7 +16,9 @@
         "ms-dotnettools.csdevkit",
         "ms-dotnettools.csharp",
         "editorconfig.editorconfig",
-        "GitHub.copilot"
+        "GitHub.copilot",
+        "GitHub.vscode-pull-request-github",
+        "bierner.markdown-mermaid"
       ],
       "settings": {
         "dotnet.defaultSolution": "DataFilters.sln",
@@ -23,6 +26,6 @@
       }
     }
   },
-  "postCreateCommand": "./build.sh restore",
+  "postStartCommand": "./build.sh restore",
   "remoteUser": "vscode"
 }
