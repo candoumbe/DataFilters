@@ -6,10 +6,6 @@
     <Description>Converts IFilter instance to strongly typed expressions.</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\DataFilters.Expressions.xml</DocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Linq.Queryable" Condition="'$(TargetFramework)' != 'net10.0'" />
-  </ItemGroup>  
   <ItemGroup>
     <ProjectReference Include="..\DataFilters\DataFilters.csproj" />
   </ItemGroup>
