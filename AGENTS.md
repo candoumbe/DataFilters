@@ -39,6 +39,103 @@ These rules are **mandatory** — see `CONTRIBUTING.md` for full details.
 5. **Tests**: use xunit + FluentAssertions + FsCheck. Test projects reference `tests.props`.
 6. **Semantic Versioning**: the project follows SemVer 2.0. Version zero — public API is not yet stable.
 
+### Examples
+
+#### Variable declarations
+
+```csharp
+// ✅ DO — explicit type
+Filter filter = new Filter("Nickname", FilterOperator.EqualTo, "Batman");
+IList<IFilter> filters = new List<IFilter>();
+string name = "Bruce";
+
+// ❌ DON'T — var is forbidden
+var filter = new Filter("Nickname", FilterOperator.EqualTo, "Batman");
+var filters = new List<IFilter>();
+var name = "Bruce";
+```
+
+#### Single exit point
+
+```csharp
+// ✅ DO — one return at the end
+public string GetLabel(FilterOperator op)
+{
+    string result;
+    if (op == FilterOperator.EqualTo)
+    {
+        result = "eq";
+    }
+    else
+    {
+        result = "other";
+    }
+
+    return result;
+}
+
+// ❌ DON'T — multiple returns
+public string GetLabel(FilterOperator op)
+{
+    if (op == FilterOperator.EqualTo)
+    {
+        return "eq";
+    }
+
+    return "other";
+}
+```
+
+#### Usings order
+
+```csharp
+// ✅ DO — System first, then others alphabetically
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using DataFilters;
+using FluentAssertions;
+
+// ❌ DON'T — System not first, or unused usings left in
+using DataFilters;
+using System;
+using System.IO; // unused
+```
+
+#### Writing tests
+
+```csharp
+// ✅ DO — xunit + FluentAssertions, [UnitTest] category, TheoryData for cases
+[UnitTest]
+public class MyTests
+{
+    public static TheoryData<string, FilterOperator> Cases => new()
+    {
+        { "eq", FilterOperator.EqualTo },
+        { "contains", FilterOperator.Contains },
+    };
+
+    [Theory]
+    [MemberData(nameof(Cases))]
+    public void Should_parse_operator(string input, FilterOperator expected)
+    {
+        // Act
+        FilterOperator result = Parse(input);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+}
+
+// ❌ DON'T — NUnit, Assert.Equal, missing category
+[Test]
+public void TestParse()
+{
+    var result = Parse("eq");
+    Assert.AreEqual(FilterOperator.EqualTo, result);
+}
+```
+
 ## Testing expectations
 
 - Every new feature or bug fix must have corresponding unit tests.
@@ -58,3 +155,35 @@ These rules are **mandatory** — see `CONTRIBUTING.md` for full details.
 - Do not modify build infrastructure unless explicitly asked.
 - Do not use `var` (except anonymous types).
 - Do not write methods with multiple return statements.
+
+### Anti-pattern examples
+
+```csharp
+// ❌ DON'T — unnecessary wrapper/helper
+public static class FilterHelper
+{
+    public static Filter Eq(string field, object value)
+        => new(field, FilterOperator.EqualTo, value);
+}
+
+// ✅ DO — use the types directly
+Filter filter = new Filter("Age", FilterOperator.EqualTo, 30);
+```
+
+```csharp
+// ❌ DON'T — over-engineer with defensive checks on internal code
+public void Process(Filter filter)
+{
+    if (filter == null) throw new ArgumentNullException(nameof(filter));
+    if (string.IsNullOrEmpty(filter.Field)) throw new ArgumentException("Field required");
+    // ...
+}
+
+// ✅ DO — trust internal callers, validate only at system boundaries
+public void Process(Filter filter)
+{
+    // filter is guaranteed non-null by the calling pipeline
+    string field = filter.Field;
+    // ...
+}
+```
