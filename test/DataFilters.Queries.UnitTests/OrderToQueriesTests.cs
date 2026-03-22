@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using FluentAssertions;
+using AwesomeAssertions;
 using global::Queries.Core.Parts.Sorting;
 using Xunit;
 using Xunit.Abstractions;

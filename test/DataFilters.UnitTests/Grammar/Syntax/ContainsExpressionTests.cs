@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using AwesomeAssertions;
 using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;

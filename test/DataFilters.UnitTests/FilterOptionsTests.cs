@@ -1,7 +1,5 @@
-﻿using DataFilters.Casing;
-
-using FluentAssertions;
-
+﻿using AwesomeAssertions;
+using DataFilters.Casing;
 using Xunit;
 using Xunit.Categories;
 

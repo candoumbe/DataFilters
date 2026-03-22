@@ -1,9 +1,9 @@
 ﻿
 using System;
+using AwesomeAssertions;
+using AwesomeAssertions.Extensions;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
-using FluentAssertions.Extensions;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;

@@ -18,7 +18,8 @@
         "editorconfig.editorconfig",
         "GitHub.copilot",
         "GitHub.vscode-pull-request-github",
-        "bierner.markdown-mermaid"
+        "bierner.markdown-mermaid",
+        "DavidAnson.vscode-markdownlint"
       ],
       "settings": {
         "dotnet.defaultSolution": "DataFilters.sln",

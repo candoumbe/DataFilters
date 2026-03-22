@@ -1,5 +1,5 @@
+using AwesomeAssertions;
 using DataFilters.Grammar.Syntax;
-using FluentAssertions;
 using Xunit;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
