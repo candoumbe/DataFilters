@@ -144,22 +144,21 @@ public static class FilterTokenParser
                                                                  .ToStringValue()))
            );
 
+    private static readonly TokenListParser<FilterToken, OrExpression> s_or
+        = (from left in Parse.Ref(() => UnaryExpression)
+           from _ in Token.EqualTo(FilterToken.Or)
+           from right in Parse.Ref(() => UnaryExpression)
+           select left | right);
+
     /// <summary>
     /// Parser for logical OR expression.
     /// </summary>
-    public static TokenListParser<FilterToken, OrExpression> Or
-        => from left in Parse.Ref(() => UnaryExpression)
-           from _ in Token.EqualTo(FilterToken.Or)
-           from right in Parse.Ref(() => UnaryExpression)
-           select left | right;
+    public static TokenListParser<FilterToken, OrExpression> Or => s_or;
 
-    /// <summary>
-    /// Parser for logical AND expression
-    /// </summary>
-    public static TokenListParser<FilterToken, AndExpression> And => (from left in Parse.Ref(() => UnaryExpression)
-                                                                      from _ in Token.EqualTo(FilterToken.And)
-                                                                      from right in Parse.Ref(() => UnaryExpression)
-                                                                      select new AndExpression(left, right)).Try()
+    private static readonly TokenListParser<FilterToken, AndExpression> s_and = (from left in Parse.Ref(() => UnaryExpression)
+                                                                         from _ in Token.EqualTo(FilterToken.And)
+                                                                         from right in Parse.Ref(() => UnaryExpression)
+                                                                         select new AndExpression(left, right)).Try()
         .Or(from left in AlphaNumeric
             from _ in Asterisk
             from right in AlphaNumeric
@@ -173,11 +172,13 @@ public static class FilterTokenParser
                                      new EndsWithExpression(right.Value)));
 
     /// <summary>
-    /// Parser for NOT expression
+    /// Parser for logical AND expression
     /// </summary>
-    public static TokenListParser<FilterToken, NotExpression> Not => (from bangs in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
-                                                                      from expression in Parse.Ref(() => UnaryExpression)
-                                                                      select (bangs, expression))
+    public static TokenListParser<FilterToken, AndExpression> And => s_and;
+
+    private static readonly TokenListParser<FilterToken, NotExpression> s_not = (from bangs in Token.EqualTo(FilterToken.Bang).AtLeastOnce()
+                                                                         from expression in Parse.Ref(() => UnaryExpression)
+                                                                         select (bangs, expression))
         .Select(tuple =>
                 {
                     NotExpression notExpression = !tuple.expression;
@@ -189,6 +190,11 @@ public static class FilterTokenParser
 
                     return notExpression;
                 });
+
+    /// <summary>
+    /// Parser for NOT expression
+    /// </summary>
+    public static TokenListParser<FilterToken, NotExpression> Not => s_not;
 
     private static TokenListParser<FilterToken, BracketExpression> Bracket => (
                                                                                   from _ in Token.EqualTo(FilterToken.LeftSquaredBracket)
@@ -380,17 +386,19 @@ public static class FilterTokenParser
 
     private static TokenListParser<FilterToken, Token<FilterToken>> Whitespace => Token.EqualTo(FilterToken.Whitespace);
 
+    private static readonly TokenListParser<FilterToken, GroupExpression> s_group = (from _ in Token.EqualTo(FilterToken.LeftParenthesis)
+                                                                                      from expression in Parse.Ref(() => BinaryOrUnaryExpression)
+                                                                                      from __ in Token.EqualTo(FilterToken.RightParenthesis)
+                                                                                      select new GroupExpression(expression));
+
     /// <summary>
     /// Group expression
     /// </summary>
-    public static TokenListParser<FilterToken, GroupExpression> Group => from _ in Token.EqualTo(FilterToken.LeftParenthesis)
-                                                                         from expression in Parse.Ref(() => BinaryOrUnaryExpression)
-                                                                         from __ in Token.EqualTo(FilterToken.RightParenthesis)
-                                                                         select new GroupExpression(expression);
+    public static TokenListParser<FilterToken, GroupExpression> Group => s_group;
 
-    private static TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression => Parse.OneOf(
-                                                                                                         Parse.Ref(() => And.Try().Cast<FilterToken, AndExpression, FilterExpression>()),
-                                                                                                         Parse.Ref(() => Or.Try().Cast<FilterToken, OrExpression, FilterExpression>()),
+    private static readonly TokenListParser<FilterToken, FilterExpression> BinaryOrUnaryExpression = Parse.OneOf(
+                                                                                                         s_and.Try().Cast<FilterToken, AndExpression, FilterExpression>(),
+                                                                                                         s_or.Try().Cast<FilterToken, OrExpression, FilterExpression>(),
                                                                                                          Parse.Ref(() => UnaryExpression)
                                                                                                         );
 
@@ -701,9 +709,9 @@ public static class FilterTokenParser
     /// <summary>
     /// Parses all supported unary expressions
     /// </summary>
-    private static TokenListParser<FilterToken, FilterExpression> UnaryExpression => Parse.OneOf(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()),
-                                                                                                 Parse.Ref(() => Not.Try().Cast<FilterToken, NotExpression, FilterExpression>()),
-                                                                                                 Parse.Ref(() => Group.Try().Cast<FilterToken, GroupExpression, FilterExpression>()),
+    private static readonly TokenListParser<FilterToken, FilterExpression> UnaryExpression = Parse.OneOf(Parse.Ref(() => OneOf.Try().Cast<FilterToken, OneOfExpression, FilterExpression>()),
+                                                                                                 s_not.Try().Cast<FilterToken, NotExpression, FilterExpression>(),
+                                                                                                 s_group.Try().Cast<FilterToken, GroupExpression, FilterExpression>(),
                                                                                                  Parse.Ref(() => Interval.Try().Cast<FilterToken, IntervalExpression, FilterExpression>()),
                                                                                                  Parse.Ref(() => GlobalUniqueIdentifier.Try().Cast<FilterToken, GuidValueExpression, FilterExpression>()),
                                                                                                  Parse.Ref(() => Duration.Try().Cast<FilterToken, DurationExpression, FilterExpression>()),
