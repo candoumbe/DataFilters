@@ -11,6 +11,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 public class IntervalExpressionTests(ITestOutputHelper outputHelper)
 {
     [Fact]

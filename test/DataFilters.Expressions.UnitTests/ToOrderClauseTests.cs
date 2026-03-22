@@ -10,6 +10,7 @@ using Xunit.Categories;
 using static DataFilters.OrderDirection;
 
 namespace DataFilters.Expressions.UnitTests;
+
 [UnitTest]
 [Feature("Expressions")]
 public class ToOrderClauseTests

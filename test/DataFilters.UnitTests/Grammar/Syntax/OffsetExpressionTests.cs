@@ -9,6 +9,7 @@ using Xunit;
 using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 [UnitTest]
 public class OffsetExpressionTests
 {

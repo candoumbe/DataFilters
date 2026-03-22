@@ -12,6 +12,7 @@ using Superpower.Model;
 using Xunit;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 public class NotExpressionTests
 {
     [Fact]

@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 using static DataFilters.OrderDirection;
 
 namespace DataFilters.UnitTests;
+
 public class OrderTests(ITestOutputHelper outputHelper)
 {
     [Theory]

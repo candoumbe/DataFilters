@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using NodaTime;
 
 namespace DataFilters.Expressions.UnitTests;
+
 [ExcludeFromCodeCoverage]
 public class NodaTimeClass
 {

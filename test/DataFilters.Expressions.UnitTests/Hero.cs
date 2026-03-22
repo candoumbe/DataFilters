@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 namespace DataFilters.Expressions.UnitTests;
+
 public class Hero : IEquatable<Hero>
 {
     public string Name { get; set; }

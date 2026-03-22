@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 [UnitTest]
 public class EndsWithExpressionTests(ITestOutputHelper outputHelper)
 {

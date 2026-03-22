@@ -9,6 +9,7 @@ using FsCheck.Xunit;
 using Xunit;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 public class DateExpressionTests
 {
     [Fact]
