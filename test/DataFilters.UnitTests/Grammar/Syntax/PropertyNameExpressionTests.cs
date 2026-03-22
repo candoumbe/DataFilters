@@ -1,7 +1,7 @@
 ﻿
 using System;
+using AwesomeAssertions;
 using DataFilters.Grammar.Syntax;
-using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 

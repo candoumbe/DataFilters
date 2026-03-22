@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using AwesomeAssertions;
 using DataFilters.Grammar.Parsing;
-using FluentAssertions;
 using Superpower;
 using Superpower.Model;
 using Xunit;

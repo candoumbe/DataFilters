@@ -1,7 +1,7 @@
 ﻿
 using System;
+using AwesomeAssertions;
 using DataFilters.TestObjects;
-using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using static DataFilters.OrderDirection;

@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AwesomeAssertions;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;

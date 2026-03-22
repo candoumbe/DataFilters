@@ -1,7 +1,7 @@
 ﻿using System;
+using AwesomeAssertions;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;

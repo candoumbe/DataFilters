@@ -1,7 +1,7 @@
 
 using System;
-using FluentAssertions;
-using FluentAssertions.Extensions;
+using AwesomeAssertions;
+using AwesomeAssertions.Extensions;
 using global::Queries.Core.Parts.Clauses;
 using Xunit;
 using Xunit.Abstractions;

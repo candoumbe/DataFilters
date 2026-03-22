@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using AwesomeAssertions;
 using Candoumbe.MiscUtilities.Comparers;
 using DataFilters.Grammar.Parsing;
 using DataFilters.Grammar.Syntax;
 using DataFilters.UnitTests.Helpers;
-using FluentAssertions;
 using FsCheck;
 using FsCheck.Fluent;
 using FsCheck.Xunit;

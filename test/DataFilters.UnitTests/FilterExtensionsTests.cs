@@ -1,9 +1,9 @@
 ﻿using System;
+using AwesomeAssertions;
+using AwesomeAssertions.Common;
+using AwesomeAssertions.Extensions;
 using DataFilters.Casing;
 using DataFilters.TestObjects;
-using FluentAssertions;
-using FluentAssertions.Common;
-using FluentAssertions.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Categories;
