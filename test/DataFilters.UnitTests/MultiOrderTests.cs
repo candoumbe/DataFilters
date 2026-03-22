@@ -6,6 +6,7 @@ using Xunit.Abstractions;
 using static DataFilters.OrderDirection;
 
 namespace DataFilters.UnitTests;
+
 public class MultiOrderTests(ITestOutputHelper outputHelper)
 {
     public static TheoryData<MultiOrder<SuperHero>, object, bool, string> EqualsCases

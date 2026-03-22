@@ -21,6 +21,7 @@ using static Newtonsoft.Json.JsonConvert;
 #endif
 
 namespace DataFilters.UnitTests;
+
 [UnitTest]
 public class MultiFilterTests(ITestOutputHelper output)
 {

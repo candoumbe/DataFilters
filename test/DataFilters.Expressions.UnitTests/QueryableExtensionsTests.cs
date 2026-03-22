@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 
 namespace DataFilters.Expressions.UnitTests;
+
 [UnitTest]
 public class QueryableExtensionsTests(ITestOutputHelper outputHelper)
 {

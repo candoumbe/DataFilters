@@ -19,6 +19,7 @@ using static DataFilters.FilterLogic;
 using static DataFilters.FilterOperator;
 
 namespace DataFilters.UnitTests;
+
 [UnitTest]
 public class FilterTests(ITestOutputHelper output)
 {

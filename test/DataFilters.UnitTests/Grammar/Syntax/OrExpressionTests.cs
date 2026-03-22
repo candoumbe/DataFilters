@@ -13,6 +13,7 @@ using Xunit.Abstractions;
 using Xunit.Categories;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 [UnitTest]
 public class OrExpressionTests(ITestOutputHelper outputHelper)
 {

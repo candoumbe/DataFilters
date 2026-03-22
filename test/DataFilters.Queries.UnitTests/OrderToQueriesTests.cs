@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 using static global::Queries.Core.Parts.Sorting.OrderDirection;
 
 namespace DataFilters.Queries.UnitTests;
+
 public class OrderToQueriesTests(ITestOutputHelper outputHelper)
 {
     public class Person

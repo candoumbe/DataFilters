@@ -9,6 +9,7 @@ using FsCheck.Fluent;
 using FsCheck.Xunit;
 
 namespace DataFilters.UnitTests.Grammar.Syntax;
+
 public class ConstantBracketValueTests
 {
     [Property]
