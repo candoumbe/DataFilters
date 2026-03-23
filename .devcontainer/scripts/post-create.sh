@@ -35,25 +35,22 @@ log_info "Updating package manager..."
 sudo apt-get update > /dev/null 2>&1
 log_success "Package manager updated."
 
+log_info "Node JS version: $(node -v)"
+log_info "npm version: $(npm -v)"
+
 # Install xdg-utils for opening links in the default browser
 log_info "Installing xdg-utils..."
 sudo apt-get install -y xdg-utils > /dev/null 2>&1
 log_success "xdg-utils installed successfully."
 
-# Install/Update Node.js and npm
-log_info "Installing/updating Node.js and npm..."
-sudo apt-get install -y nodejs npm > /dev/null 2>&1
-log_success "Node.js and npm installed/updated successfully."
-
-# Update npm to latest version
-log_info "Updating npm to latest version..."
-sudo npm install -g npm@latest > /dev/null 2>&1
-log_success "npm updated to latest version."
-
 # Install squad CLI globally
 log_info "Installing squad CLI globally..."
 npm install -g @bradygaster/squad-cli > /dev/null 2>&1
 log_success "squad CLI installed successfully."
+
+log_info "Initialize squad configuration..."
+squad init
+log_success "squad CLI initialized successfully."
 
 log_info ""
 log_success "Post-create setup complete!"

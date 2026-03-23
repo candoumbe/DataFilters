@@ -87,7 +87,7 @@ fi
 
 # Update npm to latest version
 log_info "Updating npm to latest version..."
-sudo npm install -g npm@latest > /dev/null 2>&1
+npm install -g npm@latest > /dev/null 2>&1
 log_success "npm updated."
 
 # Ensure squad CLI is installed or updated
