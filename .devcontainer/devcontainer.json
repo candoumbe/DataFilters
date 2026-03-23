@@ -3,6 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/copilot-cli": {}
   },
   "runArgs": [
@@ -27,6 +28,7 @@
       }
     }
   },
-  "postStartCommand": "./build.sh restore",
+  "postCreateCommand": "./.devcontainer/scripts/post-create.sh",
+  "postStartCommand": "./.devcontainer/scripts/post-start.sh",
   "remoteUser": "vscode"
 }
