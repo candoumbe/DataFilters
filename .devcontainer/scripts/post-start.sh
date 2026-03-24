@@ -87,17 +87,17 @@ fi
 
 # Update npm to latest version
 log_info "Updating npm to latest version..."
-npm install -g npm@latest > /dev/null 2>&1
+npm install --ignore-scripts -g npm@latest > /dev/null 2>&1
 log_success "npm updated."
 
 # Ensure squad CLI is installed or updated
 if command_exists squad; then
     log_info "Updating squad CLI to latest version..."
-    npm install -g @bradygaster/squad-cli@latest > /dev/null 2>&1
+    npm install --ignore-scripts -g @bradygaster/squad-cli@latest > /dev/null 2>&1
     log_success "squad CLI updated to latest version."
 else
     log_info "Installing squad CLI..."
-    npm install -g @bradygaster/squad-cli > /dev/null 2>&1
+    npm install --ignore-scripts -g @bradygaster/squad-cli > /dev/null 2>&1
     log_success "squad CLI installed successfully."
 fi
 
