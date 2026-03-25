@@ -15,6 +15,10 @@
     <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests'))">true</IsTestProject>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true'">
+    <WarningsAsErrors>$(WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(IsTestProject)' == 'false'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
