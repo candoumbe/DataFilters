@@ -1,0 +1,19 @@
+{
+  "universe_usage": [
+    {
+      "universe": "the-expanse",
+      "assignment_id": "datafilters-issue-338-squad-init",
+      "used_names": ["holden", "amos", "naomi"],
+      "allocated_at": "2026-03-25T00:00:00Z",
+      "available_names": [
+        "alex",
+        "chrisjen",
+        "avasarala",
+        "bobbie",
+        "drummer",
+        "proto",
+        "peaches"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "universe_allowlist": [
+    "the-expanse",
+    "ocean-s-11",
+    "star-wars-ot",
+    "alien",
+    "blade-runner",
+    "cyberpunk",
+    "dune",
+    "foundation",
+    "expanse-belt",
+    "matrix",
+    "lotr",
+    "harry-potter",
+    "marvel-mcu",
+    "mad-max",
+    "terminator"
+  ],
+  "current_universe": "the-expanse",
+  "max_agents_per_universe": 25,
+  "overflow_strategy": "diegetic-expansion"
+}
