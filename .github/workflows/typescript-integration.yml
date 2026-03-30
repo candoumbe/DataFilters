@@ -1,0 +1,59 @@
+name: typescript-integration
+
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - 'src/typescript/**'
+      - '.github/workflows/typescript-*.yml'
+  pull_request:
+    paths:
+      - 'src/typescript/**'
+      - '.github/workflows/typescript-*.yml'
+
+jobs:
+  typescript:
+    name: Node ${{ matrix.node-version }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['18', '20', '22']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'src/typescript/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd src/typescript
+          npm ci
+
+      - name: Lint
+        run: |
+          cd src/typescript
+          npm run lint
+
+      - name: Build
+        run: |
+          cd src/typescript
+          npm run build
+
+      - name: Test
+        run: |
+          cd src/typescript
+          npm run test:cov
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./src/typescript/coverage/lcov.info
+          flags: typescript
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -52,6 +52,9 @@ The public API SHOULD NOT be considered stable.
     - [Using Dev Container](#using-dev-container)
     - [Local setup](#local-setup)
     - [Build](#build)
+- [Monorepo structure](#monorepo-structure)
+    - [Python SDK](#python-sdk)
+    - [TypeScript SDK](#typescript-sdk)
 
 The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
 I wanted to have a uniform way to query a collection of resources whilst abstracting away underlying datasources.
@@ -609,6 +612,62 @@ You can find more info on that directly in the Github repository.
 | [![Nuget](https://img.shields.io/nuget/v/Datafilters?label=Datafilters&color=blue)](https://www.nuget.org/packages/DataFilters)                                     | ![DataFilters download count](https://img.shields.io/nuget/dt/Datafilters?label=&color=blue)                         | provides core functionalities of parsing strings and converting to [IFilter][class-ifilter] instances.                                                                                                                                       |
 | [![Nuget](https://img.shields.io/nuget/v/DataFilters.Expressions?label=Datafilters.Expressions&color=blue)](https://www.nuget.org/packages/DataFilters.Expressions) | ![DataFilters.Expressions download count](https://img.shields.io/nuget/dt/Datafilters.Expressions?label=&color=blue) | adds `ToExpression<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent `System.Linq.Expressions.Expression<Func<T, bool>>` instance.                                                           |
 | [![Nuget](https://img.shields.io/nuget/v/Datafilters.Queries?label=DataFilters.Queries&color=blue)](https://www.nuget.org/packages/DataFilters.Queries)             | ![DataFilters.Queries download count](https://img.shields.io/nuget/dt/Datafilters.Queries?label=&color=blue)         | adds `ToWhere<T>()` extension method on top of [IFilter][class-ifilter] instance to convert it to an equivalent [`IWhereClause`](https://github.com/candoumbe/Queries/blob/develop/src/Queries.Core/Parts/Clauses/IWhereClause.cs) instance. |
+
+## Monorepo structure
+
+This repository is organised as a monorepo that hosts independent SDKs for multiple languages alongside the original C# library.
+
+```
+src/
+├── DataFilters/          # C# library (NuGet)
+├── python/               # Python SDK (PyPI)
+│   ├── datafilters/
+│   ├── tests/
+│   └── pyproject.toml
+└── typescript/           # TypeScript SDK (npm)
+    ├── src/
+    ├── test/
+    └── package.json
+```
+
+Each language has its own independent CI/CD pipelines triggered only when its files change:
+
+| Language   | Integration workflow             | Delivery workflow             |
+|------------|----------------------------------|-------------------------------|
+| C#         | `integration.yml`                | `delivery.yml`                |
+| Python     | `python-integration.yml`         | `python-delivery.yml`         |
+| TypeScript | `typescript-integration.yml`     | `typescript-delivery.yml`     |
+
+### Python SDK
+
+```bash
+# Install for development
+cd src/python
+pip install -e ".[dev]"
+
+# Run tests
+pytest tests/
+
+# Lint
+flake8 datafilters tests
+```
+
+### TypeScript SDK
+
+```bash
+# Install dependencies
+cd src/typescript
+npm ci
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Lint
+npm run lint
+```
 
 ## Getting started (Development)
 
