@@ -1,0 +1,48 @@
+{
+  "name": "DataFilters (Python)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/copilot-cli": {},
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "runArgs": [
+    "--userns=keep-id"
+  ],
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylance",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-python.vscode-pytest",
+        "editorconfig.editorconfig",
+        "GitHub.copilot",
+        "GitHub.vscode-pull-request-github",
+        "bierner.markdown-mermaid",
+        "DavidAnson.vscode-markdownlint"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "isort.args": ["--profile", "black"],
+        "flake8.args": ["--max-line-length=100"],
+        "dev.containers.dockerPath": "podman"
+      }
+    }
+  },
+  "postCreateCommand": "./.devcontainer/python/scripts/post-create.sh",
+  "postStartCommand": "./.devcontainer/python/scripts/post-start.sh",
+  "remoteUser": "vscode"
+}
