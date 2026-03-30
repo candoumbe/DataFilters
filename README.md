@@ -679,7 +679,13 @@ npm run lint
 
 ### Using Dev Container
 
-The repository includes a [Dev Container](https://containers.dev/) configuration that provides a ready-to-use development environment with all the required tools pre-installed.
+The repository includes three [Dev Container](https://containers.dev/) configurations — one per language — so you only start the toolchain you need.
+
+| Dev Container             | Base image                                    | Optimised for         |
+|---------------------------|-----------------------------------------------|-----------------------|
+| **DataFilters (C#)**      | `mcr.microsoft.com/devcontainers/dotnet:10.0` | C# / .NET SDK         |
+| **DataFilters (Python)**  | `mcr.microsoft.com/devcontainers/python:3.12` | Python 3.12 + pytest  |
+| **DataFilters (TypeScript)** | `mcr.microsoft.com/devcontainers/javascript-node:20` | Node 20 + Jest |
 
 1. Clone the repository:
 
@@ -694,11 +700,11 @@ The repository includes a [Dev Container](https://containers.dev/) configuration
    code .
    ```
 
-3. When prompted, click **"Reopen in Container"** (or run the command `Dev Containers: Reopen in Container` from the Command Palette).
+3. When prompted to select a Dev Container configuration, choose the one matching your language (or run **Dev Containers: Reopen in Container** from the Command Palette and pick from the list).
 
-   VS Code will build the container, install the .NET SDK and extensions, then restore the dotnet local tools and NuGet packages automatically.
+   VS Code will build the selected container, install the required SDK and extensions, and restore all dependencies automatically.
 
-> **Tip**: You can also open this repository directly in [GitHub Codespaces](https://github.com/codespaces) for a cloud-hosted development environment.
+> **Tip**: You can also open this repository directly in [GitHub Codespaces](https://github.com/codespaces) and select your preferred Dev Container configuration at startup.
 
 ### Local setup
 
