@@ -16,6 +16,8 @@ jobs:
   typescript:
     name: Node ${{ matrix.node-version }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:

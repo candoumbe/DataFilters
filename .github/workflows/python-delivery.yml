@@ -17,6 +17,8 @@ jobs:
   python-deploy:
     name: Build and publish Python package
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
