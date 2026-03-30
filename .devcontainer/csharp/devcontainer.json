@@ -1,5 +1,5 @@
 {
-  "name": "DataFilters",
+  "name": "DataFilters (C#)",
   "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
@@ -29,7 +29,7 @@
       }
     }
   },
-  "postCreateCommand": "./.devcontainer/scripts/post-create.sh",
-  "postStartCommand": "./.devcontainer/scripts/post-start.sh",
+  "postCreateCommand": "./.devcontainer/csharp/scripts/post-create.sh",
+  "postStartCommand": "./.devcontainer/csharp/scripts/post-start.sh",
   "remoteUser": "vscode"
 }

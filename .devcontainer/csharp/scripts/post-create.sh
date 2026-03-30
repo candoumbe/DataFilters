@@ -26,9 +26,9 @@ log_error() {
 }
 
 # Main configuration section
-log_info "=========================================="
-log_info "DataFilters DevContainer Post-Create Setup"
-log_info "=========================================="
+log_info "=============================================="
+log_info "DataFilters (C#) DevContainer Post-Create Setup"
+log_info "=============================================="
 
 # Update package manager
 log_info "Updating package manager..."
