@@ -1,0 +1,44 @@
+{
+  "name": "DataFilters (TypeScript)",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/copilot-cli": {}
+  },
+  "runArgs": [
+    "--userns=keep-id"
+  ],
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "Orta.vscode-jest",
+        "editorconfig.editorconfig",
+        "GitHub.copilot",
+        "GitHub.vscode-pull-request-github",
+        "bierner.markdown-mermaid",
+        "DavidAnson.vscode-markdownlint"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "eslint.workingDirectories": ["src/typescript"],
+        "jest.jestCommandLine": "npx jest",
+        "jest.rootPath": "src/typescript",
+        "dev.containers.dockerPath": "podman"
+      }
+    }
+  },
+  "postCreateCommand": "./.devcontainer/typescript/scripts/post-create.sh",
+  "postStartCommand": "./.devcontainer/typescript/scripts/post-start.sh",
+  "remoteUser": "vscode"
+}
