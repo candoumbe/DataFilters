@@ -6,17 +6,17 @@
  *   - `field=value*`      → StartsWithFilterExpression
  *   - `field=*value`      → EndsWithFilterExpression
  *   - `field=*value*`     → ContainsFilterExpression
- *   - `field=!value`      → NotFilterExpression(EqualsFilterExpression)
- *   - `field=[min,max]`   → AndFilterExpression(gte, lte)
+ *   - `field=!value`      → NotFilter(EqualsFilterExpression)
+ *   - `field=[min,max]`   → AndFilter(gte, lte)
  *   - `field=[min,]`      → GreaterThanOrEqualFilterExpression
  *   - `field=[,max]`      → LessThanOrEqualFilterExpression
- *   - `field=(min,max)`   → AndFilterExpression(gt, lt)
- *   - `expr1,expr2`       → AndFilterExpression of multiple criteria
- *   - `expr1|expr2`       → OrFilterExpression of multiple criteria
+ *   - `field=(min,max)`   → AndFilter(gt, lt)
+ *   - `expr1,expr2`       → AndFilter of multiple criteria
+ *   - `expr1|expr2`       → OrFilter of multiple criteria
  */
 
 import {
-  AndFilterExpression,
+  AndFilter,
   ContainsFilterExpression,
   EndsWithFilterExpression,
   EqualsFilterExpression,
@@ -25,8 +25,8 @@ import {
   IFilter,
   LessThanFilterExpression,
   LessThanOrEqualFilterExpression,
-  NotFilterExpression,
-  OrFilterExpression,
+  NotFilter,
+  OrFilter,
   StartsWithFilterExpression,
 } from './expressions';
 
@@ -61,7 +61,7 @@ function parseRange(field: string, value: string): IFilter {
     }
   }
 
-  const result: IFilter = filters.length === 1 ? filters[0] : new AndFilterExpression(filters);
+  const result: IFilter = filters.length === 1 ? filters[0] : new AndFilter(filters);
   return result;
 }
 
@@ -83,7 +83,7 @@ function parseValueExpression(field: string, value: string): IFilter {
     result = new EqualsFilterExpression(field, actualValue);
   }
 
-  return negated ? new NotFilterExpression(result) : result;
+  return negated ? new NotFilter(result) : result;
 }
 
 function parseSingle(expression: string): IFilter {
@@ -133,7 +133,7 @@ function parseAndExpression(expression: string): IFilter {
   const parts = splitAndParts(expression);
   const result: IFilter =
     parts.length > 1
-      ? new AndFilterExpression(parts.map((p) => parseSingle(p.trim())))
+      ? new AndFilter(parts.map((p) => parseSingle(p.trim())))
       : parseSingle(expression);
   return result;
 }
@@ -154,7 +154,7 @@ export function parse(expression: string): IFilter {
   const orParts = trimmed.split('|');
   const result: IFilter =
     orParts.length > 1
-      ? new OrFilterExpression(orParts.map((p) => parseAndExpression(p.trim())))
+      ? new OrFilter(orParts.map((p) => parseAndExpression(p.trim())))
       : parseAndExpression(trimmed);
   return result;
 }

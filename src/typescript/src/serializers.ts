@@ -3,7 +3,7 @@
  */
 
 import {
-  AndFilterExpression,
+  AndFilter,
   ContainsFilterExpression,
   EndsWithFilterExpression,
   EqualsFilterExpression,
@@ -12,8 +12,8 @@ import {
   IFilter,
   LessThanFilterExpression,
   LessThanOrEqualFilterExpression,
-  NotFilterExpression,
-  OrFilterExpression,
+  NotFilter,
+  OrFilter,
   StartsWithFilterExpression,
 } from './expressions';
 
@@ -53,11 +53,11 @@ export function fromDict(data: Record<string, unknown>): IFilter {
     const children = (data['filters'] as Record<string, unknown>[]).map(fromDict);
 
     if (logic === 'and') {
-      result = new AndFilterExpression(children);
+      result = new AndFilter(children);
     } else if (logic === 'or') {
-      result = new OrFilterExpression(children);
+      result = new OrFilter(children);
     } else if (logic === 'not') {
-      result = new NotFilterExpression(children[0]);
+      result = new NotFilter(children[0]);
     } else {
       throw new Error(`Unknown logic operator: '${logic}'`);
     }

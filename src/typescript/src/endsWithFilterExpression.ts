@@ -1,4 +1,4 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Matches records where a property ends with a specific string. */
 export class EndsWithFilterExpression implements IFilter {

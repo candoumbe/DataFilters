@@ -1,9 +1,9 @@
-import { AndFilterExpression, EqualsFilterExpression } from '../src/expressions';
+import { AndFilter, EqualsFilterExpression } from '../src/expressions';
 
-describe('AndFilterExpression', () => {
+describe('AndFilter', () => {
   it('should serialize with logic and nested filters', () => {
     // Arrange
-    const f = new AndFilterExpression([
+    const f = new AndFilter([
       new EqualsFilterExpression('a', 1),
       new EqualsFilterExpression('b', 2),
     ]);

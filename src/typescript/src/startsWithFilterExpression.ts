@@ -1,4 +1,4 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Matches records where a property starts with a specific string. */
 export class StartsWithFilterExpression implements IFilter {

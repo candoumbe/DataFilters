@@ -1,5 +1,5 @@
 import {
-  AndFilterExpression,
+  AndFilter,
   ContainsFilterExpression,
   EndsWithFilterExpression,
   EqualsFilterExpression,
@@ -7,8 +7,8 @@ import {
   GreaterThanOrEqualFilterExpression,
   LessThanFilterExpression,
   LessThanOrEqualFilterExpression,
-  NotFilterExpression,
-  OrFilterExpression,
+  NotFilter,
+  OrFilter,
   StartsWithFilterExpression,
 } from '../src/expressions';
 import { FilterBuilder } from '../src/builder';
@@ -60,8 +60,8 @@ describe('FilterBuilder - single conditions', () => {
 
   it('should build not filter', () => {
     const result = new FilterBuilder().where('deleted').not(true).build();
-    expect(result).toBeInstanceOf(NotFilterExpression);
-    expect((result as NotFilterExpression).filter).toBeInstanceOf(EqualsFilterExpression);
+    expect(result).toBeInstanceOf(NotFilter);
+    expect((result as NotFilter).filter).toBeInstanceOf(EqualsFilterExpression);
   });
 });
 
@@ -71,14 +71,14 @@ describe('FilterBuilder - multiple conditions', () => {
       .where('name').contains('bat')
       .andWhere('age').gte(18)
       .build();
-    expect(result).toBeInstanceOf(AndFilterExpression);
-    expect((result as AndFilterExpression).filters.length).toBe(2);
+    expect(result).toBeInstanceOf(AndFilter);
+    expect((result as AndFilter).filters.length).toBe(2);
   });
 
   it('should build OR filter', () => {
     const result = new FilterBuilder().where('status').or('active', 'pending').build();
-    expect(result).toBeInstanceOf(OrFilterExpression);
-    expect((result as OrFilterExpression).filters.length).toBe(2);
+    expect(result).toBeInstanceOf(OrFilter);
+    expect((result as OrFilter).filters.length).toBe(2);
   });
 });
 

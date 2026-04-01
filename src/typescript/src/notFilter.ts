@@ -1,7 +1,7 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Negates a filter expression. */
-export class NotFilterExpression implements IFilter {
+export class NotFilter implements IFilter {
   public constructor(public readonly filter: IFilter) {}
 
   public toDict(): Record<string, unknown> {

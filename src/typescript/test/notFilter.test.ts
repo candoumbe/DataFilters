@@ -1,9 +1,9 @@
-import { EqualsFilterExpression, NotFilterExpression } from '../src/expressions';
+import { EqualsFilterExpression, NotFilter } from '../src/expressions';
 
-describe('NotFilterExpression', () => {
+describe('NotFilter', () => {
   it('should serialize with logic not', () => {
     // Arrange
-    const f = new NotFilterExpression(new EqualsFilterExpression('deleted', true));
+    const f = new NotFilter(new EqualsFilterExpression('deleted', true));
 
     // Act
     const result = f.toDict();
@@ -18,7 +18,7 @@ describe('NotFilterExpression', () => {
     const inner = new EqualsFilterExpression('active', false);
 
     // Act
-    const f = new NotFilterExpression(inner);
+    const f = new NotFilter(inner);
 
     // Assert
     expect(f.filter).toBe(inner);

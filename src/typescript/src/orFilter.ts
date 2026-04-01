@@ -1,7 +1,7 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Combines multiple filters with a logical OR. */
-export class OrFilterExpression implements IFilter {
+export class OrFilter implements IFilter {
   public constructor(public readonly filters: IFilter[]) {}
 
   public toDict(): Record<string, unknown> {

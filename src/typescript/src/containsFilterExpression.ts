@@ -1,4 +1,4 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Matches records where a property contains a substring. */
 export class ContainsFilterExpression implements IFilter {

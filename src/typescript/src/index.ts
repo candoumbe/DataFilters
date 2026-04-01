@@ -15,9 +15,9 @@ export {
   GreaterThanOrEqualFilterExpression,
   LessThanFilterExpression,
   LessThanOrEqualFilterExpression,
-  AndFilterExpression,
-  OrFilterExpression,
-  NotFilterExpression,
+  AndFilter,
+  OrFilter,
+  NotFilter,
 } from './expressions';
 
 export { FilterBuilder, FieldBuilder } from './builder';

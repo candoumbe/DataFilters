@@ -1,5 +1,5 @@
 import {
-  AndFilterExpression,
+  AndFilter,
   ContainsFilterExpression,
   EndsWithFilterExpression,
   EqualsFilterExpression,
@@ -7,8 +7,8 @@ import {
   GreaterThanOrEqualFilterExpression,
   LessThanFilterExpression,
   LessThanOrEqualFilterExpression,
-  NotFilterExpression,
-  OrFilterExpression,
+  NotFilter,
+  OrFilter,
   StartsWithFilterExpression,
 } from '../src/expressions';
 import { parse } from '../src/parser';
@@ -80,8 +80,8 @@ describe('parse - negation', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(NotFilterExpression);
-    const inner = (result as NotFilterExpression).filter;
+    expect(result).toBeInstanceOf(NotFilter);
+    const inner = (result as NotFilter).filter;
     expect(inner).toBeInstanceOf(EqualsFilterExpression);
     expect((inner as EqualsFilterExpression).value).toBe('Batman');
   });
@@ -96,8 +96,8 @@ describe('parse - range', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(AndFilterExpression);
-    const f = result as AndFilterExpression;
+    expect(result).toBeInstanceOf(AndFilter);
+    const f = result as AndFilter;
     expect(f.filters[0]).toBeInstanceOf(GreaterThanOrEqualFilterExpression);
     expect(f.filters[1]).toBeInstanceOf(LessThanOrEqualFilterExpression);
   });
@@ -110,8 +110,8 @@ describe('parse - range', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(AndFilterExpression);
-    const f = result as AndFilterExpression;
+    expect(result).toBeInstanceOf(AndFilter);
+    const f = result as AndFilter;
     expect(f.filters[0]).toBeInstanceOf(GreaterThanFilterExpression);
     expect(f.filters[1]).toBeInstanceOf(LessThanFilterExpression);
   });
@@ -150,8 +150,8 @@ describe('parse - AND combination', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(AndFilterExpression);
-    expect((result as AndFilterExpression).filters.length).toBe(2);
+    expect(result).toBeInstanceOf(AndFilter);
+    expect((result as AndFilter).filters.length).toBe(2);
   });
 });
 
@@ -164,8 +164,8 @@ describe('parse - OR combination', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(OrFilterExpression);
-    expect((result as OrFilterExpression).filters.length).toBe(2);
+    expect(result).toBeInstanceOf(OrFilter);
+    expect((result as OrFilter).filters.length).toBe(2);
   });
 });
 
@@ -197,7 +197,7 @@ describe('parse - parameterized', () => {
     ['name=*bat*', ContainsFilterExpression],
     ['name=Bat*', StartsWithFilterExpression],
     ['name=*man', EndsWithFilterExpression],
-    ['name=!Batman', NotFilterExpression],
+    ['name=!Batman', NotFilter],
   ];
 
   test.each(cases)('parse("%s") should return expected type', (expression, expectedType) => {

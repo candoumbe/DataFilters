@@ -3,7 +3,7 @@
  */
 
 import {
-  AndFilterExpression,
+  AndFilter,
   ContainsFilterExpression,
   EndsWithFilterExpression,
   EqualsFilterExpression,
@@ -12,8 +12,8 @@ import {
   IFilter,
   LessThanFilterExpression,
   LessThanOrEqualFilterExpression,
-  NotFilterExpression,
-  OrFilterExpression,
+  NotFilter,
+  OrFilter,
   StartsWithFilterExpression,
 } from './expressions';
 
@@ -66,13 +66,13 @@ export class FieldBuilder {
 
   /** Add a not-equals condition. */
   public not(value: unknown): FilterBuilder {
-    return this.parent['add'](new NotFilterExpression(new EqualsFilterExpression(this.field, value)));
+    return this.parent['add'](new NotFilter(new EqualsFilterExpression(this.field, value)));
   }
 
   /** Add an OR condition matching any of the given values. */
   public or(...values: unknown[]): FilterBuilder {
     const orFilters: IFilter[] = values.map((v) => new EqualsFilterExpression(this.field, v));
-    return this.parent['add'](new OrFilterExpression(orFilters));
+    return this.parent['add'](new OrFilter(orFilters));
   }
 }
 
@@ -123,7 +123,7 @@ export class FilterBuilder {
     }
 
     const result: IFilter =
-      this.filters.length === 1 ? this.filters[0] : new AndFilterExpression(this.filters);
+      this.filters.length === 1 ? this.filters[0] : new AndFilter(this.filters);
     return result;
   }
 }

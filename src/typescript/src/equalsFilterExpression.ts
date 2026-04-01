@@ -1,4 +1,4 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Matches records where a property equals a specific value. */
 export class EqualsFilterExpression implements IFilter {

@@ -1,4 +1,4 @@
-import { IFilter } from './IFilter';
+import { IFilter } from './iFilter';
 
 /** Matches records where a property is greater than or equal to a value. */
 export class GreaterThanOrEqualFilterExpression implements IFilter {
