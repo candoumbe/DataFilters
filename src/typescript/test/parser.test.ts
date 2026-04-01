@@ -1,23 +1,29 @@
 import {
-  AndFilter,
-  ContainsFilter,
-  EndsWithFilter,
-  EqualsFilter,
-  GreaterThanFilter,
-  GreaterThanOrEqualFilter,
-  LessThanFilter,
-  LessThanOrEqualFilter,
-  NotFilter,
-  OrFilter,
-  StartsWithFilter,
+  AndFilterExpression,
+  ContainsFilterExpression,
+  EndsWithFilterExpression,
+  EqualsFilterExpression,
+  GreaterThanFilterExpression,
+  GreaterThanOrEqualFilterExpression,
+  LessThanFilterExpression,
+  LessThanOrEqualFilterExpression,
+  NotFilterExpression,
+  OrFilterExpression,
+  StartsWithFilterExpression,
 } from '../src/expressions';
 import { parse } from '../src/parser';
 
 describe('parse - equals', () => {
   it('should parse simple equals expression', () => {
-    const result = parse('name=Batman');
-    expect(result).toBeInstanceOf(EqualsFilter);
-    const f = result as EqualsFilter;
+    // Arrange
+    const expression = 'name=Batman';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(EqualsFilterExpression);
+    const f = result as EqualsFilterExpression;
     expect(f.field).toBe('name');
     expect(f.value).toBe('Batman');
   });
@@ -25,112 +31,180 @@ describe('parse - equals', () => {
 
 describe('parse - contains', () => {
   it('should parse contains expression', () => {
-    const result = parse('name=*bat*');
-    expect(result).toBeInstanceOf(ContainsFilter);
-    expect((result as ContainsFilter).value).toBe('bat');
+    // Arrange
+    const expression = 'name=*bat*';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(ContainsFilterExpression);
+    expect((result as ContainsFilterExpression).value).toBe('bat');
   });
 });
 
 describe('parse - startsWith', () => {
   it('should parse starts-with expression', () => {
-    const result = parse('name=Bat*');
-    expect(result).toBeInstanceOf(StartsWithFilter);
-    expect((result as StartsWithFilter).value).toBe('Bat');
+    // Arrange
+    const expression = 'name=Bat*';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(StartsWithFilterExpression);
+    expect((result as StartsWithFilterExpression).value).toBe('Bat');
   });
 });
 
 describe('parse - endsWith', () => {
   it('should parse ends-with expression', () => {
-    const result = parse('name=*man');
-    expect(result).toBeInstanceOf(EndsWithFilter);
-    expect((result as EndsWithFilter).value).toBe('man');
+    // Arrange
+    const expression = 'name=*man';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(EndsWithFilterExpression);
+    expect((result as EndsWithFilterExpression).value).toBe('man');
   });
 });
 
 describe('parse - negation', () => {
   it('should parse not-equals expression', () => {
-    const result = parse('name=!Batman');
-    expect(result).toBeInstanceOf(NotFilter);
-    const inner = (result as NotFilter).filter;
-    expect(inner).toBeInstanceOf(EqualsFilter);
-    expect((inner as EqualsFilter).value).toBe('Batman');
+    // Arrange
+    const expression = 'name=!Batman';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(NotFilterExpression);
+    const inner = (result as NotFilterExpression).filter;
+    expect(inner).toBeInstanceOf(EqualsFilterExpression);
+    expect((inner as EqualsFilterExpression).value).toBe('Batman');
   });
 });
 
 describe('parse - range', () => {
   it('should parse closed range [min,max]', () => {
-    const result = parse('age=[18,65]');
-    expect(result).toBeInstanceOf(AndFilter);
-    const f = result as AndFilter;
-    expect(f.filters[0]).toBeInstanceOf(GreaterThanOrEqualFilter);
-    expect(f.filters[1]).toBeInstanceOf(LessThanOrEqualFilter);
+    // Arrange
+    const expression = 'age=[18,65]';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(AndFilterExpression);
+    const f = result as AndFilterExpression;
+    expect(f.filters[0]).toBeInstanceOf(GreaterThanOrEqualFilterExpression);
+    expect(f.filters[1]).toBeInstanceOf(LessThanOrEqualFilterExpression);
   });
 
   it('should parse open range (min,max)', () => {
-    const result = parse('age=(18,65)');
-    expect(result).toBeInstanceOf(AndFilter);
-    const f = result as AndFilter;
-    expect(f.filters[0]).toBeInstanceOf(GreaterThanFilter);
-    expect(f.filters[1]).toBeInstanceOf(LessThanFilter);
+    // Arrange
+    const expression = 'age=(18,65)';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(AndFilterExpression);
+    const f = result as AndFilterExpression;
+    expect(f.filters[0]).toBeInstanceOf(GreaterThanFilterExpression);
+    expect(f.filters[1]).toBeInstanceOf(LessThanFilterExpression);
   });
 
   it('should parse half-open range [min,]', () => {
-    const result = parse('age=[18,]');
-    expect(result).toBeInstanceOf(GreaterThanOrEqualFilter);
-    expect((result as GreaterThanOrEqualFilter).value).toBe('18');
+    // Arrange
+    const expression = 'age=[18,]';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(GreaterThanOrEqualFilterExpression);
+    expect((result as GreaterThanOrEqualFilterExpression).value).toBe('18');
   });
 
   it('should parse half-open range [,max]', () => {
-    const result = parse('age=[,65]');
-    expect(result).toBeInstanceOf(LessThanOrEqualFilter);
-    expect((result as LessThanOrEqualFilter).value).toBe('65');
+    // Arrange
+    const expression = 'age=[,65]';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(LessThanOrEqualFilterExpression);
+    expect((result as LessThanOrEqualFilterExpression).value).toBe('65');
   });
 });
 
 describe('parse - AND combination', () => {
   it('should parse comma-separated expressions as AND', () => {
-    const result = parse('name=*bat*,age=[18,]');
-    expect(result).toBeInstanceOf(AndFilter);
-    expect((result as AndFilter).filters.length).toBe(2);
+    // Arrange
+    const expression = 'name=*bat*,age=[18,]';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(AndFilterExpression);
+    expect((result as AndFilterExpression).filters.length).toBe(2);
   });
 });
 
 describe('parse - OR combination', () => {
   it('should parse pipe-separated expressions as OR', () => {
-    const result = parse('status=active|status=pending');
-    expect(result).toBeInstanceOf(OrFilter);
-    expect((result as OrFilter).filters.length).toBe(2);
+    // Arrange
+    const expression = 'status=active|status=pending';
+
+    // Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(OrFilterExpression);
+    expect((result as OrFilterExpression).filters.length).toBe(2);
   });
 });
 
 describe('parse - errors', () => {
   it('should throw on empty expression', () => {
+    // Arrange / Act / Assert
     expect(() => parse('')).toThrow();
   });
 
   it('should throw on whitespace-only expression', () => {
+    // Arrange / Act / Assert
     expect(() => parse('   ')).toThrow();
   });
 
   it('should throw on missing field', () => {
+    // Arrange / Act / Assert
     expect(() => parse('=value')).toThrow();
   });
 
   it('should throw on missing equals sign', () => {
+    // Arrange / Act / Assert
     expect(() => parse('noequals')).toThrow();
   });
 });
 
 describe('parse - parameterized', () => {
   const cases: [string, unknown][] = [
-    ['name=Batman', EqualsFilter],
-    ['name=*bat*', ContainsFilter],
-    ['name=Bat*', StartsWithFilter],
-    ['name=*man', EndsWithFilter],
-    ['name=!Batman', NotFilter],
+    ['name=Batman', EqualsFilterExpression],
+    ['name=*bat*', ContainsFilterExpression],
+    ['name=Bat*', StartsWithFilterExpression],
+    ['name=*man', EndsWithFilterExpression],
+    ['name=!Batman', NotFilterExpression],
   ];
 
   test.each(cases)('parse("%s") should return expected type', (expression, expectedType) => {
-    expect(parse(expression)).toBeInstanceOf(expectedType as unknown as new () => unknown);
+    // Arrange / Act
+    const result = parse(expression);
+
+    // Assert
+    expect(result).toBeInstanceOf(expectedType as unknown as new () => unknown);
   });
 });

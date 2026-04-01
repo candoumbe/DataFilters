@@ -2,32 +2,32 @@
  * Parser for DataFilters query syntax strings.
  *
  * Supported syntax:
- *   - `field=value`       → EqualsFilter
- *   - `field=value*`      → StartsWithFilter
- *   - `field=*value`      → EndsWithFilter
- *   - `field=*value*`     → ContainsFilter
- *   - `field=!value`      → NotFilter(EqualsFilter)
- *   - `field=[min,max]`   → AndFilter(gte, lte)
- *   - `field=[min,]`      → GreaterThanOrEqualFilter
- *   - `field=[,max]`      → LessThanOrEqualFilter
- *   - `field=(min,max)`   → AndFilter(gt, lt)
- *   - `expr1,expr2`       → AndFilter of multiple criteria
- *   - `expr1|expr2`       → OrFilter of multiple criteria
+ *   - `field=value`       → EqualsFilterExpression
+ *   - `field=value*`      → StartsWithFilterExpression
+ *   - `field=*value`      → EndsWithFilterExpression
+ *   - `field=*value*`     → ContainsFilterExpression
+ *   - `field=!value`      → NotFilterExpression(EqualsFilterExpression)
+ *   - `field=[min,max]`   → AndFilterExpression(gte, lte)
+ *   - `field=[min,]`      → GreaterThanOrEqualFilterExpression
+ *   - `field=[,max]`      → LessThanOrEqualFilterExpression
+ *   - `field=(min,max)`   → AndFilterExpression(gt, lt)
+ *   - `expr1,expr2`       → AndFilterExpression of multiple criteria
+ *   - `expr1|expr2`       → OrFilterExpression of multiple criteria
  */
 
 import {
-  AndFilter,
-  ContainsFilter,
-  EndsWithFilter,
-  EqualsFilter,
-  GreaterThanFilter,
-  GreaterThanOrEqualFilter,
+  AndFilterExpression,
+  ContainsFilterExpression,
+  EndsWithFilterExpression,
+  EqualsFilterExpression,
+  GreaterThanFilterExpression,
+  GreaterThanOrEqualFilterExpression,
   IFilter,
-  LessThanFilter,
-  LessThanOrEqualFilter,
-  NotFilter,
-  OrFilter,
-  StartsWithFilter,
+  LessThanFilterExpression,
+  LessThanOrEqualFilterExpression,
+  NotFilterExpression,
+  OrFilterExpression,
+  StartsWithFilterExpression,
 } from './expressions';
 
 const RANGE_PATTERN = /^(?<open>[[(])(?<min>[^,]*),(?<max>[^)\]]*)?(?<close>[)\]])$/;
@@ -47,25 +47,22 @@ function parseRange(field: string, value: string): IFilter {
 
   if (minVal !== null && minVal !== '') {
     if (openBracket === '[') {
-      filters.push(new GreaterThanOrEqualFilter(field, minVal));
+      filters.push(new GreaterThanOrEqualFilterExpression(field, minVal));
     } else {
-      filters.push(new GreaterThanFilter(field, minVal));
+      filters.push(new GreaterThanFilterExpression(field, minVal));
     }
   }
 
   if (maxVal !== null && maxVal !== '') {
     if (closeBracket === ']') {
-      filters.push(new LessThanOrEqualFilter(field, maxVal));
+      filters.push(new LessThanOrEqualFilterExpression(field, maxVal));
     } else {
-      filters.push(new LessThanFilter(field, maxVal));
+      filters.push(new LessThanFilterExpression(field, maxVal));
     }
   }
 
-  if (filters.length === 1) {
-    return filters[0];
-  }
-
-  return new AndFilter(filters);
+  const result: IFilter = filters.length === 1 ? filters[0] : new AndFilterExpression(filters);
+  return result;
 }
 
 function parseValueExpression(field: string, value: string): IFilter {
@@ -77,16 +74,16 @@ function parseValueExpression(field: string, value: string): IFilter {
   if (RANGE_PATTERN.test(actualValue)) {
     result = parseRange(field, actualValue);
   } else if (actualValue.startsWith('*') && actualValue.endsWith('*') && actualValue.length > 1) {
-    result = new ContainsFilter(field, actualValue.slice(1, -1));
+    result = new ContainsFilterExpression(field, actualValue.slice(1, -1));
   } else if (actualValue.startsWith('*')) {
-    result = new EndsWithFilter(field, actualValue.slice(1));
+    result = new EndsWithFilterExpression(field, actualValue.slice(1));
   } else if (actualValue.endsWith('*')) {
-    result = new StartsWithFilter(field, actualValue.slice(0, -1));
+    result = new StartsWithFilterExpression(field, actualValue.slice(0, -1));
   } else {
-    result = new EqualsFilter(field, actualValue);
+    result = new EqualsFilterExpression(field, actualValue);
   }
 
-  return negated ? new NotFilter(result) : result;
+  return negated ? new NotFilterExpression(result) : result;
 }
 
 function parseSingle(expression: string): IFilter {
@@ -134,11 +131,11 @@ function splitAndParts(expression: string): string[] {
 
 function parseAndExpression(expression: string): IFilter {
   const parts = splitAndParts(expression);
-  if (parts.length > 1) {
-    return new AndFilter(parts.map((p) => parseSingle(p.trim())));
-  }
-
-  return parseSingle(expression);
+  const result: IFilter =
+    parts.length > 1
+      ? new AndFilterExpression(parts.map((p) => parseSingle(p.trim())))
+      : parseSingle(expression);
+  return result;
 }
 
 /**
@@ -155,10 +152,9 @@ export function parse(expression: string): IFilter {
 
   const trimmed = expression.trim();
   const orParts = trimmed.split('|');
-
-  if (orParts.length > 1) {
-    return new OrFilter(orParts.map((p) => parseAndExpression(p.trim())));
-  }
-
-  return parseAndExpression(trimmed);
+  const result: IFilter =
+    orParts.length > 1
+      ? new OrFilterExpression(orParts.map((p) => parseAndExpression(p.trim())))
+      : parseAndExpression(trimmed);
+  return result;
 }

@@ -3,76 +3,76 @@
  */
 
 import {
-  AndFilter,
-  ContainsFilter,
-  EndsWithFilter,
-  EqualsFilter,
-  GreaterThanFilter,
-  GreaterThanOrEqualFilter,
+  AndFilterExpression,
+  ContainsFilterExpression,
+  EndsWithFilterExpression,
+  EqualsFilterExpression,
+  GreaterThanFilterExpression,
+  GreaterThanOrEqualFilterExpression,
   IFilter,
-  LessThanFilter,
-  LessThanOrEqualFilter,
-  NotFilter,
-  OrFilter,
-  StartsWithFilter,
+  LessThanFilterExpression,
+  LessThanOrEqualFilterExpression,
+  NotFilterExpression,
+  OrFilterExpression,
+  StartsWithFilterExpression,
 } from './expressions';
 
 /** Internal helper that provides filter-condition methods for a single field. */
 export class FieldBuilder {
-  constructor(
+  public constructor(
     private readonly parent: FilterBuilder,
     private readonly field: string,
   ) {}
 
   /** Add an equals condition. */
-  eq(value: unknown): FilterBuilder {
-    return this.parent['add'](new EqualsFilter(this.field, value));
+  public eq(value: unknown): FilterBuilder {
+    return this.parent['add'](new EqualsFilterExpression(this.field, value));
   }
 
   /** Add a contains condition. */
-  contains(value: string): FilterBuilder {
-    return this.parent['add'](new ContainsFilter(this.field, value));
+  public contains(value: string): FilterBuilder {
+    return this.parent['add'](new ContainsFilterExpression(this.field, value));
   }
 
   /** Add a starts-with condition. */
-  startsWith(value: string): FilterBuilder {
-    return this.parent['add'](new StartsWithFilter(this.field, value));
+  public startsWith(value: string): FilterBuilder {
+    return this.parent['add'](new StartsWithFilterExpression(this.field, value));
   }
 
   /** Add an ends-with condition. */
-  endsWith(value: string): FilterBuilder {
-    return this.parent['add'](new EndsWithFilter(this.field, value));
+  public endsWith(value: string): FilterBuilder {
+    return this.parent['add'](new EndsWithFilterExpression(this.field, value));
   }
 
   /** Add a greater-than condition. */
-  gt(value: unknown): FilterBuilder {
-    return this.parent['add'](new GreaterThanFilter(this.field, value));
+  public gt(value: unknown): FilterBuilder {
+    return this.parent['add'](new GreaterThanFilterExpression(this.field, value));
   }
 
   /** Add a greater-than-or-equal condition. */
-  gte(value: unknown): FilterBuilder {
-    return this.parent['add'](new GreaterThanOrEqualFilter(this.field, value));
+  public gte(value: unknown): FilterBuilder {
+    return this.parent['add'](new GreaterThanOrEqualFilterExpression(this.field, value));
   }
 
   /** Add a less-than condition. */
-  lt(value: unknown): FilterBuilder {
-    return this.parent['add'](new LessThanFilter(this.field, value));
+  public lt(value: unknown): FilterBuilder {
+    return this.parent['add'](new LessThanFilterExpression(this.field, value));
   }
 
   /** Add a less-than-or-equal condition. */
-  lte(value: unknown): FilterBuilder {
-    return this.parent['add'](new LessThanOrEqualFilter(this.field, value));
+  public lte(value: unknown): FilterBuilder {
+    return this.parent['add'](new LessThanOrEqualFilterExpression(this.field, value));
   }
 
   /** Add a not-equals condition. */
-  not(value: unknown): FilterBuilder {
-    return this.parent['add'](new NotFilter(new EqualsFilter(this.field, value)));
+  public not(value: unknown): FilterBuilder {
+    return this.parent['add'](new NotFilterExpression(new EqualsFilterExpression(this.field, value)));
   }
 
   /** Add an OR condition matching any of the given values. */
-  or(...values: unknown[]): FilterBuilder {
-    const orFilters: IFilter[] = values.map((v) => new EqualsFilter(this.field, v));
-    return this.parent['add'](new OrFilter(orFilters));
+  public or(...values: unknown[]): FilterBuilder {
+    const orFilters: IFilter[] = values.map((v) => new EqualsFilterExpression(this.field, v));
+    return this.parent['add'](new OrFilterExpression(orFilters));
   }
 }
 
@@ -99,7 +99,7 @@ export class FilterBuilder {
    * Start a filter condition for the given field.
    * @param field - The name of the field to filter on.
    */
-  where(field: string): FieldBuilder {
+  public where(field: string): FieldBuilder {
     return new FieldBuilder(this, field);
   }
 
@@ -107,25 +107,23 @@ export class FilterBuilder {
    * Chain an additional AND condition on a new field.
    * @param field - The name of the field for the next condition.
    */
-  andWhere(field: string): FieldBuilder {
+  public andWhere(field: string): FieldBuilder {
     return new FieldBuilder(this, field);
   }
 
   /**
    * Construct and return the final IFilter.
    *
-   * @returns A single IFilter or an AndFilter combining all accumulated conditions.
+   * @returns A single IFilter or an AndFilterExpression combining all accumulated conditions.
    * @throws {Error} If no conditions have been added.
    */
-  build(): IFilter {
+  public build(): IFilter {
     if (this.filters.length === 0) {
       throw new Error('No filter conditions have been added.');
     }
 
-    if (this.filters.length === 1) {
-      return this.filters[0];
-    }
-
-    return new AndFilter(this.filters);
+    const result: IFilter =
+      this.filters.length === 1 ? this.filters[0] : new AndFilterExpression(this.filters);
+    return result;
   }
 }

@@ -7,17 +7,17 @@
 
 export {
   IFilter,
-  EqualsFilter,
-  ContainsFilter,
-  StartsWithFilter,
-  EndsWithFilter,
-  GreaterThanFilter,
-  GreaterThanOrEqualFilter,
-  LessThanFilter,
-  LessThanOrEqualFilter,
-  AndFilter,
-  OrFilter,
-  NotFilter,
+  EqualsFilterExpression,
+  ContainsFilterExpression,
+  StartsWithFilterExpression,
+  EndsWithFilterExpression,
+  GreaterThanFilterExpression,
+  GreaterThanOrEqualFilterExpression,
+  LessThanFilterExpression,
+  LessThanOrEqualFilterExpression,
+  AndFilterExpression,
+  OrFilterExpression,
+  NotFilterExpression,
 } from './expressions';
 
 export { FilterBuilder, FieldBuilder } from './builder';
