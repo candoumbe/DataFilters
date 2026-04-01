@@ -1,11 +1,11 @@
-import { EqualsFilterExpression, OrFilter } from '../src/expressions';
+import { EqualsFilter, OrFilter } from '../src/expressions';
 
 describe('OrFilter', () => {
   it('should serialize with logic and nested filters', () => {
     // Arrange
     const f = new OrFilter([
-      new EqualsFilterExpression('status', 'active'),
-      new EqualsFilterExpression('status', 'pending'),
+      new EqualsFilter('status', 'active'),
+      new EqualsFilter('status', 'pending'),
     ]);
 
     // Act

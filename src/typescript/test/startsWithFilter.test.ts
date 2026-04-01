@@ -1,9 +1,9 @@
-import { StartsWithFilterExpression } from '../src/expressions';
+import { StartsWithFilter } from '../src/expressions';
 
-describe('StartsWithFilterExpression', () => {
+describe('StartsWithFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new StartsWithFilterExpression('name', 'Bat');
+    const f = new StartsWithFilter('name', 'Bat');
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('StartsWithFilterExpression', () => {
 
   it('op field should be startswith', () => {
     // Arrange / Act
-    const dict = new StartsWithFilterExpression('f', 'v').toDict();
+    const dict = new StartsWithFilter('f', 'v').toDict();
 
     // Assert
     expect(dict['op']).toBe('startswith');

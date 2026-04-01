@@ -4,17 +4,17 @@
 
 import {
   AndFilter,
-  ContainsFilterExpression,
-  EndsWithFilterExpression,
-  EqualsFilterExpression,
-  GreaterThanFilterExpression,
-  GreaterThanOrEqualFilterExpression,
+  ContainsFilter,
+  EndsWithFilter,
+  EqualsFilter,
+  GreaterThanFilter,
+  GreaterThanOrEqualFilter,
   IFilter,
-  LessThanFilterExpression,
-  LessThanOrEqualFilterExpression,
+  LessThanFilter,
+  LessThanOrEqualFilter,
   NotFilter,
   OrFilter,
-  StartsWithFilterExpression,
+  StartsWithFilter,
 } from './expressions';
 
 /** Internal helper that provides filter-condition methods for a single field. */
@@ -26,52 +26,52 @@ export class FieldBuilder {
 
   /** Add an equals condition. */
   public eq(value: unknown): FilterBuilder {
-    return this.parent['add'](new EqualsFilterExpression(this.field, value));
+    return this.parent['add'](new EqualsFilter(this.field, value));
   }
 
   /** Add a contains condition. */
   public contains(value: string): FilterBuilder {
-    return this.parent['add'](new ContainsFilterExpression(this.field, value));
+    return this.parent['add'](new ContainsFilter(this.field, value));
   }
 
   /** Add a starts-with condition. */
   public startsWith(value: string): FilterBuilder {
-    return this.parent['add'](new StartsWithFilterExpression(this.field, value));
+    return this.parent['add'](new StartsWithFilter(this.field, value));
   }
 
   /** Add an ends-with condition. */
   public endsWith(value: string): FilterBuilder {
-    return this.parent['add'](new EndsWithFilterExpression(this.field, value));
+    return this.parent['add'](new EndsWithFilter(this.field, value));
   }
 
   /** Add a greater-than condition. */
   public gt(value: unknown): FilterBuilder {
-    return this.parent['add'](new GreaterThanFilterExpression(this.field, value));
+    return this.parent['add'](new GreaterThanFilter(this.field, value));
   }
 
   /** Add a greater-than-or-equal condition. */
   public gte(value: unknown): FilterBuilder {
-    return this.parent['add'](new GreaterThanOrEqualFilterExpression(this.field, value));
+    return this.parent['add'](new GreaterThanOrEqualFilter(this.field, value));
   }
 
   /** Add a less-than condition. */
   public lt(value: unknown): FilterBuilder {
-    return this.parent['add'](new LessThanFilterExpression(this.field, value));
+    return this.parent['add'](new LessThanFilter(this.field, value));
   }
 
   /** Add a less-than-or-equal condition. */
   public lte(value: unknown): FilterBuilder {
-    return this.parent['add'](new LessThanOrEqualFilterExpression(this.field, value));
+    return this.parent['add'](new LessThanOrEqualFilter(this.field, value));
   }
 
   /** Add a not-equals condition. */
   public not(value: unknown): FilterBuilder {
-    return this.parent['add'](new NotFilter(new EqualsFilterExpression(this.field, value)));
+    return this.parent['add'](new NotFilter(new EqualsFilter(this.field, value)));
   }
 
   /** Add an OR condition matching any of the given values. */
   public or(...values: unknown[]): FilterBuilder {
-    const orFilters: IFilter[] = values.map((v) => new EqualsFilterExpression(this.field, v));
+    const orFilters: IFilter[] = values.map((v) => new EqualsFilter(this.field, v));
     return this.parent['add'](new OrFilter(orFilters));
   }
 }

@@ -1,9 +1,9 @@
-import { EqualsFilterExpression } from '../src/expressions';
+import { EqualsFilter } from '../src/expressions';
 
-describe('EqualsFilterExpression', () => {
+describe('EqualsFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new EqualsFilterExpression('name', 'Batman');
+    const f = new EqualsFilter('name', 'Batman');
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('EqualsFilterExpression', () => {
 
   it('should store field and value', () => {
     // Arrange / Act
-    const f = new EqualsFilterExpression('age', 30);
+    const f = new EqualsFilter('age', 30);
 
     // Assert
     expect(f.field).toBe('age');
@@ -23,7 +23,7 @@ describe('EqualsFilterExpression', () => {
 
   it('op field should be eq', () => {
     // Arrange / Act
-    const dict = new EqualsFilterExpression('f', 'v').toDict();
+    const dict = new EqualsFilter('f', 'v').toDict();
 
     // Assert
     expect(dict['op']).toBe('eq');

@@ -1,9 +1,9 @@
-import { GreaterThanFilterExpression } from '../src/expressions';
+import { GreaterThanFilter } from '../src/expressions';
 
-describe('GreaterThanFilterExpression', () => {
+describe('GreaterThanFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new GreaterThanFilterExpression('age', 18);
+    const f = new GreaterThanFilter('age', 18);
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('GreaterThanFilterExpression', () => {
 
   it('op field should be gt', () => {
     // Arrange / Act
-    const dict = new GreaterThanFilterExpression('f', 0).toDict();
+    const dict = new GreaterThanFilter('f', 0).toDict();
 
     // Assert
     expect(dict['op']).toBe('gt');

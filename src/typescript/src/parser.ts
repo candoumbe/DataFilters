@@ -2,14 +2,14 @@
  * Parser for DataFilters query syntax strings.
  *
  * Supported syntax:
- *   - `field=value`       → EqualsFilterExpression
- *   - `field=value*`      → StartsWithFilterExpression
- *   - `field=*value`      → EndsWithFilterExpression
- *   - `field=*value*`     → ContainsFilterExpression
- *   - `field=!value`      → NotFilter(EqualsFilterExpression)
+ *   - `field=value`       → EqualsFilter
+ *   - `field=value*`      → StartsWithFilter
+ *   - `field=*value`      → EndsWithFilter
+ *   - `field=*value*`     → ContainsFilter
+ *   - `field=!value`      → NotFilter(EqualsFilter)
  *   - `field=[min,max]`   → AndFilter(gte, lte)
- *   - `field=[min,]`      → GreaterThanOrEqualFilterExpression
- *   - `field=[,max]`      → LessThanOrEqualFilterExpression
+ *   - `field=[min,]`      → GreaterThanOrEqualFilter
+ *   - `field=[,max]`      → LessThanOrEqualFilter
  *   - `field=(min,max)`   → AndFilter(gt, lt)
  *   - `expr1,expr2`       → AndFilter of multiple criteria
  *   - `expr1|expr2`       → OrFilter of multiple criteria
@@ -17,17 +17,17 @@
 
 import {
   AndFilter,
-  ContainsFilterExpression,
-  EndsWithFilterExpression,
-  EqualsFilterExpression,
-  GreaterThanFilterExpression,
-  GreaterThanOrEqualFilterExpression,
+  ContainsFilter,
+  EndsWithFilter,
+  EqualsFilter,
+  GreaterThanFilter,
+  GreaterThanOrEqualFilter,
   IFilter,
-  LessThanFilterExpression,
-  LessThanOrEqualFilterExpression,
+  LessThanFilter,
+  LessThanOrEqualFilter,
   NotFilter,
   OrFilter,
-  StartsWithFilterExpression,
+  StartsWithFilter,
 } from './expressions';
 
 const RANGE_PATTERN = /^(?<open>[[(])(?<min>[^,]*),(?<max>[^)\]]*)?(?<close>[)\]])$/;
@@ -47,17 +47,17 @@ function parseRange(field: string, value: string): IFilter {
 
   if (minVal !== null && minVal !== '') {
     if (openBracket === '[') {
-      filters.push(new GreaterThanOrEqualFilterExpression(field, minVal));
+      filters.push(new GreaterThanOrEqualFilter(field, minVal));
     } else {
-      filters.push(new GreaterThanFilterExpression(field, minVal));
+      filters.push(new GreaterThanFilter(field, minVal));
     }
   }
 
   if (maxVal !== null && maxVal !== '') {
     if (closeBracket === ']') {
-      filters.push(new LessThanOrEqualFilterExpression(field, maxVal));
+      filters.push(new LessThanOrEqualFilter(field, maxVal));
     } else {
-      filters.push(new LessThanFilterExpression(field, maxVal));
+      filters.push(new LessThanFilter(field, maxVal));
     }
   }
 
@@ -74,13 +74,13 @@ function parseValueExpression(field: string, value: string): IFilter {
   if (RANGE_PATTERN.test(actualValue)) {
     result = parseRange(field, actualValue);
   } else if (actualValue.startsWith('*') && actualValue.endsWith('*') && actualValue.length > 1) {
-    result = new ContainsFilterExpression(field, actualValue.slice(1, -1));
+    result = new ContainsFilter(field, actualValue.slice(1, -1));
   } else if (actualValue.startsWith('*')) {
-    result = new EndsWithFilterExpression(field, actualValue.slice(1));
+    result = new EndsWithFilter(field, actualValue.slice(1));
   } else if (actualValue.endsWith('*')) {
-    result = new StartsWithFilterExpression(field, actualValue.slice(0, -1));
+    result = new StartsWithFilter(field, actualValue.slice(0, -1));
   } else {
-    result = new EqualsFilterExpression(field, actualValue);
+    result = new EqualsFilter(field, actualValue);
   }
 
   return negated ? new NotFilter(result) : result;

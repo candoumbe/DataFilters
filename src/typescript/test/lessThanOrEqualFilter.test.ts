@@ -1,9 +1,9 @@
-import { LessThanOrEqualFilterExpression } from '../src/expressions';
+import { LessThanOrEqualFilter } from '../src/expressions';
 
-describe('LessThanOrEqualFilterExpression', () => {
+describe('LessThanOrEqualFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new LessThanOrEqualFilterExpression('age', 65);
+    const f = new LessThanOrEqualFilter('age', 65);
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('LessThanOrEqualFilterExpression', () => {
 
   it('op field should be lte', () => {
     // Arrange / Act
-    const dict = new LessThanOrEqualFilterExpression('f', 0).toDict();
+    const dict = new LessThanOrEqualFilter('f', 0).toDict();
 
     // Assert
     expect(dict['op']).toBe('lte');

@@ -1,9 +1,9 @@
-import { EndsWithFilterExpression } from '../src/expressions';
+import { EndsWithFilter } from '../src/expressions';
 
-describe('EndsWithFilterExpression', () => {
+describe('EndsWithFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new EndsWithFilterExpression('name', 'man');
+    const f = new EndsWithFilter('name', 'man');
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('EndsWithFilterExpression', () => {
 
   it('op field should be endswith', () => {
     // Arrange / Act
-    const dict = new EndsWithFilterExpression('f', 'v').toDict();
+    const dict = new EndsWithFilter('f', 'v').toDict();
 
     // Assert
     expect(dict['op']).toBe('endswith');

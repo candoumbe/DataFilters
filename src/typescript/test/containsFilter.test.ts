@@ -1,9 +1,9 @@
-import { ContainsFilterExpression } from '../src/expressions';
+import { ContainsFilter } from '../src/expressions';
 
-describe('ContainsFilterExpression', () => {
+describe('ContainsFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new ContainsFilterExpression('name', 'bat');
+    const f = new ContainsFilter('name', 'bat');
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('ContainsFilterExpression', () => {
 
   it('op field should be contains', () => {
     // Arrange / Act
-    const dict = new ContainsFilterExpression('f', 'v').toDict();
+    const dict = new ContainsFilter('f', 'v').toDict();
 
     // Assert
     expect(dict['op']).toBe('contains');

@@ -1,15 +1,15 @@
 import {
   AndFilter,
-  ContainsFilterExpression,
-  EndsWithFilterExpression,
-  EqualsFilterExpression,
-  GreaterThanFilterExpression,
-  GreaterThanOrEqualFilterExpression,
-  LessThanFilterExpression,
-  LessThanOrEqualFilterExpression,
+  ContainsFilter,
+  EndsWithFilter,
+  EqualsFilter,
+  GreaterThanFilter,
+  GreaterThanOrEqualFilter,
+  LessThanFilter,
+  LessThanOrEqualFilter,
   NotFilter,
   OrFilter,
-  StartsWithFilterExpression,
+  StartsWithFilter,
 } from '../src/expressions';
 import { parse } from '../src/parser';
 
@@ -22,8 +22,8 @@ describe('parse - equals', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(EqualsFilterExpression);
-    const f = result as EqualsFilterExpression;
+    expect(result).toBeInstanceOf(EqualsFilter);
+    const f = result as EqualsFilter;
     expect(f.field).toBe('name');
     expect(f.value).toBe('Batman');
   });
@@ -38,8 +38,8 @@ describe('parse - contains', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(ContainsFilterExpression);
-    expect((result as ContainsFilterExpression).value).toBe('bat');
+    expect(result).toBeInstanceOf(ContainsFilter);
+    expect((result as ContainsFilter).value).toBe('bat');
   });
 });
 
@@ -52,8 +52,8 @@ describe('parse - startsWith', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(StartsWithFilterExpression);
-    expect((result as StartsWithFilterExpression).value).toBe('Bat');
+    expect(result).toBeInstanceOf(StartsWithFilter);
+    expect((result as StartsWithFilter).value).toBe('Bat');
   });
 });
 
@@ -66,8 +66,8 @@ describe('parse - endsWith', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(EndsWithFilterExpression);
-    expect((result as EndsWithFilterExpression).value).toBe('man');
+    expect(result).toBeInstanceOf(EndsWithFilter);
+    expect((result as EndsWithFilter).value).toBe('man');
   });
 });
 
@@ -82,8 +82,8 @@ describe('parse - negation', () => {
     // Assert
     expect(result).toBeInstanceOf(NotFilter);
     const inner = (result as NotFilter).filter;
-    expect(inner).toBeInstanceOf(EqualsFilterExpression);
-    expect((inner as EqualsFilterExpression).value).toBe('Batman');
+    expect(inner).toBeInstanceOf(EqualsFilter);
+    expect((inner as EqualsFilter).value).toBe('Batman');
   });
 });
 
@@ -98,8 +98,8 @@ describe('parse - range', () => {
     // Assert
     expect(result).toBeInstanceOf(AndFilter);
     const f = result as AndFilter;
-    expect(f.filters[0]).toBeInstanceOf(GreaterThanOrEqualFilterExpression);
-    expect(f.filters[1]).toBeInstanceOf(LessThanOrEqualFilterExpression);
+    expect(f.filters[0]).toBeInstanceOf(GreaterThanOrEqualFilter);
+    expect(f.filters[1]).toBeInstanceOf(LessThanOrEqualFilter);
   });
 
   it('should parse open range (min,max)', () => {
@@ -112,8 +112,8 @@ describe('parse - range', () => {
     // Assert
     expect(result).toBeInstanceOf(AndFilter);
     const f = result as AndFilter;
-    expect(f.filters[0]).toBeInstanceOf(GreaterThanFilterExpression);
-    expect(f.filters[1]).toBeInstanceOf(LessThanFilterExpression);
+    expect(f.filters[0]).toBeInstanceOf(GreaterThanFilter);
+    expect(f.filters[1]).toBeInstanceOf(LessThanFilter);
   });
 
   it('should parse half-open range [min,]', () => {
@@ -124,8 +124,8 @@ describe('parse - range', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(GreaterThanOrEqualFilterExpression);
-    expect((result as GreaterThanOrEqualFilterExpression).value).toBe('18');
+    expect(result).toBeInstanceOf(GreaterThanOrEqualFilter);
+    expect((result as GreaterThanOrEqualFilter).value).toBe('18');
   });
 
   it('should parse half-open range [,max]', () => {
@@ -136,8 +136,8 @@ describe('parse - range', () => {
     const result = parse(expression);
 
     // Assert
-    expect(result).toBeInstanceOf(LessThanOrEqualFilterExpression);
-    expect((result as LessThanOrEqualFilterExpression).value).toBe('65');
+    expect(result).toBeInstanceOf(LessThanOrEqualFilter);
+    expect((result as LessThanOrEqualFilter).value).toBe('65');
   });
 });
 
@@ -193,10 +193,10 @@ describe('parse - errors', () => {
 
 describe('parse - parameterized', () => {
   const cases: [string, unknown][] = [
-    ['name=Batman', EqualsFilterExpression],
-    ['name=*bat*', ContainsFilterExpression],
-    ['name=Bat*', StartsWithFilterExpression],
-    ['name=*man', EndsWithFilterExpression],
+    ['name=Batman', EqualsFilter],
+    ['name=*bat*', ContainsFilter],
+    ['name=Bat*', StartsWithFilter],
+    ['name=*man', EndsWithFilter],
     ['name=!Batman', NotFilter],
   ];
 

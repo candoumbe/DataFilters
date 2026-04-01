@@ -1,9 +1,9 @@
-import { LessThanFilterExpression } from '../src/expressions';
+import { LessThanFilter } from '../src/expressions';
 
-describe('LessThanFilterExpression', () => {
+describe('LessThanFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new LessThanFilterExpression('age', 65);
+    const f = new LessThanFilter('age', 65);
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('LessThanFilterExpression', () => {
 
   it('op field should be lt', () => {
     // Arrange / Act
-    const dict = new LessThanFilterExpression('f', 0).toDict();
+    const dict = new LessThanFilter('f', 0).toDict();
 
     // Assert
     expect(dict['op']).toBe('lt');

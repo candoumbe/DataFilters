@@ -1,9 +1,9 @@
-import { GreaterThanOrEqualFilterExpression } from '../src/expressions';
+import { GreaterThanOrEqualFilter } from '../src/expressions';
 
-describe('GreaterThanOrEqualFilterExpression', () => {
+describe('GreaterThanOrEqualFilter', () => {
   it('should serialize to correct dict', () => {
     // Arrange
-    const f = new GreaterThanOrEqualFilterExpression('age', 18);
+    const f = new GreaterThanOrEqualFilter('age', 18);
 
     // Act
     const result = f.toDict();
@@ -14,7 +14,7 @@ describe('GreaterThanOrEqualFilterExpression', () => {
 
   it('op field should be gte', () => {
     // Arrange / Act
-    const dict = new GreaterThanOrEqualFilterExpression('f', 0).toDict();
+    const dict = new GreaterThanOrEqualFilter('f', 0).toDict();
 
     // Assert
     expect(dict['op']).toBe('gte');

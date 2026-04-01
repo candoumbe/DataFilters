@@ -4,14 +4,14 @@
  */
 
 export { IFilter } from './iFilter';
-export { EqualsFilterExpression } from './equalsFilterExpression';
-export { ContainsFilterExpression } from './containsFilterExpression';
-export { StartsWithFilterExpression } from './startsWithFilterExpression';
-export { EndsWithFilterExpression } from './endsWithFilterExpression';
-export { GreaterThanFilterExpression } from './greaterThanFilterExpression';
-export { GreaterThanOrEqualFilterExpression } from './greaterThanOrEqualFilterExpression';
-export { LessThanFilterExpression } from './lessThanFilterExpression';
-export { LessThanOrEqualFilterExpression } from './lessThanOrEqualFilterExpression';
+export { EqualsFilter } from './equalsFilter';
+export { ContainsFilter } from './containsFilter';
+export { StartsWithFilter } from './startsWithFilter';
+export { EndsWithFilter } from './endsWithFilter';
+export { GreaterThanFilter } from './greaterThanFilter';
+export { GreaterThanOrEqualFilter } from './greaterThanOrEqualFilter';
+export { LessThanFilter } from './lessThanFilter';
+export { LessThanOrEqualFilter } from './lessThanOrEqualFilter';
 export { AndFilter } from './andFilter';
 export { OrFilter } from './orFilter';
 export { NotFilter } from './notFilter';

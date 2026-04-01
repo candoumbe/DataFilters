@@ -1,7 +1,7 @@
 import { IFilter } from './iFilter';
 
 /** Matches records where a property equals a specific value. */
-export class EqualsFilterExpression implements IFilter {
+export class EqualsFilter implements IFilter {
   public constructor(public readonly field: string, public readonly value: unknown) {}
 
   public toDict(): Record<string, unknown> {

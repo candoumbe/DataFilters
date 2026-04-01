@@ -1,7 +1,7 @@
 import { IFilter } from './iFilter';
 
 /** Matches records where a property ends with a specific string. */
-export class EndsWithFilterExpression implements IFilter {
+export class EndsWithFilter implements IFilter {
   public constructor(public readonly field: string, public readonly value: string) {}
 
   public toDict(): Record<string, unknown> {
