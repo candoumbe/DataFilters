@@ -53,7 +53,6 @@ The public API SHOULD NOT be considered stable.
     - [Local setup](#local-setup)
     - [Build](#build)
 - [Monorepo structure](#monorepo-structure)
-    - [Python SDK](#python-sdk)
     - [TypeScript SDK](#typescript-sdk)
 
 The idea came to me when working on a set of REST APIs and trying to build `/search` endpoints.
@@ -620,10 +619,6 @@ This repository is organised as a monorepo that hosts independent SDKs for multi
 ```
 src/
 ├── DataFilters/          # C# library (NuGet)
-├── python/               # Python SDK (PyPI)
-│   ├── datafilters/
-│   ├── tests/
-│   └── pyproject.toml
 └── typescript/           # TypeScript SDK (npm)
     ├── src/
     ├── test/
@@ -635,22 +630,7 @@ Each language has its own independent CI/CD pipelines triggered only when its fi
 | Language   | Integration workflow             | Delivery workflow             |
 |------------|----------------------------------|-------------------------------|
 | C#         | `integration.yml`                | `delivery.yml`                |
-| Python     | `python-integration.yml`         | `python-delivery.yml`         |
 | TypeScript | `typescript-integration.yml`     | `typescript-delivery.yml`     |
-
-### Python SDK
-
-```bash
-# Install for development
-cd src/python
-pip install -e ".[dev]"
-
-# Run tests
-pytest tests/
-
-# Lint
-flake8 datafilters tests
-```
 
 ### TypeScript SDK
 
@@ -679,12 +659,11 @@ npm run lint
 
 ### Using Dev Container
 
-The repository includes three [Dev Container](https://containers.dev/) configurations — one per language — so you only start the toolchain you need.
+The repository includes two [Dev Container](https://containers.dev/) configurations — one per language — so you only start the toolchain you need.
 
 | Dev Container             | Base image                                    | Optimised for         |
 |---------------------------|-----------------------------------------------|-----------------------|
 | **DataFilters (C#)**      | `mcr.microsoft.com/devcontainers/dotnet:10.0` | C# / .NET SDK         |
-| **DataFilters (Python)**  | `mcr.microsoft.com/devcontainers/python:3.12` | Python 3.12 + pytest  |
 | **DataFilters (TypeScript)** | `mcr.microsoft.com/devcontainers/javascript-node:20` | Node 20 + Jest |
 
 1. Clone the repository:

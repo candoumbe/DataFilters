@@ -260,13 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-# Python SDK
-*.egg-info/
-.pytest_cache/
-.coverage
-src/python/dist/
-src/python/build/
-
 # TypeScript/Node SDK
 src/typescript/node_modules/
 src/typescript/dist/
