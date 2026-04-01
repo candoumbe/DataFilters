@@ -31,6 +31,9 @@ import {
 } from './expressions';
 
 const RANGE_PATTERN = /^(?<open>[[(])(?<min>[^,]*),(?<max>[^)\]]*)?(?<close>[)\]])$/;
+const WILDCARD_CHAR = '*';
+const NEGATION_CHAR = '!';
+const MIN_WILDCARD_LENGTH = 2;
 
 function parseRange(field: string, value: string): IFilter {
   const match = RANGE_PATTERN.exec(value);
@@ -40,12 +43,12 @@ function parseRange(field: string, value: string): IFilter {
 
   const openBracket = match.groups['open'];
   const closeBracket = match.groups['close'];
-  const minVal = match.groups['min'] || null;
-  const maxVal = match.groups['max'] || null;
+  const minVal = match.groups['min'];
+  const maxVal = match.groups['max'];
 
   const filters: IFilter[] = [];
 
-  if (minVal !== null && minVal !== '') {
+  if (minVal && minVal.trim() !== '') {
     if (openBracket === '[') {
       filters.push(new GreaterThanOrEqualFilter(field, minVal));
     } else {
@@ -53,7 +56,7 @@ function parseRange(field: string, value: string): IFilter {
     }
   }
 
-  if (maxVal !== null && maxVal !== '') {
+  if (maxVal && maxVal.trim() !== '') {
     if (closeBracket === ']') {
       filters.push(new LessThanOrEqualFilter(field, maxVal));
     } else {
@@ -61,23 +64,31 @@ function parseRange(field: string, value: string): IFilter {
     }
   }
 
+  if (filters.length === 0) {
+    throw new Error(`Range expression must have at least one bound: '${value}'`);
+  }
+
   const result: IFilter = filters.length === 1 ? filters[0] : new AndFilter(filters);
   return result;
 }
 
 function parseValueExpression(field: string, value: string): IFilter {
-  const negated = value.startsWith('!');
+  const negated = value.startsWith(NEGATION_CHAR);
   const actualValue = negated ? value.slice(1) : value;
 
   let result: IFilter;
 
   if (RANGE_PATTERN.test(actualValue)) {
     result = parseRange(field, actualValue);
-  } else if (actualValue.startsWith('*') && actualValue.endsWith('*') && actualValue.length > 1) {
+  } else if (
+    actualValue.startsWith(WILDCARD_CHAR) &&
+    actualValue.endsWith(WILDCARD_CHAR) &&
+    actualValue.length > MIN_WILDCARD_LENGTH
+  ) {
     result = new ContainsFilter(field, actualValue.slice(1, -1));
-  } else if (actualValue.startsWith('*')) {
+  } else if (actualValue.startsWith(WILDCARD_CHAR)) {
     result = new EndsWithFilter(field, actualValue.slice(1));
-  } else if (actualValue.endsWith('*')) {
+  } else if (actualValue.endsWith(WILDCARD_CHAR)) {
     result = new StartsWithFilter(field, actualValue.slice(0, -1));
   } else {
     result = new EqualsFilter(field, actualValue);

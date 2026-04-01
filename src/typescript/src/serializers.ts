@@ -49,27 +49,47 @@ export function fromDict(data: Record<string, unknown>): IFilter {
   let result: IFilter;
 
   if ('logic' in data) {
-    const logic = data['logic'] as string;
-    const children = (data['filters'] as Record<string, unknown>[]).map(fromDict);
+    const logic = data['logic'];
+    if (typeof logic !== 'string') {
+      throw new Error(`Invalid logic type: expected string, got ${typeof logic}`);
+    }
+
+    const filtersData = data['filters'];
+    if (!Array.isArray(filtersData)) {
+      throw new Error(`Invalid filters type: expected array, got ${typeof filtersData}`);
+    }
+
+    const children = filtersData.map(fromDict);
 
     if (logic === 'and') {
       result = new AndFilter(children);
     } else if (logic === 'or') {
       result = new OrFilter(children);
     } else if (logic === 'not') {
+      if (children.length === 0) {
+        throw new Error('Not filter requires at least one child filter');
+      }
       result = new NotFilter(children[0]);
     } else {
       throw new Error(`Unknown logic operator: '${logic}'`);
     }
   } else {
-    const op = data['op'] as string;
-    const Ctor = OP_MAP[op];
+    const op = data['op'];
+    if (typeof op !== 'string') {
+      throw new Error(`Invalid op type: expected string, got ${typeof op}`);
+    }
 
+    const Ctor = OP_MAP[op];
     if (!Ctor) {
       throw new Error(`Unknown filter operator: '${op}'`);
     }
 
-    result = new Ctor(data['field'] as string, data['value']);
+    const field = data['field'];
+    if (typeof field !== 'string') {
+      throw new Error(`Invalid field type: expected string, got ${typeof field}`);
+    }
+
+    result = new Ctor(field, data['value']);
   }
 
   return result;
