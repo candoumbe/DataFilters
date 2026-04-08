@@ -4,13 +4,10 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/copilot-cli": {}
+    "ghcr.io/devcontainers/features/copilot-cli": {},
+    "ghcr.io/nils-geistmann/devcontainers-features/zsh": {},
+    "ghcr.io/devcontainers-extra/features/jest": {}
   },
-  "runArgs": [
-    "--userns=keep-id"
-  ],
-  "containerUser": "vscode",
-  "updateRemoteUserUID": true,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -19,7 +16,7 @@
         "ms-vscode.vscode-typescript-next",
         "Orta.vscode-jest",
         "editorconfig.editorconfig",
-        "GitHub.copilot",
+        "github.copilot-chat",
         "GitHub.vscode-pull-request-github",
         "bierner.markdown-mermaid",
         "DavidAnson.vscode-markdownlint"
@@ -30,7 +27,7 @@
         "[typescript]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
-        "typescript.preferences.importModuleSpecifier": "relative",
+        "ts.preferences.importModuleSpecifier": "relative",
         "eslint.workingDirectories": ["src/typescript"],
         "jest.jestCommandLine": "npx jest",
         "jest.rootPath": "src/typescript",
@@ -38,7 +35,6 @@
       }
     }
   },
-  "postCreateCommand": "./.devcontainer/typescript/scripts/post-create.sh",
-  "postStartCommand": "./.devcontainer/typescript/scripts/post-start.sh",
-  "remoteUser": "vscode"
+  "postCreateCommand": "zsh ./.devcontainer/typescript/scripts/post-create.sh",
+  "postStartCommand": "zsh ./.devcontainer/typescript/scripts/post-start.sh"
 }
