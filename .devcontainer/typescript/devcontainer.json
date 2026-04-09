@@ -5,7 +5,9 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/copilot-cli": {},
-    "ghcr.io/nils-geistmann/devcontainers-features/zsh": {},
+    "ghcr.io/nils-geistmann/devcontainers-features/zsh": {
+      "plugins": "git npm gh git-prompt branch"
+    },
     "ghcr.io/devcontainers-extra/features/jest": {}
   },
   "customizations": {
