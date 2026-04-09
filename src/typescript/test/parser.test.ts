@@ -114,7 +114,15 @@ describe("parse - range", () => {
         expect(result).toBeInstanceOf(AndFilter);
         const f = result as AndFilter;
         expect(f.filters[0]).toBeInstanceOf(GreaterThanFilter);
+
+        const greaterThanFilter = f.filters[0] as GreaterThanFilter;
+        expect(greaterThanFilter.field).toBe("age");
+        expect(greaterThanFilter.value).toBe("18");
+
         expect(f.filters[1]).toBeInstanceOf(LessThanFilter);
+        const lessThanFilter = f.filters[1] as LessThanFilter;
+        expect(lessThanFilter.field).toBe("age");
+        expect(lessThanFilter.value).toBe("65");
     });
 
     it("should parse half-open range [min TO *[", () => {
@@ -126,7 +134,9 @@ describe("parse - range", () => {
 
         // Assert
         expect(result).toBeInstanceOf(GreaterThanOrEqualFilter);
-        expect((result as GreaterThanOrEqualFilter).value).toBe("18");
+        const greaterThanOrEqualFilter = result as GreaterThanOrEqualFilter;
+        expect(greaterThanOrEqualFilter.field).toBe("age");
+        expect(greaterThanOrEqualFilter.value).toBe("18");
     });
 
     it("should parse half-open range ]* TO max]", () => {
@@ -138,7 +148,9 @@ describe("parse - range", () => {
 
         // Assert
         expect(result).toBeInstanceOf(LessThanOrEqualFilter);
-        expect((result as LessThanOrEqualFilter).value).toBe("65");
+        const lessThanOrEqualFilter = result as LessThanOrEqualFilter;
+        expect(lessThanOrEqualFilter.field).toBe("age");
+        expect(lessThanOrEqualFilter.value).toBe("65");
     });
 });
 
@@ -202,7 +214,17 @@ describe("parse - OR combination", () => {
 
         // Assert
         expect(result).toBeInstanceOf(OrFilter);
-        expect((result as OrFilter).filters.length).toBe(2);
+        const orFilter = result as OrFilter;
+        expect(orFilter.filters.length).toBe(2);
+        expect(orFilter.filters[0]).toBeInstanceOf(EqualsFilter);
+        const equalsFilter1 = orFilter.filters[0] as EqualsFilter;
+        expect(equalsFilter1.field).toBe("status");
+        expect(equalsFilter1.value).toBe("active");
+
+        expect(orFilter.filters[1]).toBeInstanceOf(EqualsFilter);
+        const equalsFilter2 = orFilter.filters[1] as EqualsFilter;
+        expect(equalsFilter2.field).toBe("status");
+        expect(equalsFilter2.value).toBe("pending");
     });
 });
 
