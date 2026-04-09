@@ -277,7 +277,7 @@ describe("parse - parameterized", () => {
 describe("parse - FilterOptions", () => {
     it("should use AndFilter by default (no options)", () => {
         // Arrange
-        const expression = "name=Batman,age=30";
+        const expression = "name=Batman&age=30";
 
         // Act
         const result: IFilter = parse(expression);
@@ -288,7 +288,7 @@ describe("parse - FilterOptions", () => {
 
     it("should use AndFilter when options.logic is And", () => {
         // Arrange
-        const expression = "name=Batman,age=30";
+        const expression = "name=Batman&age=30";
         const options = new FilterOptions({ logic: FilterLogic.And });
 
         // Act
@@ -299,7 +299,14 @@ describe("parse - FilterOptions", () => {
         const andFilter = result as AndFilter;
         expect(andFilter.filters.length).toBe(2);
         expect(andFilter.filters[0]).toBeInstanceOf(EqualsFilter);
+        const left = andFilter.filters[0] as EqualsFilter;
+        expect(left.field).toBe("name");
+        expect(left.value).toBe("Batman");
+
         expect(andFilter.filters[1]).toBeInstanceOf(EqualsFilter);
+        const right = andFilter.filters[1] as EqualsFilter;
+        expect(right.field).toBe("age");
+        expect(right.value).toBe("30");
     });
 
     it("should use OrFilter when options.logic is Or", () => {
@@ -315,7 +322,14 @@ describe("parse - FilterOptions", () => {
         const orFilter = result as OrFilter;
         expect(orFilter.filters.length).toBe(2);
         expect(orFilter.filters[0]).toBeInstanceOf(EqualsFilter);
+        const left = orFilter.filters[0] as EqualsFilter;
+        expect(left.field).toBe("name");
+        expect(left.value).toBe("Batman");
+
         expect(orFilter.filters[1]).toBeInstanceOf(EqualsFilter);
+        const right = orFilter.filters[1] as EqualsFilter;
+        expect(right.field).toBe("age");
+        expect(right.value).toBe("30");
     });
 
     it("should parse query string with '&' as AndFilter by default", () => {
