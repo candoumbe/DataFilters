@@ -9,21 +9,19 @@ export enum FilterLogic {
 
 /**
  * Options for customizing filter parsing behaviour.
- *
- * Mirrors the C# `FilterOptions` record, providing the same resilience /
- * handling strategy at parse time.
+ * Allows specifying how multiple criteria separated by `&` should be combined (AND vs OR).
  *
  * @example
  * ```typescript
  * // comma-separated parts will be combined with OR instead of AND
  * const options = new FilterOptions({ logic: FilterLogic.Or });
- * const filter = parse("name=Batman,age=30", options);
+ * const filter = parse("name=Batman&age=30", options);
  * // → OrFilter([EqualsFilter("name","Batman"), EqualsFilter("age","30")])
  * ```
  */
 export class FilterOptions {
     /**
-     * Logic to apply when combining multiple comma-separated filter criteria.
+     * Logic to apply when combining multiple filter criteria separated by `&` delimiter.
      *
      * Defaults to `FilterLogic.And`.
      */
