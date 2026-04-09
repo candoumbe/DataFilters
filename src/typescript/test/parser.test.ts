@@ -13,6 +13,7 @@ import {
     StartsWithFilter,
 } from "../src/expressions";
 import { parse } from "../src/parser";
+import { FilterLogic, FilterOptions } from "../src/filterOptions";
 
 describe("parse - equals", () => {
     it("should parse simple equals expression", () => {
@@ -271,4 +272,121 @@ describe("parse - parameterized", () => {
             );
         },
     );
+});
+
+describe("parse - FilterOptions", () => {
+    it("should use AndFilter by default (no options)", () => {
+        // Arrange
+        const expression = "name=Batman,age=30";
+
+        // Act
+        const result: IFilter = parse(expression);
+
+        // Assert
+        expect(result).toBeInstanceOf(AndFilter);
+    });
+
+    it("should use AndFilter when options.logic is And", () => {
+        // Arrange
+        const expression = "name=Batman,age=30";
+        const options = new FilterOptions({ logic: FilterLogic.And });
+
+        // Act
+        const result: IFilter = parse(expression, options);
+
+        // Assert
+        expect(result).toBeInstanceOf(AndFilter);
+        const andFilter = result as AndFilter;
+        expect(andFilter.filters.length).toBe(2);
+        expect(andFilter.filters[0]).toBeInstanceOf(EqualsFilter);
+        expect(andFilter.filters[1]).toBeInstanceOf(EqualsFilter);
+    });
+
+    it("should use OrFilter when options.logic is Or", () => {
+        // Arrange
+        const expression = "name=Batman&age=30";
+        const options = new FilterOptions({ logic: FilterLogic.Or });
+
+        // Act
+        const result: IFilter = parse(expression, options);
+
+        // Assert
+        expect(result).toBeInstanceOf(OrFilter);
+        const orFilter = result as OrFilter;
+        expect(orFilter.filters.length).toBe(2);
+        expect(orFilter.filters[0]).toBeInstanceOf(EqualsFilter);
+        expect(orFilter.filters[1]).toBeInstanceOf(EqualsFilter);
+    });
+
+    it("should parse query string with '&' as AndFilter by default", () => {
+        // Arrange
+        const expression = "name=*bat*&age=[18 TO *[";
+
+        // Act
+        const result: IFilter = parse(expression);
+
+        // Assert
+        expect(result).toBeInstanceOf(AndFilter);
+        const andFilter = result as AndFilter;
+        expect(andFilter.filters.length).toBe(2);
+
+        expect(andFilter.filters[0]).toBeInstanceOf(ContainsFilter);
+        const containsFilter = andFilter.filters[0] as ContainsFilter;
+        expect(containsFilter.field).toBe("name");
+        expect(containsFilter.value).toBe("bat");
+
+        expect(andFilter.filters[1]).toBeInstanceOf(GreaterThanOrEqualFilter);
+        const greaterThanOrEqualFilter = andFilter
+            .filters[1] as GreaterThanOrEqualFilter;
+        expect(greaterThanOrEqualFilter.field).toBe("age");
+        expect(greaterThanOrEqualFilter.value).toBe("18");
+    });
+
+    it("should parse URL-encoded query string with '&' as AndFilter", () => {
+        // Arrange
+        const expression = "name=%2Abat%2A&age=%5B18%20TO%20*%5B";
+
+        // Act
+        const result: IFilter = parse(expression);
+
+        // Assert
+        expect(result).toBeInstanceOf(AndFilter);
+        const andFilter = result as AndFilter;
+        expect(andFilter.filters.length).toBe(2);
+
+        expect(andFilter.filters[0]).toBeInstanceOf(ContainsFilter);
+        const containsFilter = andFilter.filters[0] as ContainsFilter;
+        expect(containsFilter.field).toBe("name");
+        expect(containsFilter.value).toBe("bat");
+
+        expect(andFilter.filters[1]).toBeInstanceOf(GreaterThanOrEqualFilter);
+        const greaterThanOrEqualFilter = andFilter
+            .filters[1] as GreaterThanOrEqualFilter;
+        expect(greaterThanOrEqualFilter.field).toBe("age");
+        expect(greaterThanOrEqualFilter.value).toBe("18");
+    });
+
+    it("should default logic to And when constructed without arguments", () => {
+        // Arrange
+        const options = new FilterOptions();
+
+        // Assert
+        expect(options.logic).toBe(FilterLogic.And);
+    });
+
+    it("should apply Or logic on inherited-field comma parts", () => {
+        // Arrange
+        const expression = "name=*an,bat*";
+        const options = new FilterOptions({ logic: FilterLogic.Or });
+
+        // Act
+        const result: IFilter = parse(expression, options);
+
+        // Assert
+        expect(result).toBeInstanceOf(OrFilter);
+        const orFilter = result as AndFilter;
+        expect(orFilter.filters.length).toBe(2);
+        expect(orFilter.filters[0]).toBeInstanceOf(EndsWithFilter);
+        expect(orFilter.filters[1]).toBeInstanceOf(StartsWithFilter);
+    });
 });

@@ -29,12 +29,53 @@ import {
     OrFilter,
     StartsWithFilter,
 } from "./expressions";
+import { FilterLogic, FilterOptions } from "./filterOptions";
 
 const RANGE_PATTERN =
     /^(?<open>[[\]])(?<min>.*?)\s*TO\s*(?<max>.*?)(?<close>[[\]])$/;
 const WILDCARD_CHAR = "*";
 const NEGATION_CHAR = "!";
 const MIN_WILDCARD_LENGTH = 2;
+
+function decodeQueryComponent(value: string): string {
+    const normalized = value.replace(/\+/g, " ");
+
+    let result: string;
+    try {
+        result = decodeURIComponent(normalized);
+    } catch {
+        result = normalized;
+    }
+
+    return result;
+}
+
+function normalizeExpression(expression: string): string {
+    const withoutPrefix = expression.startsWith("?")
+        ? expression.slice(1)
+        : expression;
+    const queryParts = withoutPrefix
+        .split("&")
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0);
+
+    if (queryParts.length <= 1) {
+        return decodeQueryComponent(withoutPrefix);
+    }
+
+    const normalizedParts = queryParts.map((part) => {
+        const eqIndex = part.indexOf("=");
+        if (eqIndex === -1) {
+            return decodeQueryComponent(part);
+        }
+
+        const field = decodeQueryComponent(part.slice(0, eqIndex));
+        const value = decodeQueryComponent(part.slice(eqIndex + 1));
+        return `${field}=${value}`;
+    });
+
+    return normalizedParts.join(",");
+}
 
 function parseRange(field: string, value: string): IFilter {
     const match = RANGE_PATTERN.exec(value);
@@ -159,7 +200,7 @@ function splitAndParts(expression: string): string[] {
     return parts;
 }
 
-function parseAndExpression(expression: string): IFilter {
+function parseAndExpression(expression: string, options?: FilterOptions): IFilter {
     const parts = splitAndParts(expression);
 
     if (parts.length <= 1) {
@@ -184,21 +225,24 @@ function parseAndExpression(expression: string): IFilter {
         return parseValueExpression(inheritedField, trimmed);
     });
 
-    return new AndFilter(filters);
+    const logic = options?.logic ?? FilterLogic.And;
+    return logic === FilterLogic.Or ? new OrFilter(filters) : new AndFilter(filters);
 }
 
 /**
  * Parse a DataFilters query string into an IFilter.
  *
  * @param expression - A filter expression string, e.g. `"name=*bat*,age=[18,]"`.
+ * @param options - Optional parsing options that control how multiple criteria are combined.
  * @returns An IFilter representing the parsed expression.
  * @throws {Error} If the expression cannot be parsed.
  */
-export function parse(expression: string): IFilter {
+export function parse(expression: string, options?: FilterOptions): IFilter {
     if (!expression || !expression.trim()) {
         throw new Error("Expression must not be empty");
     }
 
     const trimmed = expression.trim();
-    return parseAndExpression(trimmed);
+    const normalizedExpression = normalizeExpression(trimmed);
+    return parseAndExpression(normalizedExpression, options);
 }

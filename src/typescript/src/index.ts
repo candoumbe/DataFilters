@@ -6,22 +6,24 @@
  */
 
 export {
-  IFilter,
-  EqualsFilter,
-  ContainsFilter,
-  StartsWithFilter,
-  EndsWithFilter,
-  GreaterThanFilter,
-  GreaterThanOrEqualFilter,
-  LessThanFilter,
-  LessThanOrEqualFilter,
-  AndFilter,
-  OrFilter,
-  NotFilter,
-} from './expressions';
+    IFilter,
+    EqualsFilter,
+    ContainsFilter,
+    StartsWithFilter,
+    EndsWithFilter,
+    GreaterThanFilter,
+    GreaterThanOrEqualFilter,
+    LessThanFilter,
+    LessThanOrEqualFilter,
+    AndFilter,
+    OrFilter,
+    NotFilter,
+} from "./expressions";
 
-export { FilterBuilder, FieldBuilder } from './builder';
+export { FilterBuilder, FieldBuilder } from "./builder";
 
-export { parse } from './parser';
+export { parse } from "./parser";
 
-export { toDict, toJson, fromDict } from './serializers';
+export { FilterLogic, FilterOptions } from "./filterOptions";
+
+export { toDict, toJson, fromDict } from "./serializers";
