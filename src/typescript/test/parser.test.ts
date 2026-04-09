@@ -167,6 +167,29 @@ describe("parse - AND combination", () => {
         expect(greatThanOrEqualToFilter.field).toBe("age");
         expect(greatThanOrEqualToFilter.value).toBe("18");
     });
+
+    it("should parse comma-separated expressions on same property as AND", () => {
+        // Arrange
+        const expression = "name=*an,bat*";
+
+        // Act
+        const result: IFilter = parse(expression);
+
+        // Assert
+        expect(result).toBeInstanceOf(AndFilter);
+        const andFilter = result as AndFilter;
+
+        expect(andFilter.filters.length).toBe(2);
+        expect(andFilter.filters[0]).toBeInstanceOf(EndsWithFilter);
+        const endsWithFilter = andFilter.filters[0] as EndsWithFilter;
+        expect(endsWithFilter.field).toBe("name");
+        expect(endsWithFilter.value).toBe("an");
+
+        expect(andFilter.filters[1]).toBeInstanceOf(StartsWithFilter);
+        const startsWithFilter = andFilter.filters[1] as StartsWithFilter;
+        expect(startsWithFilter.field).toBe("name");
+        expect(startsWithFilter.value).toBe("bat");
+    });
 });
 
 describe("parse - OR combination", () => {

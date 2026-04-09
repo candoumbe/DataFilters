@@ -48,8 +48,8 @@ function parseRange(field: string, value: string): IFilter {
     const maxVal = match.groups["max"];
 
     const filters: IFilter[] = [];
-    const trimmedMin = minVal ? minVal.trim() : "";
-    const trimmedMax = maxVal ? maxVal.trim() : "";
+    const trimmedMin = minVal?.trim() ?? "";
+    const trimmedMax = maxVal?.trim() ?? "";
     const hasMin = trimmedMin !== "" && trimmedMin !== WILDCARD_CHAR;
     const hasMax = trimmedMax !== "" && trimmedMax !== WILDCARD_CHAR;
 
@@ -161,11 +161,30 @@ function splitAndParts(expression: string): string[] {
 
 function parseAndExpression(expression: string): IFilter {
     const parts = splitAndParts(expression);
-    const result: IFilter =
-        parts.length > 1
-            ? new AndFilter(parts.map((p) => parseSingle(p.trim())))
-            : parseSingle(expression);
-    return result;
+
+    if (parts.length <= 1) {
+        return parseSingle(expression);
+    }
+
+    let inheritedField: string | null = null;
+    const filters: IFilter[] = parts.map((p) => {
+        const trimmed = p.trim();
+        if (trimmed.includes("=")) {
+            const eqIndex = trimmed.indexOf("=");
+            inheritedField = trimmed.slice(0, eqIndex).trim();
+            return parseSingle(trimmed);
+        }
+
+        if (!inheritedField) {
+            throw new Error(
+                `Cannot determine field for expression part: '${trimmed}'`,
+            );
+        }
+
+        return parseValueExpression(inheritedField, trimmed);
+    });
+
+    return new AndFilter(filters);
 }
 
 /**
