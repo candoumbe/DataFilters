@@ -1,0 +1,6 @@
+[{*.ts,*.js}]
+indent_style = space
+indent_size = 2
+
+[*.ts]
+trim_trailing_whitespace = true
