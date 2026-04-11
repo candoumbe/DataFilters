@@ -13,9 +13,10 @@ import {
   LessThanFilter,
   LessThanOrEqualFilter,
   NotFilter,
+  OneOfFilter,
   OrFilter,
   StartsWithFilter,
-} from './expressions';
+} from "./expressions";
 
 /** Internal helper that provides filter-condition methods for a single field. */
 export class FieldBuilder {
@@ -51,7 +52,9 @@ export class FieldBuilder {
 
   /** Add a greater-than-or-equal condition. */
   public gte(value: unknown): FilterBuilder {
-    return this.parent.addFilter(new GreaterThanOrEqualFilter(this.field, value));
+    return this.parent.addFilter(
+      new GreaterThanOrEqualFilter(this.field, value),
+    );
   }
 
   /** Add a less-than condition. */
@@ -66,13 +69,24 @@ export class FieldBuilder {
 
   /** Add a not-equals condition. */
   public not(value: unknown): FilterBuilder {
-    return this.parent.addFilter(new NotFilter(new EqualsFilter(this.field, value)));
+    return this.parent.addFilter(
+      new NotFilter(new EqualsFilter(this.field, value)),
+    );
+  }
+
+  /** Add a OneOf condition matching any of the given values. */
+  public oneOf(...values: unknown[]): FilterBuilder {
+    const orFilters: IFilter[] = values.map(
+      (v) => new EqualsFilter(this.field, v),
+    );
+    return this.parent.addFilter(new OneOfFilter(orFilters));
   }
 
   /** Add an OR condition matching any of the given values. */
-  public or(...values: unknown[]): FilterBuilder {
-    const orFilters: IFilter[] = values.map((v) => new EqualsFilter(this.field, v));
-    return this.parent.addFilter(new OrFilter(orFilters));
+  public or(leftValue: unknown, rightValue: unknown): FilterBuilder {
+    const left = new EqualsFilter(this.field, leftValue);
+    const right = new EqualsFilter(this.field, rightValue);
+    return this.parent.addFilter(new OrFilter(left, right));
   }
 }
 
@@ -120,7 +134,7 @@ export class FilterBuilder {
    */
   public build(): IFilter {
     if (this.filters.length === 0) {
-      throw new Error('No filter conditions have been added.');
+      throw new Error("No filter conditions have been added.");
     }
 
     const result: IFilter =

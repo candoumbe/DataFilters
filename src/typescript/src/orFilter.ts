@@ -1,10 +1,12 @@
-import { IFilter } from './iFilter';
+import { IFilter } from "./iFilter";
 
-/** Combines multiple filters with a logical OR. */
 export class OrFilter implements IFilter {
-  public constructor(public readonly filters: IFilter[]) {}
+  public constructor(
+    public readonly left: IFilter,
+    public readonly right: IFilter,
+  ) {}
 
   public toDict(): Record<string, unknown> {
-    return { logic: 'or', filters: this.filters.map((f) => f.toDict()) };
+    return { logic: "or", filters: [this.left.toDict(), this.right.toDict()] };
   }
 }

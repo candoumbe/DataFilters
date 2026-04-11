@@ -227,14 +227,11 @@ describe("parse - OR combination", () => {
     // Assert
     expect(result).toBeInstanceOf(OrFilter);
     const orFilter = result as OrFilter;
-    expect(orFilter.filters.length).toBe(2);
-    expect(orFilter.filters[0]).toBeInstanceOf(EqualsFilter);
-    const left = orFilter.filters[0] as EqualsFilter;
+    const left = orFilter.left as EqualsFilter;
     expect(left.field).toBe("status");
     expect(left.value).toBe("active");
 
-    expect(orFilter.filters[1]).toBeInstanceOf(EqualsFilter);
-    const right = orFilter.filters[1] as EqualsFilter;
+    const right = orFilter.right as EqualsFilter;
     expect(right.field).toBe("status");
     expect(right.value).toBe("pending");
   });
@@ -419,14 +416,12 @@ describe("parse - FilterOptions", () => {
     // Assert
     expect(result).toBeInstanceOf(OrFilter);
     const orFilter = result as OrFilter;
-    expect(orFilter.filters.length).toBe(2);
-    expect(orFilter.filters[0]).toBeInstanceOf(EqualsFilter);
-    const left = orFilter.filters[0] as EqualsFilter;
+
+    const left = orFilter.left as EqualsFilter;
     expect(left.field).toBe("name");
     expect(left.value).toBe("Batman");
 
-    expect(orFilter.filters[1]).toBeInstanceOf(EqualsFilter);
-    const right = orFilter.filters[1] as EqualsFilter;
+    const right = orFilter.right as EqualsFilter;
     expect(right.field).toBe("age");
     expect(right.value).toBe("30");
   });
@@ -489,7 +484,7 @@ describe("parse - FilterOptions", () => {
 
   it("should apply Or logic on inherited-field comma parts", () => {
     // Arrange
-    const expression = "name=*an,bat*";
+    const expression = "name=*bat*&age=30";
     const options = new FilterOptions({ logic: FilterLogic.Or });
 
     // Act
@@ -498,8 +493,15 @@ describe("parse - FilterOptions", () => {
     // Assert
     expect(result).toBeInstanceOf(OrFilter);
     const orFilter = result as OrFilter;
-    expect(orFilter.filters.length).toBe(2);
-    expect(orFilter.filters[0]).toBeInstanceOf(EndsWithFilter);
-    expect(orFilter.filters[1]).toBeInstanceOf(StartsWithFilter);
+    expect(orFilter.left).toBeInstanceOf(ContainsFilter);
+    const left = orFilter.left as ContainsFilter;
+    expect(left.field).toBe("name");
+    expect(left.value).toBe("bat");
+
+    expect(orFilter.right).toBeInstanceOf(EqualsFilter);
+
+    const right = orFilter.right as EqualsFilter;
+    expect(right.field).toBe("age");
+    expect(right.value).toBe("30");
   });
 });

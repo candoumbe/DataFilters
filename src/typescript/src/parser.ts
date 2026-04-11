@@ -26,6 +26,7 @@ import {
   LessThanFilter,
   LessThanOrEqualFilter,
   NotFilter,
+  OneOfFilter,
   OrFilter,
   StartsWithFilter,
 } from "./expressions";
@@ -283,10 +284,27 @@ function parseSingle(expression: string): IFilter {
   }
 
   const orParts = splitByUnescapedSeparator(value, "|");
-  const result: IFilter =
-    orParts.length > 1
-      ? new OrFilter(orParts.map((v) => parseValueExpression(field, v.trim())))
-      : parseValueExpression(field, value);
+
+  let result;
+  switch (orParts.length) {
+    case 0:
+      throw new Error(`Invalid filter expression: '${expression}'`);
+    case 1:
+      result = parseValueExpression(field, value);
+      break;
+    case 2:
+      result = new OrFilter(
+        parseValueExpression(field, orParts[0].trim()),
+        parseValueExpression(field, orParts[1].trim()),
+      );
+      break;
+    default:
+      result = new OneOfFilter(
+        orParts.map((v) => parseValueExpression(field, v.trim())),
+      );
+      break;
+  }
+
   return result;
 }
 
@@ -327,8 +345,15 @@ function parseAndExpression(
     });
 
     const logic = options?.logic ?? FilterLogic.And;
-    result =
-      logic === FilterLogic.Or ? new OrFilter(filters) : new AndFilter(filters);
+    if (logic === FilterLogic.Or) {
+      if (filters.length === 2) {
+        result = new OrFilter(filters[0], filters[1]);
+      } else {
+        result = new OneOfFilter(filters);
+      }
+    } else {
+      result = new AndFilter(filters);
+    }
   }
 
   return result;
