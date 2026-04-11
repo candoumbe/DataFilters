@@ -193,7 +193,7 @@ interface FilterPart {
   field: string;
 }
 
-class DataFilterParser extends EmbeddedActionsParser {
+class InternalFilterParser extends EmbeddedActionsParser {
   /** Field name set by the most recent fieldAssignment rule. */
   private currentField: string = "";
   /** Options supplied for this parse call. */
@@ -729,7 +729,7 @@ class DataFilterParser extends EmbeddedActionsParser {
 }
 
 // Single shared instance — performSelfAnalysis is expensive and runs only once.
-const PARSER_INSTANCE = new DataFilterParser();
+const PARSER_INSTANCE = new InternalFilterParser();
 
 /**
  * Parse a DataFilters query string into an IFilter.
