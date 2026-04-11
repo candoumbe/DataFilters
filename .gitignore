@@ -285,3 +285,4 @@ output/
 .squad/sessions/
 # Squad: SubSquad activation file (local to this machine)
 .squad-workstream
+src/typescript/.jest-cache/
