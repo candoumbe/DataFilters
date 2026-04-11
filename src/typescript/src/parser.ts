@@ -323,13 +323,34 @@ function parseAndExpression(
     result = parseSingle(expression);
   } else {
     let inheritedField: string | null = null;
-    const filters: IFilter[] = parts.map((p) => {
+    const encounteredFields = new Set<string>();
+    const groupedFilters: IFilter[] = [];
+    let currentGroup: IFilter[] = [];
+
+    const flushCurrentGroup = (): void => {
+      if (currentGroup.length === 1) {
+        groupedFilters.push(currentGroup[0]);
+      } else if (currentGroup.length > 1) {
+        groupedFilters.push(new AndFilter(currentGroup));
+      }
+
+      currentGroup = [];
+    };
+
+    for (const p of parts) {
       const trimmed = p.trim();
       const eqIndex = findFirstUnescaped(trimmed, "=");
       let parsedFilter: IFilter;
 
       if (eqIndex !== -1) {
-        inheritedField = trimmed.slice(0, eqIndex).trim();
+        const field = unescapeValue(trimmed.slice(0, eqIndex).trim());
+
+        if (inheritedField !== null && field !== inheritedField) {
+          flushCurrentGroup();
+        }
+
+        inheritedField = field;
+        encounteredFields.add(field);
         parsedFilter = parseSingle(trimmed);
       } else {
         if (!inheritedField) {
@@ -341,18 +362,27 @@ function parseAndExpression(
         parsedFilter = parseValueExpression(inheritedField, trimmed);
       }
 
-      return parsedFilter;
-    });
+      currentGroup.push(parsedFilter);
+    }
 
+    flushCurrentGroup();
+
+    // Multiple values targeting the same field are always AND-ed together.
+    // The global logic only applies when combining different field groups.
+    const isSameField = encounteredFields.size <= 1;
     const logic = options?.logic ?? FilterLogic.And;
-    if (logic === FilterLogic.Or) {
-      if (filters.length === 2) {
-        result = new OrFilter(filters[0], filters[1]);
-      } else {
-        result = new OneOfFilter(filters);
-      }
+
+    if (isSameField || logic === FilterLogic.And) {
+      result =
+        groupedFilters.length === 1
+          ? groupedFilters[0]
+          : new AndFilter(groupedFilters);
     } else {
-      result = new AndFilter(filters);
+      if (groupedFilters.length === 2) {
+        result = new OrFilter(groupedFilters[0], groupedFilters[1]);
+      } else {
+        result = new OneOfFilter(groupedFilters);
+      }
     }
   }
 

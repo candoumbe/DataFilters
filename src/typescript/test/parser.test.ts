@@ -353,6 +353,7 @@ describe("parse - parameterized", () => {
     ["name=*man", undefined, EndsWithFilter],
     ["name=!Batman", undefined, NotFilter],
     ["name=!Batman&age=30", { logic: FilterLogic.Or }, OrFilter],
+    ["name=bat*,*man*", { logic: FilterLogic.Or }, AndFilter],
     ["name=!Batman&age=30", undefined, AndFilter],
   ];
 
@@ -482,26 +483,67 @@ describe("parse - FilterOptions", () => {
     expect(options.logic).toBe(FilterLogic.And);
   });
 
-  it("should apply Or logic on inherited-field comma parts", () => {
-    // Arrange
-    const expression = "name=*bat*&age=30";
-    const options = new FilterOptions({ logic: FilterLogic.Or });
+  const inheritedFieldOrCases: [
+    string,
+    FilterOptions,
+    (result: IFilter) => void,
+  ][] = [
+    [
+      "name=*bat*&age=30",
+      new FilterOptions({ logic: FilterLogic.Or }),
+      (result: IFilter): void => {
+        expect(result).toBeInstanceOf(OrFilter);
+        const orFilter = result as OrFilter;
+        expect(orFilter.left).toBeInstanceOf(ContainsFilter);
+        const left = orFilter.left as ContainsFilter;
+        expect(left.field).toBe("name");
+        expect(left.value).toBe("bat");
 
-    // Act
-    const result: IFilter = parse(expression, options);
+        expect(orFilter.right).toBeInstanceOf(EqualsFilter);
 
-    // Assert
-    expect(result).toBeInstanceOf(OrFilter);
-    const orFilter = result as OrFilter;
-    expect(orFilter.left).toBeInstanceOf(ContainsFilter);
-    const left = orFilter.left as ContainsFilter;
-    expect(left.field).toBe("name");
-    expect(left.value).toBe("bat");
+        const right = orFilter.right as EqualsFilter;
+        expect(right.field).toBe("age");
+        expect(right.value).toBe("30");
+      },
+    ],
+    [
+      "name=bat*,*man*&age=30",
+      new FilterOptions({ logic: FilterLogic.Or }),
+      (result: IFilter): void => {
+        expect(result).toBeInstanceOf(OrFilter);
+        const orFilter = result as OrFilter;
 
-    expect(orFilter.right).toBeInstanceOf(EqualsFilter);
+        expect(orFilter.left).toBeInstanceOf(AndFilter);
+        const left = orFilter.left as AndFilter;
+        {
+          expect(left.filters.length).toBe(2);
 
-    const right = orFilter.right as EqualsFilter;
-    expect(right.field).toBe("age");
-    expect(right.value).toBe("30");
-  });
+          expect(left.filters[0]).toBeInstanceOf(StartsWithFilter);
+          const startsWith = left.filters[0] as StartsWithFilter;
+          expect(startsWith.field).toBe("name");
+          expect(startsWith.value).toBe("bat");
+
+          expect(left.filters[1]).toBeInstanceOf(ContainsFilter);
+          const containsFilter = left.filters[1] as ContainsFilter;
+          expect(containsFilter.field).toBe("name");
+          expect(containsFilter.value).toBe("man");
+        }
+        expect(orFilter.right).toBeInstanceOf(EqualsFilter);
+        const right = orFilter.right as EqualsFilter;
+        expect(right.field).toBe("age");
+        expect(right.value).toBe("30");
+      },
+    ],
+  ];
+
+  test.each(inheritedFieldOrCases)(
+    "should apply Or logic on inherited-field comma parts",
+    (expression, options, assertion) => {
+      // Arrange / Act
+      const result: IFilter = parse(expression, options);
+
+      // Assert
+      assertion(result);
+    },
+  );
 });
