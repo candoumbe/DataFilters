@@ -386,16 +386,17 @@ class InternalFilterParser extends EmbeddedActionsParser {
     });
 
     const result: IFilter = this.ACTION(() => {
+      let filter: IFilter;
       if (hasLeadingAsterisk && hasTrailingAsterisk) {
-        return new ContainsFilter(field, val);
+        filter = new ContainsFilter(field, val);
+      } else if (hasLeadingAsterisk) {
+        filter = new EndsWithFilter(field, val);
+      } else if (hasTrailingAsterisk) {
+        filter = new StartsWithFilter(field, val);
+      } else {
+        filter = new EqualsFilter(field, val);
       }
-      if (hasLeadingAsterisk) {
-        return new EndsWithFilter(field, val);
-      }
-      if (hasTrailingAsterisk) {
-        return new StartsWithFilter(field, val);
-      }
-      return new EqualsFilter(field, val);
+      return filter;
     });
 
     return result;

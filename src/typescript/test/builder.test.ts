@@ -15,51 +15,105 @@ import { FilterBuilder } from "../src/builder";
 
 describe("FilterBuilder - single conditions", () => {
   it("should build equals filter", () => {
-    const result = new FilterBuilder().where("name").eq("Batman").build();
+    // Arrange
+    const builder = new FilterBuilder().where("name").eq("Batman");
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(EqualsFilter);
     expect((result as EqualsFilter).field).toBe("name");
     expect((result as EqualsFilter).value).toBe("Batman");
   });
 
   it("should build contains filter", () => {
-    const result = new FilterBuilder().where("name").contains("bat").build();
+    // Arrange
+    const builder = new FilterBuilder().where("name").contains("bat");
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(ContainsFilter);
     expect((result as ContainsFilter).value).toBe("bat");
   });
 
   it("should build startsWith filter", () => {
-    const result = new FilterBuilder().where("name").startsWith("Bat").build();
+    // Arrange
+    const builder = new FilterBuilder().where("name").startsWith("Bat");
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(StartsWithFilter);
   });
 
   it("should build endsWith filter", () => {
-    const result = new FilterBuilder().where("name").endsWith("man").build();
+    // Arrange
+    const builder = new FilterBuilder().where("name").endsWith("man");
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(EndsWithFilter);
   });
 
   it("should build gt filter", () => {
-    const result = new FilterBuilder().where("age").gt(18).build();
+    // Arrange
+    const builder = new FilterBuilder().where("age").gt(18);
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(GreaterThanFilter);
     expect((result as GreaterThanFilter).value).toBe(18);
   });
 
   it("should build gte filter", () => {
-    const result = new FilterBuilder().where("age").gte(18).build();
+    // Arrange
+    const builder = new FilterBuilder().where("age").gte(18);
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(GreaterThanOrEqualFilter);
   });
 
   it("should build lt filter", () => {
-    const result = new FilterBuilder().where("age").lt(65).build();
+    // Arrange
+    const builder = new FilterBuilder().where("age").lt(65);
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(LessThanFilter);
   });
 
   it("should build lte filter", () => {
-    const result = new FilterBuilder().where("age").lte(65).build();
+    // Arrange
+    const builder = new FilterBuilder().where("age").lte(65);
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(LessThanOrEqualFilter);
   });
 
   it("should build not filter", () => {
-    const result = new FilterBuilder().where("deleted").not(true).build();
+    // Arrange
+    const builder = new FilterBuilder().where("deleted").not(true);
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(NotFilter);
     expect((result as NotFilter).filter).toBeInstanceOf(EqualsFilter);
   });
@@ -67,22 +121,27 @@ describe("FilterBuilder - single conditions", () => {
 
 describe("FilterBuilder - multiple conditions", () => {
   it("should combine two conditions as AND", () => {
-    const result = new FilterBuilder()
+    // Arrange
+    const builder = new FilterBuilder()
       .where("name")
       .contains("bat")
       .andWhere("age")
-      .gte(18)
-      .build();
+      .gte(18);
+
+    // Act
+    const result = builder.build();
+
+    // Assert
     expect(result).toBeInstanceOf(AndFilter);
     expect((result as AndFilter).filters.length).toBe(2);
   });
 
   it("should build OR filter", () => {
+    // Arrange
+    const builder = new FilterBuilder().where("status").or("active", "pending");
+
     // Act
-    const result = new FilterBuilder()
-      .where("status")
-      .or("active", "pending")
-      .build();
+    const result = builder.build();
 
     // Assert
     expect(result).toBeInstanceOf(OrFilter);
@@ -101,6 +160,10 @@ describe("FilterBuilder - multiple conditions", () => {
 
 describe("FilterBuilder - errors", () => {
   it("should throw when no conditions added", () => {
-    expect(() => new FilterBuilder().build()).toThrow();
+    // Arrange
+    const builder = new FilterBuilder();
+
+    // Act & Assert
+    expect(() => builder.build()).toThrow();
   });
 });
