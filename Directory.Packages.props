@@ -25,7 +25,7 @@
     <PackageVersion Include="ReportGenerator" Version="5.5.7" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="Superpower" Version="3.2.0" />
+    <PackageVersion Include="Superpower" Version="3.2.1" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageVersion Include="xunit.analyzers" Version="1.27.0" />
