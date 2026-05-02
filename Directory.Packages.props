@@ -22,7 +22,7 @@
     <PackageVersion Include="OneOf.Extended" Version="3.0.271" />
     <PackageVersion Include="Optional" Version="4.0.0" />
     <PackageVersion Include="Queries.Core" Version="0.4.0" />
-    <PackageVersion Include="ReportGenerator" Version="5.5.7" />
+    <PackageVersion Include="ReportGenerator" Version="5.5.8" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.15.0" />
     <PackageVersion Include="Superpower" Version="3.2.1" />
