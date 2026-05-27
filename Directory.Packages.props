@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Candoumbe.Pipelines" Version="2.0.1" />
-    <PackageVersion Include="Candoumbe.Types.Strings" Version="0.4.2" />
+    <PackageVersion Include="Candoumbe.Types.Strings" Version="0.5.0" />
     <PackageVersion Include="coverlet.msbuild" Version="10.0.1" />
     <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
