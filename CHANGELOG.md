@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🧹 Housekeeping
 - Bumped `Ultimately` to `4.0.0`
+- Updated Squad team
 
 ## [0.13.2] / 2025-09-14
 ### 🚨 Fixes
