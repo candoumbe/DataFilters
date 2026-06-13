@@ -3,12 +3,12 @@
   <Import Project="../core.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>;CS0649;CS0169;CS1591;</NoWarn>
-    <NukeRootDirectory>..</NukeRootDirectory>
-    <NukeScriptDirectory>..</NukeScriptDirectory>
-    <NukeTelemetryVersion>1</NukeTelemetryVersion>
+    <FalloutRootDirectory>..</FalloutRootDirectory>
+    <FalloutScriptDirectory>..</FalloutScriptDirectory>
+    <FalloutTelemetryVersion>1</FalloutTelemetryVersion>
   </PropertyGroup>
 
   <ItemGroup>
