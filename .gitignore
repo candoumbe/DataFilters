@@ -264,8 +264,8 @@ __pycache__/
 .vscode/
 output/
 
-# Nuke temp directory
-/.nuke/temp
+# Fallout temp directory
+/.fallout/temp
 
 # Stryker output
 [Ss]tryker[Oo]utput/
