@@ -283,3 +283,4 @@ output/
 .squad/.scratch/
 .squad/.cache/
 */**/.env
+dotnet/

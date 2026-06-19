@@ -33,7 +33,7 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
   <Choose>
-    <When Condition="'$(TargetFramework)' == 'net10.0'">
+    <When Condition="'$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net11.0'">
       <ItemGroup>
         <PackageVersion Include="Ultimately" Version="4.0.0"/>
       </ItemGroup>
