@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -72,6 +73,9 @@ public class NuGetAuditConfigurationTests
 
         List<string> expectedCodes =
         [
+            #if NET11_0_OR_GREATER
+            with(capacity: 5),
+            #endif
             "NU1900",
             "NU1901",
             "NU1902",
