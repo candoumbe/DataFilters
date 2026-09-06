@@ -17,7 +17,7 @@
       "rollForward": false
     },
     "fallout.globaltool": {
-      "version": "10.3.49",
+      "version": "10.4.0",
       "commands": [
         "fallout"
       ],
