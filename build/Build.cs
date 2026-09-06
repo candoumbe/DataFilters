@@ -6,6 +6,7 @@ using Candoumbe.Pipelines.Components.Formatting;
 using Candoumbe.Pipelines.Components.GitHub;
 using Candoumbe.Pipelines.Components.NuGet;
 using Candoumbe.Pipelines.Components.Workflows;
+using Candoumbe.Pipelines.Tools;
 using Fallout.Common;
 using Fallout.Common.CI.GitHubActions;
 using Fallout.Common.IO;
@@ -13,6 +14,7 @@ using Fallout.Common.ProjectModel;
 using Fallout.Common.Tooling;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Tools.GitHub;
+using static Serilog.Log;
 
 namespace DataFilters.ContinuousIntegration;
 
@@ -69,29 +71,29 @@ namespace DataFilters.ContinuousIntegration;
     ]
 )]
 
-// [GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
-//     AutoGenerate = false,
-//     FetchDepth = 0,
-//     OnCronSchedule = "0 0 * * *",
-//     InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
-//     OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
-//
-//     CacheKeyFiles =
-//     [
-//         "src/**/*.csproj",
-//         "test/**/*.csproj",
-//         "stryker-config.json",
-//         "test/**/*/xunit.runner.json"
-//     ],
-//     EnableGitHubToken = true,
-//     ImportSecrets =
-//     [
-//         nameof(NugetApiKey),
-//         nameof(IReportCoverage.CodecovToken),
-//         nameof(IMutationTest.StrykerDashboardApiKey)
-//     ],
-//     PublishArtifacts = true
-// )]
+[GitHubActions("nightly", GitHubActionsImage.Ubuntu2204,
+    AutoGenerate = false,
+    FetchDepth = 0,
+    OnCronSchedule = "0 0 * * *",
+    InvokedTargets = [nameof(IMutationTest.MutationTests), nameof(IPushNugetPackages.Pack)],
+    OnPushBranches = [IHaveDevelopBranch.DevelopBranchName],
+
+    CacheKeyFiles =
+    [
+        "src/**/*.csproj",
+        "test/**/*.csproj",
+        "stryker-config.json",
+        "test/**/*/xunit.runner.json"
+    ],
+    EnableGitHubToken = true,
+    ImportSecrets =
+    [
+        nameof(IPushNugetPackages.NuGetApiKey),
+        nameof(IReportCoverage.CodecovToken),
+        nameof(IMutationTest.StrykerDashboardApiKey)
+    ],
+    PublishArtifacts = true
+)]
 [GitHubActions("nightly-manual", GitHubActionsImage.Ubuntu2204,
     AutoGenerate = false,
     FetchDepth = 0,
@@ -101,7 +103,7 @@ namespace DataFilters.ContinuousIntegration;
     [
         "src/**/*.csproj",
         "test/**/*.csproj",
-        "stryker-config.json",
+        "test/**/*/stryker-config.json",
         "test/**/*/xunit.runner.json"
     ],
     EnableGitHubToken = true,
@@ -124,6 +126,7 @@ public class Build : EnhancedBuild,
     IRestore,
     IDotnetFormat,
     IUnitTest,
+    IMutationTest,
     IBenchmark,
     IReportUnitTestCoverage,
     IPushNugetPackages,
@@ -174,4 +177,32 @@ public class Build : EnhancedBuild,
 
     /// <inheritdoc />
     bool IDotnetFormat.VerifyNoChanges => IsServerBuild;
+
+    /// <summary>
+    /// Projects to be targeted by mutation tests.
+    /// </summary>
+    private static readonly string[] s_projects = ["DataFilters", "DataFilters.Expressions", "DataFilters.Queries"];
+
+    /// <inheritdoc />
+    IEnumerable<MutationProjectConfiguration> IMutationTest.MutationTestsProjects =>
+    [
+        ..s_projects.Select(projectName => new MutationProjectConfiguration(sourceProject: Solution.AllProjects.Single(csproj => csproj.Name == projectName),
+                                                                            testProjects: Solution.AllProjects.Where(csproj => string.Equals(csproj.Name, $"{projectName}.UnitTests")),
+                                                                            configurationFile: this.Get<IHaveTestDirectory>().TestDirectory / $"{projectName}.UnitTests" / "stryker-config.json"))
+    ];
+
+    /// <summary>
+    /// Gets the Stryker settings for mutation testing.
+    /// </summary>
+    Configure<StrykerSettings> IMutationTest.StrykerArgumentsSettings => settings =>
+    {
+        if (EnvironmentInfo.HasVariable("IS_DEVCONTAINER"))
+        {
+            Information("Running in a dev container, adjusting Stryker settings accordingly.");
+            settings = settings.ResetOpenReport();
+        }
+
+        return settings;
+    };
+
 }
