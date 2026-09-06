@@ -40,7 +40,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageVersion Include="Ultimately" Version="3.0.0"/>
+        <PackageVersion Include="Ultimately" Version="4.0.0"/>
       </ItemGroup>
     </Otherwise>
   </Choose>
