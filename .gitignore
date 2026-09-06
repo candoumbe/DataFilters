@@ -283,3 +283,7 @@ output/
 .squad/.scratch/
 .squad/.cache/
 */**/.env
+
+# dotnet run-file cache
+/dotnet/runfile-discovery/
+
