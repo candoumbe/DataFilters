@@ -43,14 +43,14 @@
 
   <!-- Set package references based on target framework -->
   <Choose>
-    <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(TargetFramework), '^net\d\.0$'))">
+    <When Condition="'$(TargetFramework)' == 'netstandard2.1' or '$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0' ">
       <ItemGroup>
-        <PackageReference Include="Ultimately" />
+        <PackageReference Include="Optional" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="Optional" />
+        <PackageReference Include="Ultimately" />
       </ItemGroup>
     </Otherwise>
   </Choose>
