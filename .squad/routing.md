@@ -6,19 +6,18 @@ How to decide who handles what.
 
 | Work Type | Route To | Examples |
 |-----------|----------|----------|
-| {domain 1} | {Name} | {example tasks} |
-| {domain 2} | {Name} | {example tasks} |
-| {domain 3} | {Name} | {example tasks} |
-| Code review | {Name} | Review PRs, check quality, suggest improvements |
-| Testing | {Name} | Write tests, find edge cases, verify fixes |
-| Scope & priorities | {Name} | What to build next, trade-offs, decisions |
+| Architecture & scope | Holden | Big decisions, trade-offs, design direction |
+| Build, tooling, NuGet, CI/CD | Amos | `Directory.Packages.props`, build scripts, CI setup |
+| Testing & validation | Naomi | Unit tests, edge cases, bug regression checks |
+| Code review | Holden | Review PRs, validate architecture fit, quality gates |
 | Session logging | Scribe | Automatic — never needs routing |
+| Backlog & issue triage | Ralph | Work queue, status, follow-up monitoring |
 
 ## Issue Routing
 
 | Label | Action | Who |
 |-------|--------|-----|
-| `squad` | Triage: analyze issue, assign `squad:{member}` label | Lead |
+| `squad` | Triage: analyze issue, assign `squad:{member}` label | Holden |
 | `squad:{name}` | Pick up issue and complete the work | Named member |
 
 ### How Issue Assignment Works
