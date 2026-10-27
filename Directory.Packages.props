@@ -21,7 +21,7 @@
     <PackageVersion Include="NodaTime.Testing" Version="3.3.6" />
     <PackageVersion Include="OneOf.Extended" Version="3.0.271" />
     <PackageVersion Include="Queries.Core" Version="0.4.0" />
-    <PackageVersion Include="ReportGenerator" Version="5.5.11" />
+    <PackageVersion Include="ReportGenerator" Version="5.5.12" />
     <PackageVersion Include="Roslynator.Analyzers" Version="5.0.1" />
     <PackageVersion Include="Roslynator.Formatting.Analyzers" Version="4.16.1" />
     <PackageVersion Include="Superpower" Version="3.2.1" />
