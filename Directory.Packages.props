@@ -47,6 +47,6 @@
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
-    <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0"/>
+    <PackageVersion Include="Ardalis.GuardClauses" Version="6.0.0"/>
   </ItemGroup>
 </Project>
